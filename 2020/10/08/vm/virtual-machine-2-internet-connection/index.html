@@ -5,19 +5,19 @@
   
 
   
-  <title>single number 3 | Hexo</title>
+  <title>virtual machine - 2. internet connection | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="思路：  先考虑是否遇到过相似的题目： 有：通过异或，删除出现过偶次数的number，保留只有奇次数的number    这道题的特殊点在于有2个奇次数的nubmer 如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分  解题方法：  创建第一个bitwise1, 0000x bitwise1 &#x3D; bitwise1^x^y^a^a &#x3D; bitwsie1^x^y   创建第二个">
+  <meta name="description" content="Ref:  https:&#x2F;&#x2F;cnblogs.com&#x2F;wish123&#x2F;p&#x2F;9277995.html   NAT模式 原理: 虚拟机和主机之间有NAT Engine 虚拟机发送请求，实际上是传给NAT Engine，由它利用主机进行网络访问 虚拟机收到的请求,   特点: 配置:">
 <meta property="og:type" content="article">
-<meta property="og:title" content="single number 3">
-<meta property="og:url" content="http://example.com/2020/10/03/single-number-3/index.html">
+<meta property="og:title" content="virtual machine - 2. internet connection">
+<meta property="og:url" content="http://example.com/2020/10/08/vm/virtual-machine-2-internet-connection/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="思路：  先考虑是否遇到过相似的题目： 有：通过异或，删除出现过偶次数的number，保留只有奇次数的number    这道题的特殊点在于有2个奇次数的nubmer 如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分  解题方法：  创建第一个bitwise1, 0000x bitwise1 &#x3D; bitwise1^x^y^a^a &#x3D; bitwsie1^x^y   创建第二个">
+<meta property="og:description" content="Ref:  https:&#x2F;&#x2F;cnblogs.com&#x2F;wish123&#x2F;p&#x2F;9277995.html   NAT模式 原理: 虚拟机和主机之间有NAT Engine 虚拟机发送请求，实际上是传给NAT Engine，由它利用主机进行网络访问 虚拟机收到的请求,   特点: 配置:">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2020-10-03T04:33:34.000Z">
-<meta property="article:modified_time" content="2020-10-03T05:50:23.801Z">
+<meta property="article:published_time" content="2020-10-08T09:56:19.000Z">
+<meta property="article:modified_time" content="2020-10-08T10:02:21.499Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="leetcode,">
+<meta property="article:tag" content="virtual machine">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -67,10 +67,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-single-number-3" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-vm/virtual-machine-2-internet-connection" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2020/10/03/single-number-3/" class="article-date">
-  <time datetime="2020-10-03T04:33:34.000Z" itemprop="datePublished">2020-10-03</time>
+    <a href="/2020/10/08/vm/virtual-machine-2-internet-connection/" class="article-date">
+  <time datetime="2020-10-08T09:56:19.000Z" itemprop="datePublished">2020-10-08</time>
 </a>
     
   </div>
@@ -81,7 +81,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      single number 3
+      virtual machine - 2. internet connection
     </h1>
   
 
@@ -89,30 +89,20 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>思路：</p>
+        <p>Ref:</p>
 <ol>
-<li>先考虑是否遇到过相似的题目：<ol>
-<li>有：通过异或，删除出现过偶次数的number，保留只有奇次数的number </li>
+<li><a target="_blank" rel="noopener" href="https://cnblogs.com/wish123/p/9277995.html">https://cnblogs.com/wish123/p/9277995.html</a></li>
 </ol>
-</li>
-<li>这道题的特殊点在于有2个奇次数的nubmer</li>
-<li>如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分</li>
-</ol>
-<p>解题方法：</p>
 <ol>
-<li>创建第一个bitwise1, 0000x<ol>
-<li>bitwise1 = bitwise1^x^y^a^a = bitwsie1^x^y</li>
+<li>NAT模式<ol>
+<li>原理:<ol>
+<li>虚拟机和主机之间有NAT Engine</li>
+<li>虚拟机发送请求，实际上是传给NAT Engine，由它利用主机进行网络访问</li>
+<li>虚拟机收到的请求,</li>
 </ol>
 </li>
-<li>创建第二个bitwise2,<ol>
-<li>Bitwise2 = bitwise1^(-bitwise1+1)</li>
-<li>bitwise2中只有right most 1 bit of bitwise1</li>
-<li>bitwise2就含有x和y的特殊bit了</li>
-</ol>
-</li>
-<li>创建第三个bitwise3, i : nums<ol>
-<li>if bitwise3^i !=0, bitwise3 = bitwise3^i</li>
-<li>int the end, bitwise3= x (or y);</li>
+<li>特点:</li>
+<li>配置:</li>
 </ol>
 </li>
 </ol>
@@ -120,10 +110,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/single-number-3/" data-id="ckftbv34u0000qkst498kf36s" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2020/10/08/vm/virtual-machine-2-internet-connection/" data-id="ckg0u2psl000bsd0oeo5p966q" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/leetcode/" rel="tag">leetcode,</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
 
     </footer>
   </div>
@@ -132,9 +122,9 @@
 <nav id="article-nav">
   
   
-    <a href="/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2020/10/08/vm/virtual-machine-1-install-CentOS7/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">git常见命令</div>
+      <div class="article-nav-title">virtual machine - 1. install CentOS7</div>
     </a>
   
 </nav>
@@ -153,7 +143,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode,</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode,</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
     </div>
   </div>
 
@@ -163,7 +153,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode,</a>
+      <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode,</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/virtual-machine/" style="font-size: 20px;">virtual machine</a>
     </div>
   </div>
 
@@ -185,19 +175,23 @@
       <ul>
         
           <li>
-            <a href="/2020/10/03/single-number-3/">single number 3</a>
+            <a href="/2020/10/08/vm/virtual-machine-2-internet-connection/">virtual machine - 2. internet connection</a>
           </li>
         
           <li>
-            <a href="/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/">git常见命令</a>
+            <a href="/2020/10/08/vm/virtual-machine-1-install-CentOS7/">virtual machine - 1. install CentOS7</a>
           </li>
         
           <li>
-            <a href="/2020/10/03/hello-world/">Hello World</a>
+            <a href="/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/">mysql - 1.整体架构篇</a>
           </li>
         
           <li>
-            <a href="/2020/10/02/hexo-tutorial/">GitHub上搭建hexo博客</a>
+            <a href="/2020/10/03/leetcode/Largest-Time-for-Given-Digits/">Largest Time for Given Digits</a>
+          </li>
+        
+          <li>
+            <a href="/2020/10/03/leetcode/single-number-3/">single number 3</a>
           </li>
         
       </ul>
