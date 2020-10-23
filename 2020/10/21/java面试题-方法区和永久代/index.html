@@ -5,19 +5,18 @@
   
 
   
-  <title>single number 3 | Hexo</title>
+  <title>java面试题: 方法区和永久代 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="思路：  先考虑是否遇到过相似的题目： 有：通过异或，删除出现过偶次数的number，保留只有奇次数的number    这道题的特殊点在于有2个奇次数的nubmer 如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分  解题方法：  创建第一个bitwise1, 0000x bitwise1 &#x3D; bitwise1^x^y^a^a &#x3D; bitwsie1^x^y   创建第二个">
+  <meta name="description" content="ref:   https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;60949531 https:&#x2F;&#x2F;www.nowcoder.com&#x2F;questionTerminal&#x2F;8f393a761e0f4b67b1c442d092eb484d">
 <meta property="og:type" content="article">
-<meta property="og:title" content="single number 3">
-<meta property="og:url" content="http://example.com/2020/10/03/leetcode/single-number-3/index.html">
+<meta property="og:title" content="java面试题: 方法区和永久代">
+<meta property="og:url" content="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="思路：  先考虑是否遇到过相似的题目： 有：通过异或，删除出现过偶次数的number，保留只有奇次数的number    这道题的特殊点在于有2个奇次数的nubmer 如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分  解题方法：  创建第一个bitwise1, 0000x bitwise1 &#x3D; bitwise1^x^y^a^a &#x3D; bitwsie1^x^y   创建第二个">
+<meta property="og:description" content="ref:   https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;60949531 https:&#x2F;&#x2F;www.nowcoder.com&#x2F;questionTerminal&#x2F;8f393a761e0f4b67b1c442d092eb484d">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2020-10-03T04:33:34.000Z">
-<meta property="article:modified_time" content="2020-10-13T05:51:30.359Z">
+<meta property="article:published_time" content="2020-10-21T15:19:07.000Z">
+<meta property="article:modified_time" content="2020-10-21T15:19:28.958Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="leetcode">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
@@ -67,10 +66,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-leetcode/single-number-3" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-java面试题-方法区和永久代" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2020/10/03/leetcode/single-number-3/" class="article-date">
-  <time datetime="2020-10-03T04:33:34.000Z" itemprop="datePublished">2020-10-03</time>
+    <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/" class="article-date">
+  <time datetime="2020-10-21T15:19:07.000Z" itemprop="datePublished">2020-10-21</time>
 </a>
     
   </div>
@@ -81,7 +80,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      single number 3
+      java面试题: 方法区和永久代
     </h1>
   
 
@@ -89,61 +88,37 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>思路：</p>
+        <p>ref: </p>
 <ol>
-<li>先考虑是否遇到过相似的题目：<ol>
-<li>有：通过异或，删除出现过偶次数的number，保留只有奇次数的number </li>
-</ol>
-</li>
-<li>这道题的特殊点在于有2个奇次数的nubmer</li>
-<li>如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分</li>
-</ol>
-<p>解题方法：</p>
-<ol>
-<li>创建第一个bitwise1, 0000x<ol>
-<li>bitwise1 = bitwise1^x^y^a^a = bitwsie1^x^y</li>
-</ol>
-</li>
-<li>创建第二个bitwise2,<ol>
-<li>Bitwise2 = bitwise1^(-bitwise1+1)</li>
-<li>bitwise2中只有right most 1 bit of bitwise1</li>
-<li>bitwise2就含有x和y的特殊bit了</li>
-</ol>
-</li>
-<li>创建第三个bitwise3, i : nums<ol>
-<li>if bitwise3^i !=0, bitwise3 = bitwise3^i</li>
-<li>int the end, bitwise3= x (or y);</li>
-</ol>
-</li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d">https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d</a></li>
 </ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/leetcode/single-number-3/" data-id="ckg8lx7b40005c30o7ax32i7b" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/" data-id="ckglk6bp400057ust7q19fxpf" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li></ul>
-
     </footer>
   </div>
   
     
 <nav id="article-nav">
   
-    <a href="/2020/10/03/leetcode/Largest-Time-for-Given-Digits/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Newer</strong>
       <div class="article-nav-title">
         
-          Largest Time for Given Digits
+          java面试题: CPU飙升
         
       </div>
     </a>
   
   
-    <a href="/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">git常见命令</div>
+      <div class="article-nav-title">LeetCode: All Elements in Two Binary Search Trees</div>
     </a>
   
 </nav>

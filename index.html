@@ -64,6 +64,419 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-java-concurrnecy-in-Practice-1" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/23/java-concurrnecy-in-Practice-1/" class="article-date">
+  <time datetime="2020-10-23T00:47:23.000Z" itemprop="datePublished">2020-10-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/23/java-concurrnecy-in-Practice-1/">java concurrnecy in Practice - 1</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li><p>Race condition: 由于多线程之间不恰当的执行时序，而出现的不正确结果</p>
+<ol>
+<li><p>比如: 没有同步的情况下，使用实例遍历count统计servlet的调用次数，count++就会出现race condition;<br>这是一个”读取-修改-写入”的操作序列，并且结果依赖于之前的状态</p>
+</li>
+<li><p>最常见的race condition: Check Then Act（先检查后执行）</p>
+<ol>
+<li>比如观察某个条件为真（比如文件X不存在），然后根据这个条件作出相应的动作（创建文件X）</li>
+<li>但实际上观察 与 动作之间，观察的结果可能已经无效（另一个线程正在创建文件X）</li>
+</ol>
+</li>
+<li><p>Check Then Act的一个示例：延迟初始化</p>
+<ol>
+<li><pre><code class="java">//这段代码的执行代价很高
+public class LazyInitRace&#123;
+  private ExpensiveObject instance = null;
+  public ExpensiveObject getInstance()&#123;
+    if(instance == null)
+      instance = new ExpensiveObject();
+    return instance;
+  &#125;
+&#125;</code></pre>
+</li>
+<li><p>线程A和线程B同时执行getInstance();</p>
+<ol>
+<li>A看到instance为空，则开始初始化</li>
+<li>B检查instance是否为空，取决于A是否初始化完成；如果A需要花很长时间初始化，那么B检查到instance是空，也开始初始化</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/23/java-concurrnecy-in-Practice-1/" data-id="ckglk6bp100027ustc9ryhjkh" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-java面试题-CPU飙升" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/" class="article-date">
+  <time datetime="2020-10-22T06:00:56.000Z" itemprop="datePublished">2020-10-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/">java面试题: CPU飙升</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/58338577">https://zhuanlan.zhihu.com/p/58338577</a></li>
+<li><a target="_blank" rel="noopener" href="http://hongyitong.github.io/2018/01/18/%E5%88%86%E6%9E%90java%E8%BF%9B%E7%A8%8B%E5%81%87%E6%AD%BB%E6%83%85%E5%86%B5/">http://hongyitong.github.io/2018/01/18/%E5%88%86%E6%9E%90java%E8%BF%9B%E7%A8%8B%E5%81%87%E6%AD%BB%E6%83%85%E5%86%B5/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.javazhiyin.com/52519.html">https://www.javazhiyin.com/52519.html</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/" data-id="ckglk6bp200037ustgxg8fd54" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-java面试题-方法区和永久代" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/" class="article-date">
+  <time datetime="2020-10-21T15:19:07.000Z" itemprop="datePublished">2020-10-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/">java面试题: 方法区和永久代</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ref: </p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d">https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/" data-id="ckglk6bp400057ust7q19fxpf" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-LeetCode-All-Elements-in-Two-Binary-Search-Trees" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/" class="article-date">
+  <time datetime="2020-10-21T14:51:09.000Z" itemprop="datePublished">2020-10-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/">LeetCode: All Elements in Two Binary Search Trees</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://leetcode.com/explore/challenge/card/september-leetcoding-challenge/554/week-1-september-1st-september-7th/3449/discuss/464073/C++-One-Pass-Traversal">https://leetcode.com/explore/challenge/card/september-leetcoding-challenge/554/week-1-september-1st-september-7th/3449/discuss/464073/C++-One-Pass-Traversal</a></li>
+</ol>
+<p>难点在于traverse的过程中merge, 如何使用stack存储traverse的节点</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/" data-id="ckglk6boz00017ust9b6hcp46" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-java面试题-如何实现延迟队列" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" class="article-date">
+  <time datetime="2020-10-21T04:26:28.000Z" itemprop="datePublished">2020-10-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/">java面试题: 如何实现延迟队列</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Ref:</p>
+<ol>
+<li>加锁的需求以及redis实现:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/wMqEEga0v9_Kq1cTMPlSdQ">https://mp.weixin.qq.com/s/wMqEEga0v9_Kq1cTMPlSdQ</a></li>
+<li>消息延迟发送: <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/104285758">https://zhuanlan.zhihu.com/p/104285758</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" data-id="ckglk6bp300047ust5wdr7xd5" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag">java面试题</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-LeetCode-Partition-Labels" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/20/LeetCode-Partition-Labels/" class="article-date">
+  <time datetime="2020-10-20T05:46:37.000Z" itemprop="datePublished">2020-10-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/20/LeetCode-Partition-Labels/">LeetCode: Partition Labels</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://www.programcreek.com/2013/03/leetcode-partition-labels-java/?__cf_chl_captcha_tk__=f87085a5c10c4934ebb0261d0a343ef5a08fea05-1603155102-0-AQd1SBuIYKu-9t2dlTqj_ofo4MPCRjJDdsEzuwjM_VI5OS0r4AMHWvKnVv4_HBnAVaky3z2rPKID_cifB96LOAl2F9FWv9QDooFCH3pLKZ8BD8ajdfheoB7yhnYA5qIBa22sYBF7ToWfLE_NeybnDvc1BIISqnwAAP1iADWbcJVJGQ0q9GGDUlXhchW-hsfzzbs29u5qgZuRuKQp7wU9TD0uu3m0anJtC-5OylDQtgLP-Z-pShtFnhstAxjEA2-f_KvVA_eY8L8DnynxKRwFsAnOPreUTUmaY6W1C8k5O6HlBoCy8yU7WsejnN6YKblTWyjy8QW-mQgUqURsw5DxAoxxnuM9MMC01KUoH4OZyrhce1tfyogqwLS3V0AbHDoL7Y_nmyDfgtFxuuhyk2RqdbsmRuYCmPZiMd3TYS0LMap1jQ_kJenm5B8XvsHANVGPsMNkr5hvkDScOG0iPqr41dBF6_nJUb7lJXgaKi7Vk_yOKnC8fxPCFandwSC9OTL7btkXsuJ_8sDG-ud1s-rX6leXtwThCKu5djRv-MlLRT3j">https://www.programcreek.com/2013/03/leetcode-partition-labels-java/?__cf_chl_captcha_tk__=f87085a5c10c4934ebb0261d0a343ef5a08fea05-1603155102-0-AQd1SBuIYKu-9t2dlTqj_ofo4MPCRjJDdsEzuwjM_VI5OS0r4AMHWvKnVv4_HBnAVaky3z2rPKID_cifB96LOAl2F9FWv9QDooFCH3pLKZ8BD8ajdfheoB7yhnYA5qIBa22sYBF7ToWfLE_NeybnDvc1BIISqnwAAP1iADWbcJVJGQ0q9GGDUlXhchW-hsfzzbs29u5qgZuRuKQp7wU9TD0uu3m0anJtC-5OylDQtgLP-Z-pShtFnhstAxjEA2-f_KvVA_eY8L8DnynxKRwFsAnOPreUTUmaY6W1C8k5O6HlBoCy8yU7WsejnN6YKblTWyjy8QW-mQgUqURsw5DxAoxxnuM9MMC01KUoH4OZyrhce1tfyogqwLS3V0AbHDoL7Y_nmyDfgtFxuuhyk2RqdbsmRuYCmPZiMd3TYS0LMap1jQ_kJenm5B8XvsHANVGPsMNkr5hvkDScOG0iPqr41dBF6_nJUb7lJXgaKi7Vk_yOKnC8fxPCFandwSC9OTL7btkXsuJ_8sDG-ud1s-rX6leXtwThCKu5djRv-MlLRT3j</a></li>
+</ol>
+<p>BootFei’s answer:</p>
+<ol>
+<li>其实就是merge interval的思路<ol>
+<li>找到当前char的最后一次出现的地址，称为anchor</li>
+<li>在遍历到anchor之前的chars，如果在他们中间出现anchor更靠后的，更新anchor</li>
+<li>直到遍历的index和anchor位置相等</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/20/LeetCode-Partition-Labels/" data-id="ckglk6bot00007ustdmo0ho51" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-java面试题1-java类初始化顺序" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/19/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/" class="article-date">
+  <time datetime="2020-10-19T15:30:35.000Z" itemprop="datePublished">2020-10-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/19/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/">java面试题1: java类初始化顺序</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>题目汇总：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></p>
+<p>ref</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/65872513">https://zhuanlan.zhihu.com/p/65872513</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05">https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05</a></li>
+<li><a target="_blank" rel="noopener" href="http://baijiahao.baidu.com/s?id=1626608229788927963">http://baijiahao.baidu.com/s?id=1626608229788927963</a></li>
+</ol>
+<p>类初始化过程以及该过程的意义：</p>
+<ol>
+<li>对于类和接口，初始化就是调用初始化方法；</li>
+<li>java虚拟机层面：</li>
+<li>java虚拟机是支持多线程的，所以需要处理同步<ol>
+<li>同步就需要互斥，需要锁LC; C和LC的映射关系，有jvm自行决定</li>
+<li>如果C的Class对象显示当前C的初始化由其他线程正在执行 -&gt; 当前线程释放LC并进入阻塞，直等到其他线程完成初始化</li>
+<li>如果C的Class对象显示当前C的初始化由当前线程正在执行 -&gt; do nothing, release LC</li>
+</ol>
+</li>
+</ol>
+<p>bootfei’s answer:</p>
+<ol>
+<li>类初始化是类加载过程中的最后一步，也是真正开始调用java的字节码文件</li>
+<li>类初始化首先区分是针对接口还是类<ol>
+<li>如果是类，会首先调用父类的<cinit>,然后调用子类的<cinit></li>
+<li>如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<cinit></li>
+</ol>
+</li>
+<li>类初始化的顺序是<ol>
+<li>静态变量</li>
+<li>静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/19/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/" data-id="ckglk6bpa00077ust34m667vr" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag">java面试题</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Java/java-ThreadLocal底层原理以及内存溢出问题" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" class="article-date">
+  <time datetime="2020-10-17T11:52:16.000Z" itemprop="datePublished">2020-10-17</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">java</a>►<a class="article-category-link" href="/categories/java/oom/">oom</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/">java ThreadLocal底层原理以及内存溢出问题</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/129607326">https://zhuanlan.zhihu.com/p/129607326</a></li>
+</ol>
+<p>首先从内存模型的角度讨论ThreadLocal的存在价值</p>
+<ol>
+<li>多线程可以通过jvm的堆，同时读写共享变量，但是会出现并发问题</li>
+<li>为了解决1中的并发问题，可以使用局部变量，因为局部变量会存储在线程中的栈帧中，但是局部变量不能被一个线程中的多个方法共享</li>
+<li>为了解决2中的多个方法不能共享局部变量问题，可以使用ThreadLocal</li>
+</ol>
+<p>然后讨论ThreadLocal的底层原理</p>
+<ol>
+<li>ThreadLocal的set(T value)和get()方法，本质上是要获取当前线程的ThreadLocalMap (其实就是该线程的 ThreadLocal[]  数组)</li>
+<li>jdk使用ThreadLocal的内部类, ThreadLocalMaps对 ThreadLocal[ ]数组进行了封装</li>
+<li>ThreadLocalMap内部维护了Entry[ ] 数组, Entry是ThreadLocalMap的内部类</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" data-id="ckglk6bpc00087ust7naca0mg" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Contains-Duplicate-III" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/10/13/Contains-Duplicate-III/" class="article-date">
@@ -152,465 +565,12 @@
 
 
   
-    <article id="post-vm/virtual-machine-2-internet-connection" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/08/vm/virtual-machine-2-internet-connection/" class="article-date">
-  <time datetime="2020-10-08T09:56:19.000Z" itemprop="datePublished">2020-10-08</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/vm/virtual-machine-2-internet-connection/">virtual machine - 2. internet connection</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Ref:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://cnblogs.com/wish123/p/9277995.html">https://cnblogs.com/wish123/p/9277995.html</a></li>
-</ol>
-<ol>
-<li>NAT模式<ol>
-<li>原理:<ol>
-<li>虚拟机和主机之间有NAT Engine</li>
-<li>虚拟机发送请求，实际上是传给NAT Engine，由它利用主机进行网络访问</li>
-<li>虚拟机收到的请求,</li>
-</ol>
-</li>
-<li>特点:</li>
-<li>配置:</li>
-</ol>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/08/vm/virtual-machine-2-internet-connection/" data-id="ckg8lx7b7000bc30ob7nz38wr" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-vm/virtual-machine-1-install-CentOS7" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/08/vm/virtual-machine-1-install-CentOS7/" class="article-date">
-  <time datetime="2020-10-08T08:11:57.000Z" itemprop="datePublished">2020-10-08</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/vm/virtual-machine-1-install-CentOS7/">virtual machine - 1. install CentOS7</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/08/vm/virtual-machine-1-install-CentOS7/" data-id="ckg8lx7b50008c30ob3gf94c6" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-mysql/mysql-1-整体架构篇" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/" class="article-date">
-  <time datetime="2020-10-08T07:59:03.000Z" itemprop="datePublished">2020-10-08</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/">mysql - 1.整体架构篇</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Ref:</p>
-<ol>
-<li><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/pluggable-storage-overview.html">https://dev.mysql.com/doc/refman/8.0/en/pluggable-storage-overview.html</a></p>
-</li>
-<li></li>
-</ol>
-<ol>
-<li>mysql server 层</li>
-</ol>
-<ol>
-<li><p>Connection pool</p>
-<ol>
-<li><p>连接的数量</p>
-<ol>
-<li><p>查看mysql的链接数量</p>
-<pre><code>       <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Show variables like <span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure></code></pre>
-</li>
-<li><p>查看linux</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>Sql interface</p>
-<p>DML, DDL, Stored procedures</p>
-</li>
-<li><p>parser</p>
-</li>
-<li><p>optimizer</p>
-</li>
-<li><p>cacehs &amp; buffers</p>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/" data-id="ckg8lx7b60009c30o9epbcyo7" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-leetcode/Largest-Time-for-Given-Digits" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/03/leetcode/Largest-Time-for-Given-Digits/" class="article-date">
-  <time datetime="2020-10-03T08:09:01.000Z" itemprop="datePublished">2020-10-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/03/leetcode/Largest-Time-for-Given-Digits/">Largest Time for Given Digits</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>思路：</p>
-<ol>
-<li><p>类似的题目：</p>
-<ol>
-<li>IP地址题目，需要判断每个chunk的范围</li>
-</ol>
-</li>
-<li><p>判断每个chunk的范围</p>
-<ol>
-<li><p>HH: </p>
-<p>(0-1)(0-9), 2(0-4)</p>
-</li>
-<li><p>MM:</p>
-<p>(0-5)(0-9)</p>
-</li>
-</ol>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/leetcode/Largest-Time-for-Given-Digits/" data-id="ckg8lx7b30004c30ofu134xt4" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-leetcode/single-number-3" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/03/leetcode/single-number-3/" class="article-date">
-  <time datetime="2020-10-03T04:33:34.000Z" itemprop="datePublished">2020-10-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/03/leetcode/single-number-3/">single number 3</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>思路：</p>
-<ol>
-<li>先考虑是否遇到过相似的题目：<ol>
-<li>有：通过异或，删除出现过偶次数的number，保留只有奇次数的number </li>
-</ol>
-</li>
-<li>这道题的特殊点在于有2个奇次数的nubmer</li>
-<li>如何区分2个奇次数的number？首先必须找到它俩的特殊bit，用于区分</li>
-</ol>
-<p>解题方法：</p>
-<ol>
-<li>创建第一个bitwise1, 0000x<ol>
-<li>bitwise1 = bitwise1^x^y^a^a = bitwsie1^x^y</li>
-</ol>
-</li>
-<li>创建第二个bitwise2,<ol>
-<li>Bitwise2 = bitwise1^(-bitwise1+1)</li>
-<li>bitwise2中只有right most 1 bit of bitwise1</li>
-<li>bitwise2就含有x和y的特殊bit了</li>
-</ol>
-</li>
-<li>创建第三个bitwise3, i : nums<ol>
-<li>if bitwise3^i !=0, bitwise3 = bitwise3^i</li>
-<li>int the end, bitwise3= x (or y);</li>
-</ol>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/leetcode/single-number-3/" data-id="ckg8lx7b40005c30o7ax32i7b" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-git常见命令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" class="article-date">
-  <time datetime="2020-10-03T01:46:30.000Z" itemprop="datePublished">2020-10-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/">git常见命令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ol>
-<li><p>远程分支</p>
-<p>a.  查看远程分支 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -r</span><br></pre></td></tr></table></figure>
-
-<p>b. 拉取远程分支并创建本地分支</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout -b 本地分支名x origin/远程分支名x</span><br></pre></td></tr></table></figure>
-<p>   使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。</p>
-</li>
-<li><p>版本回退</p>
-<ol>
-<li><p>查看版本日志</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">log</span> --pretty=oneline</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>版本回退</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard 1094a <span class="comment">#回退到指定版本</span></span><br><span class="line">git reset --hard HEAD^ <span class="comment">#回退到上一版本</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/git%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4/" data-id="ckg8lx7as0000c30octq0ck34" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/git/" rel="tag">git</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/03/hello-world/" class="article-date">
-  <time datetime="2020-10-03T01:17:42.518Z" itemprop="datePublished">2020-10-03</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/03/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/03/hello-world/" data-id="ckg8lx7b20003c30obrlmfrxh" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hexo/hexo-tutorial" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/10/02/hexo/hexo-tutorial/" class="article-date">
-  <time datetime="2020-10-02T12:34:45.000Z" itemprop="datePublished">2020-10-02</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/blog/">blog</a>►<a class="article-category-link" href="/categories/blog/hexo/">hexo</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/10/02/hexo/hexo-tutorial/">GitHub上搭建hexo博客</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>它山之石可以攻玉</p>
-<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><p> 在GitHub上搭建hexo博客:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://juejin.im/post/6844903887732736007">https://juejin.im/post/6844903887732736007</a></li>
-</ol>
-<p>保存hexo博客源码: </p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/gatieme/article/details/82317704">https://blog.csdn.net/gatieme/article/details/82317704</a></li>
-</ol>
-<p>添加子标签并且对标签分类:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/46194621/grouping-categories-in-hexo">https://stackoverflow.com/questions/46194621/grouping-categories-in-hexo</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/pull/2734">https://github.com/hexojs/hexo/pull/2734</a></li>
-</ol>
-<h3 id="需要注意的点"><a href="#需要注意的点" class="headerlink" title="需要注意的点"></a>需要注意的点</h3><ol>
-<li><p>ssh-keygen -t rsa -C “邮件地址” 的命令并不适用于mac，具体适配的命令参考<a target="_blank" rel="noopener" href="https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/connecting-to-github-with-ssh">https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/connecting-to-github-with-ssh</a></p>
-</li>
-<li><p><code>hexo d</code>的话一般会报如下错误：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Deployer not found: github 或者 Deployer not found: git</span><br></pre></td></tr></table></figure>
-
-<p>原因是还需要安装一个插件：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>使用git分支做备份的时候，需要注意<br>a. <code>hexo init</code> 只能用于empty folder，所以如果folder有git了，需要把.git文件拷贝出来，把folder清空, 然后执行hexo init, 再.git复制回来</p>
-<p>b. 最好使用git clone下载备份代码</p>
-</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2020/10/02/hexo/hexo-tutorial/" data-id="ckg8lx7b8000dc30oa0ni6zs6" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/build/" rel="tag">build</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tutorial/" rel="tag">tutorial</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+  </nav>
 
 </section>
         
@@ -620,7 +580,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/blog/">blog</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/blog/hexo/">hexo</a></li></ul></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/blog/">blog</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/blog/hexo/">hexo</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/oom/">oom</a></li></ul></li></ul>
     </div>
   </div>
 
@@ -630,7 +590,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/build/" rel="tag">build</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sliding-window/" rel="tag">sliding window</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tutorial/" rel="tag">tutorial</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/build/" rel="tag">build</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag">java面试题</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sliding-window/" rel="tag">sliding window</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tutorial/" rel="tag">tutorial</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li></ul>
     </div>
   </div>
 
@@ -640,7 +600,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/build/" style="font-size: 10px;">build</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/sliding-window/" style="font-size: 10px;">sliding window</a> <a href="/tags/tutorial/" style="font-size: 10px;">tutorial</a> <a href="/tags/virtual-machine/" style="font-size: 20px;">virtual machine</a>
+      <a href="/tags/build/" style="font-size: 10px;">build</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/java%E9%9D%A2%E8%AF%95%E9%A2%98/" style="font-size: 20px;">java面试题</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/sliding-window/" style="font-size: 10px;">sliding window</a> <a href="/tags/tutorial/" style="font-size: 10px;">tutorial</a> <a href="/tags/virtual-machine/" style="font-size: 20px;">virtual machine</a>
     </div>
   </div>
 
@@ -662,23 +622,23 @@
       <ul>
         
           <li>
-            <a href="/2020/10/13/Contains-Duplicate-III/">Contains Duplicate III</a>
+            <a href="/2020/10/23/java-concurrnecy-in-Practice-1/">java concurrnecy in Practice - 1</a>
           </li>
         
           <li>
-            <a href="/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/">hexo:对post目录下的文档进行分类</a>
+            <a href="/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/">java面试题: CPU飙升</a>
           </li>
         
           <li>
-            <a href="/2020/10/08/vm/virtual-machine-2-internet-connection/">virtual machine - 2. internet connection</a>
+            <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/">java面试题: 方法区和永久代</a>
           </li>
         
           <li>
-            <a href="/2020/10/08/vm/virtual-machine-1-install-CentOS7/">virtual machine - 1. install CentOS7</a>
+            <a href="/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/">LeetCode: All Elements in Two Binary Search Trees</a>
           </li>
         
           <li>
-            <a href="/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/">mysql - 1.整体架构篇</a>
+            <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/">java面试题: 如何实现延迟队列</a>
           </li>
         
       </ul>
