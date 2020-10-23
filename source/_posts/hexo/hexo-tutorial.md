@@ -1,7 +1,8 @@
 ---
 title: GitHub上搭建hexo博客
 date: 2020-10-02 20:34:45
-tags: hexo
+tags: [tutorial,build]
+categories: [blog, hexo]
 ---
 
 它山之石可以攻玉
@@ -15,7 +16,11 @@ tags: hexo
 保存hexo博客源码: 
 
 1. https://blog.csdn.net/gatieme/article/details/82317704
-2. 
+
+添加子标签并且对标签分类:
+
+1. https://stackoverflow.com/questions/46194621/grouping-categories-in-hexo
+2. https://github.com/hexojs/hexo/pull/2734
 
 
 

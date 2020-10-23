@@ -1,7 +1,7 @@
 ---
 title: single number 3
 date: 2020-10-03 12:33:34
-tags: leetcode, 
+tags: leetcode 
 ---
 
 思路：
