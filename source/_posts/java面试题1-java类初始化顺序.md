@@ -5,16 +5,21 @@ tags: java面试题
 Categories: java
 ---
 
-题目汇总：https://www.zhihu.com/question/60949531
 
 
-
-ref
+知识点ref: 
 
 1. https://developer.ibm.com/zh/articles/j-lo-clobj-init/
 2. https://zhuanlan.zhihu.com/p/65872513
 3. https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05
 4. http://baijiahao.baidu.com/s?id=1626608229788927963
+
+
+
+练习题ref:
+
+1. https://developer.ibm.com/zh/articles/j-lo-clobj-init/
+2. https://www.zhihu.com/question/60949531
 
 
 
@@ -38,5 +43,7 @@ bootfei's answer:
    1. 如果是类，会首先调用父类的<cinit>,然后调用子类的<cinit>
    2. 如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<cinit>
 3. 类初始化的顺序是
-   1. 静态变量
-   2. 静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值
+   1. 父类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值
+   2. 子类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值
+   3. 父类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值
+   4. 子类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值
