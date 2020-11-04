@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en,cn">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -21,20 +21,21 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
-  <meta name="description" content="ref:  Https:&#x2F;&#x2F;zhihu.com&#x2F;question&#x2F;53546025   手动分类 md文件的存储位置与生成的html灭有关系, 只要放在post目录下即可 手动创建子目录，并且手动把不同类型的md文件放进不同类型的子目录即可   使用JavaScript代码自动分类">
+  <meta name="description" content="ref:  Https:&#x2F;&#x2F;zhihu.com&#x2F;question&#x2F;53546025  https:&#x2F;&#x2F;whx4j8.github.io&#x2F;2016&#x2F;03&#x2F;16&#x2F;hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB&#x2F;    手动分类  md文件的存储位置与生成的html灭有">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hexo:对post目录下的文档进行分类">
 <meta property="og:url" content="http://example.com/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/index.html">
-<meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="ref:  Https:&#x2F;&#x2F;zhihu.com&#x2F;question&#x2F;53546025   手动分类 md文件的存储位置与生成的html灭有关系, 只要放在post目录下即可 手动创建子目录，并且手动把不同类型的md文件放进不同类型的子目录即可   使用JavaScript代码自动分类">
-<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="ref:  Https:&#x2F;&#x2F;zhihu.com&#x2F;question&#x2F;53546025  https:&#x2F;&#x2F;whx4j8.github.io&#x2F;2016&#x2F;03&#x2F;16&#x2F;hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB&#x2F;    手动分类  md文件的存储位置与生成的html灭有">
+<meta property="og:locale">
 <meta property="article:published_time" content="2020-10-08T13:09:00.000Z">
-<meta property="article:modified_time" content="2020-10-13T05:51:23.886Z">
-<meta property="article:author" content="John Doe">
+<meta property="article:modified_time" content="2020-11-03T13:27:24.168Z">
+<meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="hexo">
+<meta property="article:tag" content="next">
 <meta name="twitter:card" content="summary">
 
 
@@ -47,11 +48,11 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'en'
+    lang   : 'en,cn'
   };
 </script>
 
-  <title>hexo:对post目录下的文档进行分类 | Hexo</title>
+  <title>hexo:对post目录下的文档进行分类 | BootFei's Blog</title>
   
 
 
@@ -104,6 +105,9 @@
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
     <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
     </div>
   </div>
 
@@ -111,9 +115,10 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Hexo</h1>
+      <h1 class="site-title">BootFei's Blog</h1>
       <i class="logo-line"></i>
     </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
   </div>
 
   <div class="site-nav-right">
@@ -124,6 +129,35 @@
 
 
 
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
 
 
 
@@ -157,24 +191,29 @@
 
         <section class="site-overview-wrap sidebar-panel">
           <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">John Doe</p>
-  <div class="site-description" itemprop="description"></div>
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
 </div>
 <div class="site-state-wrap site-overview-item animated">
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">19</span>
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">5</span>
-        <span class="site-state-item-name">categories</span>
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">9</span>
-        <span class="site-state-item-name">tags</span>
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
 </div>
@@ -213,17 +252,17 @@
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="BootFei's Blog">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -245,8 +284,17 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-13 13:51:23" itemprop="dateModified" datetime="2020-10-13T13:51:23+08:00">2020-10-13</time>
+        <time title="Modified: 2020-11-03 21:27:24" itemprop="dateModified" datetime="2020-11-03T21:27:24+08:00">2020-11-03</time>
       </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+    </span>
 
   
 </div>
@@ -260,15 +308,22 @@
     <div class="post-body" itemprop="articleBody">
         <p>ref:</p>
 <ol>
-<li><a target="_blank" rel="noopener" href="https://zhihu.com/question/53546025">Https://zhihu.com/question/53546025</a></li>
+<li><p><a target="_blank" rel="noopener" href="https://zhihu.com/question/53546025">Https://zhihu.com/question/53546025</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/">https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/</a></p>
+</li>
 </ol>
 <ol>
-<li>手动分类<ol>
+<li><p>手动分类</p>
+<ol>
 <li>md文件的存储位置与生成的html灭有关系, 只要放在post目录下即可</li>
 <li>手动创建子目录，并且手动把不同类型的md文件放进不同类型的子目录即可</li>
 </ol>
 </li>
-<li>使用JavaScript代码自动分类</li>
+<li><p>使用JavaScript代码自动分类</p>
+</li>
+<li><p>使用next的theme主题进行分类，见ref 2</p>
+</li>
 </ol>
 
     </div>
@@ -280,6 +335,7 @@
     <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/hexo/" rel="tag"># hexo</a>
+              <a href="/tags/next/" rel="tag"># next</a>
           </div>
 
         
@@ -345,9 +401,9 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
   </div>
 
     </div>
