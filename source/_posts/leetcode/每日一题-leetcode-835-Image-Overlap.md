@@ -1,5 +1,5 @@
 ---
-title: '每日一题: leetcode 835. Image Overlap'
+title: 'leetcode 835. Image Overlap'
 date: 2020-10-27 23:10:57
 tags: leetcode
 categories: algorithm

@@ -1,7 +1,7 @@
 ---
-title: java concurrnecy in Practice - 1
+title: chapter2线程安全性
 date: 2020-10-23 08:47:23
-tags:
+tags: [并发]
 ---
 
 
@@ -88,26 +88,32 @@ tags:
 
 5. 锁如何保护共享状态
 
-   1. 因为锁能使它保护的代码路径以串行的方式执行，则可以通过锁来实现一些协议以保证对共享状态的独享
-   2. 上文提到了对共享状态访问的复合操作，如何使用锁保护由复合操作包裹的共享状态呢？
+   1. 前提：什么样的数据才需要被锁保护？
+      	只有被**多个线程 ** ***同时访问*** 的**可变数据**才需要通过锁来保护
+   2. 原理:
+          因为锁能使它保护的代码路径以串行的方式执行，则通过锁来实现一些协议以保证对共享状态的独享
+   3. 上文提到了对共享状态访问的复合操作，如何使用锁保护由复合操作包裹的共享状态呢？
       1. 对复合操作加锁就成为同步代码块 => 可以使其成为原子操作，但是却 != 同步
       2. 对于可能被多个线程同时访问的可变状态变量，在访问它时都需要使用同一个锁，则称为“该状态变量由该锁保护的”，可见是锁保护了变量，不是复合操作或者同步代码块保护了变量，注意区别
-   3. 每个共享的并且可变的变量，都必须只由一个锁来保护
-   4. 当类的不变性条件涉及多个状态变量，这些状态变量必须交给同一个锁来保护
-   5. 常见的加锁约定：
+   4. 每个共享的并且可变的变量，都必须只由一个锁来保护
+   5. 当类的***不变性条件***涉及一个或者多个状态变量时
+      1. **一个变量**时，由于访问必须获取锁，这样就确保在同一时刻只有一个线程可以访问这个变量
+      2. **多个变量**时，需要添加额外的条件，这些状态变量必须交给同一个锁来保护
+   6. 既然**同步**（我猜测作者指的是同步代码块和同步方法）**可以避免竞争条件**，为什么不在每个方法都声明synchronized?
+      1. 如果滥用synchronized, 则会出现**过多的同步**
+      2. 如果只是将每个方法作为同步方法，例如Vector,那么**并不足以确保Vector上复合操作都是原子的**，比如put-if-absent
+   7. 常见的加锁约定：
       1. 所有的可变状态封装在对象内部
       2. 并通过对象的内置锁，对类内部所有访问可变状态的代码路径进行同步
       3. 通过以上2个步骤，使得在该对象上不会发生并发访问
       4. 注意：如果新的代码或者方法，没有使用同步，那么这种约定被破坏
 
 6. synchronized方法的粗粒度特性，所带来的性能问题
+   
    1. 以servlet的缓存为例, 由于service是一个synchronized方法，那么意味着每个时间内只有一个线程可以执行该方法，这就违背了设计servlet框架的初衷（servlet能同时处理多个请求）。同时，即使有多个空余的CPU，并且负载很高，但是由于每个时间内只有一个请求被处理，其他请求只能等待，意味着这些CPU依旧空闲。相当于把多线程变成了单线程。
+      <img src="https://img-blog.csdn.net/20180913104158845?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0N1cnJ5Nzg5NQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" style="zoom: 67%;" />
 
-   
-     ![https://www.google.com/search?q=synchronizedFactorizer%E4%B8%AD%E7%9A%84%E4%B8%8D%E8%89%AF%E5%B9%B6%E5%8F%91&sxsrf=ALeKk03Stazfj1FvzDWQcgPZ5TLO5fe2rw:1603886569954&tbm=isch&source=iu&ictx=1&fir=qQvOWpn4bMSTbM%252CycCA2-pjBeWnnM%252C_&vet=1&usg=AI4_-kT2pi6L17p4rWyhaFDkhhw68ps4dw&sa=X&ved=2ahUKEwjF7IuKn9fsAhULsJ4KHUOTDG0Q9QF6BAgKEAY#imgrc=qQvOWpn4bMSTbM]()
-   
-   ```java
-   // SynchronizedFactorizer.java
+```java
    public class SynchronizedFactorizer extends GenericServlet implements Servlet {
        // 这里的 @GuardedBy 指的是被内置锁 synchronized 对象保护 没有实际意义，是一个语义化的注解
        @GuardedBy("this")
@@ -141,10 +147,60 @@ tags:
            return new BigInteger[]{i};
        }
    }
-   ```
-   
+```
+
    2. 如何解决上述问题：
-   
-     1. 降低锁的粒度，把需要由锁保护的代码或者说是变量与不需要锁保护的代码或者变量分开
-     2. 
+
+        1. 降低锁的粒度，把需要由锁保护的代码或者说是变量与不需要锁保护的代码或者变量分开
+             1. 比如局部变量（位于栈上），不会在多个线程间共享，所以不需要同步
+   3. 新的代码
+```java
+public class CachedFactorizer extends GenericServlet implements Servlet {
+    @GuardedBy("this") private BigInteger lastNumber;
+    @GuardedBy("this") private BigInteger[] lastFactors;
+    @GuardedBy("this") private long hits;
+    @GuardedBy("this") private long cacheHits;
+
+    public synchronized long getHits() {
+        return hits;
+    }
+
+    public synchronized double getCacheHitRatio() {
+        return (double) cacheHits / (double) hits;
+    }
+
+    public void service(ServletRequest req, ServletResponse resp) {
+        BigInteger i = extractFromRequest(req);
+        BigInteger[] factors = null;
+        synchronized (this) {
+            ++hits;
+            if (i.equals(lastNumber)) {
+                ++cacheHits;
+                factors = lastFactors.clone();
+            }
+        }
+        if (factors == null) {
+            factors = factor(i);
+            synchronized (this) {
+                lastNumber = i;
+                lastFactors = factors.clone();
+            }
+        }
+        encodeIntoResponse(resp, factors);
+    }
+
+    void encodeIntoResponse(ServletResponse resp, BigInteger[] factors) {
+    }
+}
+```
+
+注意：cacheHits不再使用AtomicLong类型(虽然也可以使用)，因为已经使用同步代码块来构成原子操作了，没有必要使用原子变量了，两种不同的同步机制会导致混乱。
+
+
+
+
+
+Summary:
+
+编写线程安全的并发程序，核心在于：在访问共享的可变状态时需要正确的管理。本章介绍了，通过同步避免多个线程在同一时间访问相同的数据
 

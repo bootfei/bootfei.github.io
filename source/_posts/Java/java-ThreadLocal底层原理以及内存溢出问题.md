@@ -5,7 +5,9 @@ categories: [java,oom]
 tags:
 ---
 
-Ref:
+它山之石可以攻玉
+
+### ref links:
 
 1. https://zhuanlan.zhihu.com/p/129607326
 

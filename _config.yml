@@ -3,13 +3,13 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
-description: ''
-keywords:
-author: John Doe
-language: en
-timezone: ''
+title: BootFei's Blog
+subtitle: 敬畏耶和华是智慧的开端，认识至圣者就是聪明
+description: learn more, forget more; practice more, get more.
+keywords: 
+author: Fei Qi
+language: en,cn
+timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://example.com/child' and root as '/child/'

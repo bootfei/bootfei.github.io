@@ -1,8 +1,8 @@
 ---
 title: GitHub上搭建hexo博客
 date: 2020-10-02 20:34:45
-tags: [tutorial,build]
-categories: [blog, hexo]
+tags: [hexo]
+categories: [前端]
 ---
 
 它山之石可以攻玉
