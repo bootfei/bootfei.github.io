@@ -2,7 +2,6 @@
 title: 'apache http client引起的线程假死or卡死问题'
 date: 2020-11-04 13:47:46
 tags: [java, net]
-Category:[后端, 计算机网络]
 ---
 
 它山之石可以攻玉

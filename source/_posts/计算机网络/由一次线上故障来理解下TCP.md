@@ -2,7 +2,6 @@
 title: 由一次线上故障来理解下TCP
 date: 2020-11-16 12:23:23
 tags: [java, net]
-Category:[后端, 计算机网络]
 ---
 
 它山之石可以攻玉

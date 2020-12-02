@@ -8,6 +8,7 @@ ref:
 
 1. java如何理解隐式地使this引用逸出
    https://segmentfault.com/q/1010000007900854
+   https://www.cnblogs.com/viscu/p/9790755.html
 
 
 
@@ -107,21 +108,107 @@ Abstract：第二章开头指出，要编写正确的并发程序，关键在与
          }
          ```
 
+         ThisEscape发布EventListener时，也隐含地发布了ThisEscape实例本身，因为在这个内部类的实例中包含了对ThisEscape实例的隐含引用！！！
+         *比如造成的后果，在多线程环境下，会出现这样一种情况：*
+         *线程 A 和线程 B 同时访问 ThisEscape 构造方法，这时线程 A 访问构造方法还为完成(可以理解为 ThisEscape 为初始化完全)，此时由于 this 逸出，导致 this 在 A 和 B 中都具有可见性，线程 B 就可以通过 this 访问 doSomething(e) 方法，导致修改 ThisEscape 的属性。也就是在 ThisEscape 还为初始化完成，就被其他线程读取，导致出现一些奇怪的现象。*
+         *这也就是 this 逸出。*
+
+         ====> 得出结论：不要在构造过程中，使this引用逸出，具体来说，只有当构造函数返回时，this引用才应该从线程中逸出。解决方案如下:
+
+         ​		如果想在**构造函数**中注册一个**事件监听器**或**启动线程**，那么可以使用私有的构造函数（保证构造函数必须先执行完毕）+公共的工厂方法
+
+         ```java
+         public class SafeListener {
+             private final EventListener listener;
+             private ThisEscape(EventSource source) {
+                 listener = new EventListener(
+                     public void onEvent(Event e) {
+                         doSomething(e);
+                     }
+                 );
+             }
+             
+             public static SafeLisener newInstance(EventSource source) {
+                 SafeLisener safe = new SafeLisener();
+                 soure.registerListener(safe.listener);
+             }
+             
+         }
+         ```
+
          
 
 6. 线程封闭:
 
    1. 定义: 如果数据不共享，那么就不需要不同步，就是线程安全的，所以仅在单个线程内访问数据，称为线程封闭技术。
+
    2. 场景：
+
       1. Swing: 将所有组件和数据模型对象封闭到Swing的事件分发线程，除了事件线程以外的线程，都不能访问这些对象。
       2. JDBC的Connection对象: 在典型的服务器应用中，线程从连接池中获取一个Connection对象，处理完请求后，在将Connection对象返回给连接池。由于大多数请求，比如Servlet,都是由单个线程采用同步方式来处理，并且在Connection对象返回给连接池之前，连接池不会将它分配给其他线程。所以，Connection对象隐式地封闭在线程中。
+
    3. 技术实现:
       正如Java并没有强制规定某个变量必须由锁来保护，同样Java也无法强制对象必须在某个线程内，所以由程序负责确保封闭在线程内的对象会不会逸出，而Java只提供一些机制，比如局部变量和ThreadLocal类。
+
       1. Ad-hoc线程封闭: 
+
          1. 定义：维护线程封闭性的职责完全由**程序实现**来承担。
          2. 实际上，没有一个语言，能将对象封闭到一个线程上。所以，此方法还不如把程序设计为单线程，如Swing等Gui框架。
+
       2. 栈封闭:
+
          1. 定义: 是线程封闭的一种特例。只能通过局部变量才能访问对象，因为局部变量的固有属性就是封闭在执行线程中的，他们位于运行数据区的栈中（线程独享）。
+
+      3. Threadlocal类
+
+         1. 定义：这个类使线程中的某个值与保存值的对象关联起来。ThreadLocal提供了get与Set等访问接口和方法，这些方法为每个使用该变量的线程都存有一份独立的副本，所以，get（）会返回当前执行线程在调用set（）时设置的最新值
+
+         2. 场景
+
+            1. JDBC的连接对象不一定是线程安全的，而且希望避免调用每个方法时都传递一个Connection对象，因此，可以将JDBC的连接对象保存到ThreadLocal对象中。
+
+               ```java
+               public class ThreadLocalTemplate {
+                   private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<Connection>() {
+                       public Connection initialValue() {
+                           return DriverManager.getConnection("DB_URL");  //JDBC的Connection不一定是线程安全的，封装到ThreadLocal中保证每个线程都会拥有自己的JDBC连接对象副本
+                       }
+                   };
+                  
+                   public static Connection getConnection() {
+                       return connectionHolder.get();
+                   }
+               }
+               ```
+
+               
+
+            2. 当某个频繁执行的操作需要一个临时对象，而同时希望避免在每次执行时都重新分配该临时对象。
+
+               ```java
+               Integer.toString();//JDK1.5使用ThreadLocal对象来保存12字节大小的缓存区
+               ```
+
+               
+
+            3. 如果将单线程的应用程序移植到多线程环境中，只需要把全局变量转化为ThreadLocal对象（如果全局变量的语义允许），就可以维持线程安全性。
+               注意：如果全局变量是应用程序用来作为缓存的，那此方法就是无意义的。因为缓存本来就是希望一个线程的计算结果可以被其他线程共享，而不是独享。
+
+               
+
+            4. J2EE的事物上下文(Transaction Context),保存在执行线程的ThreadLocal对象中。
+
+         3. 原理：
+            当执行线程首次调用ThreadLocal.get()时，就调用initialValue来获取初始值。从概念上看，ThreadLocal<T> 视为Map<Thread,T>对象，其中保存了特定于该线程的值，但是ThreadLocal的实现并非如此。这些特定于线程的值保存在Thread对象中，当线程终止时，这些值也被gc了。
+
+7. 不变性：
+
+   1. 定义：满足同步的另一种方法就是使用不可变的对象（某个对象在被创建后就不可被修改）
+   2. 当满足以下条件时，对象才是不可变的：
+      1. 对象创建以后其状态都不能修改
+      2. 对象的所有域都是final类型
+      3. 对象是正确创建的（在对象创建期间，this引用没有逸出）
+   3. 技术实现：
 
 
 
