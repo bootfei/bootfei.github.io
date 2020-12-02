@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -208,7 +208,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -248,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/27/leetcode/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-leetcode-835-Image-Overlap/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/26/%E9%AB%98%E5%B9%B6%E5%8F%91/%E9%AB%98%E5%B9%B6%E5%8F%91%EF%BC%9A%E5%B9%B6%E5%8F%91%E7%B2%92%E5%BA%A6%E4%B8%8E%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -262,7 +262,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/27/leetcode/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-leetcode-835-Image-Overlap/" class="post-title-link" itemprop="url">每日一题: leetcode 835. Image Overlap</a>
+            <a href="/2020/11/26/%E9%AB%98%E5%B9%B6%E5%8F%91/%E9%AB%98%E5%B9%B6%E5%8F%91%EF%BC%9A%E5%B9%B6%E5%8F%91%E7%B2%92%E5%BA%A6%E4%B8%8E%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" class="post-title-link" itemprop="url">高并发：并发粒度与线程间通信</a>
         </h2>
 
         <div class="post-meta-container">
@@ -274,16 +274,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2020-10-27 23:10:57 / Modified: 23:57:57" itemprop="dateCreated datePublished" datetime="2020-10-27T23:10:57+08:00">2020-10-27</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/algorithm/" itemprop="url" rel="index"><span itemprop="name">algorithm</span></a>
-        </span>
+      <time title="Created: 2020-11-26 12:16:50 / Modified: 12:25:21" itemprop="dateCreated datePublished" datetime="2020-11-26T12:16:50+08:00">2020-11-26</time>
     </span>
 
   
@@ -296,9 +287,95 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>思路：</p>
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>使用CountDownLatch + CyclicBarrier解决高并发中，线程通信的问题<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/66036256">https://zhuanlan.zhihu.com/p/66036256</a></li>
+</ol>
+<p>思考：</p>
 <ol>
-<li>最主要的是要有对称的思想，然后是放弃复杂的x-y的坐标系概念，使用相对位移的概念来判断数组的起始位置，从左上部的图开始看，会比较好理解位置关系</li>
+<li><p>最基本的线程通信方式:  </p>
+<ol>
+<li><p>实现：threadA.join() 执行线程加入threadA线程，等待threadA结束</p>
+</li>
+<li><p>场景：实现简单并行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">        </span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+<p> 2. </p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E9%AB%98%E5%B9%B6%E5%8F%91/%E9%AB%98%E5%B9%B6%E5%8F%91%EF%BC%9A%E9%99%90%E6%B5%81%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/24/%E9%AB%98%E5%B9%B6%E5%8F%91/%E9%AB%98%E5%B9%B6%E5%8F%91%EF%BC%9A%E9%99%90%E6%B5%81%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">高并发：限流实现</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2020-11-24 19:02:44 / Modified: 19:04:59" itemprop="dateCreated datePublished" datetime="2020-11-24T19:02:44+08:00">2020-11-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>SpringBoot使用AOP和Guava实现对Request的限流<br><a target="_blank" rel="noopener" href="https://www.lagou.com/lgeduarticle/17171.html">https://www.lagou.com/lgeduarticle/17171.html</a></li>
+<li>Guava的令牌桶算法的实现<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/60979444">https://zhuanlan.zhihu.com/p/60979444</a></li>
 </ol>
 
       
@@ -326,7 +403,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/23/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/java-concurrnecy-in-Practice-1/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/mysql/mysql-%E5%B7%A5%E4%BD%9C%E4%B8%AD%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BB%84%E5%90%88sql%E8%AF%AD%E5%8F%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -340,7 +417,76 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/23/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/java-concurrnecy-in-Practice-1/" class="post-title-link" itemprop="url">java concurrnecy in Practice - 1</a>
+            <a href="/2020/11/23/mysql/mysql-%E5%B7%A5%E4%BD%9C%E4%B8%AD%E5%B8%B8%E7%94%A8%E7%9A%84%E7%BB%84%E5%90%88sql%E8%AF%AD%E5%8F%A5/" class="post-title-link" itemprop="url">mysql:工作中常用的组合sql语句</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2020-11-23 19:03:17 / Modified: 19:07:46" itemprop="dateCreated datePublished" datetime="2020-11-23T19:03:17+08:00">2020-11-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>删除重复数据，只保留id最小的数据<br><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903582114775053">https://juejin.cn/post/6844903582114775053</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/21/mysql/mysql-%E5%93%AA%E4%BA%9B%E5%9B%A0%E7%B4%A0%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%85%A2%E6%9F%A5%E8%AF%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/21/mysql/mysql-%E5%93%AA%E4%BA%9B%E5%9B%A0%E7%B4%A0%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%85%A2%E6%9F%A5%E8%AF%A2/" class="post-title-link" itemprop="url">mysql:哪些因素会导致慢查询</a>
         </h2>
 
         <div class="post-meta-container">
@@ -351,14 +497,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2020-10-23 08:47:23" itemprop="dateCreated datePublished" datetime="2020-10-23T08:47:23+08:00">2020-10-23</time>
+      <time title="Created: 2020-11-21 09:58:49" itemprop="dateCreated datePublished" datetime="2020-11-21T09:58:49+08:00">2020-11-21</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-29 09:15:21" itemprop="dateModified" datetime="2020-10-29T09:15:21+08:00">2020-10-29</time>
+        <time title="Modified: 2020-11-23 19:03:51" itemprop="dateModified" datetime="2020-11-23T19:03:51+08:00">2020-11-23</time>
       </span>
 
   
@@ -371,140 +517,238 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <ol>
-<li><p>Race condition: 由于多线程之间不恰当的执行时序，而出现的不正确结果</p>
-<ol>
-<li><p>比如: 没有同步的情况下，使用实例遍历count统计servlet的调用次数，count++就会出现race condition;<br>这是一个”读取-修改-写入”的操作序列，并且结果依赖于之前的状态</p>
-</li>
-<li><p>最常见的race condition: Check Then Act（先检查后执行）</p>
-<ol>
-<li>比如观察某个条件为真（比如文件X不存在），然后根据这个条件作出相应的动作（创建文件X）</li>
-<li>但实际上观察 与 动作之间，观察的结果可能已经无效（另一个线程正在创建文件X）</li>
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>从底层硬件、操作系统、mysql软件层面分析<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Edn_gPwcAHo5sYIzLJghzA">https://mp.weixin.qq.com/s/Edn_gPwcAHo5sYIzLJghzA</a></li>
 </ol>
-</li>
-<li><p>Check Then Act的一个示例：延迟初始化</p>
-<ol>
-<li><pre><code class="java">//这段代码的执行代价很高
-public class LazyInitRace&#123;
-  private ExpensiveObject instance = null;
-  public ExpensiveObject getInstance()&#123;
-    if(instance == null)
-      instance = new ExpensiveObject();
-    return instance;
-  &#125;
-&#125;
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">      2. 线程A和线程B同时执行getInstance();</span><br><span class="line"></span><br><span class="line">         1. A看到instance为空，则开始初始化</span><br><span class="line">         2. B检查instance是否为空，取决于A是否初始化完成；如果A需要花很长时间初始化，那么B检查到instance是空，也开始初始化</span><br><span class="line"></span><br><span class="line">2. 复合操作必须是原子操作</span><br><span class="line"></span><br><span class="line">   1. 原子操作是指对于访问同一个状态的所有操作（包括操作本身），这个操作是一个以原子方式执行的操作。</span><br><span class="line">      比如getInstance()方法中，所有代码都访问了instance这个状态，所以必须使用原子操作。</span><br><span class="line">      这样带来的好处是，假定有两个操作A和B，如果从执行A的线程来看，当另一个线程执行B时，要么将B全部执行完，要么完全不执行B，那么A和B对彼此来说是原子的，也就没有race condition的发生。</span><br><span class="line">      1. 要避免race condition, 就必须在某个线程修改该变量时，通过某种方式防止其他线程使用这个变量，从而确保其他线程要么在修改操作发生之前或者修改操作完成以后读取和修改状态，而不是在修改操作的进行当中。</span><br><span class="line">         比如“先检查后执行”和“读取-修改-写入”等复合操作（包含了一组必须以原子方式执行的操作以确保线程安全性）必须是原子的。</span><br><span class="line">      2. 比如，程序计数器，使用AtomicLong来代替long，能够确保所有对计数器状态的访问操作都是原子的。由于Servlet的状态就是计数器的状态，而且计数器的状态是线程安全的 &#x3D;&#x3D;&gt; Servlet类也是线程安全的。</span><br><span class="line"></span><br><span class="line">3. 类的线程安全</span><br><span class="line"></span><br><span class="line">   1. 当无状态的类中添加一个状态时，如果该状态完全由线程安全的对象来管理，那么这个类就是线程安全的。</span><br><span class="line">   2. 当状态变量由一个变为多个时，问题变得复杂</span><br><span class="line">      1. 若希望向类中添加更多的状态变量，那么仅仅添加更多的线程安全的状态变量，是不可行的；因为尽管原子引用或者原子变量时线程安全，但是只要存在race condition, 就是线程不安全</span><br><span class="line">      2. 线程安全性的定义：无论多个线程之间操作采用何种执行时序或者交替方式，都要保证不变性条件不被破坏。比如，lastFactor中缓存的因数之积 应该等于 lastNumber中缓存的数值，这个不变性条件必须保证。</span><br><span class="line">      3. 当不变性条件涉及到多个状态变量时，那么状态变量之间产生约束了。所以，为了保证多个变量状态的一致性，必须在单个原子操作中，更新所有相关的状态变量。</span><br><span class="line"></span><br><span class="line">4. java内置锁支持原子性</span><br><span class="line"></span><br><span class="line">   1. 内置锁的定义</span><br><span class="line">      </span><br><span class="line">      1. 同步方法（以Class对象作为锁，被称为Intrinsic Lock or Monitor Lock）</span><br><span class="line">      </span><br><span class="line">   2. 程序在进入同步代码块时，自动获得锁；退出时，无论是正常还是异常退出，都自动释放；所以获得内置锁的唯一途径，就是进入同步代码块或者同步方法</span><br><span class="line">   </span><br><span class="line">   3. 内置锁相当于互斥锁，意味着最多只有一个线程持有该锁，所以由内置锁保护的代码块，是以原子方式进行。</span><br><span class="line">      拓展：并发环境中的原子性 &#x3D; 事务应用中的原子性：即，一组语句作为一个不可分割的单元被执行，任何一个执行同步代码块的线程，都不可能看到其他线程正在执行由同一个锁保护的同步代码块</span><br><span class="line">      </span><br><span class="line">   4. 比如，使用synchronized修饰servlet的service方法，以保证 lastFactor中缓存的因数之积&#x3D;lastNumber中缓存的数值，这个不变性条件；但是！！！性能太差了，影响服务器响应！！！</span><br><span class="line">   </span><br><span class="line">   5. 内置锁的性质：重入</span><br><span class="line">   </span><br><span class="line">      1. 定义：当一个线程试图获取一个由他自己持有的锁时，那么这个请求是成功的</span><br><span class="line">   </span><br><span class="line">      2. 实现：为每个锁关联一个获取计数值和一个所有者线程。当线程请求一个未被持有的锁时，JVM将记下锁的持有者，并且将获取计数值&#x3D;1，如果线程继续获取这个锁，则获取计数值++，当线程退出同步代码块时，则计数值--。为0时，意味着锁被释放</span><br><span class="line">   </span><br><span class="line">      3. 比如，子方法调用父方法</span><br><span class="line">   </span><br><span class="line">         &#96;&#96;&#96;java</span><br><span class="line">         public class base&#123;</span><br><span class="line">         		public synchronized void do()&#123;...&#125;</span><br><span class="line">         &#125;</span><br><span class="line">         </span><br><span class="line">         public class child extends base&#123;</span><br><span class="line">         		public synchronized void do()&#123;</span><br><span class="line">         				System.out.println(&quot;...&quot;);</span><br><span class="line">               	super.do();</span><br><span class="line">         		&#125;</span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure></code></pre>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>锁如何保护共享状态</p>
-<ol>
-<li>因为锁能使它保护的代码路径以串行的方式执行，则可以通过锁来实现一些协议以保证对共享状态的独享</li>
-<li>上文提到了对共享状态访问的复合操作，如何使用锁保护由复合操作包裹的共享状态呢？<ol>
-<li>对复合操作加锁就成为同步代码块 =&gt; 可以使其成为原子操作，但是却 != 同步</li>
-<li>对于可能被多个线程同时访问的可变状态变量，在访问它时都需要使用同一个锁，则称为“该状态变量由该锁保护的”，可见是锁保护了变量，不是复合操作或者同步代码块保护了变量，注意区别</li>
-</ol>
-</li>
-<li>每个共享的并且可变的变量，都必须只由一个锁来保护</li>
-<li>当类的不变性条件涉及多个状态变量，这些状态变量必须交给同一个锁来保护</li>
-<li>常见的加锁约定：<ol>
-<li>所有的可变状态封装在对象内部</li>
-<li>并通过对象的内置锁，对类内部所有访问可变状态的代码路径进行同步</li>
-<li>通过以上2个步骤，使得在该对象上不会发生并发访问</li>
-<li>注意：如果新的代码或者方法，没有使用同步，那么这种约定被破坏</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>synchronized方法的粗粒度特性，所带来的性能问题</p>
-<ol>
-<li>以servlet的缓存为例, 由于service是一个synchronized方法，那么意味着每个时间内只有一个线程可以执行该方法，这就违背了设计servlet框架的初衷（servlet能同时处理多个请求）。同时，即使有多个空余的CPU，并且负载很高，但是由于每个时间内只有一个请求被处理，其他请求只能等待，意味着这些CPU依旧空闲。相当于把多线程变成了单线程。</li>
-</ol>
-</li>
-</ol>
-<pre><code> ![https://www.google.com/search?q=synchronizedFactorizer%E4%B8%AD%E7%9A%84%E4%B8%8D%E8%89%AF%E5%B9%B6%E5%8F%91&amp;sxsrf=ALeKk03Stazfj1FvzDWQcgPZ5TLO5fe2rw:1603886569954&amp;tbm=isch&amp;source=iu&amp;ictx=1&amp;fir=qQvOWpn4bMSTbM%252CycCA2-pjBeWnnM%252C_&amp;vet=1&amp;usg=AI4_-kT2pi6L17p4rWyhaFDkhhw68ps4dw&amp;sa=X&amp;ved=2ahUKEwjF7IuKn9fsAhULsJ4KHUOTDG0Q9QF6BAgKEAY#imgrc=qQvOWpn4bMSTbM]()</code></pre>
-   <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SynchronizedFactorizer.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SynchronizedFactorizer</span> <span class="keyword">extends</span> <span class="title">GenericServlet</span> <span class="keyword">implements</span> <span class="title">Servlet</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 这里的 @GuardedBy 指的是被内置锁 synchronized 对象保护 没有实际意义，是一个语义化的注解</span></span><br><span class="line">    <span class="meta">@GuardedBy(&quot;this&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> BigInteger lastNumber;</span><br><span class="line">    <span class="meta">@GuardedBy(&quot;this&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> BigInteger[] lastFactors;</span><br><span class="line">		</span><br><span class="line">  	<span class="comment">// 使用内置锁修饰的方法，每次只有一个线程能执行，其他线程需要等待执行的线程方法调用完后释放锁</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">service</span><span class="params">(ServletRequest req, ServletResponse resp)</span> </span>&#123;</span><br><span class="line">        BigInteger i = extractFromRequest(req);</span><br><span class="line">        <span class="keyword">if</span> (i.equals(lastNumber)) &#123;</span><br><span class="line">            encodeIntoResponse(resp, lastFactors);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            BigInteger[] factors = factor(i);</span><br><span class="line">            lastNumber = i;</span><br><span class="line">            lastFactors = factors;</span><br><span class="line">            encodeIntoResponse(resp, factors);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">encodeIntoResponse</span><span class="params">(ServletResponse resp, BigInteger[] factors)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">BigInteger <span class="title">extractFromRequest</span><span class="params">(ServletRequest req)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(<span class="string">&quot;7&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BigInteger[] factor(BigInteger i) &#123;</span><br><span class="line">        <span class="comment">// Doesn&#x27;t really factor</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> BigInteger[]&#123;i&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<ol start="2">
-<li><p>如何解决上述问题：</p>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/apache-http-client%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%85%B3%E9%97%ADsocket/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/apache-http-client%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%85%B3%E9%97%ADsocket/" class="post-title-link" itemprop="url">apache http client如何正确关闭socket</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-19 17:33:26" itemprop="dateCreated datePublished" datetime="2020-11-19T17:33:26+08:00">2020-11-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-02 18:10:48" itemprop="dateModified" datetime="2020-12-02T18:10:48+08:00">2020-12-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>从http client 4.x源码分析，该如何关闭socket<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/54832733">https://zhuanlan.zhihu.com/p/54832733</a></li>
+<li>分析服务器端口的状态与http client关闭方法的对应关系<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiao--y/p/7878170.html">https://www.cnblogs.com/xiao--y/p/7878170.html</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">chapter13:线程安全与锁优化</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-16 22:17:11" itemprop="dateCreated datePublished" datetime="2020-11-16T22:17:11+08:00">2020-11-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-02 18:11:19" itemprop="dateModified" datetime="2020-12-02T18:11:19+08:00">2020-12-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>ref:</p>
 <ol>
-<li>降低锁的粒度，把需要由锁保护的代码或者说是变量与不需要锁保护的代码或者变量分开</li>
+<li>Java并发-atomic原子类包源码剖析<br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/27e07df2672e">https://www.jianshu.com/p/27e07df2672e</a></li>
+</ol>
+<ol>
+<li><p>线程安全的定义：参考JCP中作者的定义</p>
+</li>
+<li><p>线程安全的程度（很有实际借鉴的分类）</p>
+<ol>
+<li>不可变对象，如Integer</li>
+<li>绝对线程安全，“不论运行环境，调用者不需要<strong>额外的同步措施</strong>”。注意！！！这是不对的。比如java.util.Vecotr的类中,add()和get()等方法都被synchronized修饰，但是遇到线程A读操作，线程B删除操作，就会遇到Out of index的异常。所以线程A和线程B也需要被调用者加上额外的同步。</li>
+<li>相对线程安全。同上，需要调用者加上额外的同步措施</li>
+<li>线程兼容。类本身就不安全，所以，需要调用者加上额外的同步措施</li>
+<li>线程对立。非常少见，Java已经在避免了。</li>
+</ol>
+</li>
+<li><p>实现线程安全的方法</p>
+<ol>
+<li><p>互斥同步：</p>
+<ol>
+<li>定义：同步是指如果多个线程在同时访问共享数据时，只有一个线程可以访问。</li>
+<li>同步是实现线程安全的目的；互斥是实现同步的手段；临界区、互斥量、信号量是主要的互斥实现方式。</li>
+<li>synchronized关键字：<ol>
+<li>编译之后，在同步代码块前后行程monitorenter和monitorexit两个字节码。这两个字节码都需要一个reference类型的参数来指明锁定和解锁的对象，若不指明，则使用对象实例或者Class对象</li>
+<li>当前线程尝试获取<strong>对象的锁</strong>，获取锁，则锁的计数器+1；释放锁，则锁的计数器-1；<br>获取锁失败，则阻塞等待。</li>
+<li>注意：<ol>
+<li>可重入性</li>
+<li>JAVA线程是要映射到系统线程的，所以唤醒或者阻塞一个线程都需要操作系统，从用户态到内核态，耗费CPU。所以有经验的，都会在通知操作系统阻塞线程之前加入一段自旋等待过程，避免频繁切入到内核态</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>ReentrantLock:<ol>
+<li>与synchronized相同 ==&gt; 可重入</li>
+<li>与synchronized不相同 ==&gt; 代码写法上<ol>
+<li>API层面的互斥锁，lock()与unlock()方法配合try/finally语法块来完成</li>
+<li>原生语法层面上的互斥锁<ol>
+<li>等待可中断</li>
+<li>公平锁</li>
+<li>锁绑定多个条件</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>非阻塞同步</p>
+<ol>
+<li><p>由于互斥同步是进行线程阻塞和唤醒，所以也叫阻塞同步，比较耗费性能，从处理问题的方式上来讲，也叫“悲观锁”，无论共享数据是否竞争，都必须加锁，否则都悲观地认为会出问题。所以现在使用“乐观锁”，也叫非阻塞同步</p>
+</li>
+<li><p>乐观并发，是先进行操作，再检查冲突；有冲突，再补救；无冲突，就成功；</p>
+<p>==&gt;所以，如果这个操作和检查两个步骤，依然需要软件的同步操作，那就是没必要了，所以需要依靠“硬件指令”</p>
+</li>
+<li><p>常见的硬件指令为CAS，这条指令需要3个操作数，分别是内存位置（V），旧的预期值（A）和新值（B）。CAS指令执行时，仅当V符合A是，处理器才用B更新V的值，否则不更新，无论是否更新，都会返回V。上述过程是个原子操作。</p>
+</li>
+<li><p>JDK1.5以后，JAVA才使用CAS操作，由sun.misc.Unsafe类里面的方法包装，由虚拟机特殊处理，编译处理后，只有一条处理器CAS指令，没有方法调用的过程，所以可以认为是无条件内联进去了</p>
+</li>
+<li><p>场景</p>
+<ol>
+<li><p>JUC包中的AutoInteger类，其中的方法使用了Unsafe类的CAS操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> threadCnt = <span class="number">20</span>;</span><br><span class="line">        Thread[] threads = <span class="keyword">new</span> Thread[threadCnt];</span><br><span class="line">        CountDownLatch cdt = <span class="keyword">new</span> CountDownLatch(threadCnt);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; threadCnt; i++) &#123;</span><br><span class="line">            threads[i] = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1000000</span>; j++) &#123;</span><br><span class="line">                        increase();</span><br><span class="line">                    &#125;</span><br><span class="line">                    cdt.countDown();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            threads[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (Thread i : threads) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                i.join();<span class="comment">//保证前面的所有的线程执行玩再接着执行主线程</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(count + <span class="string">&quot;   &quot;</span> + count2.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> AtomicInteger count2 = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        count2.incrementAndGet();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>count一直小于2000W，而count2一直是2000W。如果把count设置为volatile,可以吗？因为volatile可以保证线程间的可见性以及禁止指令的重排序。答案是：不可以。因为count++, 不是原子操作，而且volatile不能保证原子性。而count2是原子类，可以保证count2++是原子操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically increment by one the current value.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the updated value</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">incrementAndGet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> current = get();</span><br><span class="line">        <span class="keyword">int</span> next = current + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">            <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>incrementAndGet（）方法在一个<strong>无限循环</strong>中（就是一个自旋锁），不断尝试将一个比当前值大1的新值赋给自己。如果失败了，那说明在执行“获取-设置”操作的时候值已经有了修改，于是再次循环进行下一次操作，直到设置成功为止。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>无同步方案</p>
+<ol>
+<li>可重入代码：纯代码，就是不涉及任何共享数据，比如堆上的数据或者公用的系统资源。判断是否是可重入代码的标准：输入相同参数，返回相同结果，就是可重入代码，也就是线程安全。</li>
 <li></li>
 </ol>
 </li>
 </ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/22/java%E9%9D%A2%E8%AF%95%E9%A2%98-CPU%E9%A3%99%E5%8D%87/" class="post-title-link" itemprop="url">java面试题: CPU飙升</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2020-10-22 14:00:56 / Modified: 14:23:04" itemprop="dateCreated datePublished" datetime="2020-10-22T14:00:56+08:00">2020-10-22</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Ref:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/58338577">https://zhuanlan.zhihu.com/p/58338577</a></li>
-<li><a target="_blank" rel="noopener" href="http://hongyitong.github.io/2018/01/18/%E5%88%86%E6%9E%90java%E8%BF%9B%E7%A8%8B%E5%81%87%E6%AD%BB%E6%83%85%E5%86%B5/">http://hongyitong.github.io/2018/01/18/%E5%88%86%E6%9E%90java%E8%BF%9B%E7%A8%8B%E5%81%87%E6%AD%BB%E6%83%85%E5%86%B5/</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.javazhiyin.com/52519.html">https://www.javazhiyin.com/52519.html</a></li>
+</li>
 </ol>
 
       
@@ -532,7 +776,7 @@ public class LazyInitRace&#123;
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/16/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%94%B1%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%9D%A5%E7%90%86%E8%A7%A3%E4%B8%8BTCP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -546,7 +790,7 @@ public class LazyInitRace&#123;
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E6%96%B9%E6%B3%95%E5%8C%BA%E5%92%8C%E6%B0%B8%E4%B9%85%E4%BB%A3/" class="post-title-link" itemprop="url">java面试题: 方法区和永久代</a>
+            <a href="/2020/11/16/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%94%B1%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%9D%A5%E7%90%86%E8%A7%A3%E4%B8%8BTCP/" class="post-title-link" itemprop="url">由一次线上故障来理解下TCP</a>
         </h2>
 
         <div class="post-meta-container">
@@ -557,14 +801,14 @@ public class LazyInitRace&#123;
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2020-10-21 23:19:07" itemprop="dateCreated datePublished" datetime="2020-10-21T23:19:07+08:00">2020-10-21</time>
+      <time title="Created: 2020-11-16 12:23:23" itemprop="dateCreated datePublished" datetime="2020-11-16T12:23:23+08:00">2020-11-16</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-27 21:07:02" itemprop="dateModified" datetime="2020-10-27T21:07:02+08:00">2020-10-27</time>
+        <time title="Modified: 2020-12-02 18:09:27" itemprop="dateModified" datetime="2020-12-02T18:09:27+08:00">2020-12-02</time>
       </span>
 
   
@@ -577,15 +821,9 @@ public class LazyInitRace&#123;
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>知识点ref: </p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d">https://www.nowcoder.com/questionTerminal/8f393a761e0f4b67b1c442d092eb484d</a></li>
-</ol>
-<p>练习题ref:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
-<li></li>
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>原文链接，有2行查看jstack和netstat的组合shell脚本<br><a target="_blank" rel="noopener" href="https://juejin.im/post/6844903970146615310">https://juejin.im/post/6844903970146615310</a></li>
 </ol>
 
       
@@ -613,7 +851,7 @@ public class LazyInitRace&#123;
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/14/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter2-java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E6%BA%A2%E5%87%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -627,7 +865,7 @@ public class LazyInitRace&#123;
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/21/LeetCode-All-Elements-in-Two-Binary-Search-Trees/" class="post-title-link" itemprop="url">LeetCode: All Elements in Two Binary Search Trees</a>
+            <a href="/2020/11/14/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter2-java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E6%BA%A2%E5%87%BA/" class="post-title-link" itemprop="url">chapter2:java内存模型与内存溢出溢出</a>
         </h2>
 
         <div class="post-meta-container">
@@ -639,7 +877,7 @@ public class LazyInitRace&#123;
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2020-10-21 22:51:09 / Modified: 23:10:35" itemprop="dateCreated datePublished" datetime="2020-10-21T22:51:09+08:00">2020-10-21</time>
+      <time title="Created: 2020-11-14 08:17:53 / Modified: 19:18:56" itemprop="dateCreated datePublished" datetime="2020-11-14T08:17:53+08:00">2020-11-14</time>
     </span>
 
   
@@ -652,11 +890,130 @@ public class LazyInitRace&#123;
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Ref:</p>
+          <img src="https://www.programmersought.com/images/459/32a80743681c44757daa599b4633e9bb.png" style="zoom: 67%;" />
+
 <ol>
-<li><a target="_blank" rel="noopener" href="https://leetcode.com/explore/challenge/card/september-leetcoding-challenge/554/week-1-september-1st-september-7th/3449/discuss/464073/C++-One-Pass-Traversal">https://leetcode.com/explore/challenge/card/september-leetcoding-challenge/554/week-1-september-1st-september-7th/3449/discuss/464073/C++-One-Pass-Traversal</a></li>
+<li>java虚拟机所管理的内存，包含以下几个运行时数据区域:<ol>
+<li>程序计数器：线程私有，<ol>
+<li>表示当前线程所执行的字节码的行号指示器</li>
+<li>如果线程正在执行JAVA方法，那么这个计数器指向的是虚拟机字节码指令的地址; 如果正在执行的是Native方法，则为空Undefined;</li>
 </ol>
-<p>难点在于traverse的过程中merge, 如何使用stack存储traverse的节点</p>
+</li>
+<li>虚拟机栈：线程私有<ol>
+<li>表示Java方法执行的内存模型：每个方法执行时都会创建一个栈帧(stack frame),<ol>
+<li>用于存储局部变量表、操作数栈、动态链接、方法出口等信息</li>
+<li>方法调用 ==&gt; 栈帧入栈，方法执行完成 ==&gt;栈帧出栈</li>
+<li>局部变量：包括基本类型，</li>
+</ol>
+</li>
+<li>生命周期 = 线程周期</li>
+<li>2种异常<ol>
+<li>StackOverflowError:如果线程请求的栈深度大于虚拟机所允许的深度</li>
+<li>OutOfMemoryError: 如果虚拟机栈可以动态拓展，而且拓展时无法申请到足够的内存</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>本地方法栈:<ol>
+<li>和虚拟机栈基本一致，有些虚拟机将两者合二为一</li>
+<li>虚拟机栈执行JAVA方法（字节码），本地方法栈执行Native方法</li>
+</ol>
+</li>
+<li>堆：线程共享<ol>
+<li>存放几乎所有的对象的实例</li>
+<li>一种异常<ol>
+<li>OutOfMemoryError:  通过-Xms -Xmx控制</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>方法区: 线程共享<ol>
+<li>存放虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码</li>
+<li>运行时常量池：属于方法区的一部分<ol>
+<li>类加载时，Class文件中的常量池信息，会进入到此area</li>
+<li>需要注意的是，不仅编译期间产生的常量，而且运行期间产生的常量，也可以进入常量池，比如String类的Intern()方法</li>
+</ol>
+</li>
+<li>有的虚拟机使用<strong>永生代</strong>实现方法区</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>直接内存<ol>
+<li>不是虚拟机运行时数据区的一部分</li>
+<li>一种异常OutOfMemory</li>
+<li>原理<ol>
+<li>JDK1.4中加入了NIO(New Input/Output类)，引入了Channel与Buffer的IO方式，这种方式可以直接使用Native函数直接分配<strong>堆外内存</strong>, 然后通过通过堆内的DirectByBuffer对象作为这块内存的引用进行操作</li>
+<li>因为这种方式避免了在java堆和native堆中来回复制数据，所以在某些场景下提高了性能</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>对象的创建<ol>
+<li>第一步:遇到了new指令, 先检查指令的参数是否能在<strong>常量池</strong>(应该是方法区中的常量池)中定位到一个<strong>类的符号引用</strong>，并且检查该符号代表的类是否已经被<strong>加载、解析、初始化</strong>。如果没有，则进行相应的<strong>类加载</strong>过程。</li>
+<li>第二步:类加载检查通过后，在堆中为对象分配内存。对象所需要内存的大小在类加载完成后就可以确定。<ol>
+<li>假设java堆是绝对规整的，那么就有一个指针，作为内存是否空闲的分界点指示器。==&gt;指针碰撞</li>
+<li>假设java堆不是规整的，那么虚拟机需要维护一个记录可用内存的列表(Free List)。==&gt; 空闲列表</li>
+<li>采用哪种内存分配方式，是由内存是否规整决定的；内存是否规整，是由垃圾收集器是否有压缩整理功能决定的。所以，Serial,ParNew等有Compact过程的收集器，通常是指针碰撞；CMS等有Mark-Sweep算法的，通常是空闲列表。</li>
+<li>分配内存过程中的线程安全性问题<ol>
+<li>线程A给对象A分配内存，修改了指针，同时线程B给对象B分配内存，也修改了指针</li>
+<li>2种解决方案:<ol>
+<li>对分配内存的动作加上同步：实际上虚拟机采用CAS+失败重试保证更新指针的原子性</li>
+<li>TLAB(Thread Local Allocation Buffer): <ol>
+<li>把内存的分配按照线程，划分在不同的空间之中进行。哪个线程需要分配内存，就在自己的线程中分配内存</li>
+<li>只有TLAB用完并分配新的TLAB时，才需要同步锁定。</li>
+<li>虚拟机使用+XX:+/-UseTLAB来决定是否使用</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>第三步: 内存分配完成后，对内存空间初始化为零值。这保证了对象的实例字段在JAVA代码中可以不被赋初始值就能直接使用</li>
+<li>第四步:设置对象的对象头信息，比如这个对象是哪个类的实例，如何找到类的元数据信息等等</li>
+<li>第五步:上面4步，从虚拟机角度，一个对象以及创建完成了。但从JAVA程序角度，对象刚刚创建，还需要执行 <init> 方法，否则，所有字段还是零值。所以，执行new指令以后都会紧跟<init>方法，按照程序员的意愿执行。</li>
+</ol>
+</li>
+<li>对象的内存布局和访问定位<ol>
+<li>内存布局<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy83MDE3MTQwLTgwMzc0ZTY1YzZiMjBjYmU" style="zoom:67%;" />
+1. 对象头:包含2部分，分别是对象自身的运行时数据、类型指针
+   1. 对象自身的运行时数据，称为Mark Word
+   2. 类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针确定这个对象是哪个类的实例
+2. 实例数据:对象真正存储的有效信息,无论是从父类继承下来的字段，还是子类定义的
+3. 对齐填充</li>
+<li>访问定位<ol>
+<li>有个概念必须澄清: JAVA程序是通过栈上的reference数据来操作堆上的具体对象，但是reference类型在虚拟机中只是规定了一个指向对象的引用，并没有定义这个引用该通过何种方式去定位、访问堆中对象的具体位置，所以对象的访问方式取决于虚拟机的实现。</li>
+<li>主流的实现有：使用句柄和直接指针<ol>
+<li>使用句柄：java堆中，专门有一块内存作为句柄池，reference存储对象的句柄地址，句柄中包含了对象实例数据的地址和类型数据的地址<br><img src="http://static.oschina.net/uploads/space/2012/0219/232926_WTnX_103999.png"></li>
+<li>直接指针:  reference直接存储对象（不仅仅是对象实例地址）的地址，而且Java堆必须要将类型地址和数据地址一起放在对象地址中了<br><img src="http://static.oschina.net/uploads/space/2012/0219/232935_FM5T_103999.png"></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>​            </p>
+<p>实验课：<br>-XX:+PrintGCDetails</p>
+<ol>
+<li>堆异常<ol>
+<li>通过参数-Xms20M   -Xmx20M 控制</li>
+</ol>
+</li>
+<li>栈异常<ol>
+<li>通过-Xss128k</li>
+</ol>
+</li>
+<li>方法区和运行时常量区异常<ol>
+<li>通过-XX:PermSize=10M -XX:MaxPermSize=10M</li>
+<li>String.intern()方法是一个Native方法，如果字符串常量池中已经包含了一个等于此String对象的字符串，则返回，否则，直接将此String对象包含的字符串加到常量池中，并返回引用。</li>
+<li>小补充：比如CGLIB这种类增强技术，需要很大的方法区保证动态生成的Class可以加载到内存</li>
+<li>现在jdk越来越“去永久代“</li>
+</ol>
+</li>
+</ol>
 
       
     </div>
@@ -683,7 +1040,7 @@ public class LazyInitRace&#123;
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/13/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter3%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -697,77 +1054,7 @@ public class LazyInitRace&#123;
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/21/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" class="post-title-link" itemprop="url">java面试题: 如何实现延迟队列</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2020-10-21 12:26:28 / Modified: 12:35:18" itemprop="dateCreated datePublished" datetime="2020-10-21T12:26:28+08:00">2020-10-21</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Ref:</p>
-<ol>
-<li>加锁的需求以及redis实现:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/wMqEEga0v9_Kq1cTMPlSdQ">https://mp.weixin.qq.com/s/wMqEEga0v9_Kq1cTMPlSdQ</a></li>
-<li>消息延迟发送: <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/104285758">https://zhuanlan.zhihu.com/p/104285758</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/20/LeetCode-Partition-Labels/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/20/LeetCode-Partition-Labels/" class="post-title-link" itemprop="url">LeetCode: Partition Labels</a>
+            <a href="/2020/11/13/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter3%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/" class="post-title-link" itemprop="url">chapter3对象的共享</a>
         </h2>
 
         <div class="post-meta-container">
@@ -778,14 +1065,14 @@ public class LazyInitRace&#123;
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2020-10-20 13:46:37" itemprop="dateCreated datePublished" datetime="2020-10-20T13:46:37+08:00">2020-10-20</time>
+      <time title="Created: 2020-11-13 09:19:03" itemprop="dateCreated datePublished" datetime="2020-11-13T09:19:03+08:00">2020-11-13</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-21 22:50:42" itemprop="dateModified" datetime="2020-10-21T22:50:42+08:00">2020-10-21</time>
+        <time title="Modified: 2020-11-26 00:00:12" itemprop="dateModified" datetime="2020-11-26T00:00:12+08:00">2020-11-26</time>
       </span>
 
   
@@ -798,16 +1085,152 @@ public class LazyInitRace&#123;
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Ref:</p>
+          <p>ref: </p>
 <ol>
-<li><a target="_blank" rel="noopener" href="https://www.programcreek.com/2013/03/leetcode-partition-labels-java/?__cf_chl_captcha_tk__=f87085a5c10c4934ebb0261d0a343ef5a08fea05-1603155102-0-AQd1SBuIYKu-9t2dlTqj_ofo4MPCRjJDdsEzuwjM_VI5OS0r4AMHWvKnVv4_HBnAVaky3z2rPKID_cifB96LOAl2F9FWv9QDooFCH3pLKZ8BD8ajdfheoB7yhnYA5qIBa22sYBF7ToWfLE_NeybnDvc1BIISqnwAAP1iADWbcJVJGQ0q9GGDUlXhchW-hsfzzbs29u5qgZuRuKQp7wU9TD0uu3m0anJtC-5OylDQtgLP-Z-pShtFnhstAxjEA2-f_KvVA_eY8L8DnynxKRwFsAnOPreUTUmaY6W1C8k5O6HlBoCy8yU7WsejnN6YKblTWyjy8QW-mQgUqURsw5DxAoxxnuM9MMC01KUoH4OZyrhce1tfyogqwLS3V0AbHDoL7Y_nmyDfgtFxuuhyk2RqdbsmRuYCmPZiMd3TYS0LMap1jQ_kJenm5B8XvsHANVGPsMNkr5hvkDScOG0iPqr41dBF6_nJUb7lJXgaKi7Vk_yOKnC8fxPCFandwSC9OTL7btkXsuJ_8sDG-ud1s-rX6leXtwThCKu5djRv-MlLRT3j">https://www.programcreek.com/2013/03/leetcode-partition-labels-java/?__cf_chl_captcha_tk__=f87085a5c10c4934ebb0261d0a343ef5a08fea05-1603155102-0-AQd1SBuIYKu-9t2dlTqj_ofo4MPCRjJDdsEzuwjM_VI5OS0r4AMHWvKnVv4_HBnAVaky3z2rPKID_cifB96LOAl2F9FWv9QDooFCH3pLKZ8BD8ajdfheoB7yhnYA5qIBa22sYBF7ToWfLE_NeybnDvc1BIISqnwAAP1iADWbcJVJGQ0q9GGDUlXhchW-hsfzzbs29u5qgZuRuKQp7wU9TD0uu3m0anJtC-5OylDQtgLP-Z-pShtFnhstAxjEA2-f_KvVA_eY8L8DnynxKRwFsAnOPreUTUmaY6W1C8k5O6HlBoCy8yU7WsejnN6YKblTWyjy8QW-mQgUqURsw5DxAoxxnuM9MMC01KUoH4OZyrhce1tfyogqwLS3V0AbHDoL7Y_nmyDfgtFxuuhyk2RqdbsmRuYCmPZiMd3TYS0LMap1jQ_kJenm5B8XvsHANVGPsMNkr5hvkDScOG0iPqr41dBF6_nJUb7lJXgaKi7Vk_yOKnC8fxPCFandwSC9OTL7btkXsuJ_8sDG-ud1s-rX6leXtwThCKu5djRv-MlLRT3j</a></li>
+<li>java如何理解隐式地使this引用逸出<br><a target="_blank" rel="noopener" href="https://segmentfault.com/q/1010000007900854">https://segmentfault.com/q/1010000007900854</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/viscu/p/9790755.html">https://www.cnblogs.com/viscu/p/9790755.html</a></li>
 </ol>
-<p>BootFei’s answer:</p>
+<p>Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过<strong>同步</strong>，避免多个线程同时访问相同的变量；而本章介绍如何<strong>共享</strong>和<strong>发布对象</strong>，从而使多个线程可以同时安全的访问相同的变量。这两章合在一起构成了线程安全类的基础。</p>
 <ol>
-<li>其实就是merge interval的思路<ol>
-<li>找到当前char的最后一次出现的地址，称为anchor</li>
-<li>在遍历到anchor之前的chars，如果在他们中间出现anchor更靠后的，更新anchor</li>
-<li>直到遍历的index和anchor位置相等</li>
+<li><p>可见性<br>比如，由于”重排序”引起的读线程获取到<strong>失效数据</strong>，无法获取到主线程的最新写入的数据</p>
+</li>
+<li><p>失效数据</p>
+<ol>
+<li>比如一个类中只有get和set方法, 线程A调用set，同时线程B调用get，那么线程B可能看到失效数据，也可能看到最新数据。</li>
+<li>拓展：类比Mysql中的read uncommitted隔离级别, 牺牲了准确性，但是提高了性能</li>
+<li>如果对get和set都同步，那么此类就是线程安全</li>
+</ol>
+</li>
+<li><p>加锁与可见性</p>
+<ol>
+<li>锁可以保证原子性（或者说是互斥性），也可以保证可见性</li>
+<li>锁保证可见性的原因在于：<img src="https://img-blog.csdnimg.cn/20190316230729391.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5OTUxOTgz,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
+
+</li>
+</ol>
+<p>为了确保所有线程都能看到共享变量的最新值，所以说所有执行的线程必须在同一个锁上同步</p>
+</li>
+<li><p>Volatile</p>
+<ol>
+<li>稍弱的同步机制（作者应该是指的内存可见性这方面，而不是互斥性），将变量的更新操作通知到其他线程</li>
+<li>volatile作用在于可见性，不仅仅体现在使编译器不进行重排序，而且使得 ==&gt; 当线程A写入volatile变量而线程B随后读取时，写入volatile变量之前对A可见的变量，在B读取了volatile以后，对B也是可见的，从内存可见性看，写入volatile=退出同步代码块（线程A），读volatile=进入同步代码块（线程B）</li>
+<li>实际的应用场景<ol>
+<li>比如”数绵羊”，<strong>检查某个状态标记</strong>以判断是否退出循环</li>
+</ol>
+</li>
+<li>局限性：无法保证原子性</li>
+<li>需要满足的条件，才能使用volatile：<ol>
+<li>在访问变量时，不需要加锁</li>
+<li>变量不能与其他状态一起纳入不变性条件（因为volatile不保证原子性，而不变性条件需要原子性）</li>
+<li>变量的写入操作依赖变量的当前值，或者确保只有一个线程（因为volatile不保证原子性，而依赖当前值，属于原子性）</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>发布和逸出</p>
+<ol>
+<li><p>概念：</p>
+<ol>
+<li>发布：使对象能够在当前作用域之外的代码中使用（我自认为这个定义还不能对实际的分析有帮助，应该这样说：A发布了对象B，给对象或者线程C1orC2…..Cn使用，所以对象或者线程C1orC2在A的作用域之外使用对象B）</li>
+<li>逸出：当某个不应该被发布的对象被发布时</li>
+</ol>
+</li>
+<li><p>场景：发布常见的场景，</p>
+<ol>
+<li><p>将对象的引用存储到公共静态域，任何类和线程都能看到这个域<br>比如，initailize实例化了knownSecrets，这个对象发布了knownSecrets</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Set&lt;Secret&gt; knownSecrets;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initialize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    knownSecrets = <span class="keyword">new</span> HashSet&lt;Secret&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>发布一个对象间接地发布其他对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//内部可变的数据逸出（不要这样做）</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UnsafeStates</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String[] states = <span class="keyword">new</span> String[] &#123;</span><br><span class="line">        <span class="string">&quot;AK&quot;</span>, <span class="string">&quot;AL&quot;</span> ...</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">public</span> String[] getStates() &#123; <span class="keyword">return</span> states; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如，以这种方式发布states会出问题，这样会允许内部可变的数据逸出，请不要这样做。因为任何一个调用者都能修改它的内容。数组states已经逸出了它所属的范围，这个本就是私有的数据，事实上已经变成公有的了。<br>==&gt;<strong>如果一个已经发布的对象能够通过非私有的变量引用和方法调用到达其他的对象，那么这些对象也都会发布，会不安全。</strong></p>
+</li>
+<li><p>发布一个内部的类实例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThisEscape</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThisEscape</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        source.registerListener(<span class="keyword">new</span> EventListener() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                doSomething(e); <span class="comment">//其实就是this.doSomething(e);</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">EventSource</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">registerListener</span><span class="params">(EventListener e)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">EventListener</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">Event</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ThisEscape发布EventListener时，也隐含地发布了ThisEscape实例本身，因为在这个内部类的实例中包含了对ThisEscape实例的隐含引用！！！<br><em>比如造成的后果，在多线程环境下，会出现这样一种情况：</em><br><em>线程 A 和线程 B 同时访问 ThisEscape 构造方法，这时线程 A 访问构造方法还为完成(可以理解为 ThisEscape 为初始化完全)，此时由于 this 逸出，导致 this 在 A 和 B 中都具有可见性，线程 B 就可以通过 this 访问 doSomething(e) 方法，导致修改 ThisEscape 的属性。也就是在 ThisEscape 还为初始化完成，就被其他线程读取，导致出现一些奇怪的现象。</em><br><em>这也就是 this 逸出。</em></p>
+<p>====&gt; 得出结论：不要在构造过程中，使this引用逸出，具体来说，只有当构造函数返回时，this引用才应该从线程中逸出。解决方案如下:</p>
+<p>​        如果想在<strong>构造函数</strong>中注册一个<strong>事件监听器</strong>或<strong>启动线程</strong>，那么可以使用私有的构造函数（保证构造函数必须先执行完毕）+公共的工厂方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeListener</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> EventListener listener;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ThisEscape</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        listener = <span class="keyword">new</span> EventListener(</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                doSomething(e);</span><br><span class="line">            &#125;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> SafeLisener <span class="title">newInstance</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        SafeLisener safe = <span class="keyword">new</span> SafeLisener();</span><br><span class="line">        soure.registerListener(safe.listener);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="6">
+<li><p>线程封闭:</p>
+<ol>
+<li><p>定义: 如果数据不共享，那么就不需要不同步，就是线程安全的，所以仅在单个线程内访问数据，称为线程封闭技术。</p>
+</li>
+<li><p>场景：</p>
+<ol>
+<li>Swing: 将所有组件和数据模型对象封闭到Swing的事件分发线程，除了事件线程以外的线程，都不能访问这些对象。</li>
+<li>JDBC的Connection对象: 在典型的服务器应用中，线程从连接池中获取一个Connection对象，处理完请求后，在将Connection对象返回给连接池。由于大多数请求，比如Servlet,都是由单个线程采用同步方式来处理，并且在Connection对象返回给连接池之前，连接池不会将它分配给其他线程。所以，Connection对象隐式地封闭在线程中。</li>
+</ol>
+</li>
+<li><p>技术实现:<br>正如Java并没有强制规定某个变量必须由锁来保护，同样Java也无法强制对象必须在某个线程内，所以由程序负责确保封闭在线程内的对象会不会逸出，而Java只提供一些机制，比如局部变量和ThreadLocal类。</p>
+<ol>
+<li><p>Ad-hoc线程封闭: </p>
+<ol>
+<li>定义：维护线程封闭性的职责完全由<strong>程序实现</strong>来承担。</li>
+<li>实际上，没有一个语言，能将对象封闭到一个线程上。所以，此方法还不如把程序设计为单线程，如Swing等Gui框架。</li>
+</ol>
+</li>
+<li><p>栈封闭:</p>
+<ol>
+<li>定义: 是线程封闭的一种特例。只能通过局部变量才能访问对象，因为局部变量的固有属性就是封闭在执行线程中的，他们位于运行数据区的栈中（线程独享）。</li>
+</ol>
+</li>
+<li><p>Threadlocal类</p>
+<ol>
+<li><p>定义：这个类使线程中的某个值与保存值的对象关联起来。ThreadLocal提供了get与Set等访问接口和方法，这些方法为每个使用该变量的线程都存有一份独立的副本，所以，get（）会返回当前执行线程在调用set（）时设置的最新值</p>
+</li>
+<li><p>场景</p>
+<ol>
+<li><p>JDBC的连接对象不一定是线程安全的，而且希望避免调用每个方法时都传递一个Connection对象，因此，可以将JDBC的连接对象保存到ThreadLocal对象中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalTemplate</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadLocal&lt;Connection&gt; connectionHolder = <span class="keyword">new</span> ThreadLocal&lt;Connection&gt;() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> Connection <span class="title">initialValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> DriverManager.getConnection(<span class="string">&quot;DB_URL&quot;</span>);  <span class="comment">//JDBC的Connection不一定是线程安全的，封装到ThreadLocal中保证每个线程都会拥有自己的JDBC连接对象副本</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">getConnection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> connectionHolder.get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<pre><code>        2. 当某个频繁执行的操作需要一个临时对象，而同时希望避免在每次执行时都重新分配该临时对象。
+
+           <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Integer.toString();<span class="comment">//JDK1.5使用ThreadLocal对象来保存12字节大小的缓存区</span></span><br></pre></td></tr></table></figure>
+
+
+
+        3. 如果将单线程的应用程序移植到多线程环境中，只需要把全局变量转化为ThreadLocal对象（如果全局变量的语义允许），就可以维持线程安全性。
+           注意：如果全局变量是应用程序用来作为缓存的，那此方法就是无意义的。因为缓存本来就是希望一个线程的计算结果可以被其他线程共享，而不是独享。
+
+
+
+        4. J2EE的事物上下文(Transaction Context),保存在执行线程的ThreadLocal对象中。
+
+     3. 原理：
+        当执行线程首次调用ThreadLocal.get()时，就调用initialValue来获取初始值。从概念上看，ThreadLocal&lt;T&gt; 视为Map&lt;Thread,T&gt;对象，其中保存了特定于该线程的值，但是ThreadLocal的实现并非如此。这些特定于线程的值保存在Thread对象中，当线程终止时，这些值也被gc了。</code></pre>
+<ol start="7">
+<li><p>不变性：</p>
+<ol>
+<li>定义：满足同步的另一种方法就是使用不可变的对象（某个对象在被创建后就不可被修改）</li>
+<li>当满足以下条件时，对象才是不可变的：<ol>
+<li>对象创建以后其状态都不能修改</li>
+<li>对象的所有域都是final类型</li>
+<li>对象是正确创建的（在对象创建期间，this引用没有逸出）</li>
+</ol>
+</li>
+<li>技术实现：</li>
 </ol>
 </li>
 </ol>
@@ -837,7 +1260,7 @@ public class LazyInitRace&#123;
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/19/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/10/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%9B%86%E7%BE%A4%E4%B8%8B%E7%94%9F%E6%88%90%E5%94%AF%E4%B8%80ID/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -851,7 +1274,7 @@ public class LazyInitRace&#123;
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/19/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/" class="post-title-link" itemprop="url">java面试题1: java类初始化顺序</a>
+            <a href="/2020/11/10/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%9B%86%E7%BE%A4%E4%B8%8B%E7%94%9F%E6%88%90%E5%94%AF%E4%B8%80ID/" class="post-title-link" itemprop="url">分布式集群下生成唯一ID</a>
         </h2>
 
         <div class="post-meta-container">
@@ -862,14 +1285,14 @@ public class LazyInitRace&#123;
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2020-10-19 23:30:35" itemprop="dateCreated datePublished" datetime="2020-10-19T23:30:35+08:00">2020-10-19</time>
+      <time title="Created: 2020-11-10 13:54:56" itemprop="dateCreated datePublished" datetime="2020-11-10T13:54:56+08:00">2020-11-10</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-27 21:13:19" itemprop="dateModified" datetime="2020-10-27T21:13:19+08:00">2020-10-27</time>
+        <time title="Modified: 2020-11-11 12:18:12" itemprop="dateModified" datetime="2020-11-11T12:18:12+08:00">2020-11-11</time>
       </span>
 
   
@@ -882,205 +1305,22 @@ public class LazyInitRace&#123;
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>知识点ref: </p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/65872513">https://zhuanlan.zhihu.com/p/65872513</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05">https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05</a></li>
-<li><a target="_blank" rel="noopener" href="http://baijiahao.baidu.com/s?id=1626608229788927963">http://baijiahao.baidu.com/s?id=1626608229788927963</a></li>
-</ol>
-<p>练习题ref:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></li>
-</ol>
-<p>类初始化过程以及该过程的意义：</p>
-<ol>
-<li>对于类和接口，初始化就是调用初始化方法；</li>
-<li>java虚拟机层面：</li>
-<li>java虚拟机是支持多线程的，所以需要处理同步<ol>
-<li>同步就需要互斥，需要锁LC; C和LC的映射关系，有jvm自行决定</li>
-<li>如果C的Class对象显示当前C的初始化由其他线程正在执行 -&gt; 当前线程释放LC并进入阻塞，直等到其他线程完成初始化</li>
-<li>如果C的Class对象显示当前C的初始化由当前线程正在执行 -&gt; do nothing, release LC</li>
-</ol>
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><p>介绍了唯一ID的使用场景以及常见的解决思路<br><a target="_blank" rel="noopener" href="https://www.javazhiyin.com/73643.html">https://www.javazhiyin.com/73643.html</a></p>
+</li>
+<li><p>如何利用UUID作为唯一ID存储在mysql中，并提高mysql性能 =&gt; 存储为number<br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/16122934/best-way-to-handle-large-uuid-as-a-mysql-table-primary-key">https://stackoverflow.com/questions/16122934/best-way-to-handle-large-uuid-as-a-mysql-table-primary-key</a></p>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/10950202/how-to-store-uuid-as-number">https://stackoverflow.com/questions/10950202/how-to-store-uuid-as-number</a></p>
+</li>
+<li><p>深入分析mysql为什么不推荐使用uuid或者雪花id作为主键<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wyq178/p/12548864.html">https://www.cnblogs.com/wyq178/p/12548864.html</a></p>
 </li>
 </ol>
-<p>bootfei’s answer:</p>
+<p>思路:</p>
 <ol>
-<li>类初始化是类加载过程中的最后一步，也是真正开始调用java的字节码文件</li>
-<li>类初始化首先区分是针对接口还是类<ol>
-<li>如果是类，会首先调用父类的<cinit>,然后调用子类的<cinit></li>
-<li>如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<cinit></li>
-</ol>
-</li>
-<li>类初始化的顺序是<ol>
-<li>父类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>子类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>父类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>子类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-</ol>
-</li>
+<li>为什么需要唯一ID?<br>对数据和信息要有唯一标识，比如分库分表后，订单要有唯一标识</li>
+<li>对ID有什么样的要求呢<br>1. </li>
 </ol>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">java ThreadLocal底层原理以及内存溢出问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2020-10-17 19:52:16 / Modified: 20:05:10" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Ref:</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/129607326">https://zhuanlan.zhihu.com/p/129607326</a></li>
-</ol>
-<p>首先从内存模型的角度讨论ThreadLocal的存在价值</p>
-<ol>
-<li>多线程可以通过jvm的堆，同时读写共享变量，但是会出现并发问题</li>
-<li>为了解决1中的并发问题，可以使用局部变量，因为局部变量会存储在线程中的栈帧中，但是局部变量不能被一个线程中的多个方法共享</li>
-<li>为了解决2中的多个方法不能共享局部变量问题，可以使用ThreadLocal</li>
-</ol>
-<p>然后讨论ThreadLocal的底层原理</p>
-<ol>
-<li>ThreadLocal的set(T value)和get()方法，本质上是要获取当前线程的ThreadLocalMap (其实就是该线程的 ThreadLocal[]  数组)</li>
-<li>jdk使用ThreadLocal的内部类, ThreadLocalMaps对 ThreadLocal[ ]数组进行了封装</li>
-<li>ThreadLocalMap内部维护了Entry[ ] 数组, Entry是ThreadLocalMap的内部类</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/13/Contains-Duplicate-III/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/13/Contains-Duplicate-III/" class="post-title-link" itemprop="url">Contains Duplicate III</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2020-10-13 08:39:37 / Modified: 08:40:23" itemprop="dateCreated datePublished" datetime="2020-10-13T08:39:37+08:00">2020-10-13</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
       
     </div>
 
@@ -1101,7 +1341,7 @@ public class LazyInitRace&#123;
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
