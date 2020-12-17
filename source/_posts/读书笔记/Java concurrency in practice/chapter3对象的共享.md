@@ -9,10 +9,6 @@ ref:
 1. java如何理解隐式地使this引用逸出
    https://segmentfault.com/q/1010000007900854
    https://www.cnblogs.com/viscu/p/9790755.html
-2. 重排序的理解
-   https://blog.csdn.net/coslay/article/details/47382641
-
-
 
 Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过**同步**，避免多个线程同时访问相同的变量 (在《高性能MySQL》书中，这叫做**避免并发**)；而本章介绍如何**共享**和**发布对象**，从而使多个线程可以同时安全的访问相同的变量。这两章合在一起就形成了构建线程安全类以及通过java.util.concurrent类库来构建并发应用程序的重要基础。
 
@@ -407,7 +403,7 @@ public class Holder {
 }
 ```
 
-上面程序的问题是由于对象的可见性问题引起的（问题不再于Holder类本身，而在于Holder类未被正确的发布，如果把n声明为final，那么Holder将不可变，满足正确发布的要求，具体看3.5.2节。现在最根本的原因是由于JVM运行时重排序引起的），发布的对象可能还处于构造期间，所以是不稳定的。因为没有同步来确保Holder对其他线程可见，所以我们称Holder是“非正确发布”。
+上面程序的问题是由于对象的可见性问题引起的（<!--问题不再于Holder类本身，而在于Holder类未被正确的发布，如果把n声明为final，那么Holder将不可变，满足正确发布的要求，具体看3.5.2节。现在最根本的原因是由于JVM运行时重排序引起的-->），发布的对象可能还处于构造期间，所以是不稳定的。因为没有同步来确保Holder对其他线程可见，所以我们称Holder是“非正确发布”。
 
 由于上面 n != n 会从主存中两次读取，这有可能从这两次读操作间切换到其他线程，这就有可能出 n!=n奇怪的问题。
 
@@ -465,9 +461,9 @@ public static Holder holder = new Holder(42);1
 
 比如，Date自身是可变的（这也许是类库设计的一个错误），但是如果你把它当作不可变对象来使用就可以忽略锁。否则，每当Date被跨线程共享时，都要用锁确保安全。假设你正在维护一个Map，它存储了每位用户的最近登录时间：
 
-```
+```java
 public Map<String, Date> lastLogin =
-Collections.synchronizedMap(new HashMap<String, Date>());12
+Collections.synchronizedMap(new HashMap<String, Date>());
 ```
 
 如果Date值在转入Map中后就不会改变，那么，synchronizedMap中同步的实现就足以将Date安全地发布，并且访问这些Date值时就不再需要额外的同步。
