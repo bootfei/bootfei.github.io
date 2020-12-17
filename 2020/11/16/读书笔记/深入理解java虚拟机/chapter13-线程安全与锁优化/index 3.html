@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="ref:  Java并发-atomic原子类包源码剖析https:&#x2F;&#x2F;www.jianshu.com&#x2F;p&#x2F;27e07df2672e   线程安全的定义：参考JCP中作者的定义  线程安全的程度（很有实际借鉴的分类）  不可变对象，如Integer 绝对线程安全，“不论运行环境，调用者不需要额外的同步措施”。注意！！！这是不对的。比如java.util.Vecotr的类中,add()和get()等方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chapter13:线程安全与锁优化">
+<meta property="og:url" content="http://example.com/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="ref:  Java并发-atomic原子类包源码剖析https:&#x2F;&#x2F;www.jianshu.com&#x2F;p&#x2F;27e07df2672e   线程安全的定义：参考JCP中作者的定义  线程安全的程度（很有实际借鉴的分类）  不可变对象，如Integer 绝对线程安全，“不论运行环境，调用者不需要额外的同步措施”。注意！！！这是不对的。比如java.util.Vecotr的类中,add()和get()等方">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-11-16T14:17:11.000Z">
+<meta property="article:modified_time" content="2020-12-02T10:11:19.876Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>chapter13:线程安全与锁优化 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          chapter13:线程安全与锁优化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-16 22:17:11" itemprop="dateCreated datePublished" datetime="2020-11-16T22:17:11+08:00">2020-11-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-02 18:11:19" itemprop="dateModified" datetime="2020-12-02T18:11:19+08:00">2020-12-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>ref:</p>
+<ol>
+<li>Java并发-atomic原子类包源码剖析<br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/27e07df2672e">https://www.jianshu.com/p/27e07df2672e</a></li>
+</ol>
+<ol>
+<li><p>线程安全的定义：参考JCP中作者的定义</p>
+</li>
+<li><p>线程安全的程度（很有实际借鉴的分类）</p>
+<ol>
+<li>不可变对象，如Integer</li>
+<li>绝对线程安全，“不论运行环境，调用者不需要<strong>额外的同步措施</strong>”。注意！！！这是不对的。比如java.util.Vecotr的类中,add()和get()等方法都被synchronized修饰，但是遇到线程A读操作，线程B删除操作，就会遇到Out of index的异常。所以线程A和线程B也需要被调用者加上额外的同步。</li>
+<li>相对线程安全。同上，需要调用者加上额外的同步措施</li>
+<li>线程兼容。类本身就不安全，所以，需要调用者加上额外的同步措施</li>
+<li>线程对立。非常少见，Java已经在避免了。</li>
+</ol>
+</li>
+<li><p>实现线程安全的方法</p>
+<ol>
+<li><p>互斥同步：</p>
+<ol>
+<li>定义：同步是指如果多个线程在同时访问共享数据时，只有一个线程可以访问。</li>
+<li>同步是实现线程安全的目的；互斥是实现同步的手段；临界区、互斥量、信号量是主要的互斥实现方式。</li>
+<li>synchronized关键字：<ol>
+<li>编译之后，在同步代码块前后行程monitorenter和monitorexit两个字节码。这两个字节码都需要一个reference类型的参数来指明锁定和解锁的对象，若不指明，则使用对象实例或者Class对象</li>
+<li>当前线程尝试获取<strong>对象的锁</strong>，获取锁，则锁的计数器+1；释放锁，则锁的计数器-1；<br>获取锁失败，则阻塞等待。</li>
+<li>注意：<ol>
+<li>可重入性</li>
+<li>JAVA线程是要映射到系统线程的，所以唤醒或者阻塞一个线程都需要操作系统，从用户态到内核态，耗费CPU。所以有经验的，都会在通知操作系统阻塞线程之前加入一段自旋等待过程，避免频繁切入到内核态</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>ReentrantLock:<ol>
+<li>与synchronized相同 ==&gt; 可重入</li>
+<li>与synchronized不相同 ==&gt; 代码写法上<ol>
+<li>API层面的互斥锁，lock()与unlock()方法配合try/finally语法块来完成</li>
+<li>原生语法层面上的互斥锁<ol>
+<li>等待可中断</li>
+<li>公平锁</li>
+<li>锁绑定多个条件</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>非阻塞同步</p>
+<ol>
+<li><p>由于互斥同步是进行线程阻塞和唤醒，所以也叫阻塞同步，比较耗费性能，从处理问题的方式上来讲，也叫“悲观锁”，无论共享数据是否竞争，都必须加锁，否则都悲观地认为会出问题。所以现在使用“乐观锁”，也叫非阻塞同步</p>
+</li>
+<li><p>乐观并发，是先进行操作，再检查冲突；有冲突，再补救；无冲突，就成功；</p>
+<p>==&gt;所以，如果这个操作和检查两个步骤，依然需要软件的同步操作，那就是没必要了，所以需要依靠“硬件指令”</p>
+</li>
+<li><p>常见的硬件指令为CAS，这条指令需要3个操作数，分别是内存位置（V），旧的预期值（A）和新值（B）。CAS指令执行时，仅当V符合A是，处理器才用B更新V的值，否则不更新，无论是否更新，都会返回V。上述过程是个原子操作。</p>
+</li>
+<li><p>JDK1.5以后，JAVA才使用CAS操作，由sun.misc.Unsafe类里面的方法包装，由虚拟机特殊处理，编译处理后，只有一条处理器CAS指令，没有方法调用的过程，所以可以认为是无条件内联进去了</p>
+</li>
+<li><p>场景</p>
+<ol>
+<li><p>JUC包中的AutoInteger类，其中的方法使用了Unsafe类的CAS操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> threadCnt = <span class="number">20</span>;</span><br><span class="line">        Thread[] threads = <span class="keyword">new</span> Thread[threadCnt];</span><br><span class="line">        CountDownLatch cdt = <span class="keyword">new</span> CountDownLatch(threadCnt);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; threadCnt; i++) &#123;</span><br><span class="line">            threads[i] = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1000000</span>; j++) &#123;</span><br><span class="line">                        increase();</span><br><span class="line">                    &#125;</span><br><span class="line">                    cdt.countDown();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            threads[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (Thread i : threads) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                i.join();<span class="comment">//保证前面的所有的线程执行玩再接着执行主线程</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(count + <span class="string">&quot;   &quot;</span> + count2.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> AtomicInteger count2 = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        count2.incrementAndGet();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>count一直小于2000W，而count2一直是2000W。如果把count设置为volatile,可以吗？因为volatile可以保证线程间的可见性以及禁止指令的重排序。答案是：不可以。因为count++, 不是原子操作，而且volatile不能保证原子性。而count2是原子类，可以保证count2++是原子操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically increment by one the current value.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the updated value</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">incrementAndGet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> current = get();</span><br><span class="line">        <span class="keyword">int</span> next = current + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">            <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>incrementAndGet（）方法在一个<strong>无限循环</strong>中（就是一个自旋锁），不断尝试将一个比当前值大1的新值赋给自己。如果失败了，那说明在执行“获取-设置”操作的时候值已经有了修改，于是再次循环进行下一次操作，直到设置成功为止。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>无同步方案</p>
+<ol>
+<li>可重入代码：纯代码，就是不涉及任何共享数据，比如堆上的数据或者公用的系统资源。判断是否是可重入代码的标准：输入相同参数，返回相同结果，就是可重入代码，也就是线程安全。</li>
+<li></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/16/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%94%B1%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%9D%A5%E7%90%86%E8%A7%A3%E4%B8%8BTCP/" rel="prev" title="由一次线上故障来理解下TCP">
+                  <i class="fa fa-chevron-left"></i> 由一次线上故障来理解下TCP
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/apache-http-client%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%85%B3%E9%97%ADsocket/" rel="next" title="apache http client如何正确关闭socket">
+                  apache http client如何正确关闭socket <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

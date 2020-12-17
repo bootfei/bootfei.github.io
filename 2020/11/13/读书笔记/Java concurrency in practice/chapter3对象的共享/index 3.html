@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="ref:   java如何理解隐式地使this引用逸出https:&#x2F;&#x2F;segmentfault.com&#x2F;q&#x2F;1010000007900854https:&#x2F;&#x2F;www.cnblogs.com&#x2F;viscu&#x2F;p&#x2F;9790755.html  Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过同步，避免多个线程同时访问相同的变量；而本章介绍如何">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chapter3对象的共享">
+<meta property="og:url" content="http://example.com/2020/11/13/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter3%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="ref:   java如何理解隐式地使this引用逸出https:&#x2F;&#x2F;segmentfault.com&#x2F;q&#x2F;1010000007900854https:&#x2F;&#x2F;www.cnblogs.com&#x2F;viscu&#x2F;p&#x2F;9790755.html  Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过同步，避免多个线程同时访问相同的变量；而本章介绍如何">
+<meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190316230729391.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5OTUxOTgz,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-11-13T01:19:03.000Z">
+<meta property="article:modified_time" content="2020-11-25T16:00:12.187Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="并发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190316230729391.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5OTUxOTgz,size_16,color_FFFFFF,t_70">
+
+
+<link rel="canonical" href="http://example.com/2020/11/13/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter3%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>chapter3对象的共享 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/13/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter3%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          chapter3对象的共享
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-13 09:19:03" itemprop="dateCreated datePublished" datetime="2020-11-13T09:19:03+08:00">2020-11-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-11-26 00:00:12" itemprop="dateModified" datetime="2020-11-26T00:00:12+08:00">2020-11-26</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>ref: </p>
+<ol>
+<li>java如何理解隐式地使this引用逸出<br><a target="_blank" rel="noopener" href="https://segmentfault.com/q/1010000007900854">https://segmentfault.com/q/1010000007900854</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/viscu/p/9790755.html">https://www.cnblogs.com/viscu/p/9790755.html</a></li>
+</ol>
+<p>Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过<strong>同步</strong>，避免多个线程同时访问相同的变量；而本章介绍如何<strong>共享</strong>和<strong>发布对象</strong>，从而使多个线程可以同时安全的访问相同的变量。这两章合在一起构成了线程安全类的基础。</p>
+<ol>
+<li><p>可见性<br>比如，由于”重排序”引起的读线程获取到<strong>失效数据</strong>，无法获取到主线程的最新写入的数据</p>
+</li>
+<li><p>失效数据</p>
+<ol>
+<li>比如一个类中只有get和set方法, 线程A调用set，同时线程B调用get，那么线程B可能看到失效数据，也可能看到最新数据。</li>
+<li>拓展：类比Mysql中的read uncommitted隔离级别, 牺牲了准确性，但是提高了性能</li>
+<li>如果对get和set都同步，那么此类就是线程安全</li>
+</ol>
+</li>
+<li><p>加锁与可见性</p>
+<ol>
+<li>锁可以保证原子性（或者说是互斥性），也可以保证可见性</li>
+<li>锁保证可见性的原因在于：<img src="https://img-blog.csdnimg.cn/20190316230729391.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzI5OTUxOTgz,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
+
+</li>
+</ol>
+<p>为了确保所有线程都能看到共享变量的最新值，所以说所有执行的线程必须在同一个锁上同步</p>
+</li>
+<li><p>Volatile</p>
+<ol>
+<li>稍弱的同步机制（作者应该是指的内存可见性这方面，而不是互斥性），将变量的更新操作通知到其他线程</li>
+<li>volatile作用在于可见性，不仅仅体现在使编译器不进行重排序，而且使得 ==&gt; 当线程A写入volatile变量而线程B随后读取时，写入volatile变量之前对A可见的变量，在B读取了volatile以后，对B也是可见的，从内存可见性看，写入volatile=退出同步代码块（线程A），读volatile=进入同步代码块（线程B）</li>
+<li>实际的应用场景<ol>
+<li>比如”数绵羊”，<strong>检查某个状态标记</strong>以判断是否退出循环</li>
+</ol>
+</li>
+<li>局限性：无法保证原子性</li>
+<li>需要满足的条件，才能使用volatile：<ol>
+<li>在访问变量时，不需要加锁</li>
+<li>变量不能与其他状态一起纳入不变性条件（因为volatile不保证原子性，而不变性条件需要原子性）</li>
+<li>变量的写入操作依赖变量的当前值，或者确保只有一个线程（因为volatile不保证原子性，而依赖当前值，属于原子性）</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>发布和逸出</p>
+<ol>
+<li><p>概念：</p>
+<ol>
+<li>发布：使对象能够在当前作用域之外的代码中使用（我自认为这个定义还不能对实际的分析有帮助，应该这样说：A发布了对象B，给对象或者线程C1orC2…..Cn使用，所以对象或者线程C1orC2在A的作用域之外使用对象B）</li>
+<li>逸出：当某个不应该被发布的对象被发布时</li>
+</ol>
+</li>
+<li><p>场景：发布常见的场景，</p>
+<ol>
+<li><p>将对象的引用存储到公共静态域，任何类和线程都能看到这个域<br>比如，initailize实例化了knownSecrets，这个对象发布了knownSecrets</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Set&lt;Secret&gt; knownSecrets;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initialize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    knownSecrets = <span class="keyword">new</span> HashSet&lt;Secret&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>发布一个对象间接地发布其他对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//内部可变的数据逸出（不要这样做）</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UnsafeStates</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String[] states = <span class="keyword">new</span> String[] &#123;</span><br><span class="line">        <span class="string">&quot;AK&quot;</span>, <span class="string">&quot;AL&quot;</span> ...</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">public</span> String[] getStates() &#123; <span class="keyword">return</span> states; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如，以这种方式发布states会出问题，这样会允许内部可变的数据逸出，请不要这样做。因为任何一个调用者都能修改它的内容。数组states已经逸出了它所属的范围，这个本就是私有的数据，事实上已经变成公有的了。<br>==&gt;<strong>如果一个已经发布的对象能够通过非私有的变量引用和方法调用到达其他的对象，那么这些对象也都会发布，会不安全。</strong></p>
+</li>
+<li><p>发布一个内部的类实例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThisEscape</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ThisEscape</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        source.registerListener(<span class="keyword">new</span> EventListener() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                doSomething(e); <span class="comment">//其实就是this.doSomething(e);</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">doSomething</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">EventSource</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">registerListener</span><span class="params">(EventListener e)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">EventListener</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">Event</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ThisEscape发布EventListener时，也隐含地发布了ThisEscape实例本身，因为在这个内部类的实例中包含了对ThisEscape实例的隐含引用！！！<br><em>比如造成的后果，在多线程环境下，会出现这样一种情况：</em><br><em>线程 A 和线程 B 同时访问 ThisEscape 构造方法，这时线程 A 访问构造方法还为完成(可以理解为 ThisEscape 为初始化完全)，此时由于 this 逸出，导致 this 在 A 和 B 中都具有可见性，线程 B 就可以通过 this 访问 doSomething(e) 方法，导致修改 ThisEscape 的属性。也就是在 ThisEscape 还为初始化完成，就被其他线程读取，导致出现一些奇怪的现象。</em><br><em>这也就是 this 逸出。</em></p>
+<p>====&gt; 得出结论：不要在构造过程中，使this引用逸出，具体来说，只有当构造函数返回时，this引用才应该从线程中逸出。解决方案如下:</p>
+<p>​        如果想在<strong>构造函数</strong>中注册一个<strong>事件监听器</strong>或<strong>启动线程</strong>，那么可以使用私有的构造函数（保证构造函数必须先执行完毕）+公共的工厂方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeListener</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> EventListener listener;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ThisEscape</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        listener = <span class="keyword">new</span> EventListener(</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(Event e)</span> </span>&#123;</span><br><span class="line">                doSomething(e);</span><br><span class="line">            &#125;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> SafeLisener <span class="title">newInstance</span><span class="params">(EventSource source)</span> </span>&#123;</span><br><span class="line">        SafeLisener safe = <span class="keyword">new</span> SafeLisener();</span><br><span class="line">        soure.registerListener(safe.listener);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="6">
+<li><p>线程封闭:</p>
+<ol>
+<li><p>定义: 如果数据不共享，那么就不需要不同步，就是线程安全的，所以仅在单个线程内访问数据，称为线程封闭技术。</p>
+</li>
+<li><p>场景：</p>
+<ol>
+<li>Swing: 将所有组件和数据模型对象封闭到Swing的事件分发线程，除了事件线程以外的线程，都不能访问这些对象。</li>
+<li>JDBC的Connection对象: 在典型的服务器应用中，线程从连接池中获取一个Connection对象，处理完请求后，在将Connection对象返回给连接池。由于大多数请求，比如Servlet,都是由单个线程采用同步方式来处理，并且在Connection对象返回给连接池之前，连接池不会将它分配给其他线程。所以，Connection对象隐式地封闭在线程中。</li>
+</ol>
+</li>
+<li><p>技术实现:<br>正如Java并没有强制规定某个变量必须由锁来保护，同样Java也无法强制对象必须在某个线程内，所以由程序负责确保封闭在线程内的对象会不会逸出，而Java只提供一些机制，比如局部变量和ThreadLocal类。</p>
+<ol>
+<li><p>Ad-hoc线程封闭: </p>
+<ol>
+<li>定义：维护线程封闭性的职责完全由<strong>程序实现</strong>来承担。</li>
+<li>实际上，没有一个语言，能将对象封闭到一个线程上。所以，此方法还不如把程序设计为单线程，如Swing等Gui框架。</li>
+</ol>
+</li>
+<li><p>栈封闭:</p>
+<ol>
+<li>定义: 是线程封闭的一种特例。只能通过局部变量才能访问对象，因为局部变量的固有属性就是封闭在执行线程中的，他们位于运行数据区的栈中（线程独享）。</li>
+</ol>
+</li>
+<li><p>Threadlocal类</p>
+<ol>
+<li><p>定义：这个类使线程中的某个值与保存值的对象关联起来。ThreadLocal提供了get与Set等访问接口和方法，这些方法为每个使用该变量的线程都存有一份独立的副本，所以，get（）会返回当前执行线程在调用set（）时设置的最新值</p>
+</li>
+<li><p>场景</p>
+<ol>
+<li><p>JDBC的连接对象不一定是线程安全的，而且希望避免调用每个方法时都传递一个Connection对象，因此，可以将JDBC的连接对象保存到ThreadLocal对象中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalTemplate</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ThreadLocal&lt;Connection&gt; connectionHolder = <span class="keyword">new</span> ThreadLocal&lt;Connection&gt;() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> Connection <span class="title">initialValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> DriverManager.getConnection(<span class="string">&quot;DB_URL&quot;</span>);  <span class="comment">//JDBC的Connection不一定是线程安全的，封装到ThreadLocal中保证每个线程都会拥有自己的JDBC连接对象副本</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">getConnection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> connectionHolder.get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<pre><code>        2. 当某个频繁执行的操作需要一个临时对象，而同时希望避免在每次执行时都重新分配该临时对象。
+
+           <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Integer.toString();<span class="comment">//JDK1.5使用ThreadLocal对象来保存12字节大小的缓存区</span></span><br></pre></td></tr></table></figure>
+
+
+
+        3. 如果将单线程的应用程序移植到多线程环境中，只需要把全局变量转化为ThreadLocal对象（如果全局变量的语义允许），就可以维持线程安全性。
+           注意：如果全局变量是应用程序用来作为缓存的，那此方法就是无意义的。因为缓存本来就是希望一个线程的计算结果可以被其他线程共享，而不是独享。
+
+
+
+        4. J2EE的事物上下文(Transaction Context),保存在执行线程的ThreadLocal对象中。
+
+     3. 原理：
+        当执行线程首次调用ThreadLocal.get()时，就调用initialValue来获取初始值。从概念上看，ThreadLocal&lt;T&gt; 视为Map&lt;Thread,T&gt;对象，其中保存了特定于该线程的值，但是ThreadLocal的实现并非如此。这些特定于线程的值保存在Thread对象中，当线程终止时，这些值也被gc了。</code></pre>
+<ol start="7">
+<li><p>不变性：</p>
+<ol>
+<li>定义：满足同步的另一种方法就是使用不可变的对象（某个对象在被创建后就不可被修改）</li>
+<li>当满足以下条件时，对象才是不可变的：<ol>
+<li>对象创建以后其状态都不能修改</li>
+<li>对象的所有域都是final类型</li>
+<li>对象是正确创建的（在对象创建期间，this引用没有逸出）</li>
+</ol>
+</li>
+<li>技术实现：</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag"># 并发</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/10/%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E9%9B%86%E7%BE%A4%E4%B8%8B%E7%94%9F%E6%88%90%E5%94%AF%E4%B8%80ID/" rel="prev" title="分布式集群下生成唯一ID">
+                  <i class="fa fa-chevron-left"></i> 分布式集群下生成唯一ID
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/14/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter2-java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E6%BA%A2%E5%87%BA/" rel="next" title="chapter2:java内存模型与内存溢出溢出">
+                  chapter2:java内存模型与内存溢出溢出 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

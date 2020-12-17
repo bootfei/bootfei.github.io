@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -208,7 +208,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -240,6 +240,130 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/17/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter4%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/17/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter4%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/" class="post-title-link" itemprop="url">chapter4对象的组合</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2020-12-17 11:57:11 / Modified: 17:00:19" itemprop="dateCreated datePublished" datetime="2020-12-17T11:57:11+08:00">2020-12-17</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h1><p>我们并不希望每一次内存访问都进行分析以确保程序时线程安全的，而是希望将一些现有的线程安全组件组合为更大规模的组件或程序。本章将介绍一些组合模式，这些模式能够将一个类更容易成为线程安全的，并且在维护这些类时不会无意中破坏类的安全性保证。</p>
+<h2 id="4-1-设计线程安全的类"><a href="#4-1-设计线程安全的类" class="headerlink" title="4.1 设计线程安全的类"></a>4.1 设计线程安全的类</h2><p>通过使用封装技术，可以使得在不对整个程序进行分析的情况下就可以判断一个类是否时线程安全的。</p>
+<blockquote>
+<p>在设计线程安全类的过程中，需要包含以下三个基本要素：<br>* 找出构成对象状态的所有变量。<br>* 找出约束状态变量的不变性条件。<br>* 建立对象状态的并发访问管理策略。</p>
+</blockquote>
+<p>要分析对象的状态，首先从对象的域开始。</p>
+<blockquote>
+<p>如果在对象的域中都是基本类型的变量，那么这些域将构成对象的全部状态。</p>
+<p>如果在对象的域中引用了其他对象，那么该对象的状态就包含被引用对象的域。</p>
+</blockquote>
+<p>同步策略定义了如何在不违背对象不变性条件或后验条件的情况下对其状态的访问操作进行协同。同步策略规定了如何将不可变性、线程封闭与加锁机制等结合起来以维护线程的安全性，并且还规定了哪些变量由哪些锁来保护。要确保开发人员可以对这个类进行分析与维护，就必须将同步策略写为正式文档。</p>
+<h3 id="4-1-1-收集同步需求"><a href="#4-1-1-收集同步需求" class="headerlink" title="4.1.1 收集同步需求"></a>4.1.1 收集同步需求</h3><p>要确保类的线程安全性，就需要确保它的不变性条件不会在并发访问的情况下被破坏，这就需要对其状态进行推断。对象与变量都有一个状态空间，即所有可能的取值。状态空间越小，就越容易判断线程的状态。final类型的域使用的越多，就能简化对象可能状态的分析过程。（不可变对象只有唯一的状态）</p>
+<p>许多类中定义了一些不可变条件，拥有判断状态是有效的还是无效的。long类型的变量，其状态空间为从Long.MIN_VALUE到Long.MAX_VALUE，但Counter中value取值范围存在限制，即不能是负值。</p>
+<p>在操作中还会包含一些后验条件来判断状态迁移是否是有效的。如果Counter的当前状态是17，那么下一个有效状态只能是18。<strong>当下一个状态需要依赖当前状态时，这个操作就必须是一个复合操作。</strong>并非所有的操作都会在状态转换上施加限制，例如，当更新一个保存当前温度的变量时，该变量之前的状态并不会影响计算结果。</p>
+<p>由于不变性条件以及后验条件在状态及状态转换上施加了各种约束，因此就需要额外的同步与封装。如果某些状态是无效的，那么必须对底层的状态变量进行封装，否则客户端代码可能会使对象处于无效状态。如果在某个操作中存在无效的状态转换，那么该操作必须是原子的。如果没有施加这种约束，那么就可以放宽封装性或序列化需求，以便获得更高的灵活性或性能。</p>
+<p>在类中也可以包含同时约束多个状态变量的不变性条件。在一个表示数值范围的类中可以包含两个状态变量，分别表示范围的上界和下界。这些变量必须遵循的约束是，下界值应该小于或等于上界值。类似于这种包含多个变量的不变性条件将带来原子性需求：这些相关的变量必须在单个原子操作中进行读取或更新。不能首先更新一个变量，然后释放锁并再次获得锁，然后再更新其他的变量。因为在释放锁后，可能会使对象处于无效状态。如果在一个不变性条件中包含多个变量，那么在执行任何访问相关变量的操作时，都必须持有保护这些变量的锁。</p>
+<blockquote>
+<p>如果不了解对象的不变性条件与后验条件，那么就不能确保线程安全性。要满足在状态变量的有效值或状态转换上的各种约束条件，就需要借助于原子性与封装性。</p>
+</blockquote>
+<h3 id="4-1-2-依赖状态的操作"><a href="#4-1-2-依赖状态的操作" class="headerlink" title="4.1.2 依赖状态的操作"></a>4.1.2 依赖状态的操作</h3><p>类的不变性条件与后验条件月份数了在对象上有哪些状态和转换是有效的。在某些对象的方法中还包含一些基于状态的先验条件。例如，不恩能够从空队列中移除一个元素，在输出元素前，队列必须处于“非空的”状态。如果在某个操作中包含有基于状态的先验条件，那么这个操作就称为依赖状态的操作。</p>
+<p>在单线程程序中，如果某个操作无法满足先验条件，那么就只能失败。但在并发程序中，先验条件可能会由于其他线程执行的操作而变为真。在并发程序中要一直等到先验条件为真，然后再执行该操作。</p>
+<p>在Java中，等待某个条件为真的各种内置机制，（包括等待和通知等机制）都与内置加锁机制紧密关联，要想正确地使用他们并不容易。要想实现某个等待先验条件为真时才执行的操作，一种更简单的方法是通过现有库中的类（例如阻塞队列【BlockingQueue】或信号量【Semaphore】）来实现依赖状态的行为。</p>
+<h3 id="4-1-3-状态的所有权"><a href="#4-1-3-状态的所有权" class="headerlink" title="4.1.3 状态的所有权"></a>4.1.3 状态的所有权</h3><p>如果以某个对象为根节点构造一张对象图，那么该对象的状态将是对象图中所有对象包含的域的一个子集。</p>
+<p>在定义哪些变量将构成对象的状态时，只考虑对象拥有的数据。如果分配并填充了一个HashMap对象，那么就相当于创建多个对象：HashMap对象，在HashMap对象中包含的多个对象，以及在Map.Entry中可能包含的内部对象。HashMap对象的逻辑状态包括所有的Map.Entry对象以及内部对象，及时这些对象都是一些独立的对象。</p>
+<p>所有权与封装性总是相互关联的：对象封装它拥有的状态，反之也成立，对它封装的状态拥有所有权。状态变量的所有者将决定采用何种加锁协议来维持变量状态的完整性。所有权意味着控制权。然而，如果发布了某个可变对象的引用，那么就不再拥有独占的控制权，最多是“共享控制权”。对于从构造函数或者从方法中传递进来的对象，类通常并不拥有这些对象，除非这些方法是被专门设计为转移传递进来的对象的所有权（例如，同步容器封装器的工厂方法）。</p>
+<p>容器类通常变现出一种“所有权分离”的形式，其中容器类拥有其自身的状态，而客户代码则拥有容器中各个对象的状态。Servlet框架中的ServletContext就是其中一个示例。ServletContext为Servlet提供了类似于Map形式的对象容器服务，在ServletContext可以通过名称来注册（setAttribute）或获取（getAttribute）应用程序对象。由Servlet容器实现的ServletContext对象必须是线程安全的，因为它肯定会被多个线程同时访问。当调用setAttribute和getAttribute时，Servlet不需要使用同步，但当使用保存在ServletContext中的对象时，则可能需要使用同步。这些对象由应用程序拥有，Servlet容器只是替应用程序保管它们。与所有共享对象一样，它们必须安全地被共享。为了防止多个线程在并发访问同一个对象时产生的相互干扰，这些对象要么是线程安全的对象，要么是事实不可变的对象，或者由锁来保护的对象。</p>
+<h2 id="4-2-实例封闭"><a href="#4-2-实例封闭" class="headerlink" title="4.2 实例封闭"></a>4.2 实例封闭</h2><p>如果某对象不是线程安全的，那么可以通过多种技术使其在多线程程序中安全地使用。你可以确保该对象只能由单个线程访问（线程封闭），或者一个锁来保护该对象的所有访问<!--复习第2章--></p>
+<p>封装简化了线程安全类的实现过程，它提供了<strong>实例封闭机制</strong>。当一个对象被封闭到另一个对象中时，能够访问被封闭对象的所有代码路径都是已知。与对象可以由整个程序访问的情况相比，更易于对代码进行分析。通过封闭机制与合适的加锁策略结合起来，可以确保以线程安全的方式来使用非线程安全的对象。</p>
+<blockquote>
+<p>将数据封装在对象内部，可以将数据的访问限制在对象的方法上，从而更容易确保线程在访问数据时总能持有正确的锁。</p>
+</blockquote>
+<p>被封闭对象一定不能超出既定的作用域。对象可以封闭在类的一个实例（例如作为类的一个私有成员）中，或者封闭在某个作用域内（例如作为一个局部变量），再或者封闭在线程内（例如在某个线程中将对象从一个方法传递到另一个方法，而不是在多个线程之间共享该对象）。</p>
+<p>通过封闭机制来确保线程安全，通过封闭与加锁等机制使一个类成为线程安全的（即使这个类的状态变量并不是线程安全的）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过封闭机制来确保线程安全</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonSet</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;Person&gt; mySet = <span class="keyword">new</span> HashSet&lt;Person&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(Person p)</span></span>&#123;</span><br><span class="line">        mySet.add(p);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">containsPerson</span><span class="params">(Person p)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mySet.contains(p);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>PersonSet的状态由HashSet来管理，而HashSet并非线程安全的<!--PersonSet是类的对象，mySet是其中一个域，那么PersonSet的状态就包含mySet以及mySet引用的Person对象，复习开头的定义-->。但由于mySet是私有的并且没有逸出，因此HashSet被封闭在PersonSet中。唯一能访问mySet的代码路径是addPerson与containsPerson，在执行它们时都要获得PersonSet上的锁。PersonSet的状态完全由它的内置锁保护满足<!--第二章的加锁约定-->，因此PersonSet是线程安全的类。</p>
+<p>但如果Person类是可变的，那么在访问从PersonSet中获得的Person对象时<!--比如public Person getPerson()-->，还需要额外的同步。要想安全地使用Person对象，可以使Person对象成为一个线程安全类。也可以使用锁来保护Person对象，并确保所有客户端代码在访问Person对象之前都已经获得正确的锁。</p>
+<p>实例封闭时构建线程安全类的一个最简单方式，它使得在锁策略的选择上拥有了更多地灵活性。在PersonSet中可以使用内置锁来保护它的状态，对于其他形式的锁只要自始至终都使用同一个锁，就可以保护状态。<strong>实例封闭还使得不同的状态可以由不同的锁来保护</strong>。</p>
+<p>在Java平台的类库中还有很多实例封闭的示例，其中有些类的唯一用途就是将非线程安全的类转化为线程安全的类。一些基本的容器类例如ArrayList不是线程安全的，但类库提供了包装器工厂方法，例如<strong>Collections.synchronizedList及其类似方法，使得这些非线程安全的类可以在多线程环境中安全地使用。这些工厂方法通过”装饰器Decorator”模式将容器封装在一个同步的容器对象上，而包装器能将接口中的每个方法都实现为同步方法，并将调用请求转发到底层的容器对象上。只要包装器对象拥有对底层容器对象的唯一引用（即把底层容器对象封闭在包装器中），那么它就是线程安全的。在这引起方法的Javadoc中指出，对底层容器对象的所有访问必须通过包装器来进行。</strong></p>
+<p>如果将一个本该被封闭的对象发布出去，那么也能破坏封闭性。如果一个对象本应该封闭在特定的作用域内，那么让该对象逸出作用域就是一个错误。当发布其他对象时，例如迭代器或内部的类实例，可能会间接地发布被封闭对象，同样会使被封闭对象逸出。</p>
+<blockquote>
+<p>封闭机制更易于构造线程安全的类，因为当封闭类的状态时，在分析类的线程安全性时就无须检查整个程序。</p>
+</blockquote>
+<h3 id="4-2-1-Java监视器模式"><a href="#4-2-1-Java监视器模式" class="headerlink" title="4.2.1 Java监视器模式"></a>4.2.1 Java监视器模式</h3><p>进入和退出同步代码的字节指令也称为monitorenter和monitorexit，而Java的内置锁也称为监视器锁或监视器。</p>
+<p>遵循Java监视器模式的对象会把对象的所有可变状态都封装起来，并由对象自己的内置锁来保护。</p>
+<p>Java监视器模式的主要优势就在于它的简单性，11章介绍通过更细粒度的加锁策略来提高可伸缩性。</p>
+<p><strong>Java监视器模式仅仅是编写代码的约定，对于任何一种锁对象，只要自始至终都使用该锁对象</strong>，都可以用来保护对象的状态。如下程序给出了如何使用私有锁来保护状态。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过一个私有锁来保护状态</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PrivateLock</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object();</span><br><span class="line">		<span class="meta">@GuardedBy(&quot;myLock&quot;)</span>Widget widget;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">someMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">            <span class="comment">// 访问或修改Widget的状态</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>私有的锁对象可以将锁封装起来，使客户代码无法得到锁，但客户代码可以通过公有方法来访问锁，以便（正确或者不正确）参与到它的同步策略中。</p>
+<h3 id="4-2-2-示例：车辆追踪"><a href="#4-2-2-示例：车辆追踪" class="headerlink" title="4.2.2 示例：车辆追踪"></a>4.2.2 示例：车辆追踪</h3><p>　　以下程序清单中，我们看一个示例： 一个用于调度车辆的“车辆追踪器”。首先使用监视器模式来构建车辆追踪器，然后尝试放宽某些封装性需求同时又保持线程安全性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MonitorVehicleTracker</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String ,MutablePoint&gt; locations;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MonitorVehicleTracker</span><span class="params">(Map&lt;String ,MutablePoint&gt; locations)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.locations = deepCopy(locations);   <span class="comment">//返回拷贝信息</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Map&lt;String, MutablePoint&gt; <span class="title">getLocations</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> deepCopy(locations); <span class="comment">//返回拷贝信息</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> MutablePoint <span class="title">getLocation</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        MutablePoint lo = locations.get(id);</span><br><span class="line">        <span class="keyword">return</span> lo == <span class="keyword">null</span> ? <span class="keyword">null</span> : <span class="keyword">new</span> MutablePoint(lo);    <span class="comment">//返回拷贝信息</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">setLocations</span><span class="params">(String id, <span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        MutablePoint lo = locations.get(id);</span><br><span class="line">        <span class="keyword">if</span> (lo == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        lo.x = x;</span><br><span class="line">        lo.y = y;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, MutablePoint&gt; <span class="title">deepCopy</span><span class="params">(Map&lt;String, MutablePoint&gt; locations)</span> </span>&#123;</span><br><span class="line">        Map&lt;String, MutablePoint&gt; result = <span class="keyword">new</span> HashMap&lt;String, MutablePoint&gt;();</span><br><span class="line">        <span class="keyword">for</span> (String id : locations.keySet()) &#123;</span><br><span class="line">            result.put(id, <span class="keyword">new</span> MutablePoint(locations.get(id)));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> Collections.unmodifiableMap(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NotThreadSafe</span>【不要这么做】</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MutablePoint</span> </span>&#123;　　　　　　　</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> x, y;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MutablePoint</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        x = <span class="number">0</span>; y = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MutablePoint</span><span class="params">(MutablePoint p)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.x = p.x;</span><br><span class="line">        <span class="keyword">this</span>.y = p.y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>　　虽然类 MutablePoint 不是线程安全的，但追踪器类时线程安全的，<!--它所包含的 Map 对象和可变的 Point 对象都未曾发布-->。当需要返回车辆的位置时，通过 MutablePoint 拷贝构造函数或者 deepCopy 方法来复制正确的值，从而生成一个新的Map 对象，并且该对象中的值与原有 Map 对象中的 key 值和 value 值都相同。</p>
+<p>　　在某种程度上，这种实现方式是通过再返回客户代码之前复制可变的数据来维持线程安全性的。通常情况下，这并不存在性能问题，但在车辆容器非常大的情况下将极大地降低性能。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -280,7 +404,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-12-16 10:36:00" itemprop="dateModified" datetime="2020-12-16T10:36:00+08:00">2020-12-16</time>
+        <time title="Modified: 2020-12-17 18:12:01" itemprop="dateModified" datetime="2020-12-17T18:12:01+08:00">2020-12-17</time>
       </span>
 
   
@@ -381,7 +505,7 @@
 <td align="left">Yes</td>
 </tr>
 </tbody></table>
-<h2 id="1-3-2"><a href="#1-3-2" class="headerlink" title="1.3.2"></a>1.3.2</h2><p>死锁是多个事务在同一资源上相互占用，并请求锁定对方占用的资源，从而导致的恶性循环。当多个事务试图以不同的顺序锁定资源时，就可能产生死锁。多个事务同时锁定同一个资源时，也可能会导致死锁。比如，</p>
+<h2 id="1-3-2-死锁"><a href="#1-3-2-死锁" class="headerlink" title="1.3.2 死锁"></a>1.3.2 死锁</h2><p>死锁是多个事务在同一资源上相互占用，并请求锁定对方占用的资源，从而导致的恶性循环。当多个事务试图以不同的顺序锁定资源时，就可能产生死锁。多个事务同时锁定同一个资源时，也可能会导致死锁。比如，</p>
 <p>事务1:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">start transaction;</span><br><span class="line">update stockPrice set close &#x3D; 45.50 where stock_id &#x3D; 4 and date &#x3D; &#39;2002-05-01&#39;;</span><br><span class="line">update stockPrice set close &#x3D; 19.80 where stock_id &#x3D; 3 and date &#x3D; &#39;2002-05-02&#39;;</span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
 
@@ -1067,159 +1191,6 @@
 <h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
 <li>从http client 4.x源码分析，该如何关闭socket<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/54832733">https://zhuanlan.zhihu.com/p/54832733</a></li>
 <li>分析服务器端口的状态与http client关闭方法的对应关系<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiao--y/p/7878170.html">https://www.cnblogs.com/xiao--y/p/7878170.html</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">chapter13:线程安全与锁优化</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-11-16 22:17:11" itemprop="dateCreated datePublished" datetime="2020-11-16T22:17:11+08:00">2020-11-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-12-02 18:11:19" itemprop="dateModified" datetime="2020-12-02T18:11:19+08:00">2020-12-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>ref:</p>
-<ol>
-<li>Java并发-atomic原子类包源码剖析<br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/27e07df2672e">https://www.jianshu.com/p/27e07df2672e</a></li>
-</ol>
-<ol>
-<li><p>线程安全的定义：参考JCP中作者的定义</p>
-</li>
-<li><p>线程安全的程度（很有实际借鉴的分类）</p>
-<ol>
-<li>不可变对象，如Integer</li>
-<li>绝对线程安全，“不论运行环境，调用者不需要<strong>额外的同步措施</strong>”。注意！！！这是不对的。比如java.util.Vecotr的类中,add()和get()等方法都被synchronized修饰，但是遇到线程A读操作，线程B删除操作，就会遇到Out of index的异常。所以线程A和线程B也需要被调用者加上额外的同步。</li>
-<li>相对线程安全。同上，需要调用者加上额外的同步措施</li>
-<li>线程兼容。类本身就不安全，所以，需要调用者加上额外的同步措施</li>
-<li>线程对立。非常少见，Java已经在避免了。</li>
-</ol>
-</li>
-<li><p>实现线程安全的方法</p>
-<ol>
-<li><p>互斥同步：</p>
-<ol>
-<li>定义：同步是指如果多个线程在同时访问共享数据时，只有一个线程可以访问。</li>
-<li>同步是实现线程安全的目的；互斥是实现同步的手段；临界区、互斥量、信号量是主要的互斥实现方式。</li>
-<li>synchronized关键字：<ol>
-<li>编译之后，在同步代码块前后行程monitorenter和monitorexit两个字节码。这两个字节码都需要一个reference类型的参数来指明锁定和解锁的对象，若不指明，则使用对象实例或者Class对象</li>
-<li>当前线程尝试获取<strong>对象的锁</strong>，获取锁，则锁的计数器+1；释放锁，则锁的计数器-1；<br>获取锁失败，则阻塞等待。</li>
-<li>注意：<ol>
-<li>可重入性</li>
-<li>JAVA线程是要映射到系统线程的，所以唤醒或者阻塞一个线程都需要操作系统，从用户态到内核态，耗费CPU。所以有经验的，都会在通知操作系统阻塞线程之前加入一段自旋等待过程，避免频繁切入到内核态</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>ReentrantLock:<ol>
-<li>与synchronized相同 ==&gt; 可重入</li>
-<li>与synchronized不相同 ==&gt; 代码写法上<ol>
-<li>API层面的互斥锁，lock()与unlock()方法配合try/finally语法块来完成</li>
-<li>原生语法层面上的互斥锁<ol>
-<li>等待可中断</li>
-<li>公平锁</li>
-<li>锁绑定多个条件</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>非阻塞同步</p>
-<ol>
-<li><p>由于互斥同步是进行线程阻塞和唤醒，所以也叫阻塞同步，比较耗费性能，从处理问题的方式上来讲，也叫“悲观锁”，无论共享数据是否竞争，都必须加锁，否则都悲观地认为会出问题。所以现在使用“乐观锁”，也叫非阻塞同步</p>
-</li>
-<li><p>乐观并发，是先进行操作，再检查冲突；有冲突，再补救；无冲突，就成功；</p>
-<p>==&gt;所以，如果这个操作和检查两个步骤，依然需要软件的同步操作，那就是没必要了，所以需要依靠“硬件指令”</p>
-</li>
-<li><p>常见的硬件指令为CAS，这条指令需要3个操作数，分别是内存位置（V），旧的预期值（A）和新值（B）。CAS指令执行时，仅当V符合A是，处理器才用B更新V的值，否则不更新，无论是否更新，都会返回V。上述过程是个原子操作。</p>
-</li>
-<li><p>JDK1.5以后，JAVA才使用CAS操作，由sun.misc.Unsafe类里面的方法包装，由虚拟机特殊处理，编译处理后，只有一条处理器CAS指令，没有方法调用的过程，所以可以认为是无条件内联进去了</p>
-</li>
-<li><p>场景</p>
-<ol>
-<li><p>JUC包中的AutoInteger类，其中的方法使用了Unsafe类的CAS操作。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> threadCnt = <span class="number">20</span>;</span><br><span class="line">        Thread[] threads = <span class="keyword">new</span> Thread[threadCnt];</span><br><span class="line">        CountDownLatch cdt = <span class="keyword">new</span> CountDownLatch(threadCnt);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; threadCnt; i++) &#123;</span><br><span class="line">            threads[i] = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1000000</span>; j++) &#123;</span><br><span class="line">                        increase();</span><br><span class="line">                    &#125;</span><br><span class="line">                    cdt.countDown();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            threads[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (Thread i : threads) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                i.join();<span class="comment">//保证前面的所有的线程执行玩再接着执行主线程</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(count + <span class="string">&quot;   &quot;</span> + count2.get());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> AtomicInteger count2 = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">increase</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        count++;</span><br><span class="line">        count2.incrementAndGet();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>count一直小于2000W，而count2一直是2000W。如果把count设置为volatile,可以吗？因为volatile可以保证线程间的可见性以及禁止指令的重排序。答案是：不可以。因为count++, 不是原子操作，而且volatile不能保证原子性。而count2是原子类，可以保证count2++是原子操作。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Atomically increment by one the current value.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the updated value</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">incrementAndGet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> current = get();</span><br><span class="line">        <span class="keyword">int</span> next = current + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">            <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>incrementAndGet（）方法在一个<strong>无限循环</strong>中（就是一个自旋锁），不断尝试将一个比当前值大1的新值赋给自己。如果失败了，那说明在执行“获取-设置”操作的时候值已经有了修改，于是再次循环进行下一次操作，直到设置成功为止。</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>无同步方案</p>
-<ol>
-<li>可重入代码：纯代码，就是不涉及任何共享数据，比如堆上的数据或者公用的系统资源。判断是否是可重入代码的标准：输入相同参数，返回相同结果，就是可重入代码，也就是线程安全。</li>
-<li></li>
-</ol>
-</li>
-</ol>
-</li>
 </ol>
 
       
