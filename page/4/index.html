@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -240,6 +240,268 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">java ThreadLocal底层原理以及内存溢出问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-03 12:11:55" itemprop="dateModified" datetime="2020-12-03T12:11:55+08:00">2020-12-03</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/129607326">https://zhuanlan.zhihu.com/p/129607326</a></li>
+</ol>
+<h3 id="首先从内存模型的角度讨论ThreadLocal的存在价值"><a href="#首先从内存模型的角度讨论ThreadLocal的存在价值" class="headerlink" title="首先从内存模型的角度讨论ThreadLocal的存在价值"></a>首先从内存模型的角度讨论ThreadLocal的存在价值</h3><ol>
+<li>多线程可以通过jvm的堆，同时读写共享变量，但是会出现并发问题</li>
+<li>为了解决1中的并发问题，可以使用局部变量，因为局部变量会存储在线程中的栈帧中，但是局部变量不能被一个线程中的多个方法共享</li>
+<li>为了解决2中的多个方法不能共享局部变量问题，可以使用ThreadLocal</li>
+</ol>
+<h3 id="然后讨论ThreadLocal的底层原理"><a href="#然后讨论ThreadLocal的底层原理" class="headerlink" title="然后讨论ThreadLocal的底层原理"></a>然后讨论ThreadLocal的底层原理</h3><ol>
+<li>ThreadLocal的set(T value)和get()方法，本质上是要获取当前线程的ThreadLocalMap (其实就是该线程的 ThreadLocal[]  数组)</li>
+<li>jdk使用ThreadLocal的内部类, ThreadLocalMaps对 ThreadLocal[ ]数组进行了封装</li>
+<li>ThreadLocalMap内部维护了Entry[ ] 数组, Entry是ThreadLocalMap的内部类</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/13/leetcode/Contains-Duplicate-III/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/13/leetcode/Contains-Duplicate-III/" class="post-title-link" itemprop="url">Contains Duplicate III</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2020-10-13 08:39:37 / Modified: 08:40:23" itemprop="dateCreated datePublished" datetime="2020-10-13T08:39:37+08:00">2020-10-13</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/" class="post-title-link" itemprop="url">hexo:对post目录下的文档进行分类</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-08 21:09:00" itemprop="dateCreated datePublished" datetime="2020-10-08T21:09:00+08:00">2020-10-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-11-04 13:48:59" itemprop="dateModified" datetime="2020-11-04T13:48:59+08:00">2020-11-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><p><a target="_blank" rel="noopener" href="https://zhihu.com/question/53546025">Https://zhihu.com/question/53546025</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/">https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/</a></p>
+</li>
+</ol>
+<ol>
+<li><p>手动分类</p>
+<ol>
+<li>md文件的存储位置与生成的html灭有关系, 只要放在post目录下即可</li>
+<li>手动创建子目录，并且手动把不同类型的md文件放进不同类型的子目录即可</li>
+</ol>
+</li>
+<li><p>使用JavaScript代码自动分类</p>
+</li>
+<li><p>使用next的theme主题进行分类，见ref 2</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -405,7 +667,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/mysql/mysql-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -419,7 +681,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/08/mysql/mysql-1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%AF%87/" class="post-title-link" itemprop="url">mysql - 1.整体架构篇</a>
+            <a href="/2020/10/08/mysql/mysql-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/" class="post-title-link" itemprop="url">mysql - 1.InnoDB存储引擎</a>
         </h2>
 
         <div class="post-meta-container">
@@ -437,7 +699,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-11-23 19:03:45" itemprop="dateModified" datetime="2020-11-23T19:03:45+08:00">2020-11-23</time>
+        <time title="Modified: 2020-12-23 14:27:45" itemprop="dateModified" datetime="2020-12-23T14:27:45+08:00">2020-12-23</time>
       </span>
 
   
@@ -450,39 +712,113 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>它山之石可以攻玉</p>
-<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
-<li><p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/pluggable-storage-overview.html">https://dev.mysql.com/doc/refman/8.0/en/pluggable-storage-overview.html</a></p>
+          <h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="1-InnoDB架构图"><a href="#1-InnoDB架构图" class="headerlink" title="1. InnoDB架构图"></a>1. InnoDB架构图</h2><img src="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg" style="zoom: 67%;" />
+
+<p>上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由<strong>内存池，后台线程和磁</strong></p>
+<p><strong>盘文件</strong>三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。</p>
+<h2 id="2-InnoDB磁盘文件"><a href="#2-InnoDB磁盘文件" class="headerlink" title="2. InnoDB磁盘文件"></a>2. InnoDB磁盘文件</h2><blockquote>
+<p>InnoDB的主要的磁盘文件主要分为三大块：<strong>系统表空间</strong>，<strong>用户表空间</strong>，redo日志文件和归档文件。</p>
+<p>二进制文件(binlog)等文件是MySQL Server层维护的文件，所以未列入InnoDB的磁盘文件中。</p>
+</blockquote>
+<h3 id="2-1-系统表空间"><a href="#2-1-系统表空间" class="headerlink" title="2.1 系统表空间"></a>2.1 系统表空间</h3><img src="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg" style="zoom: 67%;" />
+
+<img src="https://imgedu.lagou.com/6feb838308f34b0791c07a2b2b157fcf.jpg" style="zoom: 50%;" />
+
+<p>系统表空间存储哪些数据？</p>
+<blockquote>
+<p>系统表空间是一个共享的表空间，因为它是被多个表共享的。</p>
+<p>InnoDB系统表空间包含InnoDB数据字典(元数据以及相关对象)、double write buffer、change buffer、undo logs的存储区域。</p>
+<p>系统表空间也默认包含任何用户在系统表空间创建的表数据和索引数据。</p>
+</blockquote>
+<p>系统表空间配置解析</p>
+<blockquote>
+<p>系统表空间是由一个或者多个数据文件组成。</p>
+<p>默认情况下，一个初始大小为10MB，名为ibdata1的系统数据文件在MySQL的data目录下被创建。</p>
+</blockquote>
+<p>用户可以使用 innodb_data_file_path 对数据文件的大小和数量进行配置。</p>
+<p>innodb_data_file_path 的格式如下：<code>innodb_data_file_path=datafile1[,datafile2]...</code></p>
+<p>示例(这里将**/db/ibdata1<strong>和</strong>/dr2/db/ibdata2**两个文件组成系统表空间)： <code>innodb_data_file_path=/db/ibdata1:1000M;/dr2/db/ibdata2:1000M:autoextend</code></p>
+<!--如果这两个文件位于不同的磁盘上，磁盘的负载可能被平均，因此可以提高数据库的整体性能。-->
+
+<!--两个文件的文件名之后都跟了属性，表示文件ibdata1的大小为1000MB，文件ibdata2的大小为1000MB，而且用完空间之后可以自动增长(autoextend)。-->
+
+<h3 id="2-2-用户表空间"><a href="#2-2-用户表空间" class="headerlink" title="2.2 用户表空间"></a>2.2 用户表空间</h3><p>用户表空间只存储该表的</p>
+<blockquote>
+<ul>
+<li>数据</li>
+<li>索引</li>
+<li>插入缓冲BITMAP等信息</li>
+<li>其余信息还是存放在默认的系统表空间中。</li>
+</ul>
+</blockquote>
+<p>如何使用用户表空间？</p>
+<blockquote>
+<p>如果设置了参数<strong>innodb_file_per_table</strong>，则用户可以将每个基于InnoDB存储引擎的表产生一个独立的用户表空间。用户表空间的命名规则为：表名.ibd。通过这种方式，用户不用将所有数据都存放于默认的系统表空间中。</p>
+</blockquote>
+<h3 id="2-3-redo日志文件"><a href="#2-3-redo日志文件" class="headerlink" title="2.3 redo日志文件"></a>2.3 redo日志文件</h3><h4 id="哪些文件是重做日志文件？"><a href="#哪些文件是重做日志文件？" class="headerlink" title="哪些文件是重做日志文件？"></a>哪些文件是重做日志文件？</h4><blockquote>
+<p>默认情况下，在InnoDB存储引擎的数据目录下会有两个名为<strong>ib_logfile0</strong>和<strong>ib_logfile1</strong>的文件，这就是InnoDB的<strong>重做日志文件</strong> **(redo log file)**，它记录了对于InnoDB存储引擎的事务日志。</p>
+</blockquote>
+<h4 id="重做日志文件的作用"><a href="#重做日志文件的作用" class="headerlink" title="重做日志文件的作用"></a>重做日志文件的作用</h4><ul>
+<li><p><strong>当InnoDB的数据存储文件发生错误时，重做日志文件就能派上用场</strong>。InnoDB存储引擎可以使用重做日志文件将数据恢复为正确状态，以此来保证数据的正确性和完整性。</p>
 </li>
-<li></li>
-</ol>
-<ol>
-<li>mysql server 层</li>
-</ol>
-<ol>
-<li><p>Connection pool</p>
-<ol>
-<li><p>连接的数量</p>
-<ol>
-<li><p>查看mysql的链接数量</p>
-<pre><code>       <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Show variables like <span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure></code></pre>
+<li><p>为了得到更高的可靠性，用户可以设置多个镜像日志组，将不同的文件组放在不同的磁盘上，以此来提高重做日志的<strong>高可用性</strong>。</p>
 </li>
-<li><p>查看linux</p>
+</ul>
+<h4 id="重做日志文件组如何写入数据"><a href="#重做日志文件组如何写入数据" class="headerlink" title="重做日志文件组如何写入数据"></a>重做日志文件组如何写入数据</h4><p>每个InnoDB存储引擎至少有1个重做日志文件组(group)，每个文件组下至少有2个重做日志文件，如默认的<code>ib_logfile0</code>和<code>ib_logfile1</code>。</p>
+<blockquote>
+<p>在日志组中每个重做日志文件的**[大小一致]<strong>，并以</strong>[循环写入]**的方式运行。InnoDB存储引擎先写入重做日志文件1，当文件被写满时，会切换到重做日志文件2; 当重做日志文件2也被写满时，再切换到重做日志文件1。</p>
+</blockquote>
+<h4 id="设置重做日志文件大小"><a href="#设置重做日志文件大小" class="headerlink" title="设置重做日志文件大小"></a>设置重做日志文件大小</h4><p>用户可以使用<code>innodb_log_file_size</code>来设置重做日志文件的大小，这对InnoDB存储引擎的性能有着非常大的影响。</p>
+<blockquote>
+<p>如果重做日志文件设置的<strong>太大</strong>，数据丢失时，恢复时可能需要很长的时间；</p>
+<p>另一方面，如果设置的<strong>太小</strong>，重做日志文件太小会导致依据<code>checkpoint</code>的检查需要频繁刷新脏页到磁盘中，导致性能的抖动。</p>
+</blockquote>
+<h3 id="2-4-InnoDB逻辑存储结构"><a href="#2-4-InnoDB逻辑存储结构" class="headerlink" title="2.4 InnoDB逻辑存储结构"></a>2.4 InnoDB逻辑存储结构</h3><p>InnoDB存储引擎逻辑存储结构可分为五级：表空间、段、区、页、行。</p>
+<img src="https://static001.geekbang.org/infoq/71/715646b8db39a9537925e985c5140c70.png" style="zoom: 80%;" />
+
+<h4 id="1-表空间"><a href="#1-表空间" class="headerlink" title="1. 表空间"></a>1. 表空间</h4><p>从InnoDB存储引擎的逻辑存储结构看，所有数据都被逻辑地存放在一个空间中，称之为表空间(tablespace)。</p>
+<p>从功能上来看，InnoDB存储引擎的表空间分为系统表空间，独占表空间，通用表空间，临时表空间，Undo表空间。InnoDB 存储引擎有一个共享表空间，叫做系统表空间，在磁盘上的文件名为ibdata1。</p>
+<ul>
+<li><p>如果设置了独立表空间innodb_file_per_table=1，每张表的数据都会存储到一个独立的表空间，即一个单独的.ibd文件。</p>
 </li>
-</ol>
+<li><p>如果设置了参数innodb_file_per_table=0，关闭了独占表空间，则所有基于InnoDB存储引擎的表数据都会记录到系统表空间。</p>
 </li>
-</ol>
+</ul>
+<h4 id="2-段"><a href="#2-段" class="headerlink" title="2. 段"></a>2. 段</h4><p>表空间是由各个段组成的，常见的段有数据段、索引段、回滚段等。</p>
+<p>如果开启了独立表空间innodb_file_per_table=1，每张表的数据都会存储到一个独立的表空间，即一个单独的.ibd文件。</p>
+<p>一个用户表空间里面由很多个段组成，创建一个索引时会创建两个段：数据段和索引段。</p>
+<ul>
+<li><p>数据段存储着索引树中叶子节点的数据。</p>
 </li>
-<li><p>Sql interface</p>
-<p>DML, DDL, Stored procedures</p>
+<li><p>索引段存储着索引树中非叶子节点的数据。</p>
 </li>
-<li><p>parser</p>
+</ul>
+<p>一个段的空间大小是随着表的大小自动扩展的：表有多大，段就有多大。</p>
+<p>一个段会包含多个区，至少会有一个区，段扩展的最小单位是区。</p>
+<h4 id="3-区"><a href="#3-区" class="headerlink" title="3. 区"></a>3. 区</h4><p>一个区由64个<strong>连续</strong>的页组成，一个区的大小=1M=64个页(16K)。<strong>为了保证区中页的连续性</strong>，区扩展时InnoDB 存储引擎会一次性从磁盘申请4 ~ 5个区。</p>
+<h4 id="4-页"><a href="#4-页" class="headerlink" title="4. 页"></a>4. 页</h4><p><img src="https://img-blog.csdnimg.cn/20200705151425989.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3eDkwMDEwMg==,size_16,color_FFFFFF,t_70"></p>
+<p>InnoDB 每个页默认大小时是 16KB，页是 InnoDB管理磁盘的最小单位，也InnoDB中磁盘和内存交互的最小单位。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show global variables like &#39;innodb_page_size&#39;;</span><br></pre></td></tr></table></figure>
+
+<p>索引树上一个节点就是一个页，MySQL规定一个页上最少存储2个数据项。</p>
+<ul>
+<li><p>如果向一个页插入数据时，这个页已将满了，就会从区中分配一个新页。</p>
 </li>
-<li><p>optimizer</p>
+<li><p>如果向索引树叶子节点中间的一个页中插入数据，如果这个页是满的，就会发生页分裂。</p>
 </li>
-<li><p>cacehs &amp; buffers</p>
-</li>
-</ol>
+</ul>
+<p>操作系统管理磁盘的最小单位也是页，是操作系统读写磁盘最小单位，Linux中页一般是4K，可以通过命令查看。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">默认 4096 4K </span></span><br><span class="line">\&gt; getconf PAGE_SIZE</span><br></pre></td></tr></table></figure>
+
+<p>所以InnoDB从磁盘中</p>
+<ul>
+<li>读取一个数据页时，操作系统会<strong>分4次</strong>从磁盘文件中读取数据到内存。</li>
+<li>写入也是一样的，需要<strong>分4次</strong>从内存写入到磁盘中。</li>
+</ul>
+<h4 id="5-行"><a href="#5-行" class="headerlink" title="5. 行"></a>5. 行</h4><p>InnoDB的数据是以行为单位存储的，1个页中包含多个行。在MySQL5.7中，InnoDB提供了4种行格式：Compact、Redundant、Dynamic和Compressed行格式，Dynamic为MySQL5.7默认的行格式。InnoDB行格式官网：<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/innodb-row-format.html">https://dev.mysql.com/doc/refman/5.7/en/innodb-row-format.html</a></p>
+<p>创建表时可以指定行格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE t1 (c1 INT) ROW_FORMAT&#x3D;DYNAMIC; </span><br><span class="line"></span><br><span class="line">ALTER TABLE tablename ROW_FORMAT&#x3D;行格式名称; </span><br><span class="line"></span><br><span class="line">\#修改默认行格式 </span><br><span class="line"></span><br><span class="line">SET GLOBAL innodb_default_row_format&#x3D;DYNAMIC; </span><br><span class="line"></span><br><span class="line">\#查看表行格式 </span><br><span class="line"></span><br><span class="line">SHOW TABLE STATUS LIKE &#39;student&#39;\G; </span><br></pre></td></tr></table></figure>
+
 
       
     </div>

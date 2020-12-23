@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">40</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -240,6 +240,262 @@
       
 
       
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/04/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/apache-http-client%E5%BC%95%E8%B5%B7%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%81%87%E6%AD%BB%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/04/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/apache-http-client%E5%BC%95%E8%B5%B7%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%81%87%E6%AD%BB%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">apache http client引起的线程假死or卡死问题</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-04 13:47:46" itemprop="dateCreated datePublished" datetime="2020-11-04T13:47:46+08:00">2020-11-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-02 18:09:22" itemprop="dateModified" datetime="2020-12-02T18:09:22+08:00">2020-12-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><p>如何一步一步找到问题的原因是假死<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/baomw/article/details/84070428?utm_medium=distribute.pc_relevant_bbs_down.none-task--2~all~first_rank_v2~rank_v28-3.nonecase&amp;depth_1-utm_source=distribute.pc_relevant_bbs_down.none-task--2~all~first_rank_v2~rank_v28-3.nonecase">https://blog.csdn.net/baomw/article/details/84070428?utm_medium=distribute.pc_relevant_bbs_down.none-task--2~all~first_rank_v2~rank_v28-3.nonecase&amp;depth_1-utm_source=distribute.pc_relevant_bbs_down.none-task--2~all~first_rank_v2~rank_v28-3.nonecase</a></p>
+</li>
+<li><p>详细指令的参数说明，并且有详细脚本：<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wyb628/p/8566337.html">https://www.cnblogs.com/wyb628/p/8566337.html</a></p>
+</li>
+<li><p>jstack返回的详细解释：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_38451161/article/details/98035500">https://blog.csdn.net/weixin_38451161/article/details/98035500</a></p>
+</li>
+<li><p>http client的死锁原因深究，以及如何查看git官网的bug修复通知<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/549294286/p/11241277.html">https://www.cnblogs.com/549294286/p/11241277.html</a></p>
+</li>
+<li><p>http client 无限卡死的原因<br><a target="_blank" rel="noopener" href="https://www.oschina.net/question/2298861_240814">https://www.oschina.net/question/2298861_240814</a><br><a target="_blank" rel="noopener" href="https://www.oschina.net/question/2272252_2176034">https://www.oschina.net/question/2272252_2176034</a></p>
+</li>
+<li><p>http client 无限卡死的解决方法：设置3个超时时间，并且在spirng中的设置;<br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/403d75d310e8">https://www.jianshu.com/p/403d75d310e8</a></p>
+</li>
+</ol>
+<p>思考：</p>
+<ol>
+<li>什么是假死？</li>
+<li>Socket timeout 会stuck，而且如果不设置timeout, 那么不抛出异常</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/04/hexo/hexo-next-%E6%95%99%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/04/hexo/hexo-next-%E6%95%99%E7%A8%8B/" class="post-title-link" itemprop="url">hexo next 教程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2020-11-04 08:38:19 / Modified: 08:41:29" itemprop="dateCreated datePublished" datetime="2020-11-04T08:38:19+08:00">2020-11-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><p>设定主题sheme<br><a target="_blank" rel="noopener" href="https://doingself.github.io/2017/06/16/2017-06-16-Hexo%E4%B8%BB%E9%A2%98-NexT-%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/">https://doingself.github.io/2017/06/16/2017-06-16-Hexo%E4%B8%BB%E9%A2%98-NexT-%E4%BD%BF%E7%94%A8%E6%80%BB%E7%BB%93/</a></p>
+</li>
+<li><p>添加分类categories,标签tags<br><a target="_blank" rel="noopener" href="https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/">https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/</a></p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/27/leetcode/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-leetcode-835-Image-Overlap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/27/leetcode/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98-leetcode-835-Image-Overlap/" class="post-title-link" itemprop="url">leetcode 835. Image Overlap</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-27 23:10:57" itemprop="dateCreated datePublished" datetime="2020-10-27T23:10:57+08:00">2020-10-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-11-04 09:30:07" itemprop="dateModified" datetime="2020-11-04T09:30:07+08:00">2020-11-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/algorithm/" itemprop="url" rel="index"><span itemprop="name">algorithm</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>思路：</p>
+<ol>
+<li>最主要的是要有对称的思想，然后是放弃复杂的x-y的坐标系概念，使用相对位移的概念来判断数组的起始位置，从左上部的图开始看，会比较好理解位置关系</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
     
 
 
@@ -888,268 +1144,6 @@
 <li>父类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
 <li>子类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
 </ol>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">java ThreadLocal底层原理以及内存溢出问题</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-12-03 12:11:55" itemprop="dateModified" datetime="2020-12-03T12:11:55+08:00">2020-12-03</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>它山之石可以攻玉</p>
-<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/129607326">https://zhuanlan.zhihu.com/p/129607326</a></li>
-</ol>
-<h3 id="首先从内存模型的角度讨论ThreadLocal的存在价值"><a href="#首先从内存模型的角度讨论ThreadLocal的存在价值" class="headerlink" title="首先从内存模型的角度讨论ThreadLocal的存在价值"></a>首先从内存模型的角度讨论ThreadLocal的存在价值</h3><ol>
-<li>多线程可以通过jvm的堆，同时读写共享变量，但是会出现并发问题</li>
-<li>为了解决1中的并发问题，可以使用局部变量，因为局部变量会存储在线程中的栈帧中，但是局部变量不能被一个线程中的多个方法共享</li>
-<li>为了解决2中的多个方法不能共享局部变量问题，可以使用ThreadLocal</li>
-</ol>
-<h3 id="然后讨论ThreadLocal的底层原理"><a href="#然后讨论ThreadLocal的底层原理" class="headerlink" title="然后讨论ThreadLocal的底层原理"></a>然后讨论ThreadLocal的底层原理</h3><ol>
-<li>ThreadLocal的set(T value)和get()方法，本质上是要获取当前线程的ThreadLocalMap (其实就是该线程的 ThreadLocal[]  数组)</li>
-<li>jdk使用ThreadLocal的内部类, ThreadLocalMaps对 ThreadLocal[ ]数组进行了封装</li>
-<li>ThreadLocalMap内部维护了Entry[ ] 数组, Entry是ThreadLocalMap的内部类</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/13/leetcode/Contains-Duplicate-III/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/13/leetcode/Contains-Duplicate-III/" class="post-title-link" itemprop="url">Contains Duplicate III</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2020-10-13 08:39:37 / Modified: 08:40:23" itemprop="dateCreated datePublished" datetime="2020-10-13T08:39:37+08:00">2020-10-13</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/08/hexo/hexo-%E5%AF%B9post%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E6%A1%A3%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB/" class="post-title-link" itemprop="url">hexo:对post目录下的文档进行分类</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-08 21:09:00" itemprop="dateCreated datePublished" datetime="2020-10-08T21:09:00+08:00">2020-10-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-11-04 13:48:59" itemprop="dateModified" datetime="2020-11-04T13:48:59+08:00">2020-11-04</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>它山之石可以攻玉</p>
-<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
-<li><p><a target="_blank" rel="noopener" href="https://zhihu.com/question/53546025">Https://zhihu.com/question/53546025</a></p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/">https://whx4j8.github.io/2016/03/16/hexo-next-%E6%B7%BB%E5%8A%A0%E4%B8%BA%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E5%88%86%E7%B1%BB/</a></p>
-</li>
-</ol>
-<ol>
-<li><p>手动分类</p>
-<ol>
-<li>md文件的存储位置与生成的html灭有关系, 只要放在post目录下即可</li>
-<li>手动创建子目录，并且手动把不同类型的md文件放进不同类型的子目录即可</li>
-</ol>
-</li>
-<li><p>使用JavaScript代码自动分类</p>
-</li>
-<li><p>使用next的theme主题进行分类，见ref 2</p>
 </li>
 </ol>
 
