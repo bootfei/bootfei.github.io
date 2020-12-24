@@ -43,7 +43,7 @@
 <meta property="og:image" content="https://i.loli.net/2019/11/25/7kvL1X9HYEbDeAS.png">
 <meta property="og:image" content="https://img2020.cnblogs.com/blog/1839532/202003/1839532-20200304170117335-1515287700.png">
 <meta property="article:published_time" content="2020-12-23T04:15:53.000Z">
-<meta property="article:modified_time" content="2020-12-23T10:18:34.250Z">
+<meta property="article:modified_time" content="2020-12-23T10:33:26.163Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="java">
 <meta name="twitter:card" content="summary">
@@ -211,7 +211,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-count">41</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -290,7 +290,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2020-12-23 12:15:53 / Modified: 18:18:34" itemprop="dateCreated datePublished" datetime="2020-12-23T12:15:53+08:00">2020-12-23</time>
+      <time title="Created: 2020-12-23 12:15:53 / Modified: 18:33:26" itemprop="dateCreated datePublished" datetime="2020-12-23T12:15:53+08:00">2020-12-23</time>
     </span>
 
   
@@ -465,25 +465,7 @@
 <ul>
 <li>把新生代分为一块较大的Eden空间和两块较小的Survivor空间,每次分配内存只使用Eden和其中一块Survivor。</li>
 <li>发生垃圾搜集时,将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上,然后直接清理掉Eden和已用过的那块Survivor空间。</li>
-<li>当Survivor空间不足以容纳一次Minor GC之后存活的对象时,就需要依赖其他内存区域(大多是老年代)进行分配担保(Handle Promotion)(Suvivor无法容纳的对象直接送入老年代)。</li>
-</ul>
-<p>分配担保：<br>发生Minor GC前，虚拟机必须先检查老年代最大可用的连续空间是否 &gt; 新生代所有对象总空间</p>
-<ul>
-<li><p>是：Minor GC确保安全</p>
-</li>
-<li><p>否：虚拟机会查看</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:HandlePromotionFailure</span><br></pre></td></tr></table></figure>
-
-<p>参数的设置值是否允许担保失败</p>
-<ul>
-<li>允许担保失败：检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小<ul>
-<li>大于：尝试进行一次Minor GC(存在风险) 若失败，则进行一次Full GC</li>
-<li>小于：进行一次Full GC</li>
-</ul>
-</li>
-<li>不允许担保失败：进行一次Full GC</li>
-</ul>
-</li>
+<li>当Survivor空间不足以容纳一次Minor GC之后存活的对象时,就需要依赖其他内存区域(大多是老年代)进行分配担保(Handle Promotion)(Suvivor无法容纳的对象直接送入老年代)。<!--分配担保：见3.6.5章节--></li>
 </ul>
 <p>注：HotSpot虚拟机默认新生代中的Eden和Survivor的大小比例是8∶1,也即每次新生代中可用内存空间为整个新生代容量的90%。</p>
 <h3 id="4-标记——整理算法"><a href="#4-标记——整理算法" class="headerlink" title="4. 标记——整理算法"></a>4. 标记——整理算法</h3><p>针对老年代对象的存亡特征,1974年Edward Lueders提出了另外一种有针对性的”标记-整理”(Mark-Compact)算法,其中的标记过程仍然与”标记-清除”算法一样,但后续步骤不是直接对可回收对象进行清理,而是让所有存活的对象都向内存空间一端移动,然后直接清理掉边界以外的内存。</p>
@@ -689,6 +671,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2020/12/23/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter7-%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" rel="next" title="chapter7:虚拟机类加载机制">
+                  chapter7:虚拟机类加载机制 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>

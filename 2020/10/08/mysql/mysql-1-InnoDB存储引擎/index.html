@@ -24,24 +24,26 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
-  <meta name="description" content="InnoDB存储引擎1. InnoDB架构图  上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由内存池，后台线程和磁 盘文件三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。 2. InnoDB磁盘文件 InnoDB的主要的磁盘文件主要分为三大块：系统表空间，用户表空间，redo日志文件和归档文件。 二进制文件(binlog)等文件是MySQL Serv">
+  <meta name="description" content="InnoDB存储引擎1. InnoDB架构图  上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由内存池，后台线程和磁 盘文件三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。 2. InnoDB磁盘文件 InnoDB的主要的磁盘文件主要分为三大块：系统表空间，用户表空间，redo日志文件和归档文件。 二进制文件(binlog)等文件是MySQL Se">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql - 1.InnoDB存储引擎">
 <meta property="og:url" content="http://example.com/2020/10/08/mysql/mysql-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/index.html">
 <meta property="og:site_name" content="BootFei&#39;s Blog">
-<meta property="og:description" content="InnoDB存储引擎1. InnoDB架构图  上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由内存池，后台线程和磁 盘文件三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。 2. InnoDB磁盘文件 InnoDB的主要的磁盘文件主要分为三大块：系统表空间，用户表空间，redo日志文件和归档文件。 二进制文件(binlog)等文件是MySQL Serv">
+<meta property="og:description" content="InnoDB存储引擎1. InnoDB架构图  上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由内存池，后台线程和磁 盘文件三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。 2. InnoDB磁盘文件 InnoDB的主要的磁盘文件主要分为三大块：系统表空间，用户表空间，redo日志文件和归档文件。 二进制文件(binlog)等文件是MySQL Se">
 <meta property="og:locale">
-<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg">
 <meta property="og:image" content="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg">
 <meta property="og:image" content="https://imgedu.lagou.com/6feb838308f34b0791c07a2b2b157fcf.jpg">
 <meta property="og:image" content="https://static001.geekbang.org/infoq/71/715646b8db39a9537925e985c5140c70.png">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200705151425989.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3eDkwMDEwMg==,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://imgedu.lagou.com/b04f46ad272941eea7621ce9cdecc242.jpg">
+<meta property="og:image" content="https://i2.wp.com/img-blog.csdnimg.cn/20200514195017835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p4eWx3ag==,size_16,color_FFFFFF,t_70">
 <meta property="article:published_time" content="2020-10-08T07:59:03.000Z">
-<meta property="article:modified_time" content="2020-12-23T06:27:45.604Z">
+<meta property="article:modified_time" content="2020-12-24T05:46:24.731Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="mysql">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg">
+<meta name="twitter:image" content="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg">
 
 
 <link rel="canonical" href="http://example.com/2020/10/08/mysql/mysql-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/">
@@ -191,7 +193,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.</span> <span class="nav-text">InnoDB存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-InnoDB%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.1.</span> <span class="nav-text">1. InnoDB架构图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-InnoDB%E7%A3%81%E7%9B%98%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">2. InnoDB磁盘文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E7%B3%BB%E7%BB%9F%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 系统表空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E7%94%A8%E6%88%B7%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 用户表空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-redo%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 redo日志文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%E6%98%AF%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%EF%BC%9F"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">哪些文件是重做日志文件？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">重做日志文件的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%BB%84%E5%A6%82%E4%BD%95%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">重做日志文件组如何写入数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.2.3.4.</span> <span class="nav-text">设置重做日志文件大小</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-InnoDB%E9%80%BB%E8%BE%91%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 InnoDB逻辑存储结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">1. 表空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%AE%B5"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">2. 段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%8C%BA"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">3. 区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E9%A1%B5"><span class="nav-number">1.2.4.4.</span> <span class="nav-text">4. 页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E8%A1%8C"><span class="nav-number">1.2.4.5.</span> <span class="nav-text">5. 行</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.</span> <span class="nav-text">InnoDB存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-InnoDB%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.1.</span> <span class="nav-text">1. InnoDB架构图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-InnoDB%E7%A3%81%E7%9B%98%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">2. InnoDB磁盘文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E7%B3%BB%E7%BB%9F%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 系统表空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E7%94%A8%E6%88%B7%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 用户表空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-redo%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 redo日志文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%93%AA%E4%BA%9B%E6%96%87%E4%BB%B6%E6%98%AF%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%EF%BC%9F"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">哪些文件是重做日志文件？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">重做日志文件的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%BB%84%E5%A6%82%E4%BD%95%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">重做日志文件组如何写入数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%87%8D%E5%81%9A%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.2.3.4.</span> <span class="nav-text">设置重做日志文件大小</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-InnoDB%E9%80%BB%E8%BE%91%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 InnoDB逻辑存储结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">1. 表空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%AE%B5"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">2. 段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%8C%BA"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">3. 区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E9%A1%B5"><span class="nav-number">1.2.4.4.</span> <span class="nav-text">4. 页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E8%A1%8C"><span class="nav-number">1.2.4.5.</span> <span class="nav-text">5. 行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-InnoDB%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">3 InnoDB内存结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Buffer-Pool"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 Buffer Pool</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%A1%B5%E5%92%8C%E7%B4%A2%E5%BC%95%E9%A1%B5"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">数据页和索引页</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E7%BC%93%E5%86%B2"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">插入缓冲</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E9%80%82%E5%BA%94%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">自适应哈希索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%81%E4%BF%A1%E6%81%AF"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">锁信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%97%E5%85%B8%E4%BF%A1%E6%81%AF"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">数据字典信息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Redo-log-buffer"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 Redo log buffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Double-Write"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.3 Double Write</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-InnoDB%E5%86%85%E5%AD%98%E8%90%BD%E7%9B%98%E8%BF%87%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">4. InnoDB内存落盘过程</span></a></li></ol></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -205,7 +207,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-count">41</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -290,7 +292,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-12-23 14:27:45" itemprop="dateModified" datetime="2020-12-23T14:27:45+08:00">2020-12-23</time>
+        <time title="Modified: 2020-12-24 13:46:24" itemprop="dateModified" datetime="2020-12-24T13:46:24+08:00">2020-12-24</time>
       </span>
 
   
@@ -303,7 +305,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="1-InnoDB架构图"><a href="#1-InnoDB架构图" class="headerlink" title="1. InnoDB架构图"></a>1. InnoDB架构图</h2><img src="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg" style="zoom: 67%;" />
+        <img src="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg" style="zoom: 67%;" />
+
+<h1 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h1><h2 id="1-InnoDB架构图"><a href="#1-InnoDB架构图" class="headerlink" title="1. InnoDB架构图"></a>1. InnoDB架构图</h2><img src="https://tva1.sinaimg.cn/large/007S8ZIlgy1ghu7wvkdxyj30jg0eyq6j.jpg" style="zoom: 67%;" />
 
 <p>上图详细显示了InnoDB存储引擎的体系架构，从图中可见，InnoDB存储引擎由<strong>内存池，后台线程和磁</strong></p>
 <p><strong>盘文件</strong>三大部分组成。接下来我们就来简单了解一下内存相关的概念和原理。</p>
@@ -311,9 +315,7 @@
 <p>InnoDB的主要的磁盘文件主要分为三大块：<strong>系统表空间</strong>，<strong>用户表空间</strong>，redo日志文件和归档文件。</p>
 <p>二进制文件(binlog)等文件是MySQL Server层维护的文件，所以未列入InnoDB的磁盘文件中。</p>
 </blockquote>
-<h3 id="2-1-系统表空间"><a href="#2-1-系统表空间" class="headerlink" title="2.1 系统表空间"></a>2.1 系统表空间</h3><img src="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg" style="zoom: 67%;" />
-
-<img src="https://imgedu.lagou.com/6feb838308f34b0791c07a2b2b157fcf.jpg" style="zoom: 50%;" />
+<h3 id="2-1-系统表空间"><a href="#2-1-系统表空间" class="headerlink" title="2.1 系统表空间"></a>2.1 系统表空间</h3><img src="https://imgedu.lagou.com/6feb838308f34b0791c07a2b2b157fcf.jpg" style="zoom: 50%;" />
 
 <p>系统表空间存储哪些数据？</p>
 <blockquote>
@@ -410,6 +412,106 @@
 <p>创建表时可以指定行格式：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE t1 (c1 INT) ROW_FORMAT&#x3D;DYNAMIC; </span><br><span class="line"></span><br><span class="line">ALTER TABLE tablename ROW_FORMAT&#x3D;行格式名称; </span><br><span class="line"></span><br><span class="line">\#修改默认行格式 </span><br><span class="line"></span><br><span class="line">SET GLOBAL innodb_default_row_format&#x3D;DYNAMIC; </span><br><span class="line"></span><br><span class="line">\#查看表行格式 </span><br><span class="line"></span><br><span class="line">SHOW TABLE STATUS LIKE &#39;student&#39;\G; </span><br></pre></td></tr></table></figure>
 
+
+
+<h2 id="3-InnoDB内存结构"><a href="#3-InnoDB内存结构" class="headerlink" title="3 InnoDB内存结构"></a>3 InnoDB内存结构</h2><h3 id="3-1-Buffer-Pool"><a href="#3-1-Buffer-Pool" class="headerlink" title="3.1 Buffer Pool"></a>3.1 Buffer Pool</h3><blockquote>
+<p>InnoDB存储引擎是基于磁盘存储的，并将其中的记录按照页的方式进行管理。但是由于CPU速度和磁盘速度之间的鸿沟，基于磁盘的数据库系统通常使用<strong>缓冲池</strong>记录来提高数据库的的整体性能。</p>
+</blockquote>
+<p>所以，缓冲池的大小直接影响着数据库的整体性能，可以通过配置参数 <code>innodb_buffer_pool_size</code>来设置。</p>
+<blockquote>
+<p>具体来看，缓冲池中缓存的数据页类型有：</p>
+<p><strong><code>索引页</code>**、</strong><code>数据页</code>**、</p>
+<p>**<code>undo页</code>**、</p>
+<p>**<code>插入缓冲(insert buffer)</code>**、</p>
+<p>**<code>自适应哈希索引(adaptive hash index)</code>**、</p>
+<p><strong><code>InnoDB存储的锁信息(lock info)</code></strong></p>
+<p><strong><code>数据字典信息(data dictionary)</code></strong></p>
+</blockquote>
+<p>在架构图上可以看到，InnoDB存储引擎的内存区域除了有**<code>缓冲池</code><strong>之外，还有</strong><code>redo log buffer</code><strong>和</strong>额外内存池**。</p>
+<blockquote>
+<p>InnoDB存储引擎首先将<strong>redo日志信息</strong>先放到这个缓冲区中，然后按照一定频率将其刷新到<code>redo日志文件</code>中。<code>redo log buffer</code>一般不需要设置的很大</p>
+</blockquote>
+<p>该值可由配置参数 <code>innodb_log_buffer_size</code> 控制。</p>
+<h4 id="数据页和索引页"><a href="#数据页和索引页" class="headerlink" title="数据页和索引页"></a><strong>数据页和索引页</strong></h4><p>InnoDB存储引擎工作时，需要以<strong>Page ** **页</strong>为最小单位去将磁盘中的数据加载到内存中，与数据库相关的所有内容都存储在Page结构里。</p>
+<p>Page分为几种类型，数据页和索引页就是其中最为重要的两种类型。</p>
+<h4 id="插入缓冲"><a href="#插入缓冲" class="headerlink" title="插入缓冲"></a><strong>插入缓冲</strong></h4><blockquote>
+<p>主要针对**<code>次要索引</code>**的数据插入存在的问题而设计。</p>
+</blockquote>
+<p>我们都知道，<strong>在InnoDB引擎上进行插入操作时，一般需要按照主键顺序进行插入，这样才能获得较高的插入性能。</strong></p>
+<p>当一张表中存在<strong>次要索引</strong>时，在插入时，数据页的存放还是按照主键进行顺序存放，但是对于次要索引叶节点的插入不再是顺序的了，这时就需要离散的访问**<code>次要索引页</code>**，由于随机读取的存在导致插入操作性能下降。</p>
+<p>InnoDB为此设计了**<code>Insert Buffer</code><strong>来进行插入优化。对于次要索引的插入或者更新操作，不是每一次都直接插入到</strong><code>索引页</code><strong>中，而是先判断插入的非主键索引是否在</strong><code>缓冲池</code>**中，</p>
+<ul>
+<li>若在，则直接插入到**<code>缓冲池</code>**中</li>
+<li>若不在，则先放入到一个**<code>Insert Buffer</code>**中。</li>
+</ul>
+<p>看似数据库这个非主键的索引已经插到叶节点，而实际没有，这时存放在另外一个位置。然后再以一定的频率和情况进行**<code>Insert Buffer</code>**和非聚簇索引页子节点的合并操作。这时通常能够将多个插入合并到一个操作中，这样就大大提高了对于非聚簇索引的插入性能。</p>
+<h4 id="自适应哈希索引"><a href="#自适应哈希索引" class="headerlink" title="自适应哈希索引"></a><strong>自适应哈希索引</strong></h4><p>InnoDB会根据访问的频率和模式，为热点页建立哈希索引，来提高查询效率。</p>
+<blockquote>
+<p>哈希(hash)是一种非常快的查找方法,在一般情况下这种查找的时间复杂度为O(1),即一般仅需要一次查找就能定位数据。而B+树的查找次数,取决于B+树的高度,在生产环境中,B+树的高度一般为3<del>4层,故需要3</del>4次的查询。</p>
+</blockquote>
+<p>InnoDB存储引擎会监控对表上各索引页的查询。如果观察到建立哈希索引可以带来速度提升,则建立哈希索引,称之为<code>自适应哈希索引</code>(Adaptive Hash Index,AHI) AHI是通过**<code>缓冲池</code>**的B+树页构造而来,因此建立的速度很快,而且不需要对整张表构建哈希索引。</p>
+<p> InnoDB存储引擎会自动根据访问的频率和模式来自动地为某些热点页建立哈希索引。</p>
+<p>AHI有一个要求,即对这个页的连续访问模式必须是一样的。例如对于(a,b)这样的联合索引页,其访问模式可以是以下情况:</p>
+<ul>
+<li><p>WHERE a=xxx</p>
+</li>
+<li><p>WHERE a= xxx and b=xxx</p>
+</li>
+</ul>
+<p>访问模式一样指的是査询的条件一样,若交替进行上述两种查询,那么 InnoDB存储引擎不会对该页构造AH此外AH还有如下的要求:</p>
+<ul>
+<li><p>以该模式访问了100次</p>
+</li>
+<li><p>页通过该模式访问了N次,其中=页中记录*1/16</p>
+</li>
+</ul>
+<p>根据 InnoDB存储引擎官方的文档显示,启用AHI后,读取和写入速度可以提高2倍,辅助索引的连接操作性能可以提高5倍。毫无疑问,AHI是非常好的优化模式,其设计思想是数据库自优化的(self-tuning),即无需DBA对数据库进行人为调整。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show engine innodb status \G </span><br></pre></td></tr></table></figure>
+
+<p>可以通过参数innodb_adaptive_hash_index来考虑禁用或启动此特性，默认是开启状态。</p>
+<h4 id="锁信息"><a href="#锁信息" class="headerlink" title="锁信息"></a><strong>锁信息</strong></h4><p>我们都知道，InnoDB存储引擎默认使用**<code>行锁</code>**。不过InnoDB也会在数据库内部其他很多地方使用锁，从而允许对多种不同资源提供并发访问。数据库系统使用锁是为了支持对共享资源进行并发访问，提供数据的完整性和一致性。关于锁的具体知识我们之后再进行详细学习。</p>
+<h4 id="数据字典信息"><a href="#数据字典信息" class="headerlink" title="数据字典信息"></a><strong>数据字典信息</strong></h4><p>InnoDB有自己的表缓存，可以称为表定义缓存或者数据字典(Data Dictionary)。当InnoDB打开一张表，就增加一个对应的对象到数据字典。</p>
+<p>数据字典是对数据库中的数据、库对象、表对象等的元信息的集合。在MySQL中，数据字典信息内容就包括表结构、数据库名或表名、字段的数据类型、视图、索引、表字段信息、存储过程、触发器等内容。MySQL INFORMATION_SCHEMA库提供了对数据局元数据、统计信息、以及有关MySQL server的访问信息（例如：数据库名或表名，字段的数据类型和访问权限等）。该库中保存的信息也可以称为MySQL的数据字典。</p>
+<h3 id="3-2-Redo-log-buffer"><a href="#3-2-Redo-log-buffer" class="headerlink" title="3.2 Redo log buffer"></a>3.2 Redo log buffer</h3><p>当<code>Buffer Pool</code>中的<code>page</code>的版本比磁盘要新时，数据库需要将新版本的<code>page</code>从<code>Buffer Pool</code>刷新到磁盘。但是如果每次一个<code>page</code>发送变化，就进行刷新，那么性能开发是非常大的。<!--出现了性能问题--></p>
+<p>于是InnoDB采用了<code>Write Ahead Log</code>策略，即当事务提交时，先写<code>redo log file</code>，然后再择时将脏页写入磁盘。如果发生宕机导致数据丢失，就通过<code>redo log file</code>进行数据恢复。<!--解决该性能问题的思路--></p>
+<img src="https://imgedu.lagou.com/b04f46ad272941eea7621ce9cdecc242.jpg" alt="InnoDB数据写入示意图" style="zoom:67%;" />
+
+
+
+<p>InnoDB存储引擎会首先将**<code>redo log file</code><strong>先放入</strong><code>redo log buffer</code><strong>中，然后再按照一定频率将其刷新到</strong><code>redo log file</code>**。注意，日志都是顺序写入磁盘。<!--redo log buffer落盘到磁盘的持久化过程--></p>
+<p><code>redo log buffer</code>一般不需要设置得很大，因为一般情况每一秒钟都会讲重做日志缓冲刷新到日志文件中。可通过配置参数<code>innodb_log_buffer_size</code>控制，默认为8MB。<!--redo log buffer落盘时的性能调优--></p>
+<p>InnoDB是事务的存储引擎，其通过Force Log at Commit机制实现事务的持久性，即当事务提交时，必须先将该事务的所有日志写入到重做日志文件进行持久化，然后事务的提交操作完成才算完成。</p>
+<p>为了确保每次日志都写入到重做日志文件，在每次讲重做日志缓冲写入重做日志后，必须调用一次fsync操作，将缓冲文件从文件系统缓存中真正写入磁盘。</p>
+<p>redolog落盘有三种方式：<code>innodb_flush_log_at_trx_commit</code> </p>
+<ul>
+<li><p>0：每秒落盘一次</p>
+</li>
+<li><p>1：事务提交时落盘（默认且最靠谱）</p>
+</li>
+<li><p>2：把redolog的落盘交给操作系统，没有调用fsync。</p>
+</li>
+</ul>
+<blockquote>
+<p>0、2都有可能丢失数据，性能比1情况高。设置为0时，性能最高，但是丧失了事务的一致性。</p>
+</blockquote>
+<h3 id="3-3-Double-Write"><a href="#3-3-Double-Write" class="headerlink" title="3.3 Double Write"></a>3.3 Double Write</h3><p>如果说<code>Insert Buffer</code>给InnoDB存储引擎带来了性能上的提升，那么<code>Double Write</code>带给InnoDB存储引擎的是数据页的可靠性。</p>
+<p><code>redo log buffer</code>中记录的是数据页中做哪些修改，并不记录数据页的完整内容。<!--解释了可靠性的机制--><br>脏页落盘时，在系统表空间中对数据页做一个备份。如果出现**<code>用户表空间</code><strong>数据页损坏的情况可以使用</strong><code>系统表空间</code><strong>备份的数据页恢复。</strong><code>Double Write</code>**就是在脏页落盘过程中的一个缓冲。</p>
+<img src="https://i2.wp.com/img-blog.csdnimg.cn/20200514195017835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p4eWx3ag==,size_16,color_FFFFFF,t_70" alt="img" style="zoom:67%;" />
+
+<p><strong>Double Write由两部分组成，一部分是内存中的<code>double write buffer</code>，大小为2MB，另一部分是物理磁盘上共享表空间连续的128个页，大小也为2MB；</strong></p>
+<p>在对<code>Buffer pool</code>的脏页进行刷新时，并不直接写磁盘，而是通过memcpy函数将脏页先复制到内存中的<code>double write buffer</code>区域，之后通过<code>double write buffer</code>再分两次，每次1MB顺序地写入<strong>共享表空间</strong>的物理磁盘上，然后马上调用fsync函数，同步磁盘，避免操作系统缓冲写带来的问题；</p>
+<p>完成double write页的写入后，再将<code>double write buffer</code>中的页写入各个<code>用户表空间</code>文件中，如果操作系统在将页写入磁盘的过程中发生了崩溃，恢复过程时，InnoDB存储引擎可以从**<code>用户共享表空间</code>**中的<code>double write</code>中找到该页的一个副本，将其复制到<code>用户表空间</code>的数据文件中(.ibd)，再应用<code>Redo Log file</code>。</p>
+<h2 id="4-InnoDB内存落盘过程"><a href="#4-InnoDB内存落盘过程" class="headerlink" title="4. InnoDB内存落盘过程"></a>4. InnoDB内存落盘过程</h2><p>checkpoint：检查点，表示脏页写入到磁盘的时机，所以检查点也就意味着脏数据的写入。</p>
+<ul>
+<li>sharp checkpoint：在关闭数据库的时候，将buffer pool中的脏页全部刷新到磁盘中。</li>
+<li>fuzzy checkpoint：数据库正常运行时，在不同的时机，将部分脏页写入磁盘。<ul>
+<li>Master Thread Checkpoint；定期落盘会以每秒或者每10秒一次的频率</li>
+<li>FLUSH_LRU_LIST Checkpoint；通过lru算法淘汰内存的数据页，如果数据页是脏页就需要落盘。</li>
+<li>Async/Sync Flush Checkpoint；在redolog满了的情况。需要把redolog对于的脏页落盘，redolog就可以覆盖了。如果没有落盘的内容小于redolog的75%不执行落盘操作如果大于75%小于90%执行异步落盘。如果大于90%会执行同步落盘。在mysql 5.6之后，不管是Async Flush checkpoint还是Sync Flush checkpoint，都不会阻塞用户的查询进程。</li>
+<li>Dirty Page too much Checkpoint；内存中的脏页太多了会执行落盘操作。新版本中脏页达到75%会执行落盘操作，旧版本中90%会落盘</li>
+</ul>
+</li>
+</ul>
 
     </div>
 
