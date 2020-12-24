@@ -272,10 +272,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2020-12-23 18:42:39 / Modified: 19:34:41" itemprop="dateCreated datePublished" datetime="2020-12-23T18:42:39+08:00">2020-12-23</time>
+      <time title="Created: 2020-12-23 18:42:39" itemprop="dateCreated datePublished" datetime="2020-12-23T18:42:39+08:00">2020-12-23</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-24 16:20:11" itemprop="dateModified" datetime="2020-12-24T16:20:11+08:00">2020-12-24</time>
+      </span>
 
   
 </div>
@@ -289,14 +295,13 @@
     <div class="post-body" itemprop="articleBody">
           <p>代码编译的结果从本地机器码转变为字节码，是存储格式发展的一小步</p>
 <h2 id="7-1-概述"><a href="#7-1-概述" class="headerlink" title="7.1 概述"></a>7.1 概述</h2><p><strong>在Class文件中描述的各种信息，最终都需要加载到虚拟机中之后才能被运行和使用。</strong></p>
-<p>虚拟机把描述类的数据从<strong>Class文件加载到内存</strong>，并<strong>对数据进行校验</strong>、<strong>转换解析</strong>和<strong>初始化</strong>，最终形成可以被虚拟机<strong>直接使用的Java类型</strong>，这就是虚拟机的**<code>类加载机制</code>**。</p>
+<p>虚拟机把描述类的数据从<strong>Class文件加载到内存</strong>，并<strong>对数据进行校验</strong>、<strong>转换解析</strong>和<strong>初始化</strong>，最终形成可以被虚拟机<strong>直接使用的Java类型</strong>，这就是虚拟机的<code>类加载机制</code>。</p>
 <p>与那些在编译时需要进行连接工作的语言不同，在Java语言里面，类型的<code>加载</code>和<code>连接</code>过程都是在<code>程序运行期间</code>完成的，这样会在类加载时稍微增加一些性能开销，但是却能为Java应用程序提供高度的灵活性，</p>
 <p>Java中天生可以动态扩展的语言特性就是依赖<code>运行期动态加载</code>和<code>动态连接</code>这个特点实现的。例如，如果编写一个使用接口的应用程序，可以等到运行时再指定其实际的实现。</p>
-<p>为了避免语言表达中可能产生的偏差，在本章正式开始之前，笔者先设立两个语言上的约定：</p>
-<ul>
-<li>第一，在实际情况中，每个Class文件都有可能代表着Java语言中的一个类或接口，后文中直接对“类”的描述都包括了类和接口的可能性，而对于类和接口需要分开描述的场景会特别指明；</li>
-<li>第二，笔者所说的“Class文件”并非指Class必须是存在于具体磁盘中的某个文件，这里说的Class文件指的是一串二进制的字节流，无论以何种形式存在都可以。</li>
-</ul>
+<!--“Class文件”并非指Class必须是存在于具体磁盘中的某个文件，这里说的Class文件指的是一串二进制的字节流，无论以何种形式存在都可以。-->
+
+
+
 <h2 id="7-2-类加载的时机"><a href="#7-2-类加载的时机" class="headerlink" title="7.2 类加载的时机"></a>7.2 类加载的时机</h2><p>类从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期包括了：</p>
 <blockquote>
 <p>加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、</p>
@@ -477,7 +482,7 @@
 <p>·虚拟机会保证一个类的<clinit>()方法在多线程环境中被正确地加锁和同步，如果多个线程同时去初始化一个类，那么只会有一个线程去执行这个类的<clinit>()方法，其他线程都需要阻塞等待，直到活动线程执行<clinit>()方法完毕。如果在一个类的<clinit>()方法中有耗时很长的操作，那就可能造成多个进程阻塞，在实际应用中这种阻塞往往是很隐蔽的。代码清单7-6演示了这种场景。</p>
 <p>代码清单7-6　字段解析</p>
 <hr>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">static class DeadLoopClass &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        &#x2F;&#x2F; 如果不加上这个if语句，编译器将提示&quot;Initializer does not complete normally&quot;并拒绝编译</span><br><span class="line">        if (true) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread() + &quot;init DeadLoopClass&quot;);</span><br><span class="line">            while (true) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">public static void main(String[] args) &#123;</span><br><span class="line">    Runnable script &#x3D; new Runnable() &#123;</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            System.out.println(Thread.currentThread() + &quot;start&quot;);</span><br><span class="line">            DeadLoopClass dlc &#x3D; new DeadLoopClass();</span><br><span class="line">            System.out.println(Thread.currentThread() + &quot; run over&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    Thread thread1 &#x3D; new Thread(script);</span><br><span class="line">    Thread thread2 &#x3D; new Thread(script);</span><br><span class="line">    thread1.start();</span><br><span class="line">    thread2.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DeadLoopClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="comment">// 如果不加上这个if语句，编译器将提示&quot;Initializer does not complete normally&quot;并拒绝编译</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread() + <span class="string">&quot;init DeadLoopClass&quot;</span>);</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Runnable script = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(Thread.currentThread() + <span class="string">&quot;start&quot;</span>);</span><br><span class="line">            DeadLoopClass dlc = <span class="keyword">new</span> DeadLoopClass();</span><br><span class="line">            System.out.println(Thread.currentThread() + <span class="string">&quot; run over&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    Thread thread1 = <span class="keyword">new</span> Thread(script);</span><br><span class="line">    Thread thread2 = <span class="keyword">new</span> Thread(script);</span><br><span class="line">    thread1.start();</span><br><span class="line">    thread2.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
 <p>运行结果如下，一条线程正在死循环以模拟长时间操作，另外一条线程在阻塞等待：</p>
