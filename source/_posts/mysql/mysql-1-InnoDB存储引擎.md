@@ -275,9 +275,9 @@ InnoDB有自己的表缓存，可以称为表定义缓存或者数据字典(Data
 
 ### 3.2 Redo log buffer
 
-当`Buffer Pool`中的`page`的版本比磁盘要新时，数据库需要将新版本的`page`从`Buffer Pool`刷新到磁盘。但是如果每次一个`page`发送变化，就进行刷新，那么性能开发是非常大的，于是InnoDB采用了`Write Ahead Log`策略，
+当`Buffer Pool`中的`page`的版本比磁盘要新时，数据库需要将新版本的`page`从`Buffer Pool`刷新到磁盘。但是如果每次一个`page`发送变化，就进行刷新，那么性能开发是非常大的。<!--出现了性能问题-->
 
-> 即当事务提交时，先写`redo log file`，然后再择时将脏页写入磁盘。如果发生宕机导致数据丢失，就通过`redo log file`进行数据恢复。
+于是InnoDB采用了`Write Ahead Log`策略，即当事务提交时，先写`redo log file`，然后再择时将脏页写入磁盘。如果发生宕机导致数据丢失，就通过`redo log file`进行数据恢复。<!--解决该性能问题的思路-->
 
 
 
@@ -285,42 +285,49 @@ InnoDB有自己的表缓存，可以称为表定义缓存或者数据字典(Data
 
 
 
-InnoDB存储引擎会首先将**`redo log file`**先放入**`redo log buffer`**中，然后再按照一定频率将其刷新到**`redo log file`**。
+InnoDB存储引擎会首先将**`redo log file`**先放入**`redo log buffer`**中，然后再按照一定频率将其刷新到**`redo log file`**。注意，日志都是顺序写入磁盘。<!--redo log buffer落盘到磁盘的持久化过程-->
 
-`redo log buffer`一般不需要设置得很大，因为一般情况每一秒钟都会讲重做日志缓冲刷新到日志文件中。可通过配置参数`innodb_log_buffer_size`控制，默认为8MB。
+`redo log buffer`一般不需要设置得很大，因为一般情况每一秒钟都会讲重做日志缓冲刷新到日志文件中。可通过配置参数`innodb_log_buffer_size`控制，默认为8MB。<!--redo log buffer落盘时的性能调优-->
 
-除了每秒刷新机制之外，每次事务提交时重做日志缓冲也会刷新到日志中。InnoDB是事务的存储引擎，其通过Force Log at Commit机制实现事务的持久性，即当事务提交时，必须先将该事务的所有日志写入到重做日志文件进行持久化，然后事务的提交操作完成才算完成。InnoDB的写入机制大致入下图所示。
+InnoDB是事务的存储引擎，其通过Force Log at Commit机制实现事务的持久性，即当事务提交时，必须先将该事务的所有日志写入到重做日志文件进行持久化，然后事务的提交操作完成才算完成。
 
 为了确保每次日志都写入到重做日志文件，在每次讲重做日志缓冲写入重做日志后，必须调用一次fsync操作，将缓冲文件从文件系统缓存中真正写入磁盘。
 
-可以通过innodb_flush_log_at_trx_commit来控制重做日志刷新到磁盘的策略。该参数默认值为1，表示事务提交必须进行一次fsync操作，还可以设置为0和2。
+redolog落盘有三种方式：`innodb_flush_log_at_trx_commit` 
 
-- 0表示事务提交时不进行写入重做日志操作，该操作只在主线程中完成，
+- 0：每秒落盘一次
 
-- 2表示提交时写入重做日志，但是只写入文件系统缓存，不进行fsync操作。
+- 1：事务提交时落盘（默认且最靠谱）
 
-由此可见，设置为0时，性能最高，但是丧失了事务的一致性。
+- 2：把redolog的落盘交给操作系统，没有调用fsync。
+
+> 0、2都有可能丢失数据，性能比1情况高。设置为0时，性能最高，但是丧失了事务的一致性。
+>
 
 ### 3.3 Double Write
 
-如上图所示，InnoDB在缓冲池中变更数据时，会首先将相关变更写入重做日志缓冲中，然后再按时或者当事务提交时写入磁盘，这符合Force-log-at-commit原则；
+如果说`Insert Buffer`给InnoDB存储引擎带来了性能上的提升，那么`Double Write`带给InnoDB存储引擎的是数据页的可靠性。
 
-当重做日志写入磁盘后，缓冲池中的变更数据才会依据checkpoint机制择时写入到磁盘中，这符 合WAL原则。 
+`redo log buffer`中记录的是数据页中做哪些修改，并不记录数据页的完整内容。<!--解释了可靠性的机制-->
+脏页落盘时，在系统表空间中对数据页做一个备份。如果出现**`用户表空间`**数据页损坏的情况可以使用**`系统表空间`**备份的数据页恢复。**`Double Write`**就是在脏页落盘过程中的一个缓冲。
 
-在checkpoint择时机制中，就有重做日志文件写满的判断，所以，如前文所述，如果重做日志文件太小，经常被写满，就会频繁导致checkpoint将更改的数据写入磁盘，导致性能抖动。操作系统的文件系统是带有缓存的，当InnoDB向磁盘写入数据时，有可能只是写入到了文件系统的缓存中，没有真正的“落袋为安”。
+<img src="https://i2.wp.com/img-blog.csdnimg.cn/20200514195017835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p4eWx3ag==,size_16,color_FFFFFF,t_70" alt="img" style="zoom:67%;" />
 
-InnoDB的innodb_flush_log_at_trx_commit属性可以控制每次事务提交时InnoDB的行为。
+**Double Write由两部分组成，一部分是内存中的`double write buffer`，大小为2MB，另一部分是物理磁盘上共享表空间连续的128个页，大小也为2MB；**
 
-- 当属性值为0时，事务提交时，不会对重做日志进行写入操作，而是等待主线程按时写入每秒写入一次；
-- 当属性值为1时，事务提交时，会将重做日志写入文件系统缓存，并且调用文件系统的fsync，将文件系统缓冲中的数据真正写入磁盘存储，确保不会出现数据丢失；
-- 当属性值为2时，事务提交时，也会将日志文件写入文件系统缓存，但是不会调用fsync，而是让文件系统自己去判断何时将缓存写入磁盘。
+在对`Buffer pool`的脏页进行刷新时，并不直接写磁盘，而是通过memcpy函数将脏页先复制到内存中的`double write buffer`区域，之后通过`double write buffer`再分两次，每次1MB顺序地写入**共享表空间**的物理磁盘上，然后马上调用fsync函数，同步磁盘，避免操作系统缓冲写带来的问题；
 
-innodb_flush_log_at_commit是InnoDB性能调优的一个基础参数，涉及InnoDB的写入效率和数
+完成double write页的写入后，再将`double write buffer`中的页写入各个`用户表空间`文件中，如果操作系统在将页写入磁盘的过程中发生了崩溃，恢复过程时，InnoDB存储引擎可以从**`用户共享表空间`**中的`double write`中找到该页的一个副本，将其复制到`用户表空间`的数据文件中(.ibd)，再应用`Redo Log file`。
 
-据安全。当参数值为0时，写入效率最高，但是数据安全最低；参数值为1时，写入效率最低，但
 
-是数据安全最高；参数值为2时，二者都是中等水平。一般建议将该属性值设置为1，以获得较高
 
-的数据安全性，而且也只有设置为1，才能保证事务的持久性。
+## 4. InnoDB内存落盘过程
 
-日志的刷盘机制如下图所示：
+checkpoint：检查点，表示脏页写入到磁盘的时机，所以检查点也就意味着脏数据的写入。
+
+- sharp checkpoint：在关闭数据库的时候，将buffer pool中的脏页全部刷新到磁盘中。
+- fuzzy checkpoint：数据库正常运行时，在不同的时机，将部分脏页写入磁盘。
+  - Master Thread Checkpoint；定期落盘会以每秒或者每10秒一次的频率
+  - FLUSH_LRU_LIST Checkpoint；通过lru算法淘汰内存的数据页，如果数据页是脏页就需要落盘。
+  - Async/Sync Flush Checkpoint；在redolog满了的情况。需要把redolog对于的脏页落盘，redolog就可以覆盖了。如果没有落盘的内容小于redolog的75%不执行落盘操作如果大于75%小于90%执行异步落盘。如果大于90%会执行同步落盘。在mysql 5.6之后，不管是Async Flush checkpoint还是Sync Flush checkpoint，都不会阻塞用户的查询进程。
+  - Dirty Page too much Checkpoint；内存中的脏页太多了会执行落盘操作。新版本中脏页达到75%会执行落盘操作，旧版本中90%会落盘
