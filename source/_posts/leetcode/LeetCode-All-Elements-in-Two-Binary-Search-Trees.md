@@ -1,5 +1,5 @@
 ---
-title: 'LeetCode: All Elements in Two Binary Search Trees'
+itle: 'LeetCode: All Elements in Two Binary Search Trees'
 date: 2020-10-21 22:51:09
 tags:
 ---
