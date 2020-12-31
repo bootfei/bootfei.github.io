@@ -290,7 +290,7 @@ public interface ExecutorService extends Executor {
 
 > 程序清单 6-8 支持关闭操作的 Web 服务器：
 
-```
+```java
 // 支持关闭操作的 Web 服务器
 public class LifecycleWebServer {
     private final ExecutorService exec = Executors.newCachedThreadPool();
@@ -601,9 +601,9 @@ public abstract class FutureRenderer {
 
 `CompletionService` 将 `Executor` 和 `BlockingQueue` 的功能融合在一起。 你可以将 `Callable` 任务提交给它来执行，然后使用类似于队列操作的 `take` 和 `poll` 等方法来获得已完成的结果，而这些结果会在完成时被封装为 `Future`。
 
-`ExecutorCompletionService` 实现了 `CompletionService`，并将**「计算部分」**委托给了一个 `Executor`。
+`ExecutorCompletionService` 实现了 `CompletionService`，并将**「计算部分」**委托给了一个 `Executor`。<!--其实这块的设计，需要仔细想一下设计模式的概念，如果你想为一个类开发一个全新的功能，你会怎么做呢？JAVA的设计师使用了组合方法，计算部分仍然交给Executor，全新的功能交给CompletionService,那么CompletionService持有一个Exectuor对象即可-->
 
-`ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。
+`ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。<!--Executor有工作队列，现在ExcutorCompletionService多了个结果队列-->
 
 当计算完成时，调用 `FutureTask` 中的 `done` 方法。
 
@@ -640,7 +640,7 @@ public abstract class FutureRenderer {
 - 缩短总运行时间
 - 提高响应性
 
-为每一个图像的下载都创建一个「独立任务」，并在线程中执行它们，从而将「串行」的下载过程转变为「并行」过程 ——> 这将减少下载所有图像的总时间。
+为每一个图像的下载都创建一个「独立任务」，并在线程中执行它们，从而将「串行」的下载过程转变为「并行」过程。
 
 此外，通过从 `CompletionService` 中获取结果以及使每张图片在下载完成后「立刻」 显示出来，能使用户获得一个更加「动态」和「更高响应性」 的用户界面，如下面的代码所示：
 
@@ -683,11 +683,15 @@ public abstract class Renderer {
             throw LaunderThrowable.launderThrowable(e);
         }
     }
+  
+		interface ImageInfo {
+        ImageData downloadIamge();
+    }
 
 }
 ```
 
-多个 `ExecutorCompletionService` 可以 「共享」 一个 `Executor`。 因此可以创建一个对于「特定计算」私有，又能「共享」一个公共 `Executor` 的 `ExecutorCompletionService` 。因此，`CompletionService` 的作用就相当于一组**「计算句柄」**，这与 `Future` 作为单个计算句柄是非常类似的。 通过记录提交给 `CompletionService` 的任务数量，并计算出已经获得的已完成结果的数量，即使使用一个 「共享的」 `Executor`，也能知道已经获得了所有任务结果的「时间」。、
+多个 `ExecutorCompletionService` 可以 「共享」 一个 `Executor`。 因此可以创建一个对于「特定计算」私有，又能「共享」一个公共 `Executor` 的 `ExecutorCompletionService` 。因此，`CompletionService` 的作用就相当于一组**「计算句柄」**，这与 `Future` 作为单个计算句柄是非常类似的。 通过记录提交给 `CompletionService` 的任务数量，并计算出已经获得的已完成结果的数量，即使使用一个 「共享的」 `Executor`，也能知道已经获得了所有任务结果的「时间」。
 
 #### 6.3.7 为任务设置时限
 
@@ -699,7 +703,7 @@ public abstract class Renderer {
 
 在支持「时间限制」的 `Future.get` 中支持这种需求： 当结果可用时，它将立即返回，如果在指定时限内没有计算出结果，将抛出 `TimeoutException`。
 
-在使用时限任务时需要注意，当这些任务超时后应该 「立即停止」，从而避免为无效的任务浪费计算资源。 要实现这个功能，可以由 「任务本身」 来管理它自己的限定时间，并且在超时后 「中止」 或 「取消」 任务。
+在使用时限任务时需要注意，当这些任务超时后应该 「立即停止」，从而避免为无效的任务浪费计算资源。 要实现这个功能，可以由 「任务本身」 来管理它自己的限定时间，并且在超时后 「中止」 或 「取消」 任务。<!--这里，用"中止"和"取消"，比"放弃"任务更加准确，因为"中止"是java线程的一种状态-->
 
 此时可再次使用 `Future` ,如果一个限时的 `get` 方法抛出了 `TimeoutException` ,那么可以通过 `Future` 来取消任务。
 
@@ -757,15 +761,15 @@ public class RederWithTimeBudget {
 
 例如这样一个旅行预定门户网站：用户输入旅行的「日期」 和其他要求，门户网站获取并显示来自多条航线，旅店或汽车租赁公司的报价。
 
-在获取不同公司报价的过程中，可能会调用「Web服务」，「访问」 数据库，执行一个 EDI 事务或其他机制。在这种情况下，不应该让页面的响应时间 受限于 「最慢服务」的响应时间，而应该只显示在 「指定时间」内接收到的信息。 对于没有及时响应的服务提供者，页面可以忽略它们，或者显示一个提示信息，例如"未在指定时间内获取到 xxx 信息"。
+在获取不同公司报价的过程中，可能会调用「Web服务」，「访问」 数据库，执行一个 EDI 事务或其他机制。在这种情况下，不应该让页面的响应时间 受限于 「最慢服务」的响应时间，而应该只显示在 「指定时间」内接收到的信息。 对于没有及时响应的服务提供者，页面可以忽略它们，或者显示一个提示信息，例如"未在指定时间内获取到 xxx 信息"。<!--一组任务分解为多个任务上，并且抛弃超时的任务-->
 
-从一个公司获得报价的过程 与 从其他公司获得报价的过程无关。【也就是这些获得报价的任务是独立的】，因此可以将获取报价的过程当成「一个任务」，从而使获得报价的过程能「并发执行」。
+从一个公司获得报价的过程 与 从其他公司获得报价的过程无关。因此可以将获取报价的过程当成「一个任务」，从而使获得报价的过程能「并发执行」。
 
 创建 n 个任务，将其提交到一个线程池，保留 n 个 `Future`，并使用限时的 `get` 方法通过 `Future` 串行地获取每一个结果 ，这一切都很简单，但还有个更简单的方法 ——> `invokeAll`。
 
 下面的示例代码中使用了支持限时的 `invokeAll` ，将多个任务提交到 「一个」 `ExecutorService` 并获得结果。
 
-`InvokeAll` 方法的参数为 「一组任务」，并返回一组 `Future`。 这两个集合有着相同的结构，`invokeAll` 按照任务集合中迭代器的顺序将所有的 `Future` 添加到返回的集合中，从而使调用者能降各个 `Future` 与其表示的 `Callable` 关联起来。
+`InvokeAll` 方法的参数为 「一组任务」，并返回一组 `Future`。 这两个集合有着相同的结构，`invokeAll` 按照任务集合中迭代器的顺序将所有的 `Future` 添加到返回的集合中，从而使调用者能降各个 `Future` 与其表示的 `Callable` 关联起来。<!--太好了，而且集合能将Callable任务单元 与 Future任务结果状态一一对应-->
 
 当所有任务都执行完毕时，或者调用线程被中断时，又或者超过指定时限时， `invokeAll` 将返回。
 
@@ -773,7 +777,7 @@ public class RederWithTimeBudget {
 
 > 程序清单 6-17 在预定时间内请求旅游报价：
 
-```
+```java
 // Requesting travel quotes under a time budget
 // 使用 invokeAll 来获取一组报价，这个类的设计非常严谨
 public class TimeBudget {
@@ -863,5 +867,3 @@ interface TravelInfo {
 
 }
 ```
-
-**【这个类的设计真的太严谨了，非常具有参考价值】**

@@ -211,25 +211,7 @@ Andrew Appel针对具备"朝生夕灭"特点的对象,提出了一种更优化�
 
 - 把新生代分为一块较大的Eden空间和两块较小的Survivor空间,每次分配内存只使用Eden和其中一块Survivor。
 - 发生垃圾搜集时,将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上,然后直接清理掉Eden和已用过的那块Survivor空间。
-- 当Survivor空间不足以容纳一次Minor GC之后存活的对象时,就需要依赖其他内存区域(大多是老年代)进行分配担保(Handle Promotion)(Suvivor无法容纳的对象直接送入老年代)。
-
-分配担保：
-发生Minor GC前，虚拟机必须先检查老年代最大可用的连续空间是否 > 新生代所有对象总空间
-
-- 是：Minor GC确保安全
-
-- 否：虚拟机会查看
-
-  ```shell
-  -XX:HandlePromotionFailure
-  ```
-
-  参数的设置值是否允许担保失败
-
-  - 允许担保失败：检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小
-    - 大于：尝试进行一次Minor GC(存在风险) 若失败，则进行一次Full GC
-    - 小于：进行一次Full GC
-  - 不允许担保失败：进行一次Full GC
+- 当Survivor空间不足以容纳一次Minor GC之后存活的对象时,就需要依赖其他内存区域(大多是老年代)进行分配担保(Handle Promotion)(Suvivor无法容纳的对象直接送入老年代)。<!--分配担保：见3.6.5章节-->
 
 注：HotSpot虚拟机默认新生代中的Eden和Survivor的大小比例是8∶1,也即每次新生代中可用内存空间为整个新生代容量的90%。
 
