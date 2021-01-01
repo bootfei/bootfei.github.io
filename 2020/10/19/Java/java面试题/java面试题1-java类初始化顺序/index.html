@@ -32,7 +32,7 @@
 <meta property="og:description" content="知识点ref:   https:&#x2F;&#x2F;developer.ibm.com&#x2F;zh&#x2F;articles&#x2F;j-lo-clobj-init&#x2F; https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;65872513 https:&#x2F;&#x2F;blog.nowcoder.net&#x2F;n&#x2F;a9a1c0cf7dc841c496769865b91a3b05 http:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1626">
 <meta property="og:locale">
 <meta property="article:published_time" content="2020-10-19T15:30:35.000Z">
-<meta property="article:modified_time" content="2020-10-27T13:13:19.437Z">
+<meta property="article:modified_time" content="2020-12-24T09:14:14.417Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="java面试题">
 <meta name="twitter:card" content="summary">
@@ -198,20 +198,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">46</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -283,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-10-27 21:13:19" itemprop="dateModified" datetime="2020-10-27T21:13:19+08:00">2020-10-27</time>
+        <time title="Modified: 2020-12-24 17:14:14" itemprop="dateModified" datetime="2020-12-24T17:14:14+08:00">2020-12-24</time>
       </span>
 
   
@@ -321,17 +321,15 @@
 </ol>
 <p>bootfei’s answer:</p>
 <ol>
-<li>类初始化是类加载过程中的最后一步，也是真正开始调用java的字节码文件</li>
+<li>初始化是类加载过程中的最后一步，也是真正开始调用java的字节码文件</li>
 <li>类初始化首先区分是针对接口还是类<ol>
-<li>如果是类，会首先调用父类的<cinit>,然后调用子类的<cinit></li>
-<li>如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<cinit></li>
+<li>如果是类，会首先调用父类的<clinit>,然后调用子类的<clinit></li>
+<li>如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<clinit></li>
 </ol>
 </li>
 <li>类初始化的顺序是<ol>
-<li>父类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>子类的静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>父类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
-<li>子类的变量和代码块以及构造函数，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
+<li>父类的变量和代码块、静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
+<li>子类的变量和代码块、静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
 </ol>
 </li>
 </ol>
@@ -356,8 +354,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2020/10/20/leetcode/LeetCode-Partition-Labels/" rel="next" title="LeetCode: Partition Labels">
-                  LeetCode: Partition Labels <i class="fa fa-chevron-right"></i>
+                <a href="/2020/10/21/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" rel="next" title="java面试题: 如何实现延迟队列">
+                  java面试题: 如何实现延迟队列 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
@@ -406,7 +404,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
