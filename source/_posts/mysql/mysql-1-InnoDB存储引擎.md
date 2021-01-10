@@ -127,7 +127,7 @@ innodb_data_file_path=/db/ibdata1:1000M;/dr2/db/ibdata2:1000M:autoextend
 
 > 如果重做日志文件设置的**太大**，数据丢失时，恢复时可能需要很长的时间；
 >
-> 另一方面，如果设置的**太小**，重做日志文件太小会导致依据`checkpoint`的检查需要频繁刷新脏页到磁盘中，导致性能的抖动。<!--这里不太明白，和checkpoint有什么关系-->
+> 另一方面，如果设置的**太小**，重做日志文件太小会导致依据`checkpoint`的检查需要频繁刷新脏页到磁盘中，导致性能的抖动。<!--这里就是前面说的，redo log file是覆盖写的，如果其中一个文件比如file1写满了，就必须马上把buffer pool的数据页(脏页)落盘，写入磁盘中的数据页。这样 file1的数据就是"过期"的，是可以被覆盖掉的了-->
 >
 
 ### 2.3 InnoDB逻辑存储结构
@@ -311,38 +311,42 @@ InnoDB有自己的表缓存，可以称为表定义缓存或者数据字典(Data
 
 ### 3.2 Redo log buffer（重做日志缓冲）
 
-<font color='red'>背景：对数据进行增删改时，数据仍然是在内存中的，还没有及时落盘，所以为了保证数据的持久化，需要事务提交之前，先写redo log（磁盘）。一般磁盘文件都有其对应的内存，所以也有`redo log buffer(内存)`。</font>
-
-当`Buffer Pool`中的`page`的版本比磁盘要新时，数据库需要将新版本的`page`从`Buffer Pool`刷新到磁盘。但是如果每次一个`page`发送变化，就进行刷新，那么性能开发是非常大的。<!--出现了性能问题，所以需要解决-->
-
-于是InnoDB采用了`Write Ahead Log`策略，即当事务提交时，先写`redo log file（磁盘）`，然后再择时将脏页写入磁盘。如果发生宕机导致数据丢失，就通过`redo log file（磁盘）`进行数据恢复。<!--解决该性能问题的思路-->
+<font color='red'>背景：对数据进行增删改时，数据仍然是在内存中的，还没有及时落盘，所以为了保证数据的持久化，需要把内存中的数据及时落盘，但是每个page变更都要及时落盘的话，频繁的IO导致服务器的性能有所下降。故先将数据的变更留在内存中，在某个时间点，再统一将这一段时间内的数据变更落盘，但是这个策略有风险，就是在数据变更落盘之前，如果服务器断电，那么就会丢失数据的更新。设计者为了避免这个风险，要求事务提交之前，先写redo log（磁盘）。一般磁盘文件都有其对应的内存，所以也有`redo log buffer(内存)`。</font>
 
 
 
-<img src="https://imgedu.lagou.com/b04f46ad272941eea7621ce9cdecc242.jpg" alt="InnoDB数据写入示意图" style="zoom:67%;" />
+<img src="https://imgedu.lagou.com/b04f46ad272941eea7621ce9cdecc242.jpg" alt="InnoDB数据写入示意图" style="zoom: 80%;" />
 
 
 
-InnoDB存储引擎会首先将**`redo log file`**先放入**`redo log buffer`**中，然后再按照一定频率将其刷新到**`redo log file`**。
+如上图所示，InnoDB在缓冲池中变更数据时，会首先将相关变更写入`redo log buffer`中，然后再按时或者当事务提交时写入磁盘，这符合`Force-log-at-commit`原则；当重做日志写入磁盘后，缓冲池中的变更数据才会依据checkpoint机制择时写入到磁盘中，这符 合`WAL`原则。 
 
-注意，日志都是**顺序**写入磁盘，即磁头是顺着磁道向后写，不涉及磁头的移动。<!--redo log buffer落盘到磁盘的持久化过程-->
+总结起来，在内存中有redo log buffer：
+			1、插入数据时先写change buffer，然后写redo log buffer。
+			2、事务提交时，redo log buffer需要落盘。
+			3、redo log buffer落盘成功，事务提交成功；否则事务提交失败。
 
-`redo log buffer`一般不需要设置得很大，因为一般情况每一秒钟都会讲重做日志缓冲刷新到日志文件中。可通过配置参数`innodb_log_buffer_size`控制，默认为8MB。<!--redo log buffer落盘时的性能调优-->
+> 问：如果redo log buffer写入redo log日志，写到一半，数据库服务器挂了。此时redo log日志会变成怎样？
+> 答：如果redo log没有写完，那么事务提交失败。只有redo log成功写入, 事务才算提交完成。
 
-InnoDB是事务的存储引擎，其通过Force Log at Commit机制实现事务的持久性，即当事务提交时，必须先将该事务的所有日志写入到重做日志文件进行持久化，然后事务的提交操作完成才算完成。
+<!--在checkpoint择时机制中，就有redo log file写满的判断，所以，如前文所述，如果redo log file太小，经常被写满，就会频繁导致checkpoint将更改的数据写入磁盘，导致性能抖动。-->
 
-为了确保每次日志都写入到重做日志文件，在每次讲重做日志缓冲写入重做日志后，必须调用一次fsync操作，将缓冲文件从文件系统缓存中真正写入磁盘。
+操作系统的文件系统是带有缓存的，当InnoDB向磁盘写入数据时，有可能只是写入到了文件系统的缓存中，没有真正的“落袋为安”。
 
-redo log落盘有三种方式：`innodb_flush_log_at_trx_commit` 
+InnoDB的innodb_flush_log_at_trx_commit属性可以控制每次事务提交时InnoDB的行为。
 
-- 0：每秒落盘一次
-
-- 1：事务提交时落盘（默认且最靠谱）
-
-- 2：把redolog的落盘交给操作系统，没有调用fsync。
-
-> 0、2都有可能丢失数据，性能比1情况高。设置为0时，性能最高，但是丧失了事务的一致性。
+> 当属性值为0时，事务提交时，不会对重做日志进行写入操作，而是等待主线程按时写入每秒写入一次；
 >
+> 当属性值为1时，事务提交时，会将重做日志写入文件系统缓存，并且调用文件系统的fsync，将文件系统缓冲中的数据真正写入磁盘存储，确保不会出现数据丢失；
+>
+> 当属性值为2时，事务提交时，也会将日志文件写入文件系统缓存，但是不会调用fsync，而是让文件系统自己去判断何时将缓存写入磁盘。
+
+innodb_flush_log_at_commit是InnoDB性能调优的一个基础参数，涉及InnoDB的写入效率和数据安全。当参数值为0时，写入效率最高，但是数据安全最低；参数值为1时，写入效率最低，但是数据安全最高；参数值为2时，二者都是中等水平。一般建议将该属性值设置为1，以获得较高的数据安全性，而且也只有设置为1，才能保证事务的持久性。
+
+redo log buffer的刷盘机制如下图所示：
+
+![](http://img2.jintiankansha.me/get3?src=http://user-gold-cdn.xitu.io/2018/9/9/165bc3478f2b9fa9?imageView2/0/w/1280/h/960/ignore-error/1)
+
 
 ### 3.3 Double Write
 
@@ -365,18 +369,29 @@ redo log落盘有三种方式：`innodb_flush_log_at_trx_commit`
 
 ![][InnoDB内存落盘流程图]
 
-`checkpoint`：检查点，表示脏页写入到磁盘的时机，所以检查点也就意味着脏数据的写入。
+### 4.1 整体思路分析
 
-- sharp checkpoint：在关闭数据库的时候，将buffer pool中的脏页全部刷新到磁盘中。
-- fuzzy checkpoint：数据库正常运行时，在不同的时机，将部分脏页写入磁盘。
-  - Master Thread Checkpoint；定期落盘会以每秒或者每10秒一次的频率
-  - FLUSH_LRU_LIST Checkpoint；通过lru算法淘汰内存的数据页，如果数据页是脏页就需要落盘。
-  - Async/Sync Flush Checkpoint；在redolog满了的情况。需要把redolog对于的脏页落盘，redolog就可以覆盖了。如果没有落盘的内容小于redolog的75%不执行落盘操作如果大于75%小于90%执行异步落盘。如果大于90%会执行同步落盘。在mysql 5.6之后，不管是Async Flush checkpoint还是Sync Flush checkpoint，都不会阻塞用户的查询进程。
-  - Dirty Page too much Checkpoint；内存中的脏页太多了会执行落盘操作。新版本中脏页达到75%会执行落盘操作，旧版本中90%会落盘
+<img src="https://imgedu.lagou.com/b04f46ad272941eea7621ce9cdecc242.jpg" alt="InnoDB数据写入示意图" style="zoom: 80%;" />
 
+InnoDB内存缓冲池中的数据page要完成持久化的话，是通过两个流程来完成的，一个是脏页落盘；一个是预写redo log日志。
 
+**当缓冲池中的页的版本比磁盘要新时，数据库需要将新版本的页从缓冲池刷新到磁盘。**但是如果每次一个页发送变化，就进行刷新，那么性能开发是非常大的，于是InnoDB采用了`Write Ahead Log`策略和 `Force Log at Commit`机制实现事务级别下数据的持久性。
 
+> `Write Ahead Log`要求数据的变更写入到磁盘前，首先必须将内存中的日志写入到磁盘；
+>
+> `Force-log-at-commit`要求当一个事务提交时，所有产生的日志都必须刷新到磁盘上，如果日志刷新成功后，缓冲池中的数据刷新到磁盘前数据库发生了宕机，那么重启时，数据库可以从日志中恢复数据。
+>
+> 为了确保每次日志都写入到重做日志文件，在每次将重做日志缓冲写入重做日志后，必须调用一次**fsync**操作，将缓冲文件从文件系统缓存中真正写入磁盘。
+>
+> 可以通过 innodb_flush_log_at_trx_commit 来控制重做日志刷新到磁盘的策略。
 
+### 4.2 脏页落盘
+
+在数据库中进行**读取操作**，将从磁盘中读到的页放在缓冲池中，下次再读相同的页时，首先判断该页是否在缓冲池中。若在缓冲池中，称该页在缓冲池中被命中，直接读取该页。否则，读取磁盘上的页。
+
+对于数据库中页的**修改操作**，则首先修改在缓冲池中的页，然后再以一定的频率刷新到磁盘上。
+
+页从缓冲池刷新回磁盘的操作并不是在每次页发生更新时触发，而是通过一种称为CheckPoint的机制刷新回磁盘。
 
 
 
