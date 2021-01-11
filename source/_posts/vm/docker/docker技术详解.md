@@ -262,7 +262,7 @@ docker rmi $(docker images -q)
 
 -o 输出到的文件
 
-执行后，运行 ls 命令即可看到打成的 tar 包
+执行后，运行 ls 命令即可看到打成的 tar 包 <!--其实就是把镜像保存为一个本地的tar文件-->
 
 ## 导入镜像
 
@@ -396,6 +396,179 @@ docker cp /root/boot.war my-centos:/usr/local/
 注意：源文件可以是宿主机器也可以是容器中的文件，同样，目标文件可以是容器也可以是宿主机器的文件。 
 
 ![avatar][Docker复制文件命令示意图]
+
+
+
+# Docker应用
+
+## MySQL部署
+
+### 拉取MySQL镜像
+
+docker pull mysql:5.6
+
+查看镜像
+
+docker images
+
+### 创建MySQL容器
+
+```
+docker run -di --name kkb_mysql -p 33306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:5.6
+```
+
+-p 代表端口映射，格式为宿主机映射端口:容器运行端口
+
+-e 代表添加环境变量 MYSQL_ROOT_PASSWORD 是 root 用户的登陆密码
+
+### 进入MySQL容器,登陆MySQL
+
+进入 mysql 容器
+
+docker exec -it kkb_mysql /bin/bash
+
+登陆 mysql
+
+mysql -u root -p
+
+### 远程登陆MySQL
+
+我们在我们本机的电脑上去连接虚拟机 Centos 中的 Docker 容器，这里
+
+192.168.247.130 是虚拟机操作系统的 IP
+
+### 查看容器IP地址
+
+我们可以通过以下命令查看容器运行的各种数据
+
+```
+docker inspect kkb_mysql
+```
+
+运行效果如下：
+
+我们可以看到我们的数据库服务器的 IP 是 172.17.0.2 
+
+## tomcat部署
+
+### 拉取tomcat镜像
+
+docker pull tomcat:7-jre7
+
+### 创建tomcat容器
+
+创建容器 -p 表示地址映射
+
+```
+docker run -di --name=kkb_tomcat -p 9000:8080 tomcat:7-jre7
+```
+
+
+
+## Nginx部署
+
+### 拉取Nginx镜像
+
+docker pull nginx
+
+### 创建Nginx容器
+
+docker run -di --name=kkb_nginx -p 9080:80 nginx /bin/bash
+
+### 测试Nginx
+
+浏览器地址栏输入： http://192.168.247.135
+
+<!--注意，这里可能会失败，因为启动Nginx容器不代表启动了Nginx软件，就像电脑开机了不代表QQ启动了。所以可能需要手动启动一下-->
+
+使用/usr/sbin/nginx启动Nginx软件，也可以设置Nginx软件开机自启动
+
+## Redis部署
+
+### 拉取Redis镜像
+
+docker pull redis
+
+### **创建** **Redis** **容器**
+
+docker run -di --name=kkb_redis -p 16379:6379 redis
+
+### 客户端测试
+
+在你的本地电脑命令提示符下，用 window 版本 redis 测试
+
+redis-cli -h 192.168.247.135
+
+## **搭建** **Tomcat** **服务并部署** **web** **应用**
+
+```
+docker run -di --name my-tomcat -v /root/webapps:/usr/local/tomcat/webapps -p 8888:8080 imageID 
+
+docker run -it --name my-tomcat -v /opt/webapps:/opt/tomcat/webapps -p 8888:8080 imageID /bin/bash
+```
+
+完整的例子
+
+容器内的 tomcat 目录：/bootfei/webapps
+
+```
+mkdir /bootfei/webapps -p
+docker run -di --name my-tomcat -v /bootfei/webapps:/usr/local/tomcat/webapps -p 8888:8080 --privileged=true tomcat:7-jre7
+```
+
+说明：
+
+> --name：该参数的作用是给容器起一个名字，名字要唯一。 
+>
+> -v：该参数的作用是进行目录映射，具体指的是宿主机器和容器之间的目录映射。
+>
+> /bootfei/webapps：宿主机器的目录
+>
+> /usr/local/tomcat/webapps：容器中的目录
+>
+> -p：该参数的作用是进行端口映射，具体指的是宿主机器和容器之间的端口映射。8888 端口是宿主机的端口8080 端口是容器内的端口
+>
+> --privilieged: 赋予文件权限，可以被复制过来
+
+1、将 war 包上传到宿主机器的/xxx/xxx/webapps/目录下。
+
+2、tomat 会自动热部署，直接访问 web 应用的路径即可。 
+
+
+
+# **6** **制作镜像**
+
+纯手工制作镜像
+
+需求：制作一个 tomcat 镜像。
+
+步骤： 
+
+1、下载基础镜像（centos7）并进入centos7docker容器
+
+```
+docker pull centos:7
+
+docker exec -it mycentos7 /bin/bash
+```
+
+2、安装 64 位 jdk（注意：jdk 要和 os 的位数一致）
+
+```
+vi /etc/profile
+
+export JAVA_HOME=/opt/jdk
+
+export PATH=$JAVA_HOME/bin:$PATHsource /etc/profile
+```
+
+3、安装 tomcat
+
+略
+
+4、在宿主机生成新的镜像
+
+docker commit    容器名称或者容器ID     新镜像名称
 
 # 附录
 
