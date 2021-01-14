@@ -118,7 +118,7 @@ MSET key value [key value …]
 MGET key [key …]
 ```
 
-#### 应用场景之自增主键 
+### 应用场景之订单号自增主键 
 
 - 需求：商品编号、订单号采用 INCR 命令生成。
 - 设计： key 命名要有一定的设计
@@ -199,70 +199,290 @@ HGETALL user
 
 #### 删除字段
 
-##### 可以删除一个或多个字段，返回值是被删除的字段个数
+可以删除一个或多个字段，返回值是被删除的字段个数
 
+```
+HDEL key field [field ...]
 
-hash类型适合存储那些对象数据，特别是对象属性经常发生【增删改】操作的数据。 string类型也可以存储对象数
-据，将java对象转成json字符串进行存储，这种存储适合【查询】操作。
-应用之存储商品信息
-商品信息字段
-定义商品信息的key
-存储商品信息
-获取商品信息
-list类型 ArrayList与LinkedList的区别 ArrayList 使用数组方式存储数据，所以根据索引查询数据速度快，而新增或者删除元素时需要设计到位移操作，
-所以比较慢。
-LinkedList 使用双向链表方式存储数据，每个元素都记录前后元素的指针，所以插入、删除数据时只是更改前后元
-素的指针指向即可，速度非常快。然后通过下标查询元素时需要从头开始索引，所以比较慢，但是如果查询前几个元
-素或后几个元素速度比较快。
-1 【商品id、商品名称、商品描述、商品库存、商品好评】 1 商品ID为1001的信息在 Redis中的key为：[items:1001] 192.168.101.3:7003> HMSET items:1001 id 3 name apple price 999.9 OK 123 192.168.101.3:7003> HGET items:1001 id "3" 192.168.101.3:7003> HGETALL items:1001 1) "id" 2) "3" 3) "name" 4) "apple" 5) "price" 6) "999.9" 12345678910
-list类型介绍 Redis 的列表类型（ list 类型）可以 存储一个有序的字符串列表 ，常用的操作是向列表两端添加元素，或者获得列表
-的某一个片段。
-列表类型内部是使用双向链表（ double linked list ）实现的，所以向列表两端添加元素的时间复杂度为
-0(1) ，获取越接近两端的元素速度就越快。这意味着即使是一个有几千万个元素的列表，获取头部或尾部的10条记
-录也是极快的。
-命令LPUSH/RPUSH
-语法：
-示例：
-LRANGE
-语法：
-示例：
-LPOP/RPOP
+127.0.0.1:6379> hdel user age 
+(integer) 1 
+127.0.0.1:6379> hdel user age name 
+(integer) 0 
+127.0.0.1:6379> hdel user age 
+username (integer) 1
+```
+
+#### 增加数字
+
+```
+HINCRBY key field increment
+
+127.0.0.1:6379> hincrby user age 2 # 将用户的年龄加2 
+(integer) 22 
+127.0.0.1:6379> hget user age # 获取用户的年龄 
+"22“
+```
+
+#### 其它命令
+
+##### 判断字段是否存在
+
+```
+HEXISTS key field
+
+127.0.0.1:6379> hexists user age 查看user中是否有age字段 
+(integer) 1 
+127.0.0.1:6379> hexists user name 查看user中是否有name字段 
+(integer) 0
+```
+
+##### 只获取字段名或字段值
+
+```
+HEXISTS key field
+
+127.0.0.1:6379> hexists user age 查看user中是否有age字段 
+(integer) 1 
+127.0.0.1:6379> hexists user name 查看user中是否有name字段 
+(integer) 0
+```
+
+##### 获取字段数量
+
+```
+HLEN key
+
+127.0.0.1:6379> hlen user 
+(integer) 2
+```
+
+##### 获取所有字段
+
+获得 hash 的所有信息，包括 key 和 value
+
+```
+hgetall key
+```
+
+### string类型和hash类型的区别 
+
+hash类型适合存储那些对象数据，特别是对象属性经常发生【增删改】操作的数据。 string类型也可以存储对象数据，将java对象转成json字符串进行存储，这种存储适合【查询】操作。
+
+### 应用之存储商品信息
+
+- 商品信息字段
+
+  ```
+  [商品id、商品名称、商品描述、商品库存、商品好评]
+  ```
+
+- 定义商品信息的key
+
+  ```
+   商品ID为1001的信息在 Redis中的key为：[items:1001]
+  ```
+
+- 存储商品信息
+
+  ```
+  192.168.101.3:7003> HMSET items:1001 id 3 name apple price 999.9 
+  OK
+  ```
+
+- 获取商品信息
+
+  ```
+  192.168.101.3:7003> HGET items:1001 id "3" 
+  192.168.101.3:7003> HGETALL items:1001 
+  1) "id" 
+  2) "3" 
+  3) "name" 
+  4) "apple" 
+  5) "price" 
+  6) "999.9"
+  ```
+
+  
+
+## list类型 
+
+### list类型介绍
+
+Redis 的列表类型（ list 类型）可以 存储一个有序的字符串列表 ，常用的操作是向列表两端添加元素，或者获得列表的某一个片段。
+
+列表类型内部是使用双向链表（ double linked list ）实现的，所以向列表两端添加元素的时间复杂度为0(1) ，获取越接近两端的元素速度就越快。这意味着即使是一个有几千万个元素的列表，获取头部或尾部的10条记录也是极快的。
+
+### 命令
+
+#### LPUSH/RPUSH
+
+```
+LPUSH key value [value ...] 
+RPUSH key value [value ...]
+
+127.0.0.1:6379> lpush list:1 1 2 3 
+(integer) 3 
+127.0.0.1:6379> rpush list:1 4 5 6 
+(integer) 3
+```
+
+#### LRANGE
+
+```
+LRANGE key start stop
+
+127.0.0.1:6379> lrange list:1 3
+```
+
+#### LPOP/RPOP
+
+从列表两端弹出元素 
+
 从列表左边弹出一个元素，会分两步完成：
-第一步是将列表左边的元素从列表中移除
-第二步是返回被移除的元素值。
-语法：
-示例
-LPUSH key value [value ...] RPUSH key value [value ...] 12 127.0.0.1:6379> lpush list:1 1 2 3 (integer) 3 127.0.0.1:6379> rpush list:1 4 5 6 (integer) 3 1234 获取列表中的某一片段。将返回`start`、`stop`之间的所有元素（包含两端的元素），索引从`0`开始。索引可以 是负数，如：“`-1`”代表最后边的一个元素。 11 LRANGE key start stop 127.0.0.1:6379> lrange list:1 0 2 1) "2" 2) "1" 3) "4" 12341 从列表两端弹出元素 LPOP key RPOP key 12 127.0.0.1:6379>lpop list:1 "3“ 127.0.0.1:6379>rpop list:1 "6“ 1234
-LLEN
-语法：
-示例：
-其它命令(自学) LREM LREM 命令会删除列表中前 count 个值为 value 的元素，返回实际删除的元素个数。根据 count 值的不同，该命令的
-执行方式会有所不同：
-语法：
-LINDEX
-语法：
-示例：
-Ø 设置指定索引的元素值
-语法：LSET key index value
-1 获取列表中元素的个数 1 llen key 127.0.0.1:6379> llen list:1 (integer) 2 121 删除列表中指定个数的值 - 当count>0时， LREM会从列表左边开始删除。 - 当count<0时， LREM会从列表后边开始删除。 - 当count=0时， LREM删除所有值为value的元素。 1231 LREM key count value 1 获得指定索引的元素值 1 LINDEX key index 127.0.0.1:6379>lindex l:list 2 "1" 12
-127.0.0.1:6379> lset l:list 2 2 OK 127.0.0.1:6379> lrange l:list 0 -1 1) "6" 2) "5" 3) "2" 4)
-"2"
-LTRIM
-语法：
-示例：
-LINSERT
-语法：
-示例：
-1 只保留列表指定片段,指定范围和LRANGE一致 1 LTRIM key start stop 127.0.0.1:6379> lrange l:list 0 -1 1) "6" 2) "5" 3) "0" 4) "2" 127.0.0.1:6379> ltrim l:list 0 2 OK127.0.0.1:6379> lrange l:list 0 -1 1) "6" 2) "5" 3) "0" 1234567891011 向列表中插入元素。 该命令首先会在列表中从左到右查找值为pivot的元素，然后根据第二个参数是BEFORE还是AFTER来决定将value插 入到该元素的前面还是后面。 121 LINSERT key BEFORE|AFTER pivot value
-RPOPLPUSH
-语法：
-示例：
-应用之商品评论列表
-需求：
-分析：
-实现：
+
+- 第一步是将列表左边的元素从列表中移除
+- 第二步是返回被移除的元素值。
+
+```
+LPOP key 
+RPOP key
+```
+
+#### LLEN
+
+获取列表中元素的个数 
+
+```
+llen key
+
+127.0.0.1:6379> llen list
+(integer) 2
+```
+
+#### 其它命令
+
+##### LREM
+
+删除列表中前 count 个值为 value 的元素，返回实际删除的元素个数。根据 count 值的不同，该命令的执行方式会有所不同：
+
+\- 当count>0时， LREM会从列表左边开始删除。 
+
+\- 当count<0时， LREM会从列表后边开始删除。 
+
+\- 当count=0时， LREM删除所有值为value的元素。 
+
+```
+LREM key count value
+```
 
 
+
+##### LINDEX
+
+获得指定索引的元素值 
+
+```
+LINDEX key index
+
+127.0.0.1:6379>lindex list 2 
+"1"
+```
+
+##### LSET
+
+设置指定索引的元素值
+
+```
+LSET key index value
+```
+
+##### LTRIM
+
+只保留列表指定片段,指定范围和LRANGE一致
+
+```
+LTRIM key start stop
+```
+
+##### LINSERT
+
+向列表中插入元素。 
+
+该命令首先会在列表中从左到右查找值为pivot的元素，然后根据第二个参数是BEFORE还是AFTER来决定将value插 入到该元素的前面还是后面。 
+
+```
+LINSERT key BEFORE|AFTER pivot value
+
+127.0.0.1:6379> lrange list 0 -1 
+1) "3" 
+2) "2" 
+3) "1" 
+127.0.0.1:6379> linsert list after 3 4 
+(integer) 4 
+127.0.0.1:6379> lrange list 0 -1 
+1) "3" 
+2) "4" 
+3) "2" 
+4) "1"
+```
+
+##### RPOPLPUSH
+
+将元素从一个列表转移到另一个列表中 
+
+```
+RPOPLPUSH source destination
+```
+
+### 应用之商品评论列表
+
+- 需求：
+  用户针对某一商品发布评论，一个商品会被不同的用户进行评论，存储商品评论时，要按时间顺序排序。 用户在前端页面查询该商品的评论，需要按照时间顺序降序排序
+- 分析：
+  使用list存储商品评论信息，KEY是该商品的ID，VALUE是商品评论信息列表
+- 实现：
+  192.168.101.3:7001> LPUSH items:comment:1001 '{"id":1,"name":"商品不错，很 好！！","date":1430295077289}' 
+
+## set类型
+
+set 类型即集合类型，其中的数据是不重复且没有顺序。
+
+集合类型的常用操作是向集合中加入或删除元素、判断某个元素是否存在等，由于集合类型的 Redis 内部是使用值
+
+为空的散列表实现，所有这些操作的时间复杂度都为 0(1) 。 
+
+Redis 还提供了多个集合之间的交集、并集、差集的运算。
+
+### 命令
+
+#### SADD/SREM
+
+添加元素/删除元素
+
+```
+SADD key member [member ...] SREM key member [member ...]
+
+127.0.0.1:6379> sadd set a b c 
+(integer) 3 
+127.0.0.1:6379> sadd set a 
+(integer) 0 
+127.0.0.1:6379> srem set c d 
+(integer) 1
+```
+
+#### SMEMBERS
+
+获得集合中的所有元素
+
+```
+ SMEMBERS key
+```
+
+#### SISMEMBER
+
+判断元素是否在集合中 
+
+### 集合运算命令 
 
 
 

@@ -1,6 +1,8 @@
+---
 title: docker技术详解
 date: 2021-01-11 11:01:27
 tags: [vm]
+---
 
 # Docker介绍
 
@@ -495,9 +497,13 @@ docker run -di --name=kkb_redis -p 16379:6379 redis
 
 ### 客户端测试
 
-在你的本地电脑命令提示符下，用 window 版本 redis 测试
+在你的docker容器中可以测试
 
-redis-cli -h 192.168.247.135
+redis-cli -h 192.168.247.135(docker容器的ip)
+
+也可以使用redis manager链接你的宿主机测试
+
+也可以使用jedis和spring测试
 
 ## **搭建** **Tomcat** **服务并部署** **web** **应用**
 
@@ -528,7 +534,7 @@ docker run -di --name my-tomcat -v /bootfei/webapps:/usr/local/tomcat/webapps -p
 >
 > -p：该参数的作用是进行端口映射，具体指的是宿主机器和容器之间的端口映射。8888 端口是宿主机的端口8080 端口是容器内的端口
 >
-> --privilieged: 赋予文件权限，可以被复制过来
+> --privilieged: 容器内部使用主机的所有Linux内核功能,docker容器防火墙完全开放
 
 1、将 war 包上传到宿主机器的/xxx/xxx/webapps/目录下。
 
@@ -536,7 +542,7 @@ docker run -di --name my-tomcat -v /bootfei/webapps:/usr/local/tomcat/webapps -p
 
 
 
-# **6** **制作镜像**
+# 制作镜像
 
 纯手工制作镜像
 
@@ -559,7 +565,10 @@ vi /etc/profile
 
 export JAVA_HOME=/opt/jdk
 
-export PATH=$JAVA_HOME/bin:$PATHsource /etc/profile
+export PATH=$JAVA_HOME/bin:$PATH
+
+//推出vim
+source /etc/profile
 ```
 
 3、安装 tomcat
