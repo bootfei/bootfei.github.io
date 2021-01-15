@@ -486,6 +486,169 @@ SADD key member [member ...] SREM key member [member ...]
 
 
 
+## zset类型 （sortedset） 
+
+### zset介绍 
+
+在 set 集合类型的基础上，有序集合类型为集合中的每个元素都 关联一个分数 ，这使得我们不仅可以完成插入、删除和判断元素是否存在在集合中，还能够获得分数最高或最低的前N个元素、获取指定分数范围内的元素等与分数有关的操作。
+
+在某些方面有序集合和列表类型有些相似：
+
+- 都是有序的，列表是插入有序，集合是排序
+- 都可以获得某一范围的元素
+
+不同：
+
+- 列表的实现是double-linkedlist, 有序集合是hashtable
+
+### 命令
+
+#### ZADD
+
+```
+ZADD key score member [score member ...]
+
+127.0.0.1:6379> zadd scoreboard 80 zhangsan 89 lisi 94 wangwu 
+(integer) 3 
+127.0.0.1:6379> zadd scoreboard 97 lisi 
+(integer) 0
+
+```
+
+#### ZRANGE
+
+## 通用命令
+
+### keys
+
+返回满足给定pattern 的所有key 
+
+```
+keys [key]
+redis 127.0.0.1:6379> keys mylist* 
+1) "mylist" 
+2) "mylist5" 
+3) "mylist6" 
+4) "mylist7" 
+5) "mylist8"
+```
+
+### del
+
+```
+del [key]
+```
+
+### exists
+
+```
+exists [key]
+```
+
+### expire
+
+```
+expire [key] seconds
+```
+
+# Redis消息模式
+
+最好交给kafka，RocketMq来做，因为它对于消息的可靠性和消息的限流不友好, 消息容易丢掉
+
+## 队列模式
+
+使用list类型的lpush和rpop实现消息队列
+
+注意事项：
+
+- 消息接收方如果不知道队列中是否有消息，会一直发送rpop命令，如果这样的话，会每一次都建立一次连接，这样显然不好。
+- 可以使用brpop命令，它如果从队列中取不出来数据，会一直阻塞，在一定范围内没有取出则返回null、
+
+## 发布订阅模式（略）
+
+# Redis事务
+
+弱事务，不保证ACID, 所以不重要
+
+## 事务介绍
+
+- Redis 的事务是通过 MULTI 、 EXEC 、 DISCARD 和 WATCH 、UNWATCH这五个命令来完成的。
+- Redis 的单个命令都是原子性的，所以这里需要确保事务性的对象是命令集合。 Redis 将命令集合序列化并保处于同一事务的命令集合连续且不被打断的执行
+- Redis 不支持回滚操作。
+
+## 事务命令
+
+### MULTI
+
+用于标记事务块的开始。 
+
+Redis会将后续的命令逐个放入队列中，然后使用EXEC命令原子化地执行这个命令序列。 
+
+### EXEC
+
+在一个事务中执行所有先前放入队列的命令，然后恢复正常的连接状态
+
+### DISCARD
+
+清除所有先前在一个事务中放入队列的命令，然后恢复正常的连接状态。 
+
+### WATCH
+
+监控某个key, 如果这个key在事务执行的期间发生改变，那么此次事务就会执行失败。
+
+```
+watch [key]
+```
+
+### UNWATCH
+
+清楚监控
+
+## 事务演示
+
+```shell
+127.0.0.1:6379> multi 
+OK
+127.0.0.1:6379> set s1 111 
+QUEUED 
+127.0.0.1:6379> hset set1 name zhangsan 
+QUEUED 
+127.0.0.1:6379> exec 
+1) OK 
+2) (integer) 1 
+127.0.0.1:6379> multi 
+OK
+127.0.0.1:6379> set s2 222 
+QUEUED
+
+127.0.0.1:6379> hset set2 age 20 
+QUEUED 
+127.0.0.1:6379> discard 
+OK
+127.0.0.1:6379> exec 
+(error) ERR EXEC without MULTI 
+
+127.0.0.1:6379> watch s1 
+OK
+127.0.0.1:6379> multi 
+OK
+127.0.0.1:6379> set s1 555 
+QUEUED 
+127.0.0.1:6379> exec # 此时在没有exec之前，通过另一个命令窗口对监控的s1字段进行修改
+(nil) 
+127.0.0.1:6379> get s1 
+111
+```
+
+##  事务失败处理
+
+- Redis 语法错误（编译期）
+- Redis 运行错误
+
+Redis 不支持事务回滚（为什么呢）
+1、大多数事务失败是因为语法错误或者类型错误，这两种错误，在开发阶段都是可以预见的
+2、 Redis 为了性能方面就忽略了事务回滚。
+
 # 附录
 
 ## hash字段和字段值映射示意图
