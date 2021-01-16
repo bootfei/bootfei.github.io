@@ -540,9 +540,30 @@ docker run -di --name my-tomcat -v /bootfei/webapps:/usr/local/tomcat/webapps -p
 
 2、tomat 会自动热部署，直接访问 web 应用的路径即可。 
 
+# Dockerfile制作镜像
+
+[菜鸟教程dockerfile](https://www.runoob.com/docker/docker-dockerfile.html)
+
+[我们以mycat为例，制作镜像](https://github.com/MyCATApache/Mycat-Server/wiki/2.1-docker%E5%AE%89%E8%A3%85Mycat)
+
+## 编写dockerfile
+
+myCat官网已经提供好了，我们直接donwload就好。将Dockerfile的文件放在/root/data路径下
+
+## 运行docker build
+
+在Dockerfile同目录下运行命令
+
+```shell
+#创建镜像文件
+docker build -t mycat:1.6.7.6 .
+```
 
 
-# 制作镜像
+
+## 运行docker run
+
+# Docker commit制作镜像
 
 纯手工制作镜像
 
@@ -550,7 +571,9 @@ docker run -di --name my-tomcat -v /bootfei/webapps:/usr/local/tomcat/webapps -p
 
 步骤： 
 
-1、下载基础镜像（centos7）并进入centos7docker容器
+## 下载基础镜像
+
+下载centos7并进入centos7docker容器
 
 ```
 docker pull centos:7
@@ -558,7 +581,28 @@ docker pull centos:7
 docker exec -it mycentos7 /bin/bash
 ```
 
-2、安装 64 位 jdk（注意：jdk 要和 os 的位数一致）
+## 安装 64 位 jdk
+
+（注意：jdk 要和 os 的位数一致）将jdk从宿主机复制到docker容器中
+
+```
+docker cp jdk-7.tar.gz mycentos7:/kkb/server
+```
+
+将tomcat从宿主机复制到docker容器中
+
+```
+docker cp apache-tomcat.tar.gz mycentos7:/kkb/server
+```
+
+在宿主机中将jdk和tomcat解压缩
+
+```
+tar -xf jdk-7.tar.gz
+tar -xf apache-tomcat.tar.gz
+```
+
+
 
 ```
 vi /etc/profile
@@ -571,13 +615,29 @@ export PATH=$JAVA_HOME/bin:$PATH
 source /etc/profile
 ```
 
-3、安装 tomcat
+## 安装 tomcat
 
 略
 
-4、在宿主机生成新的镜像
+## 在宿主机生成新的镜像
 
 docker commit    容器名称或者容器ID     新镜像名称
+
+```
+docker commit mycentos7  bootfei-tomcat
+docker images
+docer run -di  --name=bootfei-tomcat-con -p 8899:8080 bootfei-tomcat的镜像id
+docker ps
+```
+
+## 启动tomcat
+
+容器已经启动，需要
+
+- 进入容器启动tomcat
+- source /etc/profile 
+
+ (以后可以改成开机自启动)
 
 # 附录
 
