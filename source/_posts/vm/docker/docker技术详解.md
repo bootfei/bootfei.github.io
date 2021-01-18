@@ -214,7 +214,7 @@ Docker Hub 是 docker 默认的公用 Registry，不过缺点是国内下载会�
 在宿主机器编辑文件（centos7 不支持 vim 命令，但是支持 vi 命令）：
 
 ```
-*vi /etc/docker/daemon.json*
+vi /etc/docker/daemon.json
 ```
 
 请在该配置文件中加入（没有该文件的话，请先建一个）：
@@ -435,9 +435,27 @@ mysql -u root -p
 
 ### 远程登陆MySQL
 
-我们在我们本机的电脑上去连接虚拟机 Centos 中的 Docker 容器，这里
+我们在我们本机的电脑上去连接虚拟机 Centos 中的 Docker 容器，这里192.168.247.130 是虚拟机操作系统的 IP
 
-192.168.247.130 是虚拟机操作系统的 IP
+[解决mysql for docker容器报错：Authentication plugin 'caching_sha2_password' cannot be loaded]()
+
+```shell
+ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'password';
+```
+
+创建用户
+
+```
+CREATE USER 'pig'@'%' IDENTIFIED BY '123456';
+```
+
+赋予用户权限
+
+```
+GRANT ALL ON *.* TO 'pig'@'%';
+```
+
+
 
 ### 查看容器IP地址
 
