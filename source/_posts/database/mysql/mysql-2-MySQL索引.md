@@ -1,6 +1,8 @@
+---
 title: mysql - 2.MySQL索引
 date: 2021-01-08 15:59:03
 tags: [mysql]
+---
 
 # 索引介绍
 
@@ -180,7 +182,7 @@ like 常量% 使用索引 like %常量 不使用索引
 
 # 索引失效
 
-## 实验，建表进行验证
+
 
 ```mysql
 create table tuser( 
@@ -203,6 +205,80 @@ alter table tuser add index idx_sex(sex(1));
 
 insert into tuser(id,name,age,sex,address) values (1,'zhangsan',20,'0','致真大厦'); 
 ```
+
+## 全值匹配我最爱
+
+```
+ explain select * from tuser where name='zhaoyun' and age=1 and sex='1';
+```
+
+## 最佳左前缀法则
+
+如果索引了多个列，要遵守最佳左前缀法则。指的是查询从索引的最左前列开始 并且不跳过索引中的列。
+
+```
+explain select * from tuser where name='zhaoyun' and age=1 and sex='1';
+```
+
+**错误的示例：**
+
+带头索引死：
+
+```
+explain select * from tuser where age=23;
+```
+
+中间索引断（带头索引生效，其他索引失效）：
+
+```
+explain select * from tuser where name='aa' and sex='1';
+```
+
+## 不要在索引上做计算
+
+```
+explain select * from tuser where left(loginname,1)='zy';
+```
+
+## 范围条件右边的列失效
+
+不能继续使用索引中范围条件（bettween、<、>、in等）右边的列 
+
+## 尽量使用覆盖索引
+
+尽量使用覆盖索引（只查询索引的列），也就是索引列和查询列一致，减少select * 
+
+## 索引字段上不要使用不等
+
+索引字段上使用（！= 或者 < >）判断时，会导致索引失效而转向全表扫描 
+
+## 主键索引字段上不可以判断null
+
+## 索引字段使用like不以通配符开头
+
+由结果可知，like以通配符结束相当于范围查找，索引不会失效。[与范围条件（bettween、<、>、in等）不同的是：不会导致右边的索引失效。]()
+
+> 问题：解决like ‘%字符串%’时，索引失效问题的方法？
+>
+> 使用覆盖索引可以解决。虽然where条件使用不到索引, 但是select可以使用索引
+
+## 索引字段字符串要加单引号
+
+索引字段是字符串，但查询时不加单引号，会导致索引失效而转向全表扫描 
+
+```
+explain select * from tuser where name=123;
+```
+
+## 索引字段不要使用or
+
+非主键索引字段使用 or 时，会导致索引失效而转向全表扫描 
+
+```
+explain select * from tuser where name='asd' or age=23;
+```
+
+
 
 # 查看索引执行
 
@@ -456,15 +532,109 @@ CREATE TABLE t1(
 SELECT col1,col2,col3 FROM t1 WHERE col1>100 ORDER BY col2; 
 ```
 
-###### a. 
+
 
 ### using index(重要)
 
-
+- 查询时**不需要回表查询**，直接通过索引就可以获取查询的数据。
+- 表示相应的SELECT查询中使用到了**覆盖索引（Covering Index ）**，避免访问表的数据行，效率不错！
 
 ### using index condition(重要)
 
+#### 介绍
 
+[Using index condition 会先条件过滤索引，过滤完索引后找到所有符合索引条件的数据行，随后用WHERE 子句中的其他条件去过滤这些数据行；]()
+
+因为MySQL的架构原因，分成了server层和引擎层，才有所谓的“下推”的说法。所以[ICP（Index Condition Pushdown，索引下推）其实就是实现了index filter技术]()，将原来的在server层进行的table filter中可以进行index filter的部分，在引擎层面使用index filter进行处理，不再需要回表进行table filter。
+
+Index Condition Pushdown(ICP)是MySQL 5.6中新特性，是一种在存储引擎层使用索引过滤数据的一种 优化方式。ICP可以减少存储引擎访问基表的次数以及MySQL服务器访问存储引擎的次数。
+
+#### where条件分类
+
+要想深入理解 ICP 技术，**必须先理解数据库是如何处理** **where** **中的条件的**。 
+
+对 where 中过滤条件的处理，根据索引使用情况分成了三种：**index key, index filter, table filter**
+
+1. index key
+
+用于确定SQL查询在索引中的**连续范围**(起始范围+结束范围)的查询条件，被称之为Index Key。由于一个范围，至少包含一个起始与一个终止，因此Index Key也被拆分为**Index First Key**和**Index Last** **Key**，分别用于定位索引查找的起始，以及索引查询的终止条件。也就是说**根据索引来确定扫描的范** **围**。
+
+2. index filter
+
+在使用 index key 确定了起始范围和介绍范围之后，在此范围之内，还有一些记录不符合where 条件，如果这些条件可以使用索引进行过滤，那么就是 index fifilter。也就是说**用索引来进行**where条件过滤。
+
+3. table filter
+
+where 中的条件不能使用索引进行处理的，只能访问table，进行条件过滤了。
+
+> 也就是说各种各样的 where 条件，在进行处理时，分成了上面三种情况，一种条件会使用索引确定扫描的范围；一种条件可以在索引中进行过滤；一种必须回表进行过滤；
+
+[如何确定哪些where条件分别是 index key, index filter, table filter？]() 
+
+- 在 MySQL5.6 之前，并不区分Index Filter与Table Filter，统统将Index First Key与Index LastKey范围内的索引记录，回表读取完整记录，然后返回给MySQL Server层进行过滤。
+- 而在MySQL 5.6（包含）之后，Index Filter与Table Filter分离，Index Filter下降到InnoDB的索引层面进行过滤，减少了回表与返回MySQL Server层的记录交互开销，提高了SQL的执行效率。
+- 所以所谓的 ICP 技术，其实就是 index filter 技术而已。只不过因为MySQL的架构原因，分成了server层和引擎层，才有所谓的“下推”的说法。所以ICP其实就是实现了index filter技术，将原来的在server层进行的table filter中可以进行index filter的部分，在引擎层面使用index filter进行处理，不再需要回表进行table filter。
+
+#### 不使用ICP扫描的过程
+
+storage层：
+只将满足index key条件的索引记录对应的整行记录取出，返回给server层。
+server 层：
+对返回的数据，使用后面的where条件过滤，直至返回最后一行。
+
+#### 使用ICP扫描的过程
+
+storage层：
+首先将index key条件满足的索引记录区间确定，然后在索引上使用index filter进行过滤将满足的index filter条件的索引记录才去回表取出整行记录返回server层
+不满足index filter条件的索引记录丢弃，不回表、也不会返回server层
+server 层：
+对返回的数据，使用table filter条件做最后的过滤。
+
+**使用前后的成本差别**
+
+- 使用ICP前，存储层多返回了需要被index fifilter过滤掉的整行记录。
+- 使用ICP后，直接就去掉了不满足index fifilter条件的记录，省去了他们回表和传递到server层的成本。
+
+#### 例子
+
+##### 案例1
+
+```
+SELECT * FROM people WHERE zipcode='95054' AND lastname LIKE '%etrunia%' AND address LIKE '%Main Street%';
+```
+
+上面例子中的 lastername like '%etrunia%' 和 address like '%Main Street%' 本来是无法使用复合索引 index(zipcode, lastername, firstname) 进行过滤的，但是因为有了ICP技术，所以他们可以在 index filter 阶段使用索引进行过滤，无需回表进行 table filter 。
+
+##### 案例2
+
+```
+explain select * from role_goods where roleId=100000001 and number=1;
+```
+
+role_goods 表上有组合索引 index(roleId,status,number) ，下面的select语句，因为 “索引最左前缀原则”，只能使用到 组合索引的 roleId 部分，但是因为 ICP 技术的存在，现在 number 条件过滤也可以在 index fifilter 阶段完成了，无需像以前一样需要进行 table fifiler 了。
+
+可以看到 key_len = 9, 因为 roleId 是big int 类型，所以 key_len = 8 + 1 = 9; 所以在 index key 阶段中，并没有使用到 组合索引 index(roleId,status,number) 中的 number 字段(因为中间有一个status字段没有出现在where 条件中)，但是 “Using index condition” 却说明使用到了ICP技术，显然是 number =1条件过滤使用到了ICP技术。
+
+#### ICP的使用条件
+
+- explain显示的执行计划中type值（join 类型）为range、 ref、 eq_ref或者ref_or_null。
+- 且查询需要访问表的整行数据，即不能直接通过二级索引的元组数据获得查询结果(索引覆盖)。 
+- 对于InnnoDB表，ICP仅用于二级索引。（ICP的目的是减少全行读取的次数，从而减少IO操作），对于innodb聚集索引，完整的记录已被读入到innodb缓冲区，在这种情况下，ICP不会减少io。
+- ICP可以用于MyISAM和InnnoDB存储引擎，不支持分区表（5.7将会解决这个问题）
+
+### using temporary
+
+- 表示使用了临时表存储中间结果。
+- MySQL在对查询结果order by和group by时使用临时表
+- 临时表可以是内存临时表和磁盘临时表，执行计划中看不出来，需要查看status变量，used_tmp_table，used_tmp_disk_table才能看出来。
+
+### distinct
+
+在select部分使用了distinct关键字 （索引字段）
+
+### using where（重要）
+
+表示存储引擎返回的记录并不是所有的都满足查询条件，需要在server层进行过滤。
 
 # 附录
 
