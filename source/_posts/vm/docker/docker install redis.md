@@ -1,5 +1,5 @@
 ---
-title: docker安装redis指定配置文件
+title: docker install redis
 date: 2021-01-11 11:01:27
 tags: [vm]
 ---
@@ -56,7 +56,7 @@ docker run -p 6379:6379 --name myredis -v /usr/local/docker/redis/redis.conf:/et
 - --name myredis  指定该容器名称，查看和进行操作都比较方便。
 
 - -v 挂载目录，规则与端口映射相同。
-   
+  
    #挂载配置文件，容器启动成功可以通过更改宿主机的配置文件来达到更改容器实际配置文件的目的
    -v /usr/local/docker/redis/conf/redis.conf:/etc/redis/redis.conf
    
