@@ -175,7 +175,8 @@ management.endpoints.web.exposure.exclude=env,beans #关闭env,beans终端
 
 一般情况下，[主配置文件]()中存放[系统中定义好的属性设置]()，而[自定义属性]()一般会写入[自定义的配置文件]()中。也就是说，Java 代码除了可以读取主配置文件中的属性外，还可以读取指定配置文件中的属性，可以通过@PropertySource 注解加载指定的配置文件。
 
-spring boot 官网给出说明，@PropertySource 注解不能加载 yml文件。所以其建议自定义配置文件就使用approperties文件。
+> spring boot 官网给出说明，@PropertySource 注解不能加载 yml文件。所以其建议自定义配置文件就使用approperties文件。
+>
 
 - 修改property配置文件: 
 

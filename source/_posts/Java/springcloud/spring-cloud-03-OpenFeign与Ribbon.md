@@ -178,13 +178,13 @@ Feign 支持对请求(Feign 客户端向提供者的请求, 即consumer发送给
 
 # **Ribbon** 负载均衡
 
-- 复制提供者工程 **8081**，to **03-provider-8082**，**03-provider-8083**
+- Copy提供者工程 **8081**，to **03-provider-8082**，**03-provider-8083**
 
 - 更改配合文件
 
   - 端口号必须改变
 
-  - 微服务名称不能改！
+  - <font color="red">微服务名称不能改!!！</font>
 
   - ```yaml
     server:
@@ -193,10 +193,10 @@ Feign 支持对请求(Feign 客户端向提供者的请求, 即consumer发送给
     spring:
     	# 指定当前微服务名称
       application:
-        name: abcmsc-provider-depart #不能改！
+        name: abcmsc-provider-depart #不能改!!!
     ```
 
-    
+- 为了验证负载均衡有效，修改provider的controller返回值，加上provider的唯一标识
 
 # Ribbon 更换负载均衡策略
 
