@@ -435,12 +435,17 @@ Zuul也是Eureka client，从Eureka server获取其他consumer的信息。
     		
     	instance:
       	metadata-map: #指定添加的元数据
-      		host-mark: running-host
+      		host-mark: running-host #生产的机器
+      		#host-mark: gray-host #灰度发布的机器
     ```
 
     
 
 ## Zuul server
+
+### 原理1
+
+[ browser携带gray-host请求头, Zuul通过过滤器检测请求头；若携带gray-host请求头，那么把该请求路由到灰度发布的机器。]()
 
 - 添加依赖: 不是Spring cloud官网开发的
 
@@ -457,4 +462,104 @@ Zuul也是Eureka client，从Eureka server获取其他consumer的信息。
 - 定义过滤器
 
   - 通过过滤器实现灰度发布
-  - 
+
+  - ```java
+    mport io.jmnarloch.spring.cloud.ribbon.support.RibbonFilterContextHolder;
+    import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
+    import org.springframework.util.StringUtils;
+    
+    import javax.servlet.http.HttpServletRequest;
+    
+    // @Component
+    public class GrayFilter extends ZuulFilter {
+        @Override
+        public String filterType() {
+            return FilterConstants.PRE_TYPE;
+        }
+    
+        @Override
+        public int filterOrder() {
+            return -5;
+        }
+    
+        @Override
+        public boolean shouldFilter() {
+            // 所有请求都通过zuul过滤
+            return true;
+        }
+    
+        @Override
+        public Object run() throws ZuulException {
+            RequestContext context = RequestContext.getCurrentContext();
+            HttpServletRequest request = context.getRequest();
+            // 获取指定的请求头信息，该头信息在浏览器提交请求时携带，用于区分该请求要被路由到哪个主机处理
+            String mark = request.getHeader("gray-mark");
+            // 默认将请求路由到running-host上
+            RibbonFilterContextHolder.getCurrentContext().add("host-mark", "running-host");
+            // 若mark的值不为空且值为enable，则将请求路由到gray-host，其它请求会路由到默认的running-host
+            if (!StringUtils.isEmpty(mark) && "enable".equals(mark)) {
+                RibbonFilterContextHolder.getCurrentContext().add("host-mark", "gray-host");
+            }
+            return null;
+        }
+    }
+    ```
+
+    
+
+### 原理2
+
+原理1得需要2套页面，一个不带gray-host，一个带gray-host，所以不方便。现在改为交替访问gray-host。
+
+- 定义过滤器
+
+  - 通过全局变量Boolean flag，每次交互访问gray-host
+
+  - ```java
+    @Component
+    public class GrayFilter2 extends ZuulFilter {
+        // 定义一个原子布尔变量，是为了解决当前单例中全局变量的线程安全问题
+        private AtomicBoolean flag = new AtomicBoolean(true);
+    
+        @Override
+        public String filterType() {
+            return FilterConstants.PRE_TYPE;
+        }
+    
+        @Override
+        public int filterOrder() {
+            return -5;
+        }
+    
+        @Override
+        public boolean shouldFilter() {
+            // 所有请求都通过zuul过滤
+            return true;
+        }
+    
+        @Override
+        public Object run() throws ZuulException {
+            RequestContext context = RequestContext.getCurrentContext();
+            HttpServletRequest request = context.getRequest();
+    
+            // 根据布尔变量的值的不同，路由到不同的主机，然后再将布尔值取反
+            if (flag.get()) {
+                RibbonFilterContextHolder.getCurrentContext().add("host-mark", "running-host");
+                flag.set(false);
+            } else {
+                RibbonFilterContextHolder.getCurrentContext().add("host-mark", "gray-host");
+                flag.set(true);
+            }
+    
+            return null;
+        }
+    }
+    ```
+
+    
+
+# **Zuul**的高可用
+
+Zuul 的高可用非常关键，因为外部请求到后端微服务的流量都会经过 Zuul。故而在生产 环境中，我们一般都需要部署高可用的 Zuul 以避免单点故障。
+
+作为整个系统入口路由的高可用，需要借助额外的负载均衡器来实现，例如 Nginx、 HAProxy、F5 等。在 Zuul 集群的前端部分部署负载均衡服务器。Zuul 客户端将请求发送到负 载均衡器，负载均衡器将请求转发到其代理的其中一个 Zuul 节点。这样，就可以实现 Zuul 的高可用。
