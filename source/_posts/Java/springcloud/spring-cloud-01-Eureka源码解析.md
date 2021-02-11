@@ -14,7 +14,7 @@ tags:
 
 # Eureka Client
 
-## 自动装配
+## 自动装配EurekaClientAutoConfiguration类
 
 - 查找依赖org.springframework.cloud的spring-cloud-starter-netflix-eureka-client，没有spring.factories
 
@@ -22,27 +22,22 @@ tags:
 
 - EurekaClientAutoConfiguration类
 
-  - 看自动配置类的时候，一定要找到：业务类的实例以及配置文件的封装，才不迷路
-  
+  - 看自动配置类的时候，一定要找到：[业务类的实例](https://www.hangge.com/blog/cache/detail_2807.html)以及[配置文件的封装](https://www.hangge.com/blog/cache/detail_2807.html)，才不迷路
+
   - ```java
-    @Configuration(
-        proxyBeanMethods = false
-    )
+    @Configuration(proxyBeanMethods = false)
     @EnableConfigurationProperties
     @ConditionalOnClass({EurekaClientConfig.class})
-    @ConditionalOnProperty(
-        value = {"eureka.client.enabled"},
-        matchIfMissing = true
-    )
+    @ConditionalOnProperty(value = {"eureka.client.enabled"},matchIfMissing = true)
     @ConditionalOnDiscoveryEnabled
     @AutoConfigureBefore({NoopDiscoveryClientAutoConfiguration.class, CommonsClientAutoConfiguration.class, ServiceRegistryAutoConfiguration.class})
     @AutoConfigureAfter(
-        name = {"org.springframework.cloud.netflix.eureka.config.DiscoveryClientOptionalArgsConfiguration", "org.springframework.cloud.autoconfigure.RefreshAutoConfiguration", "org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration", "org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration"}
+        name = {....}
     )
     ```
     - @Configuration是spring的注解，但是proxyBeanMethods = false表示该类@Bean方法不可以被外部方法调用的；true表示可以
     - @EnableConfigurationProperties竟然没有value，这是因为can be registered in standard way, 就是@Bean方法；类似于以前的@EnableConfigurationProperties(EurekaClientConfigBean.class) + @Autowired方式
-  
+
   - ```java
     @Bean
     @ConditionalOnMissingBean(value = {EurekaClientConfig.class},search = SearchStrategy.CURRENT)
@@ -50,11 +45,56 @@ tags:
           return new EurekaClientConfigBean();
     }
     ```
-  
+
     - 这个就是@EnableConfigurationProperties实际上用到的Bean
     - @ConditionalOnMissingBean中SearchStrategy.CURRENT表示只搜索当前的容器，当前的容器指的是当前类EurekaClientAutoConfiguration中的@Bean
-  
-  - 核心业务类
+
+  - 核心业务实例1: EurekaClient, 在static class RefreshableEurekaClientConfiguration子类容器当中
+
+    - ```java
+      @Bean(destroyMethod = "shutdown")
+      @ConditionalOnMissingBean(value = {EurekaClient.class},search = SearchStrategy.CURRENT)
+      @org.springframework.cloud.context.config.annotation.RefreshScope
+      @Lazy
+      public EurekaClient eurekaClient(ApplicationInfoManager manager, EurekaClientConfig config, EurekaInstanceConfig instance, @Autowired(required = false) HealthCheckHandler healthCheckHandler) {
+        	....略
+         CloudEurekaClient cloudEurekaClient = new CloudEurekaClient(appManager, config, this.optionalArgs, this.context);
+        ....
+        return cloudEurekaClient;
+      }
+      ```
+
+    - search = SearchStrategy.CURRENT搜索的是static class RefreshableEurekaClientConfiguration 子类这个容器，不包括父类
+
+    - @org.springframework.cloud.context.config.annotation.RefreshScope表示该Bean EurekaClient会更新一旦其内部的配置类改变，并且使用该Bean的component会在next method call时获得一个新的Bean（原型模式,不是单例）
+
+    - @Lazy: 不是延迟加载，指的是延迟初始化。就是说创建容器RefreshableEurekaClientConfiguration 子类时，不会去创建该Bean实例，而是真正使用该Bean时才初始化。
+
+    - 问: @ConditionalOnMissingBean创建的是单例，但@RefreshScope创建的是原型，会不会冲突？
+
+      - 不会，[两者合在一起表示创建的是一个会自动更新的单例](https://www.hangge.com/blog/cache/detail_2807.html)
+
+  - 核心业务实例2: EurekaClient, 在static class EurekaClientConfiguration子类容器当中
+
+    - 为什么有两个子类容器创建同一个业务EurekaClient示例呢？
+
+      - 关键在于两个子类容器, 第一个是@ConditionalOnRefreshScope，第二个是@ConditionalOnMissingRefreshScope
+
+    - @ConditionalOnRefreshScope也是一个EurekaClientAutoConfiguration类的内部接口
+
+      - 复合注解
+
+      - ```java
+         @ConditionalOnClass({RefreshScope.class})
+         @ConditionalOnBean({RefreshAutoConfiguration.class})
+         @ConditionalOnProperty(
+           value = {"eureka.client.refresh.enable"},
+           havingValue = "true",
+           matchIfMissing = true
+         )
+        ```
+
+  - [两个EurekaClient实例，因为条件相反，所以不会同时创建](https://www.hangge.com/blog/cache/detail_2807.html)
 
 ## 预备知识
 
@@ -62,7 +102,7 @@ tags:
 
 ### **InstanceInfo.java**
 
-> 一个InstanceInfo就表示一个Eureka client示例。
+> 一个InstanceInfo就表示一个Eureka client客户端。
 
 两个时间戳:
 
@@ -72,44 +112,95 @@ tags:
 
 三个状态修改方法:
 
-- setOverridenStatus()
-
+- setOverridenStatus()：
+- overridenStatus表示它可以通过外部的请求被设置
 - setStatusWithoutDirty()
-
+  - 只修改overridenStatus, 不修改lastDirtyTimestamp
+  - 这个方法只在server端调用
 - setStatus()
+  - 这个方法只在client端调用，所以要修改lastDirtyTimestamp，因为server端没有更新
 
 重写了 euqals()
+
+- 只有instanceId相同才相等
 
 ### **Applications.java**
 
 > 就是client从server下载的所有client主机的信息。这是极大保证AP的核心，即使Server挂了，client没法更新信息表了，因为client有信息表，也可以找到available的service。
 
-有个域为
+有个域为Map<String, Application> appNameApplicationMap;
 
 - key:微服务名称 
 - value:Applicaton
 
 ### Application.java
 
+有个域为Map<String, InstanceInfo> instancesMap;
+
 - key: instanceId
 - value: InstanceInfo
-   一个 Application 中的所有 InstanceInfo 提供的微服务名称是相同的。
+- 一个 Application 中的所有 InstanceInfo 提供的微服务名称是相同的。
 
+### **Jersey** 框架
 
+Spring Cloud 中 Eureka Client 与 Eureka Server 间，及 Eureka Server 之间的通信，均采用 的是 Jersey 框架。
 
-## Eureka Client入口
+SpringMVC 中的处理器是 Controller，Jersey 中的处理器是 Resource。
+
+- 通过builder提交请求，post\get\delete\put
+
+- Resource是处理器, resource生成builder
+
+  - 具体的实现类InstanceResource
+
+    
+
+## 微服务注册
 
 ![][Eureka Client注册类]
 
-- 先找到spring.factories记录的自动配置类
-  - spring-cloud-netflix-eureka-client-2.2.6中有spring.factories文件
-- 找到EurekaClientAutoConfig自动配置类
-  - @EnableConfigurationProperties没有值，这是因为该注解有两个用法，一个是standard way，即通过创建@Bean的方式，另一个是指定配置类。采用standart way更能够对property对象精确控制
-  - @EnableConfigurationProperties是真正的创建property对象
+### **CloudEurekaClient** 构造器跟踪
 
+- EurekaClientAutoConfiguration.class的子类static class RefreshableEurekaClientConfiguration
+- 就是EurekaClient示例
+- DiscoveryClient是其父类
+  - 构造函数中有BackupRegistry，本地注册表，最大可能支持ap
+  - fetchRegistry()获取客户端注册表
+  - this.initScheduledTasks()启动定时任务
+  - 进行注册哪去了？其实在this.initScheduledTasks()内部
 
+### step1: 获取客户端注册表
 
+- fetchRegistry()获取客户端注册表：从远程下载注册表
+  - fetchRegistry(false)表示增量加载远程注册表，fetchRegistry(true)表示全量
+  - 对应的配置文件是:eureka.client.fetch-registry
+- fetchRegistryFromBackup：从远程下载注册表失败
+  - 先获取其他region远程的，再尝试获取本地的Apps
+  - 然后apps放入本地缓存类中
+- fetchRegistry()底层有Jersey通信框架的client端 <!--server端再Eureka server-->
+  - 发送get()请求，获取注册表
 
+### step2:客户端注册
+
+- 重新返回 DiscoveryClient 的构造器。在step1代码后面几十行，有个!register()调用，表示客户端注册
+- register()内部AbstractJerseyEurekaHttpClient registrationClient进行通信，就是Jersey框架
+  - 发送post()请求，进行注册
+
+### step3:初始化定时任务 
+
+重新返回 DiscoveryClient 的构造器, step2代码后面几十行，initScheduledTasks()
+
+- 定时更新应用列表对象
+  - initScheduledTasks()内部，跟踪 fetchRegistry()方法。
+  - 获取配置文件信息：clientConfig.getRegistryFetchIntervalSeconds()
+    - 表示how long to renew, default=30s
+    - 对应配置文件eureka.client.registry-fetch-interval-seconds
+  - 任务类scheduler.schedule()
+    - 第一个参数是任务类TimedSupervisorTask，里面有run()方法，run()中使用的是FutureTask和ThreadPoolExecutor
+    - 
+- 定时续约
+  - initScheduledTasks()内部，跟踪 fetchRegistry()方法。
+- 定时更新续约信息给 **Server**
 
 # 附录
 
