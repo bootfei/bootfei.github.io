@@ -106,9 +106,9 @@ tags:
 
 两个时间戳:
 
-- lastDirtyTimestamp:记录instance在客户端被修改的时间
+- lastDirtyTimestamp:记录intance在Client被修改的时间。该修改会被传递到Server端。
 <!--为什么用Dirty呢？因为client被修改了，但是server还没有收到更新-->
-- lastUpdatedTimestamp:记录instance在服务端被修改的时间
+- lastUpdatedTimestamp:记录intance状态在Server端被修改的时间。
 
 三个状态修改方法:
 
@@ -126,7 +126,7 @@ tags:
 
 ### **Applications.java**
 
-> 就是client从server下载的所有client主机的信息。这是极大保证AP的核心，即使Server挂了，client没法更新信息表了，因为client有信息表，也可以找到available的service。
+> 就是client从server下载的所有client主机的信息，即注册表。这是极大保证AP的核心，即使Server挂了，client没法更新信息表了，因为client有信息表，也可以找到available的service。
 
 有个域为Map<String, Application> appNameApplicationMap;
 
@@ -152,6 +152,22 @@ SpringMVC 中的处理器是 Controller，Jersey 中的处理器是 Resource。
 - Resource是处理器, resource生成builder
 
   - 具体的实现类InstanceResource
+
+- 里面存了各种Jersey server和client通信用的路径
+
+  - 比如String urlPath = "apps/" + info.getAppName();用来注册
+
+  - 比如
+
+    ```java
+    public EurekaHttpResponse<Applications> getDelta(String... regions) {
+        return this.getApplicationsInternal("apps/delta", regions);
+    }
+    ```
+
+    用来[增量获取注册信息](https://www.hangge.com/blog/cache/detail_2807.html)
+
+  - 比如EurekaHttpResponse<InstanceInfo> sendHeartBeat用来发送心跳检测
 
     
 
@@ -182,6 +198,8 @@ SpringMVC 中的处理器是 Controller，Jersey 中的处理器是 Resource。
 
 ### step2:客户端注册
 
+实际上并没有注册，而是交给定时任务，续约的时候进行注册
+
 - 重新返回 DiscoveryClient 的构造器。在step1代码后面几十行，有个!register()调用，表示客户端注册
 - register()内部AbstractJerseyEurekaHttpClient registrationClient进行通信，就是Jersey框架
   - 发送post()请求，进行注册
@@ -191,6 +209,7 @@ SpringMVC 中的处理器是 Controller，Jersey 中的处理器是 Resource。
 重新返回 DiscoveryClient 的构造器, step2代码后面几十行，initScheduledTasks()
 
 - 定时更新应用列表对象
+
   - initScheduledTasks()内部，跟踪 fetchRegistry()方法。
   - 获取配置文件信息：clientConfig.getRegistryFetchIntervalSeconds()
     - 表示how long to renew, default=30s
@@ -198,9 +217,52 @@ SpringMVC 中的处理器是 Controller，Jersey 中的处理器是 Resource。
   - 任务类scheduler.schedule()
     - 第一个参数是任务类TimedSupervisorTask，里面有run()方法，run()中使用的是FutureTask和ThreadPoolExecutor
     - 
+
 - 定时续约
-  - initScheduledTasks()内部，跟踪 fetchRegistry()方法。
-- 定时更新续约信息给 **Server**
+
+  - initScheduledTasks()内部，跟踪 fetchRegistry()方法
+
+  - ```java
+    this.heartbeatTask = new TimedSupervisorTask("heartbeat", this.scheduler, this.heartbeatExecutor, renewalIntervalInSecs, TimeUnit.SECONDS, expBackOffBound, new DiscoveryClient.HeartbeatThread());
+    ```
+
+    - new DiscoveryClient.HeartbeatThread()就是心跳检测，实现定时续约
+    - 里面有renew()方法，通过Jersey框架发送心跳
+
+- 定时检测Client更新
+
+  - 在initScheduledTasks()中，instanceInfoReplicator类，实现了runnable接口
+
+  - ```java
+    //创建任务
+    this.instanceInfoReplicator = new InstanceInfoReplicator(this, this.instanceInfo, this.clientConfig.getInstanceInfoReplicationIntervalSeconds(), 2);
+    ```
+
+  - 启动任务
+
+    - ```java
+      this.instanceInfoReplicator.start(this.clientConfig.getInitialInstanceInfoReplicationIntervalSeconds());
+      ```
+
+      
+
+
+
+## 微服务下架
+
+重新返回到 EurekaClientAutoConfiguration 类的如下@Bean 方法，该@Bean 方法就是前 面分析微服务注册时的入口方法。
+
+```java
+@Bean(destroyMethod = "shutdown")
+@ConditionalOnMissingBean(value = {EurekaClient.class},search = SearchStrategy.CURRENT)
+@org.springframework.cloud.context.config.annotation.RefreshScope
+@Lazy
+public EurekaClient eurekaClient(ApplicationInfoManager manager, EurekaClientConfig config, EurekaInstanceConfig instance, @Autowired(required = false) HealthCheckHandler healthCheckHandler) {
+```
+
+
+
+
 
 # 附录
 
