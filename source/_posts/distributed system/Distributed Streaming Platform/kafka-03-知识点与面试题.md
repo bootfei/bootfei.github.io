@@ -177,7 +177,7 @@ kafka中partition leader若挂了，broker controller会选择ISR中的follower�
 
 # Kafka 中 partition leader 若挂了，通过设置允许其从任意没有宕机的主机的 partition 中选举新的 leader，为什么可能导致大量数据的丢失
 
- 在 ISR 中没有副本的情况下可以选择的 partition 只能是 OSR 中的。一个 partition 只所以能够进入到 OSR，就是因为其与原来的 leader 的通信出现了问题。若该 partition 成为了 新的 leader，则可能会出现这个新的 leader 与其它所有副本均无法通信的情况。但由于其为 leader，所以其只会认为是其它副本出现了问题，从而导致该 leader 的 ISR 中没有 follower。 而没有 follower 的风险是很高的，这个 leader 的失效将会导致大量消息的丢失。
+在 ISR 中没有副本的情况下可以选择的 partition 只能是 OSR 中的。一个 partition 只所以能够进入到 OSR，就是因为其与原来的 leader 的通信出现了问题。若该 partition 成为了 新的 leader，则可能会出现这个新的 leader 与其它所有副本均无法通信的情况。但由于其为 leader，所以其只会认为是其它副本出现了问题，从而导致该 leader 的 ISR 中没有 follower。 而没有 follower 的风险是很高的，这个 leader 的失效将会导致大量消息的丢失。
 
 # Kafka 中，当一个 Consumer Group 中仅包含一个 Consumer 时，若其消费能力较低， 则可能会引发重复消费。为什么?怎么解决?
 
