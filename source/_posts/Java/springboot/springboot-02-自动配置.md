@@ -116,8 +116,6 @@ tags:
 
   - [只是加载类的名称（我觉得更准确的说，是封装类的名称），并没有创建实例]()，什么时候创建呢？
 
-    - 
-
   - ```java
     @Import(AutoConfigurationImportSelector.class)
     ```
@@ -377,6 +375,4 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
     - starter通过spring.factories通知spring容器，"我需要自动装配"
     - starter中定义了xxxService业务类，将核心业务交给spring容器创建对象
     - starter中封装了配置类，通知spring容器使用该配置初始化业务量对象
-
-# 面试题
 

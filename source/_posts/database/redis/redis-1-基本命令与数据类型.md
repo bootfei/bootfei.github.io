@@ -1,12 +1,12 @@
 ---
-title: redis-1-基本命令与5种数据类型
+title: redis-1-基本命令与数据类型
 date: 2021-01-08 15:59:03
 tags: [redis]
 ---
 
 
 
-# Redis数据类型
+# Redis普通数据类型
 
 官方命令大全网址：http://www.redis.cn/commands.html
 Redis 中存储数据是通过 key-value 格式存储数据的，其中 value 可以定义五种数据类型：
@@ -550,6 +550,91 @@ exists [key]
 ```
 expire [key] seconds
 ```
+
+# Redis特殊数据类型**(重点)**
+
+## BitMap
+
+BitMap 就是通过一个 bit 位来表示某个元素对应的值或者状态, 其中的 key 就是对应元素本身 。Redis 从 2.2 版本之后新增了setbit, getbit, bitcount 等几个 bitmap 相关命令。
+
+我们再来重申下：**Redis 其实只支持 5 种数据类型，并没有 BitMap 这种类型，BitMap 底层是基于 Redis 的字符串类型实现的。**
+
+### 底层结构
+
+底层也是通过对字符串的操作来实现
+
+<img src="https://easyreadfs.nosdn.127.net/bFxn73tfrlnNzJDOe-0WzA==/8796093023252283210" alt="img" style="zoom:50%;" />
+
+Redis 中字符串的最大长度是 512M，所以 BitMap 的 offset 值也是有上限的，其最大值是：
+
+```
+Copy8 * 1024 * 1024 * 512  =  2^32
+```
+
+### 常用命令
+
+```shell
+SETBIT key offset value #其中 offset 必须是数字，value 只能是 0 或者 1
+
+# 获取指定范围内值为 1 的个数
+# start 和 end 以字节为单位
+bitcount key start end
+
+
+# BitMap间的运算
+# operations 位移操作符，枚举值
+  AND 与运算 &
+  OR 或运算 |
+  XOR 异或 ^
+  NOT 取反 ~
+# result 计算的结果，会存储在该key中
+# key1 … keyn 参与运算的key，可以有多个，空格分割，not运算只能一个key
+# 当 BITOP 处理不同长度的字符串时，较短的那个字符串所缺少的部分会被看作 0。返回值是保存到 destkey 的字符串的长度（以字节byte为单位），和输入 key 中最长的字符串长度相等。
+bitop [operations] [result] [key1] [keyn…]
+
+# 返回指定key中第一次出现指定value(0/1)的位置
+bitpos [key] [value]
+```
+
+### 应用场景
+
+**1. 用户签到**
+
+很多网站都提供了签到功能，并且需要展示最近一个月的签到情况，这种情况可以使用 BitMap 来实现。
+根据日期 offset = （今天是一年中的第几天） % （今年的天数），key = 年份：用户id。
+
+如果需要将用户的详细签到信息入库的话，可以考虑使用一个一步线程来完成。
+
+**2. 统计活跃用户（用户登陆情况）**
+
+使用日期作为 key，然后用户 id 为 offset，如果当日活跃过就设置为1。
+
+假如 
+
+20201009 活跃用户情况是： [1，0，1，1，0]
+20201010 活跃用户情况是 ：[ 1，1，0，1，0 ]
+
+统计连续两天活跃的用户总数：
+
+```
+Copybitop and dest1 20201009 20201010 
+# dest1 中值为1的offset，就是连续两天活跃用户的ID
+bitcount dest1
+```
+
+统计20201009 ~ 20201010 活跃过的用户：
+
+```
+Copybitop or dest2 20201009 20201010 
+```
+
+**3. 统计用户是否在线**
+
+如果需要提供一个查询当前用户是否在线的接口，也可以考虑使用 BitMap 。即节约空间效率又高，只需要一个 key，然后用户 id 为 offset，如果在线就设置为 1，不在线就设置为 0。
+
+**4. 实现布隆过滤器**
+
+
 
 # Redis消息模式
 

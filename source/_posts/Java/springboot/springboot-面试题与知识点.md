@@ -35,56 +35,49 @@ tags:
 
 然后，Spring Boot 中的注解@ EnableAutoConfiguration 是@SpringBootApplication 注解的一个组成注解，该注解用于完成自动配置相关的自定义类及内置类的加载。其本身也是一个 组合注解。除了元注解外，还组合了@Import 与@AutoConfigurationPackage 两个注解。具体 分工如下:
 
--   @Import:用于加载SpringBoot中内置的及导入starter中META-INF/spring.factory配置
+- @Import: 用于加载SpringBoot中内置的及导入starter中META-INF/spring.factory配置中的自动配置类。
 
-  中的自动配置类。
+- @AutoConfigurationPackage: 用于扫描、加载并注册自定义的组件类。
 
--   @AutoConfigurationPackage:用于扫描、加载并注册自定义的组件类。
-
-## META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么? 
+# META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么? 
 
 无论是 Spring Boot 内置的 META-INF/spring.factory 配置文件，还是导入 Starter 依赖中 的 META-INF/spring.factory 配置文件，对于 Spring Boot 自动配置来说很重要是因为，其包含 了一个 key-value 对，key 为 EnableAutoConfiguration 的全限定性类名，而 value 则为当前应 用中所有可用的自动配置类。所有可用的自动配置类都在这里声明，所以该文件对于 Spring Boot 自动配置来说很重要。
 
-## 你了解 Spring Boot 官方给出的 Starter 工程的命名规范吗?具体是什么? 
+#  Spring Boot 官方给出的 Starter 工程的命名规范吗具体是什么? 
 
 Spring Boot 官方给出的 Starter 工程的命名需要遵循如下规范:
-  Spring 官方定义的Starter格式为:spring-boot-starter-{name}，如spring-boot-starter-web。  非官方Starter命名格式为:{name}-spring-boot-starter，如dubbo-spring-boot-starter。
 
-## 我们知道@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应 实例。请问这些@Bean 方法实例的创建顺序什么?
+- Spring 官方定义的Starter格式为:spring-boot-starter-{name}，如spring-boot-starter-web。 
+- 非官方Starter命名格式为:{name}-spring-boot-starter，如dubbo-spring-boot-starter。
+
+# @Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?
 
  @Configuration 所注解的类中的@Bean 方法实例的创建顺序即这些@Bean 方法的执 行顺序。首先可以为这些方法的执行添加执行条件，例如使用以@ConditionOn 开头的条件 注解。在这些条件都满足的情况下，这些方法的执行顺序即为其在@Configuration 注解类中 的定义顺序，先定义者先执行，其对应实例先创建。
 
-## 你曾定义过 Starter 吗?简单说一下定义的大体步骤。
+# 你曾定义过 Starter 吗?简单说一下定义的大体步骤。
 
 对于自定义 Starter，其工程命名格式为{name}-spring-boot-starterConfiguration。工程 需要导入配置处理器依赖。然工程中需要定义如下的类与配置:
 
--   定义核心业务类，这是该Starter存在的意义。
+- 定义核心业务类，这是该Starter存在的意义。
 
--   定义自动配置类，其完成对核心业务类的实例化。
+- 定义自动配置类，其完成对核心业务类的实例化，并交给Spring容器。
 
--   若核心业务类中需要从配置文件获取配置数据，还需要定义一个用于封装配置文件中相
+- 若核心业务类中需要从配置文件获取配置数据，还需要定义一个用于封装配置文件中相关属性的类。
 
-  关属性的类。
+- 定义META-INF/spring.factories配置文件，用于对自动配置类进行注册。
 
--   定义META-INF/spring.factories配置文件，用于对自动配置类进行注册。
-
-## 在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。 
+# 在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。
 
 在自动配置类定义中的确会用于到很多的条件注解，条件注解一般都是以 @ConditionalOn 开头的，例如:
 
-  -   @ConditionalOnClass():条件判断注解，其可以标注在类与方法上，表示当参数指定的
+  - @ConditionalOnClass():条件判断注解，其可以标注在类与方法上，表示当参数指定的类在类路径下存在时才会创建当前类的 Bean，或当前方法指定的 Bean。
 
-    类在类路径下存在时才会创建当前类的 Bean，或当前方法指定的 Bean。
+  - @ConditionalOnMissionBean:条件判断注解，其可以标注在类与方法上，表示当容器中不存在当前类或方法类型的对象时，将去创建一个相应的 Bean。
 
-  -   @ConditionalOnMissionBean:条件判断注解，其可以标注在类与方法上，表示当容器中
+  - @ConditionalOnBean():条件判断注解，其可以标注在类与方法上，表示当在容器中存在指定类的实例时才会创建当前类的 Bean，或当前方法指定的 Bean。
 
-    不存在当前类或方法类型的对象时，将去创建一个相应的 Bean。
 
-  -   @ConditionalOnBean():条件判断注解，其可以标注在类与方法上，表示当在容器中存
-
-    在指定类的实例时才会创建当前类的 Bean，或当前方法指定的 Bean。
-
-# 请简单谈一下你对 Spring Boot 启动过程的了解。
+# 谈一下你对 Spring Boot 启动过程的了解。
 
  Spring Boot 的启动从大的方面来说需要经过以下两大阶段:加载 Spring Boot 配置文 件 application.yml，与完成自动配置。
 
@@ -118,6 +111,6 @@ Spring Boot与SSM传统开发相比，其最大的特点是自动配置，不用
 
 具体来说，它就是开启了对@ConfigurationProperties 注解的 Bean 的自动注册，注解到 Spring 容器中。这种 Bean 有两种注册方式:在配置类使用@Bean 方法注册，或直接使用该 注解的 value 属性进行注册。若在配置类中使用@Bean 注册，则需要在配置类中定义一个 @Bean 方法，该方法的返回值为“使用@ConfigurationProperties 注解标注”的类。若直接 使用该注解的 value 属性进行注册，则需要将这个“使用@ConfigurationProperties 注解标注” 的类作为 value 属性值出现即可。
 
-# Spring Boot 中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个@ConditionalOnMissingBean 注解，你了解过嘛?请谈一下你对它的认识。 
+# Spring Boot 中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个@ConditionalOnMissingBean 注解,请谈一下你对它的认识。 
 
 @ConditionalOnMissingBean 注解是 Spring Boot 提供的众多条件注册中的一个。其表示的意义是，当容器中没有指定名称或指定类型的 Bean 时，该条件为 true。不过，这里需 要强调一点的是，这里要查找的“容器”是可以指定的。通过 search 属性指定。其 search 的范围有三种:仅搜索当前配置类容器;搜索所有层次的父类容器，但不包含当前配置类容 器;搜索当前配置类容器及其所有层次的父类容器，这个是默认搜索范围。
