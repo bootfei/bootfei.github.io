@@ -76,7 +76,7 @@ Kafka中partition Leader与Follower间是主备关系。Leader负责对外提供
 
 
 
-# 在 Kafka 的副本中有 AR、ISR 与 ORS 概念，它们间是什么关系? 
+# 在 Kafka 的副本中有 AR、ISR 与 OSR 概念，它们间是什么关系? 
 
 Kafka中某个partition的所有的副本统称为Assigned Replicas，即AR。初始时leader 与所有 follower 都在 ISR(In-Sync Replicas)列表，即初始时 ISR = AR。ISR 中的 partition 是要从 leader 同步消息的。但同步会有延迟，只要延迟超过了阈值 replica.lag.time.max.ms，就会 把 follower 剔除出 ISR，移入 OSR(Outof-Sync Replicas)列表。故 AR=ISR+OSR。
 
@@ -92,12 +92,6 @@ ISR 由 leader 负责维护，leader 会对 OSR 中的 follower 进行定期检�
 
 
 
-# 在 Kafka 中当消费者消费完消息后需要提交其消费过消息的 offset，这个 offset 保 存在哪里?
-
-在 Kafka 中，老版本的消费 offset 是存储的 zookeeper 中的， 但是 zookeeper 并不适合频繁的读/写操作，所以在新版本的中消费 offset 存放到了__consumer_offsets （[内置 topic 的 partition 中了，与用户的topic-partition在同一目录下]()）。该主题的 partition 默认有 50 个，那么 Consumer Group 消费的 offset 存放 的分区索引可以通过如下公式计算:Math.abs(groupID.hashCode()) % 50。
-
-
-
 # Kafka 中的 partition leader 与 broker controller 是由谁选举出来的? 
 
 Kafka 中为了保障消息的高可用性，一般会为 partition 创建副本。副本中 partition leader 负责对外提供服务，而 partition follower 则仅同步 leader 中的数据。当 partition leader 出现 宕机， 则立马由 broker controller 从 follower 中选举出来一个新的 leader。其实所谓选举，其实就是 “按资排辈”。从 ISR 列表中找到第一个 follower 作为新的 leader。
@@ -108,7 +102,7 @@ broker controller负责管理分区与副本，例如partition leader的选举�
 
 # Kafka 中的生产者生产的消息被写入到了哪个 partition?消费者将 offset 提交到了 哪里?这两个问题有什么联系?
 
- 前两个问题其实都是 Kafka 中生产者的消息路由策略。只不过，消费者提交的 offset 是一种特殊的消息，其是提交到了一个名称为__consumer_offsets 的特殊主题的相应 partition。 __consumer_offsets 主题默认有 50 个分区。
+ 前两个问题其实都是 Kafka 中生产者的消息路由策略。只不过，消费者提交的 offset 是一种特殊的消息，其是提交到了一个名称为__consumer_offsets 的特殊主题的相应 partition([内置 topic 的 partition 中了，与用户的topic-partition在同一目录下]()）。 __consumer_offsets 主题默认有 50 个分区。
 
 对于普通消息的路由，其路由规则如下:
 
@@ -138,18 +132,15 @@ broker controller负责管理分区与副本，例如partition leader的选举�
 
 HW，HighWatermark，高水位，表示 Consumer 可以消费到的最高 partition 偏移量。 在 Kafka 中与 HW 相关的机制有两种:HW 机制与 HW 截断机制。它们都是为了保证 partition leader 与 follower 间数据的一致性。只不过它们处理的场景不同。
 
-- HW机制:该机制在Kafka集群正常运行状态下可以防止partitionleader与follower间
-
-  出现数据不一致。该机制要求，对于 partition leader 新写入的消息，consumer 不能立 刻消费。leader 会等待该消息被所有 ISR 中的 partition follower 同步后才会更新 HW，此 时该消息才能被 consumer 消费。
-
-- HW截断机制:该机制在Kafka中partitionleader出现宕机情况然后又恢复时，可以防 止 partition leader 与 follower 间出现数据不一致。当原 Leader 宕机后又恢复时，将其 LEO 回退到其宕机时的 HW，然后再与新的 Leader 进行数据同步，这种机制称为 HW 截 断机制。
+- HW机制:该机制在Kafka集群正常运行状态下可以防止partitionleader与follower间出现数据不一致。该机制要求，对于 partition leader 新写入的消息，consumer 不能立 刻消费。leader 会等待该消息被所有 ISR 中的 partition follower 同步后才会更新 HW，此 时该消息才能被 consumer 消费。
+- HW截断机制:该机制在Kafka中partition leader出现宕机情况然后又恢复时，可以防 止 partition leader 与 follower 间出现数据不一致。当原 Leader 宕机后又恢复时，将其 LEO 回退到其宕机时的 HW，然后再与新的 Leader 进行数据同步，这种机制称为 HW 截 断机制。
 
 # Kafka 是如何保证消息发送的可靠性的?
 
 Kafka 的消息生产者有一个配置属性 acks，用于指定消息发送的可靠性级别的。
 
 - 0值:异步发送。生产者向kafka发送消息但不需要kafka反馈成功ack。该方式效率最高，但可靠性最低。其可能会存在消息丢失的情况。
-- 1值:同步发送，默认值。生产者发送消息给kafka，broker的partitionleader在收到消息后马上发送成功 ack，生产者收到后才会再发送消息。如果一直未收到 kafka 的 ack，则生产者会认为消息发送失败，会重发消息。
+- 1值:同步发送，默认值。生产者发送消息给kafka，broker的partition leader在收到消息后马上发送成功 ack，生产者收到后才会再发送消息。如果一直未收到 kafka 的 ack，则生产者会认为消息发送失败，会重发消息。
 - -1值:同步发送。其值等同于all。生产者发送消息给kafka，kafka收到消息后要等到ISR列表中的所有副本都同步消息完成后，才向生产者发送成功 ack。如果一直未收到 kafka 的 ack，则认为消息发送失败，会自动重发消息。
 
 # Kafka 的消息生产者设置 acks 属性值为 1 时，能否使生产者确认它发送的消息发送 成功或失败呢?
@@ -162,13 +153,13 @@ Kafka 的消息生产者设置 acks 属性值为 1 时表示，生产者发送�
 
 # Kafka 的消息生产者设置 acks 属性值为 all 时，基本可以保证消息的不丢失。但却可能会引发消息的重复接收。为什么?
 
-Kafka 的消息生产者设置 acks 属性值为 all 时表示，生产者发送消息给 kafka，kafka 收到消息后要等到 ISR 列表中的所有副本都同步消息完成后，才向生产者发送成功 ack。如 果一直未收到 kafka 的 ack，则认为消息发送失败，会自动重发消息。
+Kafka 的消息生产者设置 acks 属性值为 all 时表示，生产者发送消息给 partition leader，partition leader 收到消息后要等到 ISR 列表中的所有副本都同步消息完成后，才向生产者发送成功 ack。如 果一直未收到 partition leader 的 ack，则认为消息发送失败，会自动重发消息。
 
 这种模式下可靠性很高，很少会出现消息丢失的情况。但可能会出现部分 Follower 重复 接收消息的情况。例如生产者发送消息给partition leader，然后ISR中的follower要同步消 息。当 follower 同步还未完成时 partition leader 挂了，此时不会发送 ack 给生产者。由于发 送者没有收到 ack，所以生产者会再次发送消息给新的 Leader。若新的 Leader 曾经同步过一部分原来的消息，那么此时又接收到相同的消息，此时 leader 中的消息就会有重复消息。
 
 该模式下 kafka 对消息的重复接收问题无法直接解决。但可以想办法对于重复接收的消 息不进行重复消费:为消息指定唯一标识 key，然后在消费者端定义去重机制。当然，消费者端的去重，是需要开发人员自己定义的。
 
-# Kafka 中 partition leader 若挂了，一般会选择 ISR 中的 follower 作为新的 leader。这 个新 leader 的选举是由谁完成的?若 ISR 中没有其它 follower 能否选举出新的 leader? 
+# Kafka 中 partition leader 若挂了，一般会选择 ISR 中的 follower 作为新的 leader, 这是由谁完成的?若 ISR 中没有其它 follower 能否选举出新的 leader? 
 
 kafka中partition leader若挂了，broker controller会选择ISR中的follower作为新的 leader。若 ISR 中没有其它 follower 能否选举出新的 leader，可以通过 broker 的属性设置 unclean.leader.election.enable 的值来确定。
 
