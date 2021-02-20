@@ -133,7 +133,7 @@ MGET key [key …]
 
 ## hash类型
 
- hash 类型也叫散列类型，它提供了字段和字段值的映射。字段值只能是字符串类型，不支持散列类型、集合类型等其它类型。
+hash 类型也叫散列类型，它提供了字段和字段值的映射。字段值只能是字符串类型，不支持散列类型、集合类型等其它类型。
 
 ![avatar][hash字段和字段值映射示意图]
 
@@ -243,8 +243,6 @@ HEXISTS key field
 
 127.0.0.1:6379> hexists user age 查看user中是否有age字段 
 (integer) 1 
-127.0.0.1:6379> hexists user name 查看user中是否有name字段 
-(integer) 0
 ```
 
 ##### 获取字段数量
