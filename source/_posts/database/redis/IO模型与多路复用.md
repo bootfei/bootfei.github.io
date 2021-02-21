@@ -239,8 +239,6 @@ thread-based architecture（基于线程的架构），通俗的说就是：多�
 
 事件驱动体系结构是目前比较广泛使用的一种。这种方式会定义一系列的事件处理器来响应事件的发生，并且将**服务端接受连接**与**对事件的处理**分离。其中，**事件是一种状态的改变**。比如，tcp中socket的new incoming connection、ready for read、ready for write。
 
-Reactor模式和Proactor模式都是是event-driven architecture（事件驱动模型）的实现方式
-
 ### Reactor模式
 
 #### 简介
@@ -280,14 +278,6 @@ Reactor模式和Proactor模式都是是event-driven architecture（事件驱动�
 3. 事件到来，select返回，Reactor将事件分发到之前注册的回调函数中处理;
 
 #### 为什么使用Reactor模式
-
-好比一个餐馆，
-
-1. 有5桌客人，那就派5个服务员全程负责这桌客人的点菜、传单、结账等；有10桌客人，那就派10个服务员；....如果客人非常多，那就得多少服务员啊！！
-2. 那么就使用线程池，总共有5个服务员。但是有的客人等不及，造成客人流水
-3. 那么就使用Reactor模式，客人在点单的时候，服务员去负责其他客人，等客人点好菜了，叫服务员一声就行了。所以，只需要一个服务员负责所有客人的点菜就好了。
-
-**并发系统常使用reactor模式代替常用的多线程的处理方式，节省系统的资源，提高 系统的吞吐量。**
 
 - 多线程模式：
 
@@ -345,72 +335,157 @@ Reactor的单线程模式的单线程主要是针对于I/O操作而言，也就�
 
 ### Proactor模式
 
-流程与Reactor模式类似，区别在于proactor在IO ready事件触发后，完成IO操作再通知应用回调。虽然在linux平台还是基于epoll/select，但是内部实现了异步操作处理器(Asynchronous Operation Processor)以及异步事件分离器(Asynchronous Event Demultiplexer)将IO操作与应用回调隔离。经典应用例如boost asio异步IO库的结构和流程图如下：
-
-![img](https://pic4.zhimg.com/80/v2-3ed3d63b31460c562e43dfd32d808e9b_1440w.jpg)
-
-再直观一点，就是下面这幅图：
-
-
-
-![img](https://pic1.zhimg.com/80/v2-ae0c50cb3b3480fc36b8614b8b77f528_1440w.jpg)
-
-
-
-再再直观一点，其实就回到了五大模型-异步I/O模型的流程，就是下面这幅图：
-
-
-
-![img](https://pic3.zhimg.com/80/v2-557eee325d2e29665930825618f7b212_1440w.jpg)
-
-针对第二幅图在稍作解释：
-
-Reactor模式中，用户线程通过向Reactor对象注册感兴趣的事件监听，然后事件触发时调用事件处理函数。而Proactor模式中，用户线程将AsynchronousOperation（读/写等）、Proactor以及操作完成时的CompletionHandler注册到AsynchronousOperationProcessor。
-
-AsynchronousOperationProcessor使用Facade模式提供了一组异步操作API（读/写等）供用户使用，当用户线程调用异步API后，便继续执行自己的任务。AsynchronousOperationProcessor 会开启独立的内核线程执行异步操作，实现真正的异步。当异步IO操作完成时，AsynchronousOperationProcessor将用户线程与AsynchronousOperation一起注册的Proactor和CompletionHandler取出，然后将CompletionHandler与IO操作的结果数据一起转发给Proactor，Proactor负责回调每一个异步操作的事件完成处理函数handle_event。虽然Proactor模式中每个异步操作都可以绑定一个Proactor对象，但是一般在操作系统中，Proactor被实现为Singleton模式，以便于集中化分发操作完成事件。
-
-### Reactor模式和Proactor模式的总结对比
-
-#### 2.3.1 主动和被动
-
-以主动写为例：
-
-- Reactor将handler放到select()，等待可写就绪，然后调用write()写入数据；写完数据后再处理后续逻辑；
-- Proactor调用aoi_write后立刻返回，由内核负责写操作，写完后调用相应的回调函数处理后续逻辑
-
-**Reactor模式是一种被动的处理**，即有事件发生时被动处理。而**Proator模式则是主动发起异步调用**，然后循环检测完成事件。
-
-#### 2.3.2 实现
-
-Reactor实现了一个被动的事件分离和分发模型，服务等待请求事件的到来，再通过不受间断的同步处理事件，从而做出反应；
-
-Proactor实现了一个主动的事件分离和分发模型；这种设计允许多个任务并发的执行，从而提高吞吐量。
-
-所以涉及到文件I/O或耗时I/O可以使用Proactor模式，或使用多线程模拟实现异步I/O的方式。
-
-#### 2.3.3 优点
-
-Reactor实现相对简单，对于链接多，但耗时短的处理场景高效；
-
-- 操作系统可以在多个事件源上等待，并且避免了线程切换的性能开销和编程复杂性；
-- 事件的串行化对应用是透明的，可以顺序的同步执行而不需要加锁；
-- 事务分离：将与应用无关的多路复用、分配机制和与应用相关的回调函数分离开来。
-
-Proactor在**理论上**性能更高，能够处理耗时长的并发场景。为什么说在**理论上**？请自行搜索Netty 5.X版本废弃的原因。
-
-#### 2.3.4 缺点
-
-Reactor处理耗时长的操作会造成事件分发的阻塞，影响到后续事件的处理；
-
-Proactor实现逻辑复杂；依赖操作系统对异步的支持，目前实现了纯异步操作的操作系统少，实现优秀的如windows IOCP，但由于其windows系统用于服务器的局限性，目前应用范围较小；而Unix/Linux系统对纯异步的支持有限，应用事件驱动的主流还是通过select/epoll来实现。
-
-#### 2.3.5 适用场景
-
-Reactor：同时接收多个服务请求，并且依次同步的处理它们的事件驱动程序；
-
-Proactor：异步接收和同时处理多个服务请求的事件驱动程序。
 
 
 
 
+
+
+
+
+# 5种IO模型
+
+在理解关于同步和阻塞的概念前，需要知道
+
+```
+I/0 操作 主要分成两部分
+① 数据准备，将数据加载到内核缓存（数据加载到操作系统）
+② 将内核缓存中的数据加载到用户缓存（从操作系统复制到应用中）
+```
+
+**同步和异步的概念描述的是用户线程与内核的交互方式**
+
+**阻塞和非阻塞的概念描述的是用户线程调用内核IO操作的方式**
+
+## **异步就是异步**
+
+**![img](https://images2018.cnblogs.com/blog/874126/201808/874126-20180815160154943-682702591.png)**
+
+![img](https://images2018.cnblogs.com/blog/874126/201808/874126-20180815160307369-420684321.png)
+
+同步和异步针对应用程序来，关注的是程序中间的协作关系；
+
+阻塞与非阻塞更关注的是单个进程的执行状态。
+
+```
+　阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。
+真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，
+而自己只等待一个完成信号的时候，才是真正的异步IO。
+所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。
+```
+
+PS：
+
+```
+1，异步是一个相对概念，实际应用中没有绝对的异步，现实中更多称为“异步”只是代表阻塞。
+2，不同场合，语言环境，概念不一样，有时候同步就代表了阻塞，异步表示非阻塞。如果细分的话，代表不同含义。
+```
+
+PS：【**同步/异步】和【\**阻塞/非阻塞】的关注点是存在区别的：\****
+
+```
+【同步/异步】表示是两个事件交互的是否有序依赖关系
+同步：针对执行结果，A事件必须知道B事件的结果M后才执行得到结果。
+异步：针对执行结果，执行A事件和执行B事件没有关系。
+
+阻塞/非阻塞表示执行过程出现的状态
+阻塞：针对执行者来说，执行A事件，执行过程因为条件未满足，执行状态变成等待状态。
+非阻塞：针对执行者来说，就是事件A执行遇到未满足条件，执行另外独立的C事件。
+
+总结：两者之间是没有关系的
+【同步/异步】
+   概念上是：事件A，B的结果之间的是否存在依赖关系；
+   影响上是：保证依赖数据的正确性
+【阻塞/非阻塞】
+   概念上是：自身执行状态。
+   影响上是：阻塞导致资源浪费。
+
+特别注意：异步只有异步，同步才有阻塞和非阻塞的说法！
+
+例子：
+总整体看：传统的请求，是同步的（也是阻塞的），请求响应是有序的(请求响应之间也是等待的）；AJAX是异步请求（也是非阻塞的）。
+同步不等于阻塞：
+单个看：AJAX从客户端执行单个请求看数据是同步，但是执行是非阻塞，在未收到响应继续执行其他请求。
+```
+
+
+
+服务器端编程经常需要构造高性能的IO模型，常见的IO模型有四种: 
+
+(1[)同步阻塞IO(Blocking IO)]():即传统的IO模型。Tomcat和Apache
+
+(2)[同步非阻塞IO(Non-blocking IO)]():默认创建的socket都是阻塞的，非阻塞IO要求socket被设置为 NONBLOCK。注意这里所说的NIO并非Java的NIO(New IO)库。
+
+(3)[IO多路复用(IO Multiplexing)]():即经典的Reactor设计模式，有时也称为异步阻塞IO，Java中的 Selector和Linux中的epoll都是这种模型。
+
+(4)异步IO(Asynchronous IO):即经典的Proactor模式，也称为异步非阻塞IO
+
+
+
+## 同步阻塞IO(Blocking IO)
+
+<img src="https://img-blog.csdnimg.cn/20200806153255444.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjYyMjY2,size_16,color_FFFFFF,t_70" alt="img" style="zoom:50%;" />
+
+
+
+<img src="https://images2018.cnblogs.com/blog/874126/201808/874126-20180815215329688-621626362.png" alt="img" style="zoom:50%;" />
+
+- [用户线程(上上图中的处理线程)]()通过[系统调用read发起IO读操作(上上图中的read)]()，由用户空间转到内核空间。内核等到数据包到达后，然后将 接收的数据拷贝到用户空间，完成read操作。
+- 即用户需要等待read将socket中的数据读取到buffer后，才继续处理接收的数据。整个IO请求的过程中，用户线程 是被阻塞的，这导致用户在发起IO请求时，不能做任何事情，对CPU的资源利用率不够。
+
+```java
+{
+    read(socket, buffer); //阻塞
+    process(buffer);
+}
+```
+
+**模型特点 ：**
+
+- 采用阻塞IO模式获取输入的数据
+- 每个连接都需要独立的线程完成数据的输入，业务处理，数据返回
+
+**问题分析：**
+
+- 当并发数很大，就会创建大量的线程，占用很大系统资源
+- 连接创建后，如果当前线程暂时没有数据可读，该线程会阻塞在read 操作，造成线程资源浪费
+
+## 同步非阻塞IO
+
+<img src="https://images0.cnblogs.com/blog/405877/201411/142332004602984.png" alt="img" style="zoom:50%;" />
+
+同步非阻塞IO是在同步阻塞IO的基础上，将socket设置为NONBLOCK。这样做用户线程可以在发起IO请求后可以立即 返回。
+
+由于socket是非阻塞的方式，因此用户线程发起IO请求时立即返回。但并未读取到任何数据，用户线程 需要不断地发起IO请求，直到数据到达后，才真正读取到数据，继续执行。
+
+```java
+{
+	while(read(socket, buffer) != SUCCESS);
+	process(buffer);
+}
+```
+
+
+
+可以看到，用户线程需要不停地发送系统调用以获取这个 I/O 操作的最新状态，这个过程称为**轮询（poll）**。
+
+虽然用户线程不再被阻塞了，但用户线程需要不断地进行轮询，轮询过程会消耗额外的 CPU 资源。因此 CPU 的有效利用率同样不高。
+
+## IO多路复用
+
+<img src="https://img-blog.csdnimg.cn/20200806154511111.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjYyMjY2,size_16,color_FFFFFF,t_70" alt="img" style="zoom: 33%;" />
+
+<img src="https://images0.cnblogs.com/blog/405877/201411/142332187256396.png" alt="img" style="zoom: 33%;" />
+
+IO多路复用模型是建立在内核提供的多路分离函数select基础之上的，使用select函数可以避免同步非阻塞IO模型 中轮询等待的问题。
+
+### 针对传统阻塞 I/O 服务模型的 2 个缺点的改进：（IO多路复用 + 线程池）
+
+1、每个连接创建一个线程：（线程池）
+
+- 基于线程池复用线程资源
+
+2、每个连接对应一个阻塞对象：（IO多路复用）
+
+- 多个连接共用一个阻塞对象，应用程序只需要在[一个阻塞对象(Service Handler)]()等待，无需阻塞等待所有连接。当某个连接有新的数据可以处理时，操作系统通知应用程序，线程从阻塞状态返回，开始进行业务处理
 
