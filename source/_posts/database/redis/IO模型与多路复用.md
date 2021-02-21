@@ -337,13 +337,7 @@ Reactor的单线程模式的单线程主要是针对于I/O操作而言，也就�
 
 
 
-
-
-
-
-
-
-# 5种IO模型
+# 4种IO模型
 
 在理解关于同步和阻塞的概念前，需要知道
 
@@ -357,31 +351,13 @@ I/0 操作 主要分成两部分
 
 **阻塞和非阻塞的概念描述的是用户线程调用内核IO操作的方式**
 
-## **异步就是异步**
+## 争议：**异步就是异步**
 
 **![img](https://images2018.cnblogs.com/blog/874126/201808/874126-20180815160154943-682702591.png)**
 
 ![img](https://images2018.cnblogs.com/blog/874126/201808/874126-20180815160307369-420684321.png)
 
-同步和异步针对应用程序来，关注的是程序中间的协作关系；
-
-阻塞与非阻塞更关注的是单个进程的执行状态。
-
-```
-　阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。
-真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，
-而自己只等待一个完成信号的时候，才是真正的异步IO。
-所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。
-```
-
-PS：
-
-```
-1，异步是一个相对概念，实际应用中没有绝对的异步，现实中更多称为“异步”只是代表阻塞。
-2，不同场合，语言环境，概念不一样，有时候同步就代表了阻塞，异步表示非阻塞。如果细分的话，代表不同含义。
-```
-
-PS：【**同步/异步】和【\**阻塞/非阻塞】的关注点是存在区别的：\****
+【**同步/异步】和【**阻塞/非阻塞】的关注点是存在区别的：
 
 ```
 【同步/异步】表示是两个事件交互的是否有序依赖关系
@@ -465,8 +441,6 @@ PS：【**同步/异步】和【\**阻塞/非阻塞】的关注点是存在区�
 }
 ```
 
-
-
 可以看到，用户线程需要不停地发送系统调用以获取这个 I/O 操作的最新状态，这个过程称为**轮询（poll）**。
 
 虽然用户线程不再被阻塞了，但用户线程需要不断地进行轮询，轮询过程会消耗额外的 CPU 资源。因此 CPU 的有效利用率同样不高。
@@ -475,11 +449,7 @@ PS：【**同步/异步】和【\**阻塞/非阻塞】的关注点是存在区�
 
 <img src="https://img-blog.csdnimg.cn/20200806154511111.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjYyMjY2,size_16,color_FFFFFF,t_70" alt="img" style="zoom: 33%;" />
 
-<img src="https://images0.cnblogs.com/blog/405877/201411/142332187256396.png" alt="img" style="zoom: 33%;" />
-
-IO多路复用模型是建立在内核提供的多路分离函数select基础之上的，使用select函数可以避免同步非阻塞IO模型 中轮询等待的问题。
-
-### 针对传统阻塞 I/O 服务模型的 2 个缺点的改进：（IO多路复用 + 线程池）
+### 针对传统阻塞 I/O 模型的 2 个缺点的改进：（IO多路复用 + 线程池）
 
 1、每个连接创建一个线程：（线程池）
 
@@ -488,4 +458,129 @@ IO多路复用模型是建立在内核提供的多路分离函数select基础之
 2、每个连接对应一个阻塞对象：（IO多路复用）
 
 - 多个连接共用一个阻塞对象，应用程序只需要在[一个阻塞对象(Service Handler)]()等待，无需阻塞等待所有连接。当某个连接有新的数据可以处理时，操作系统通知应用程序，线程从阻塞状态返回，开始进行业务处理
+
+
+
+### Select函数
+
+IO多路复用模型是建立在内核提供的多路分离函数select基础之上的，使用select函数可以避免同步非阻塞IO模型中轮询等待的问题。
+
+<img src="https://images0.cnblogs.com/blog/405877/201411/142332187256396.png" alt="img" style="zoom: 25%;" />
+
+
+
+1. 用户首先将需要进行IO操作的socket添加到select中 <!--正如 new ServerSocket(port)，对某个port进行监控和IO操作-->
+2. 然后阻塞等待select系统调用返回。
+3. 当数据到达时，socket被激活，select函数返回。用户线程正式发起read请求，读取数据并继续执行。
+
+> 从流程上来看，使用select函数进行IO请求和同步阻塞模型没有太大的区别，甚至还多了添加监视socket，以及调用select函数的额外操作，效率更差。但是，[使用select以后最大的优势是用户可以在一个线程内同时处理多个socket的IO请求]()。用户可以注册多个socket，然后不断地调用select读取被激活的socket，即可达到在<font color="red">**同一个线程内同时处理多个IO请求的目的**</font>。而在同步阻塞模型中，必须通过多线程的方式才能达到这个目的。
+
+用户线程使用select函数的伪代码描述为：
+
+```java
+{
+    select(socket);
+  	//其中while循环前将socket添加到select监视中，然后在while内一直调用select获取被激活的socket，一旦socket可读，便调用read函数将socket中的数据读取出来。
+    while(1) {
+        sockets = select();
+        for(socket in sockets) {
+            if(can_read(socket)) {
+                read(socket, buffer);
+                process(buffer);
+            }
+        }
+    }
+}
+```
+
+然而，使用select函数的优点并不仅限于此。虽然上述方式允许单线程内处理多个IO请求 <!--一个线程通过无线循环执行socket = select()来处理每个socket请求-->，但是每个IO请求的过程还是阻塞的（[在select函数上阻塞]()）<!--select()要等待监听的socket有数据传过来-->，平均时间甚至比同步阻塞IO模型还要长。如果用户线程只注册自己感兴趣的socket或者IO请求，然后去做自己的事情，等到数据到来时再进行处理，则可以提高CPU的利用率。<!--就是将这张图中的用户线程，换成一个专门的线程来处理阻塞事务-->
+
+### Reactor设计模式
+
+IO多路复用模型使用了Reactor设计模式实现了这一机制。
+
+<img src="https://images0.cnblogs.com/blog/405877/201411/142332350853195.png" alt="img" style="zoom: 33%;" />
+
+**图4 Reactor设计模式**
+
+如图4所示，EventHandler抽象类表示IO事件处理器，它拥有IO文件句柄Handle（通过get_handle获取），以及对Handle的操作handle_event（读/写等）。继承于EventHandler的子类可以对事件处理器的行为进行定制。Reactor类用于管理EventHandler（注册、删除等），并使用handle_events实现事件循环，不断调用同步事件多路分离器（一般是内核）的多路分离函数select，只要某个文件句柄被激活（可读/写等），select就返回（阻塞），handle_events就会调用与文件句柄关联的事件处理器的handle_event进行相关操作。
+
+<img src="https://images0.cnblogs.com/blog/405877/201411/142333254136604.png" alt="img" style="zoom:33%;" />
+
+**图5 IO多路复用**
+
+如图5所示，通过Reactor的方式，可以将用户线程轮询IO操作状态的工作统一交给handle_events事件循环进行处理。用户线程注册事件处理器之后可以继续执行做其他的工作（异步），而Reactor线程负责调用内核的select函数检查socket状态。当有socket被激活时，则通知相应的用户线程（或执行用户线程的回调函数），执行handle_event进行数据读取、处理的工作。由于select函数是阻塞的，因此多路IO复用模型也被称为异步阻塞IO模型。[注意，这里的所说的阻塞是指select函数执行时线程被阻塞，而不是指socket]()。一般在使用IO多路复用模型时，socket都是设置为NONBLOCK的 <!--与同步非阻塞IO一样-->，不过这并不会产生影响，因为[用户线程]()发起[IO请求（read请求）]()时，数据已经到达了，用户线程一定不会被阻塞  <!--用户线程read请求时，Reactor线程已经通知用户线程socket可读了-->。
+
+用户线程使用IO多路复用模型的伪代码描述为：
+
+```java
+void UserEventHandler::handle_event() {
+    if(can_read(socket)) {
+        read(socket, buffer);
+        process(buffer);
+    }
+}
+
+{
+		Reactor.register(new UserEventHandler(socket));
+}
+```
+
+用户需要重写EventHandler的handle_event函数进行读取数据、处理数据的工作，用户线程只需要将自己的EventHandler注册到Reactor即可。Reactor中handle_events事件循环的伪代码大致如下。<!--其实和上述的select函数方法一样-->
+
+```java
+Reactor::handle_events() {
+    while(1) {
+        sockets = select();
+        for(socket in sockets) {
+       		 get_event_handler(socket).handle_event();
+        }
+    }
+}
+```
+
+事件循环不断地调用select获取被激活的socket，然后根据获取socket对应的EventHandler，执行器handle_event函数即可。
+
+IO多路复用是最常使用的IO模型，但是其异步程度还不够“彻底”，因为它使用了会阻塞线程的select系统调用。因此IO多路复用只能称为异步阻塞IO，而非真正的异步IO。
+
+
+
+## 异步IO
+
+“真正”的异步IO需要操作系统更强的支持。在IO多路复用模型中，事件循环将文件句柄的状态事件通知给用户线程，由用户线程自行读取数据、处理数据。而在异步IO模型中，当用户线程收到通知时，数据已经被内核读取完毕，并放在了用户线程指定的缓冲区内，内核在IO完成后通知用户线程直接使用即可。
+
+异步IO模型使用了Proactor设计模式实现了这一机制。
+
+![img](https://images0.cnblogs.com/blog/405877/201411/151608309061672.jpg)
+
+图6 Proactor设计模式
+
+如图6，Proactor模式和Reactor模式在结构上比较相似，不过在用户（Client）使用方式上差别较大。Reactor模式中，用户线程通过向Reactor对象注册感兴趣的事件监听，然后事件触发时调用事件处理函数。而Proactor模式中，用户线程将AsynchronousOperation（读/写等）、Proactor以及操作完成时的CompletionHandler注册到AsynchronousOperationProcessor。AsynchronousOperationProcessor使用Facade模式提供了一组异步操作API（读/写等）供用户使用，当用户线程调用异步API后，便继续执行自己的任务。AsynchronousOperationProcessor 会开启独立的内核线程执行异步操作，实现真正的异步。当异步IO操作完成时，AsynchronousOperationProcessor将用户线程与AsynchronousOperation一起注册的Proactor和CompletionHandler取出，然后将CompletionHandler与IO操作的结果数据一起转发给Proactor，Proactor负责回调每一个异步操作的事件完成处理函数handle_event。虽然Proactor模式中每个异步操作都可以绑定一个Proactor对象，但是一般在操作系统中，Proactor被实现为Singleton模式，以便于集中化分发操作完成事件。
+
+![img](https://images0.cnblogs.com/blog/405877/201411/142333511475767.png)
+
+图7 异步IO
+
+如图7所示，异步IO模型中，用户线程直接使用内核提供的异步IO API发起read请求，且发起后立即返回，继续执行用户线程代码。不过此时用户线程已经将调用的AsynchronousOperation和CompletionHandler注册到内核，然后操作系统开启独立的内核线程去处理IO操作。当read请求的数据到达时，由内核负责读取socket中的数据，并写入用户指定的缓冲区中。最后内核将read的数据和用户线程注册的CompletionHandler分发给内部Proactor，Proactor将IO完成的信息通知给用户线程（一般通过调用用户线程注册的完成事件处理函数），完成异步IO。
+
+用户线程使用异步IO模型的伪代码描述为：
+
+```
+void UserCompletionHandler::handle_event(buffer) {
+
+	process(buffer);
+}
+
+
+
+{
+
+aio_read(socket, new UserCompletionHandler);
+
+}
+```
+
+用户需要重写CompletionHandler的handle_event函数进行处理数据的工作，参数buffer表示Proactor已经准备好的数据，用户线程直接调用内核提供的异步IO API，并将重写的CompletionHandler注册即可。
+
+相比于IO多路复用模型，异步IO并不十分常用，不少高性能并发服务程序使用IO多路复用模型+多线程任务处理的架构基本可以满足需求。况且目前操作系统对异步IO的支持并非特别完善，更多的是采用IO多路复用模型模拟异步IO的方式（IO事件触发时不直接通知用户线程，而是将数据读写完毕后放到用户指定的缓冲区中）。Java7之后已经支持了异步IO，感兴趣的读者可以尝试使用。
 
