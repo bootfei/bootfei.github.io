@@ -75,13 +75,13 @@ watch key [key...]
 
 ## Redis乐观锁
 
-乐观锁基于CAS(Compare And Swap)思想(比较并替换)，是不具有互斥性，不会产生锁等待而消 耗资源，但是需要反复的重试，但也是因为重试的机制，能比较快的响应。因此我们可以利用redis来 实现乐观锁。具体思路如下:
+乐观锁基于CAS(Compare And Swap)思想(比较并替换)，是不具有互斥性，不会产生锁等待而消 耗资源，但是需要反复的重试，但也是因为重试的机制，能比较快的响应。因此我们可以利用redis来 实现乐观锁。
 
-1. 利用redis的watch功能，监控这个redisKey的状态值 
-2. 获取redisKey的值
-3. 创建redis事务
-4. 这个key的值+1 
-5. 然后去执行这个事务，如果key的值被修改过则回滚，key不加1
+具体思路如下:
+
+- 监控 锁定量
+- 如果该值被修改成功则表示该请求被通过， 反之表示该请求未通过。
+- 从监控到修改到执行都需要在redis里操作，这样就需要用 到Redis事务。
 
 ```java
 public void watch() {
@@ -114,15 +114,12 @@ public void watch() {
 
 在生产环境里，经常会利用redis乐观锁来实现秒杀，Redis乐观锁是Redis事务的经典应用。
 
-秒杀场景描述:
+由于秒杀只有少部分请求能够成功，而大量的请求是并发产生的，所以如何确定哪个请求成功了，就是 由redis乐观锁来实现。
 
-> 秒杀活动对稀缺或者特价的商品进行定时，定量售卖，吸引成大量的消费者进行抢购，但又只有少部分
-> 消费者可以下单成功。因此，秒杀活动将在较短时间内产生比平时大数十倍，上百倍的页面访问流量和
-> 下单请求流量。
+具体思路如下:
 
-由于秒杀只有少部分请求能够成功，而大量的请求是并发产生的，所以如何确定哪个请求成功了，就是 由redis乐观锁来实现。具体思路如下:
-
-监控 锁定量，如果该值被修改成功则表示该请求被通过，反之表示该请求未通过。 从监控到修改到执行都需要在redis里操作，这样就需要用到Redis事务。
+- [用户首先尝试获取秒杀的资格。(通过事务watch()函数)]()
+-  [用户获取秒杀资格后，再去检查库存是否有库存(通过事务检查库存)]()
 
 ```java
 public class SecKill {
@@ -143,18 +140,18 @@ public class SecKill {
           executorService.execute(() -> {
             Jedis jedis1 = new Jedis("127.0.0.1", 6378);
             try {
-                jedis1.watch(redisKey);
+                jedis1.watch(redisKey);//乐观锁的核心业务
                 String redisValue = jedis1.get(redisKey);
                 int valInteger = Integer.valueOf(redisValue);
                 String userInfo = UUID.randomUUID().toString();
-                // 没有秒完
+                //用户成功获取抢夺的资格，然后检查库存量
                 if (valInteger < 20) {
                     Transaction tx = jedis1.multi(); 
                   	tx.incr(redisKey);
                     List list = tx.exec();
                     // 秒成功 失败返回空list而不是空
                     if (list != null && list.size() > 0) {
-                        System.out.println("用户:" + userInfo + "，秒杀成 功!当前成功人数:" +(valInteger + 1));
+                        System.out.println("用户:" + userInfo + "，秒杀成功!当前成功人数:" +(valInteger + 1));
                     }
                     // 版本变化，被别人抢了。 
                     else {
@@ -320,6 +317,8 @@ auto-aof-rewrite-min-size 64mb
   ```
 
 - 重启 服务器，等待服务器载入修复后的 文件，并进行数据恢复。
+
+## 混合方式
 
 
 
