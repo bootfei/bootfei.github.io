@@ -276,7 +276,7 @@ InnoDB行记录有三个隐藏字段:分别对应该行的rowid、事务号db_tr
 >
 > 对于使用 SERIALIZABLE 隔离级别的事务来说，使用加锁的方式来访问记录。
 >
-> 对于使用 READ COMMITTED 和 REPEATABLE READ 隔离级别的事务来说，就需要用到我们上边所说 的 版本链 了。
+> 对于使用 READ COMMITTED 和 REPEATABLE READ 隔离级别的事务来说，就需要用到[版本链]()了。
 >
 > [核心问题就是:需要判断一下版本链中的哪个版本是当前事务可见的。]()
 >

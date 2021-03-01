@@ -77,7 +77,7 @@ tags: [mysql]
 ## 索引存储结构
 
 - 索引是在存储引擎中实现的，也就是说不同的存储引擎，会使用不同的索引
-- MyISAM和InnoDB存储引擎：只支持B+ TREE索引， 也就是说默认使用BTREE，不能够更换
+- MyISAM和InnoDB存储引擎：只支持B+ TREE索引， 也就是说默认使用B+TREE，不能够更换
 - MEMORY/HEAP存储引擎：支持HASH和BTREE索引
 
 ### B树和B+树
@@ -90,18 +90,18 @@ B树是为了磁盘或其它存储设备而设计的一种多叉（下面你会�
 
 特点: 
 
-- 叶子节点和非叶子节点都存储数据
+- [叶子节点和非叶子节点都存储数据]()
+- 为所有叶子结点增加了一个[链指针]()
 - B树的高度一般都是在2-4这个高度，树的高度直接影响IO读写的次数。如果是三层树结构---支撑的数据可以达到20G，如果是四层树结构---支撑的数据可以达到几十T 
 
 #### B+树
 
-![](https://upload-images.jianshu.io/upload_images/7361383-3e9ef22b51d553c3.png?imageMogr2/auto-orient/strip|imageView2/2/w/800/format/webp)
+![img](https://zsr.github.io/images/B+%E6%A0%91.jpg)
 
 #### B和B+的区别
 
 - B树和B+树的最大区别在于非叶子节点是否存储数据的问题。
-- B树是非叶子节点和叶子节点都会存储数据。B+树只有叶子节点才会存储数据，而且存储的数据都是在一行上，而且这些数据都是有指针指向
-  的，也就是有顺序的。
+- B树是非叶子节点和叶子节点都会存储数据。B+树只有叶子节点才会存储数据，而且存储的数据都是在一行上，而且这些数据都是有指针指向的，也就是有顺序的。
 
 
 
@@ -174,7 +174,8 @@ ALTER TABLE 'table_name' ADD INDEX index_name(col1,col2,col3）
 
 1、前缀索引
 
-like 常量% 使用索引 like %常量 不使用索引
+- like 常量% ：使用索引 
+- like %常量 ：不使用索引
 
 2、最左前缀
 
@@ -314,8 +315,6 @@ MySQL 提供了一个 **EXPLAIN** **命令**, 它可以**对** **SELECT** **语�
 
 单位查询的查询类型，比如：普通查询、联合查询(union、union all)、子查询等复杂查询。
 
-
-
 ### simple
 
 表示不需要union操作或者不包含子查询的简单select查询。有连接查询时，外层的查询为simple，且只有一个
@@ -324,8 +323,6 @@ MySQL 提供了一个 **EXPLAIN** **命令**, 它可以**对** **SELECT** **语�
 explain select * from user
 ```
 
-
-
 ### primary
 
 一个需要union操作或者含有子查询的select，位于最外层的单位查询的select_type即为primary。[且只有一个]()
@@ -333,8 +330,6 @@ explain select * from user
 ```
 explain select (select name from user) from user;
 ```
-
-
 
 ### union
 
