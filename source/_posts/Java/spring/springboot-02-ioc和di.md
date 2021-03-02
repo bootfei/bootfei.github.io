@@ -29,7 +29,7 @@ tags:
 
 
 
-# IOC模块
+# IOC模块仿写
 
 ![][手写IOC框架]
 
@@ -579,7 +579,224 @@ public void test1() {
 
 
 
+入口：XmlBeanDefinitionReader#loadBeanDefinitions();
+	流程：
+		|-	AbstractBeanDefinitionReader#loadBeanDefinitions
+			|-	#loadBeanDefinitions：--通过ResourcePatternResolver获取指定路径的Resource对象，然后继续去加载并解析
+				|- XmlBeanDefinitionReader#loadBeanDefinitions：给Resource对象包装成EncodedResource，之所以封装数据，是因为要给这个数据设置一些其他的属性
+					|- #loadBeanDefinitions：通过EncodedResource获取InputStream
+						|- #doLoadBeanDefinitions：根据InputStream创建Document文档对象
+							|- #registerBeanDefinitions：委托BeanDefinitionDocumentReader去按照Spring的语义去完成Document文档对象的解析工作
+								|- DefaultBeanDefinitionDocumentReader#registerBeanDefinitions
+									|- #doRegisterBeanDefinitions：委托给BeanDefinitionParserDelegate去完成具体的BeanDefinition解析工作
+										|- #parseBeanDefinitions
+											|- #parseDefaultElement：解析默认的元素比如bean标签、import标签等不需要加前缀的标签
+												|- #processBeanDefinition
+													|- BeanDefinitionParserDelegate#parseBeanDefinitionElement
+	
+	流程总结：
+		AbstractBeanDefinitionReader
+		XmlBeanDefinitionReader
+			
+		DefaultBeanDefinitionDocumentReader
+		BeanDefinitionParserDelegate：主要是用来解析默认命名空间下的标签，比如bean标签
+## 基础容器的Bean实例创建流程源码阅读
+
+AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
+
+> |- AbstractAutowireCapableBeanFactory#
+
+
+
 ## 高级容器的BeanDefinition注册
+
+
+
+# Spring高级容器初始化流程源码分析 
+
+## 入口
+
+> 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
+
+- java入口
+
+```
+ApplicationContext ctx = new ClassPathXmlApplicationContext("spring.xml");
+```
+
+- web程序入口
+
+```xml
+<context-param> 
+    <param-name>contextConfigLocation</param-name> 
+    <param-value>classpath:spring.xml</param-value> 
+</context-param> 
+<listener> 
+    <listener-class> org.springframework.web.context.ContextLoaderListener </listener-class> 
+</listener>
+```
+
+AbstractApplicationContext的 refresh 方法
+
+```java
+@Override
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
+
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+            // STEP 2： 非常重要！！！
+            // a） 创建基础IoC容器（DefaultListableBeanFactory） 
+            // b） 加载解析XML文件（最终存储到Document对象中）
+            // c） 读取Document对象，并完成BeanDefinition的加载和注册工作
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
+				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors(beanFactory);
+				beanPostProcess.end();
+
+				// Initialize message source for this context.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+                // STEP 11： 实例化剩余的单例bean（非懒加载方式） 非常重要！！！
+                // 注意事项：Bean的IoC、DI和AOP都是发生在此步骤
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+				contextRefresh.end();
+			}
+		}
+	}
+```
+
+## 创建BeanFactory流程源码分析 
+
+就是AbstractApplicationContext类的 refresh 方法中的step2
+
+```
+ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+```
+
+- 进入AbstractApplication的 obtainFreshBeanFactory 方法：
+
+  - 用于创建一个新的 IoC容器 ，这个 IoC容器 就是DefaultListableBeanFactory对象。
+
+  - ```java
+    protected ConfigurableListableBeanFactory obtainFreshBeanFactory() { 
+        // 主要是通过该方法完成IoC容器的刷新 
+        refreshBeanFactory(); 
+        ConfigurableListableBeanFactory beanFactory = getBeanFactory(); 
+        if (logger.isDebugEnabled()) { 
+            logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory); 
+        }
+        return beanFactory; 
+    }
+    ```
+
+- 进入AbstractRefreshableApplicationContext的 refreshBeanFactory 方法：
+
+  - 销毁以前的容器
+
+  - 创建新的 IoC容器
+
+  - [加载 BeanDefinition 对象注册到IoC容器中]()
+
+  - ```java
+    protected final void refreshBeanFactory() throws BeansException { 
+        // 如果之前有IoC容器，则销毁 
+        if (hasBeanFactory()) { 
+            destroyBeans(); closeBeanFactory();
+        }
+        try {
+            // 创建IoC容器，也就是DefaultListableBeanFactory 
+            DefaultListableBeanFactory beanFactory = createBeanFactory();   //其实就是new DefaultListableBeanFactory
+            beanFactory.setSerializationId(getId()); 
+            customizeBeanFactory(beanFactory); 
+            // 加载BeanDefinition对象，并注册到IoC容器中（重点!!!） 
+            loadBeanDefinitions(beanFactory); 
+            synchronized (this.beanFactoryMonitor) { 
+                this.beanFactory = beanFactory; 
+            } 
+        }catch (IOException ex) {
+            throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex); 
+        }
+    }
+    ```
+
+## 加载BeanDefinition流程分析
+
+AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是上方代码中的loadBeanDefinitions(beanFactory)-->
+
+> 流程相关类的说明 
+>
+> - AbstractRefreshableApplicationContext：主要用来对BeanFactory提供 refresh 功能。包括BeanFactory的创建和 BeanDefinition 的定义、解析、注册操作。
+>
+> - AbstractXmlApplicationContext：主要提供对于 XML资源 的加载功能。包括从Resource资源对象和资源路径中加载XML文件。
+>
+> - AbstractBeanDefinitionReader：主要提供对于 BeanDefinition 对象的读取功能。具体读取工作交给子类实现。
+>
+> - XmlBeanDefinitionReader：主要通过 DOM4J 对于 XML资源 的读取、解析功能，并提供对于 BeanDefinition 的注册功能。
+>
+> - DefaultBeanDefinitionDocumentReader 
+>
+> - BeanDefinitionParserDelegate 
+
+## Bean实例化流程分析
+
+AbstractApplicationContext类的 refresh 方法的step 11 ：实例化剩余的单例bean（非懒加载方式）
+
+注意事项：Bean的IoC、DI和AOP都是发生在此步骤  
+
+```
+finishBeanFactoryInitialization(beanFactory);
+```
 
 
 
