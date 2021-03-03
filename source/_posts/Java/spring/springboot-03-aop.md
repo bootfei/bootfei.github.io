@@ -443,12 +443,12 @@ protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate d
 >
 > - 产生代理对象的类对应的BeanDefinition（一种）：AspectJAwareAdvisorAutoProxyCreator
 >
-> - 通知BeanDefinition（五种）：AspectJMethodBeforeAdvice、AspectJAfterAdvice、AspectJAfterReturningAdvice、AspectJAfterThrowingAdvice、AspectJAroundAdvice
+> - 通知类BeanDefinition（五种）：AspectJMethodBeforeAdvice、AspectJAfterAdvice、AspectJAfterReturningAdvice、AspectJAfterThrowingAdvice、AspectJAroundAdvice
 >
 > - 通知器BeanDefinition（一种）：DefaultBeanFactoryPointcutAdvisor、AspectJPointcutAdvisor
 >
 > - 切入点BeanDefinition（一种）：AspectJExpressionPointcut
-> - 自定义增强功能（BeanDefinition，是由ioc流程确定的BeanDefinition，不是我们这个环节确定的）
+> - 封装自定义增强功能（BeanDefinition，是由ioc流程确定的BeanDefinition，不是我们这个环节确定的）
 >   - 类的实例
 >   - 方法（一个方法对应一个增强功能） 反射调用 method.invoke(bean,args);
 >
@@ -457,6 +457,8 @@ protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate d
 > - 用于调用自定义增强类方法对应的BeanDefinition 使用一个封装增强方法的：BeanDefinition去封装Method方法
 >
 > MethodLocatingFactoryBean
+
+### 入口
 
 找到NamespaceHandlerSupport类的 parse 方法第6行代码： 
 
@@ -470,7 +472,64 @@ public BeanDefinition parse(Element element, ParserContext parserContext) {
 }
 ```
 
+## 产生AOP代理流程分析
 
+AspectJAwareAdvisorAutoProxyCreator的继承体系 
+
+```
+|-BeanPostProcessor 
+	postProcessBeforeInitialization---初始化之前调用 
+	postProcessAfterInitialization---初始化之后调用 
+
+|--InstantiationAwareBeanPostProcessor 
+	postProcessBeforeInstantiation---实例化之前调用 
+	postProcessAfterInstantiation---实例化之后调用 
+	postProcessPropertyValues---后置处理属性值 
+
+|---SmartInstantiationAwareBeanPostProcessor 
+	predictBeanType 
+	determineCandidateConstructors 
+	getEarlyBeanReference 
+
+|----AbstractAutoProxyCreator 
+	postProcessBeforeInitialization 
+	postProcessAfterInitialization----AOP功能入口 		
+	postProcessBeforeInstantiation 
+	postProcessAfterInstantiation 
+	postProcessPropertyValues ... 
+	
+|-----AbstractAdvisorAutoProxyCreator 
+	getAdvicesAndAdvisorsForBean 
+	findEligibleAdvisors 
+	findCandidateAdvisors 
+	findAdvisorsThatCanApply 
+	
+|------AspectJAwareAdvisorAutoProxyCreator 
+	extendAdvisors 
+	sortAdvisors
+```
+
+###  找入口 
+
+AbstractAutoProxyCreator类的 postProcessAfterInitialization 方法第6行代码： 
+
+```java
+public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException { 
+    if (bean != null) { 
+        Object cacheKey = getCacheKey(bean.getClass(), beanName); 
+        if (!this.earlyProxyReferences.contains(cacheKey)) { // 使用动态代理技术，产生代理对象 
+            return wrapIfNecessary(bean, beanName, cacheKey); 
+        } 
+    }
+    return bean;
+}
+```
+
+## 代理对象执行流程
+
+主要去针对Jdk产生的动态代理对象进行分析，其实就是去分析InvocationHandler的invoke方法
+
+入口：JdkDynamicAopProxy#invoke方法
 
 # 附录
 
