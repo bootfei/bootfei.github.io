@@ -452,15 +452,9 @@ protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate d
 >   - 类的实例
 >   - 方法（一个方法对应一个增强功能） 反射调用 method.invoke(bean,args);
 >
-> - 用于产生自定义增强类实例的类对应的BeanDefinition 实例工厂去产生自定义功能对应的
+> - 用于产生自定义增强类实例的类对应的BeanDefinition 实例工厂去产生自定义功能对应的类的实例：SimpleBeanFactoryAwareAspectInstanceFactory
 >
-> 类的实例
->
-> SimpleBeanFactoryAwareAspectInstanceFactory
->
-> 用于调用自定义增强类方法对应的BeanDefinition 使用一个封装增强方法的
->
-> BeanDefinition去封装Method方法
+> - 用于调用自定义增强类方法对应的BeanDefinition 使用一个封装增强方法的：BeanDefinition去封装Method方法
 >
 > MethodLocatingFactoryBean
 
