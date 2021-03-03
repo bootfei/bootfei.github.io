@@ -214,28 +214,70 @@ private final Map<String, Object> earlySingletonObjects = new HashMap<String, Ob
 
 > getBean --- 第一次获取ServiceA的实例
 >
->  1.实例化：new ServiceA的实例 
+>  1.[A实例化]()：new ServiceA的实例 
 >
 > ​		-- 将ServiceA的引用，交给一个ObjectFactory对象去持有，然后将ObjectFactory存入 第三级缓存中，key是beanName。<!--这个过程唯一的作用就是为了提供2-b步骤中需要的三级缓存,这里面的ObjectFactory-->
 >
->  2.依赖注入：给ServiceA进行依赖注入ServiceB 
+>  2.[A依赖注入]()：给ServiceA进行依赖注入ServiceB 
 >
-> ​		* getBean() --- 第一次获取获取ServiceB的实例 
+> ​		<font color='red'>* getBean() --- 第一次获取获取ServiceB的实例 </font>
 >
-> ​				a) new ServiceB的实例 
+> > ​				1) [B实例化]()：new ServiceB的实例 
+> >
+> > ​						-- 将ServiceB的引用，交给一个ObjectFactory对象去持有，然后将 ObjectFactory存入第三级缓存中，key是beanName。 
+> >
+> > ​				2) [B依赖注入]()：给ServiceB进行依赖注入ServiceA 
+> >
+> > ​						<font color='red'>*getBean() --- 第二次获取ServiceA的实例</font>   <!--还像第一次获取ServiceA Bean，走一样的步骤吗？肯定不是，要从第三级缓存找-->
+> >
+> > ​								*可以从【第三级缓存】中找到提早暴露的ServiceA的引用，是通过 BeanName找到ObjectFactory，再向ObjectFactory要它保存的ServiceA的引用。但是这个 ServiceA有可能已经不再是目标对象的引用了。 
+> >
+> > ​						<font color='red'>*依赖注入 ---- 顺利结束 </font>
+> >
+> > ​				3) [B初始化方法]()：初始化Bean
+> >
+> > ​						 ---- 判断是否可以从二级缓存中获取到ServiceB的引用 
+> >
+> > ​						---- 添加第一级缓存，同时清楚该beanName对应的第二级和第三级缓存数据。 
 >
-> ​						-- 将ServiceB的引用，交给一个ObjectFactory对象去持有，然后将 ObjectFactory存入第三级缓存中，key是beanName。 
+> ​		<font color='red'>* 依赖注入 --- 只有当ServiceB实例完美结束，才能完成依赖注入。 </font>
 >
-> ​				b) 给ServiceB进行依赖注入ServiceA 
+> 3.[A初始化方法]()：A初始化Bean 
 >
-> ​						*getBean() --- 第二次获取ServiceA的实例   <!--还像第一次获取ServiceA Bean，走一样的步骤吗？肯定不是，要从第三级缓存找-->
->
-> ​								*可以从【第三级缓存】中找到提早暴露的ServiceA的引用，是通过 BeanName找到ObjectFactory，再向ObjectFactory要它保存的ServiceA的引用。但是这个 ServiceA有可能已经不再是目标对象的引用了。 
->
-> ​						*依赖注入 ---- 顺利结束 
->
-> ​				c) 初始化Bean ---- 判断是否可以从二级缓存中获取到ServiceB的引用 ---- 添加第一级缓存，同时清楚该beanName对应的第二级和第三级缓存数据。 * 依赖注入 --- 只有当ServiceB实例完美结束，才能完成依赖注入。 
->
-> 3.初始化方法：初始化Bean 
->
-> ​		---- 添加第一级缓存，同时清楚该beanName对应的第二级和第三级缓存数据。
+> ​		---- 添加第一级缓存，同时清除该beanName对应的第二级和第三级缓存数据。
+
+
+
+### 解决循环依赖的代码 
+
+AbstractAutowireCapableBeanFactory#doCreateBean 
+
+```java
+// 解决循环依赖的关键步骤 
+boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&isSingletonCurrentlyInCreation(beanName)); // 如果需要提前暴露单例Bean，则将该Bean放入三级缓存中 
+if (earlySingletonExposure) { 
+    // ... // 将刚创建的bean放入三级缓存中singleFactories(key是beanName，value是 FactoryBean) 
+    addSingletonFactory(beanName,() -> getEarlyBeanReference(beanName, mbd, bean)); 
+}
+// Bean创建的第二步：依赖注入 
+// Bean创建的第三步：初始化Bean 
+// 是否提早暴露单例？上面已经计算过，循环依赖的时候，这个值就是true 
+if (earlySingletonExposure) { 
+    // 如果是ClassA依赖ClassB，ClassB依赖ClassA 
+    // 而且先实例化ClassA，在ClassA属性填充的时候，去实例化ClassB 
+    // ClassB走到这里的时候，它的实例引用只是保存到三级缓存中。 
+    // 但是getSingleton方法的第二个参数allowEarlyReference如果为false的话，就 是禁止使用三级缓存 
+    // 【所以ClassB走到这里的时候，是从缓存中获取不到值的， earlySingletonReference为null】。
+    // 但是ClassB走到这里的时候，需要注入ClassA，说明ClassA已经从三级缓存里面取过 了，然后放入二级缓存了。
+    // ClassB走完了创建流程之后，ClassA也会走到这里，但是这个时候，ClassA的实例引 用是放到二级缓存中的。 
+    // 【所以ClassA走到这里的时候，是从缓存中可以获取到值的】 
+    // 此处获取到的ClassA类型的earlySingletonReference，【其实是代理对象的引 用】。 
+    Object earlySingletonReference = getSingleton(beanName, false); 
+    if (earlySingletonReference != null) { 
+        // 其实此处是将ObjectFactory产生的代理对象的实例引用，去替换ClassA正常流 程产生的原对象的引用。 
+        if (exposedObject == bean) { exposedObject = earlySingletonReference; }
+        // ...... 
+    } 
+}
+```
+
