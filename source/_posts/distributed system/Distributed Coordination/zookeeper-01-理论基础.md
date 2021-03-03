@@ -70,11 +70,10 @@ Paxos 算法要解决的问题是，在分布式系统中如何 就某个决议�
     
        > 注意：在 prepare 阶段N 不可能等于 maxN。这是由 N 的生成机制决定的 <!--这是因为配置中心唯一，N永远自增，proposer只能从中获取--> 。要获得 N 的值， 其必定会在原来数值的基础上采用同步锁方式增一。
        
-    
   - accept阶段
     ![][Paxos Accept阶段]
-
-    1. 当[提案者(Proposer)]()发出 [prepare(N)]()后，若收到了超过半数的[表决者(Accepter)]()的反馈， 那么该提案者就会将其[真正的提案 Proposal(myid,N,value)]() 发送给所有的[表决者]()。
+  
+  1. 当[提案者(Proposer)]()发出 [prepare(N)]()后，若收到了超过半数的[表决者(Accepter)]()的反馈， 那么该提案者就会将其[真正的提案 Proposal(myid,N,value)]() 发送给所有的[表决者]()。
     2. 当[表决者(Acceptor)]()接收到提案者发送的 [Proposal(myid,N,value)]()提案后，会再次拿出自己曾经 accept 过的提议中的最大编号 maxN，或曾经记录下的 prepare 的最大编号，让 N与它们进行比较，<!--有prepareN,就比较prepareN-->
        - 若 N 大于等于这两个编号，则当前表决者 accept 该提案，并反馈给提案者[ACK]()。[如右边的2个node]()
        - 若 N 小于这两个编号，则表决者采取[不回应或回应 Error]() 的方式来拒绝该提议。[如左上角的node]()
@@ -164,13 +163,12 @@ Paxous什么情况会出现死锁？
 
 ZAB ，Zookeeper Atomic Broadcast，zk 原子消息广播协议，是专为 ZooKeeper 设计的一 种[支持崩溃恢复]()的原子广播协议，在 Zookeeper 中，主要依赖 ZAB 协议来实现分布式数据 一致性。
 
-Zookeeper 使用一个单一主进程来接收并处理客户端的所有事务请求，即写请求。当服 务器数据的状态发生变更后，集群采用 ZAB 原子广播协议，以事务提案 Proposal 的形式广 播到所有的副本进程上。ZAB 协议能够保证一个全局的变更序列，即可以为每一个事务分配 一个全局的递增编号 xid。
+**Leader处理写请求：**Zookeeper 使用一个[单一主进程]()来接收并处理客户端的[所有事务请求]()，即写请求。当服务器数据的状态发生变更后，[集群采用 ZAB 原子广播协议]()，以[事务提案 Proposal]() 的形式广 播到所有的副本进程上。ZAB 协议能够保证一个全局的变更序列，即[可以为每一个事务分配 一个全局的递增编号 xid]()。<!--有个唯一的分配中心-->
 
-当 Zookeeper 客户端连接到 Zookeeper 集群的一个节点后，若[客户端]()提交的是读请求， 那么当前节点就直接根据自己保存的数据对其进行响应;如果是写请求且当前节点不是 Leader，那么节点就会将该写请求转发给 Leader，Leader 会以提案的方式广播该写操作，只 要有超过半数节点同意该写操作，则该写操作请求就会被提交。然后 Leader 会再次广播给所有订阅者，即 Learner，通知它们同步数据。
+**Followers处理读请求和转发写请求：**当 Zookeeper 客户端连接到 Zookeeper 集群的一个节点后，若[客户端]()提交的是读请求， 那么当前节点就直接根据自己保存的数据对其进行响应;如果是写请求且当前节点不是 Leader，那么节点就会将该写请求转发给 Leader，Leader 会以提案的方式广播该写操作，只 要有超过半数节点同意该写操作，则该写操作请求就会被提交。然后 Leader 会再次广播给所有订阅者，即 Learner，通知它们同步数据。
+![img](https://img-blog.csdnimg.cn/20190520161427939.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTI5NjUyMDM=,size_16,color_FFFFFF,t_70)
 
-<img src="https://upload-images.jianshu.io/upload_images/6808142-f6ea794a73c7728e.png" alt="img" style="zoom: 67%;" />
-
-
+红线：读请求， 绿线：写请求
 
 ### **ZAB** 与 **Paxos** 的关系
 
@@ -193,7 +191,7 @@ ZAB 协议是 Paxos 算法的一种工业实现算法。但两者的设计目标
   - 可以直接处理客户端的读请求，并向客户端响应;但其不会处理事务请求，其只会将客户端事务请求转发给 Leader 来处理; 同步 Leader 中的事务处理结果
   - 具有表决权;
   - 具有选举权与被选举权。
-- Observer: <!--不参与管理，只会埋头干活-->
+- Observer: <!--工人阶级，不参与管理，只会埋头干活-->
   - 用于协助 Follower 处理更多的客户端读请求。Observer 的增加，会提高集群读请求处理的吞吐量，但不会增加事务请求 的通过压力，不会增加 Leader 选举的压力。
   - 没有选举权与被选举权
   - 没有表决权
@@ -245,13 +243,13 @@ zk 集群中的每一台主机，在不同的阶段会处于不同的状态。�
 
 #### 三种模式
 
-ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没有十分明显的界线，它 们相互交织在一起。
+ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没有十分明显的界线，它们相互交织在一起。
 
 - 恢复模式:[在集群启动过程中，或 Leader 崩溃后]()，系统都需要进入恢复模式，以恢复系统对外提供服务的能力。其包含两个重要阶段:Leader 选举与初始化同步(广播)。
-- 广播模式:其分为两类:初始化同步(广播)与更新广播。
-- 同步模式:其分为两类:初始化同步(广播)与更新同步。
+- 广播模式
+- 同步模式
 
-#### 初始化同步(广播)
+#### 初始化同步（准Leader发送消息）
 
 <img src="https://img-blog.csdnimg.cn/20200330212107984.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2IxMzAzMTEwMzM1,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom: 25%;" />
 
@@ -266,11 +264,11 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 5. 当 Learner 更新成功后，会向准 Leader 发送 ACK 信息
 6. Leader 服务器在收到来自 Learner 的 ACK 后就会将该 Learner 加入到真正可用的 Follower列表或 Observer 列表。没有反馈 ACK，或反馈了但 Leader 没有收到的 Learner，Leader 不会将其加入到相应列表。
 
-#### 消息广播算法(更新广播算法)
+#### 消息广播（集群正常工作了）
 
-<img src="https://oscimg.oschina.net/oscnet/df6947725d7a9c7796c2b5be3bc1a1a4996.jpg" alt="img" style="zoom: 50%;" />
+当集群中已经有过半的Follower完成了初始化状态同步，那么整个zk集群就进入到了正常工作模式了。
 
-当集群中的 Learner 完成了初始化状态同步，那么整个 zk 集群就进入到了正常工作模式 了。
+![img](https://img-blog.csdnimg.cn/20190520163244869.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTI5NjUyMDM=,size_16,color_FFFFFF,t_70)
 
 如果集群中的 Learner 节点收到客户端的事务请求，那么这些 Learner 会将请求转发给 Leader 服务器。然后再执行如下的具体过程:<!--正常工作模式下，用的是Fast Paxos方式，就是说只有一个Leader。总统给领导阶层Followers发送同步消息,不需要商量prepare，直接发送proposal,收到ack以后直接发送commit。就是这么强横-->
 
@@ -287,7 +285,7 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 
 (**1**) **Leader** 的主动出让原则
 
-若集群中 Leader 收到的 Follower 心跳数量没有过半，此时 Leader 会自认为自己与集群 的连接已经出现了问题，其会主动修改自己的状态为 LOOKING，去查找新的 Leader。为了防止集群出现脑裂。
+若集群中 Leader 收到的 Follower 心跳数量没有过半，此时 Leader 会自认为自己与集群 的连接已经出现了问题，其会主动修改自己的状态为 LOOKING，去查找新的 Leader。[为了防止集群出现脑裂。]()
 
 而其它 Server 由于有过半的主机认为已经丢失了 Leader，所以它们会发起新的 Leader 选举，选出一个新的 Leader。
 
@@ -295,7 +293,7 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 
 当 Leader 收到超过半数 Follower 的 ACKs 后，就向各个 Follower 广播 COMMIT 消息， 批准各个 Server 执行该写操作事务。当各个 Server 在接收到 Leader 的 COMMIT 消息后就会 在本地执行该写操作，然后会向客户端响应写操作成功。
 
-但是如果在非全部 Follower 收到 COMMIT 消息之前 Leader 就挂了，这将导致一种后 果:部分 Server 已经执行了该事务，而部分 Server 尚未收到 COMMIT 消息，所以其并没有 执行该事务。当新的 Leader 被选举出，集群经过恢复模式后需要保证所有 Server 上都执行 了那些已经被部分 Server 执行过的事务。
+但是如果在非全部 Follower 收到 COMMIT 消息之前 Leader 就挂了，这将导致一种后果:部分 Server 已经执行了该事务，而部分 Server 尚未收到 COMMIT 消息，所以其并没有执行该事务。当新的 Leader 被选举出，集群经过恢复模式后需要保证所有 Server 上都执行 了那些已经被部分 Server 执行过的事务。
 
 (**3**) 被丢弃的消息不能再现原则
 
@@ -314,11 +312,9 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 
 #### Leader选举算法(非常重要)
 
-
-
  在集群启动过程中的 Leader 选举过程(算法)与 Leader 断连后的 Leader 选举过程稍微有一些区别，基本相同。
 
-- 集群启动中的 **Leader** 选举
+##### 集群启动中的 **Leader** 选举
 
 <img src="https://img-blog.csdnimg.cn/20200626153056301.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
 
@@ -328,22 +324,24 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 
 当第二台服务器 Server2 启动时，此时两台机器可以相互通信，每台机器都试图找到 Leader，选举过程如下:
 
-(1) 每个 Server 发出一个投票。此时 Server1 的投票为(1, 0)，Server2 的投票为(2, 0)，然后 各自将这个投票发给集群中其他机器。
+(1) **每个 Server 发出一个投票**。此时 Server1 的投票为(1, 0)，Server2 的投票为(2, 0)，然后 各自将这个投票发给集群中其他机器。
 
-(2) 接受来自各个服务器的投票。集群的每个服务器收到投票后，首先判断该投票的有效 性，如检查是否是本轮投票、是否来自 LOOKING 状态的服务器。
+(2) **接受来自各个服务器的投票**。集群的每个服务器收到投票后，<font color="red">首先判断该投票的有效 性，如检查是否是本轮投票、是否来自 LOOKING 状态的服务器。</font>
 
-(3) 处理投票。针对每一个投票，服务器都需要将别人的投票和自己的投票进行 PK，PK 规则如下:
+(3) **处理投票**。针对每一个投票，服务器都需要将别人的投票和自己的投票进行 PK，PK 规则如下:
 
 - [优先检查ZXID]()。ZXID比较大的服务器优先作为Leader。
-- [如果ZXID相同，那么就比较myid]()。myid较大的服务器作为Leader服务器。 对于 Server1 而言，它的投票是(1, 0)，接收 Server2 的投票为(2, 0)。其首先会比较两者的 ZXID，均为 0，再比较 myid，此时 Server2 的 myid 最大，于是 Server1 更新自己的投票为 (2, 0)，然后重新投票。对于 Server2 而言，其无须更新自己的投票，只是再次向集群中所有 主机发出上一次投票信息即可。
+- [如果ZXID相同，那么就比较myid]()。myid较大的服务器作为Leader服务器。 
 
-(4) 统计投票。每次投票后，服务器都会统计投票信息，判断是否已经有过半机器接受到 相同的投票信息。对于 Server1、Server2 而言，都统计出集群中已经有两台主机接受了(2, 0) 的投票信息，此时便认为已经选出了新的 Leader，即 Server2。
+​         对于 Server1 而言，它的投票是(1, 0)，接收 Server2 的投票为(2, 0)。其首先会比较两者的 ZXID，均为 0，再比较 myid，此时 Server2 的 myid 最大，于是 Server1 更新自己的投票为 (2, 0)，然后重新投票。对于 Server2 而言，其无须更新自己的投票，只是**再次向集群中所有机器发出上一次投票信息即可。**
 
-(5) 改变服务器状态。一旦确定了 Leader，每个服务器就会更新自己的状态，如果是Follower，那么就变更为 FOLLOWING，如果是 Leader，就变更为 LEADING。
+(4) **统计投票**。每次投票后，服务器都会统计投票信息，判断是否已经有过半机器接受到 相同的投票信息。对于 Server1、Server2 而言，都统计出集群中已经有两台主机接受了(2, 0) 的投票信息，此时便认为已经选出了新的 Leader，即 Server2。
 
-(6) 添加主机。在新的 Leader 选举出来后 Server3 启动，其想发出新一轮的选举。但由于当前集群中各个主机的状态并不是 LOOKING，而是各司其职的正常服务，所以其只能是以 Follower 的身份加入到集群中。
+(5) **改变服务器状态**。一旦确定了 Leader，每个服务器就会更新自己的状态，如果是Follower，那么就变更为 FOLLOWING，如果是 Leader，就变更为 LEADING。
 
-- 宕机后的 **Leader** 选举
+(6) **添加主机**。在新的 Leader 选举出来后 Server3 启动，其想发出新一轮的选举。但由于当前集群中各个主机的状态并不是 LOOKING，而是各司其职的正常服务，所以其只能是以 Follower 的身份加入到集群中。
+
+##### 宕机后的 **Leader** 选举
 
 <img src="https://img-blog.csdnimg.cn/20200626153309381.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
 
@@ -362,6 +360,51 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 (5) 统计投票。与启动时过程相同。对于 Server1、Server2 而言，都统计出集群中已经 有两台主机接受了(3, 333)的投票信息，此时便认为已经选出了新的 Leader，即 Server3。
 
 (6) 改变服务器的状态。与启动时过程相同。一旦确定了 Leader，每个服务器就会更新 自己的状态。Server1 变更为 FOLLOWING，Server3 变更为 LEADING。
+
+
+
+#### **Leader选举实现细节**
+
+##### 服务器状态
+
+服务器具有四种状态，分别是LOOKING、FOLLOWING、LEADING、OBSERVING。
+
+- LOOKING：寻找Leader状态。当服务器处于该状态时，它会认为当前集群中没有Leader，因此需要进入Leader选举状态。
+- FOLLOWING：跟随者状态。表明当前服务器角色是Follower。
+- LEADING：领导者状态。表明当前服务器角色是Leader。
+- OBSERVING：观察者状态。表明当前服务器角色是Observer。
+
+##### 投票数据结构
+
+　　每个投票中包含了两个最基本的信息，所推举服务器的SID和ZXID，投票（Vote）在Zookeeper中包含字段如下
+
+　　id：被推举的Leader的SID。
+
+　　zxid：被推举的Leader事务ID。
+
+　　electionEpoch：**逻辑时钟，用来判断多个投票是否在同一轮选举周期中，该值在服务端是一个自增序列，每次进入新一轮的投票后，都会对该值进行加1操作。**
+
+　　peerEpoch：被推举的Leader的epoch。
+
+　　state：当前服务器的状态。
+
+#####  QuorumCnxManager：网络I/O
+
+　　每台服务器在启动的过程中，会启动一个QuorumPeerManager，负责各台服务器之间的底层Leader选举过程中的网络通信。
+
+　　(1) **消息队列**。QuorumCnxManager内部维护了一系列的队列，用来保存接收到的、待发送的消息以及消息的发送器，除接收队列以外，其他队列都按照SID分组形成队列集合，如一个集群中除了自身还有3台机器，那么就会为这3台机器分别创建一个发送队列，互不干扰。
+
+　　　　· recvQueue：消息接收队列，用于存放那些从其他服务器接收到的消息。
+
+　　　　· queueSendMap：消息发送队列，用于保存那些待发送的消息，按照SID进行分组。
+
+　　　　· senderWorkerMap：发送器集合，每个SenderWorker消息发送器，都对应一台远程Zookeeper服务器，负责消息的发送，也按照SID进行分组。
+
+　　　　· lastMessageSent：最近发送过的消息，为每个SID保留最近发送过的一个消息。
+
+　　(2) **建立连接**。为了能够相互投票，Zookeeper集群中的所有机器都需要两两建立起网络连接。QuorumCnxManager在启动时会创建一个ServerSocket来监听Leader选举的通信端口(默认为3888)。开启监听后，Zookeeper能够不断地接收到来自其他服务器的创建连接请求，在接收到其他服务器的TCP连接请求时，会进行处理。**为了避免两台机器之间重复地创建TCP连接，Zookeeper只允许SID大的服务器主动和其他机器建立连接，否则断开连接。在接收到创建连接请求后，服务器通过对比自己和远程服务器的SID值来判断是否接收连接请求，如果当前服务器发现自己的SID更大，那么会断开当前连接，然后自己主动和远程服务器建立连接。一旦连接建立，就会根据远程服务器的SID来创建相应的消息发送器SendWorker和消息接收器RecvWorker，并启动。**
+
+　　(3) **消息接收与发送**。消息接收：由消息接收器RecvWorker负责，由**于Zookeeper为每个远程服务器都分配一个单独的RecvWorker，因此，每个RecvWorker只需要不断地从这个TCP连接中读取消息，并将其保存到recvQueue队列中。**消息发送：由于Zookeeper为每个远程服务器都分配一个单独的SendWorker，因此，每个SendWorker只需要不断地从对应的消息发送队列中获取出一个消息发送即可，同时将这个消息放入lastMessageSent中。**在SendWorker中，一旦Zookeeper发现针对当前服务器的消息发送队列为空，那么此时需要从lastMessageSent中取出一个最近发送过的消息来进行再次发送，这是为了解决接收方在消息接收前或者接收到消息后服务器挂了，导致消息尚未被正确处理。同时，Zookeeper能够保证接收方在处理消息时，会对重复消息进行正确的处理。**
 
 
 
