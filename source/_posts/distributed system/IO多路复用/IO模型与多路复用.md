@@ -443,7 +443,7 @@ I/0 操作 主要分成两部分
 
 可以看到，用户线程需要不停地发送系统调用以获取这个 I/O 操作的最新状态，这个过程称为**轮询（poll）**。
 
-虽然用户线程不再被阻塞了，但用户线程需要不断地进行轮询，轮询过程会消耗额外的 CPU 资源。因此 CPU 的有效利用率同样不高。
+[虽然用户线程不再被阻塞了，但用户线程需要不断地进行轮询，轮询过程会消耗额外的 CPU 资源。因此 CPU 的有效利用率同样不高。]()
 
 ## IO多路复用
 
@@ -473,7 +473,7 @@ IO多路复用模型是建立在内核提供的多路分离函数select基础之
 2. 然后阻塞等待select系统调用返回。
 3. 当数据到达时，socket被激活，select函数返回。用户线程正式发起read请求，读取数据并继续执行。
 
-> 从流程上来看，使用select函数进行IO请求和同步阻塞模型没有太大的区别，甚至还多了添加监视socket，以及调用select函数的额外操作，效率更差。但是，[使用select以后最大的优势是用户可以在一个线程内同时处理多个socket的IO请求]()。用户可以注册多个socket，然后不断地调用select读取被激活的socket，即可达到在<font color="red">**同一个线程内同时处理多个IO请求的目的**</font>。而在同步阻塞模型中，必须通过多线程的方式才能达到这个目的。
+> 从流程上来看，使用select函数进行IO请求和同步阻塞模型没有太大的区别，甚至还多了添加监视socket，以及调用select函数的额外操作，效率更差。但是，[使用select以后最大的优势是用户可以在一个线程内同时处理多个socket的IO请求]()。用户可以注册多个socket，然后不断地调用select读取被激活的socket，即可达到<font color="red">**在同一个线程内同时处理多个IO请求的目的**</font>。而在同步阻塞模型中，必须通过多线程的方式才能达到这个目的。
 
 用户线程 <!--相对于OS中的内核，server确实是OS中的用户线程--> 使用select函数的伪代码描述为：
 
@@ -522,7 +522,7 @@ void UserEventHandler::handle_event() {
 }
 
 {
-		Reactor.register(new UserEventHandler(socket));
+	Reactor.register(new UserEventHandler(socket));
 }
 ```
 
@@ -609,7 +609,7 @@ epoll是众多i/o多路复用技术当中的一种，相比其他io多路复用�
 
    epoll还是poll的一种优化，返回后不需要对所有的fd进行遍历，在内核中维持了fd的列表。select和poll是将这个内核列表维持在用户态，然后传递到内核中。与poll/select不同，epoll不再是一个单独的系统调用，而是由epoll_create/epoll_ctl/epoll_wait三个系统调用组成，后面将会看到这样做的好处。epoll在2.6以后的内核才支持。
 
-**2.1 select/poll的几大缺点：**
+**select/poll的几大缺点：**
 
 - 每次调用select/poll，都需要把fd集合从用户态拷贝到内核态，这个开销在fd很多时会很大
 - 同时每次调用select/poll都需要在内核遍历传递进来的所有fd，这个开销在fd很多时也很大

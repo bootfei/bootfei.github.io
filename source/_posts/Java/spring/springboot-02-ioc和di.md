@@ -343,7 +343,7 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 
 
 
-## 实现3: 面向对象，建立继承体系（结合下文的Spring重要接口，照着写）
+## 实现3: 面向对象，建立继承体系（结合下文的Spring重要接口仿写）
 
 1. 搞清楚BeanFactory家族的接口和类的作用
 2. 搞清楚ApplicationContext家族的接口和类的作用
@@ -352,7 +352,7 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 5. 搞清楚创建Bean实例流程中各个类的作用
 6. 通过以上接口和类的理解，我们写出IoC模块
 
-### 主函数不再面向过程，而是面向对象
+### 主函数面向对象
 
 ```java
 public class TestSpringV3 {
@@ -391,7 +391,7 @@ public class TestSpringV3 {
 XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 ```
 
-注意这里有个问题：new XmlBeanDefinitionReader(beanFactory) 这个构造器，竟然能够操作BeanFactory, 把BeanDefitions集合注入到其中。这权限也太危险了。所以，[需要BeanFactory实现BeanDefinitionRegistry接口对XmlBeanDefinitionReader进行限制]()。 <!--接口隔离原则，保障了类的安全-->
+<font color="red">注意这里有个问题：new XmlBeanDefinitionReader(beanFactory) 这个构造器，竟然能够操作BeanFactory, 把BeanDefitions集合注入到其中。</font>这权限也太危险了。所以，[需要BeanFactory实现BeanDefinitionRegistry接口对XmlBeanDefinitionReader进行限制]()。 <!--接口隔离原则，保障了类的安全-->
 
 ```
 XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(其实是个BeanDefinitionRegistry);
@@ -711,7 +711,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 >
 > 但是后来这个类被遗弃了，使用DefaultListableBeanFactory来代替。
 
-### 入口1：和IOC仿写的流程一样，可惜被抛弃了
+### 入口1：和实现2的流程一样，可惜被抛弃了
 
 XmlBeanFactory#构造方法中
 
@@ -724,7 +724,7 @@ DataSource dataSource = (DataSource) beanFactory.getBean("dataSource");
 System.out.println(dataSource);
 ```
 
-### 入口2：比IOC仿写多了一个Reader，专门做BeanDefinition解析
+### 入口2：和实现3的流程一样，专门做BeanDefinition解析
 
 ```java
 public void test1() { 
@@ -733,7 +733,8 @@ public void test1() {
     // 创建DefaultListableBeanFactory工厂，这也就是Spring的基本容器 
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
     // 创建BeanDefinition阅读器 
-    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); 
+    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); //还记得实现3吗？这里BeanFactory是BeanRegistry，暴露给reader对BeanDefinition集合的操作
+    
     // 进行BeanDefinition注册流程 
     reader.loadBeanDefinitions(path); 
     // Bean实例创建流程 
@@ -770,17 +771,17 @@ public void test1() {
 
 AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
 
-> |- AbstractAutowireCapableBeanFactory#
+> |- AbstractAutowireCapableBeanFactory#getBean()
 
 
 
 ## 高级容器ApplicationContext对BeanDefinition注册
 
+step2
 
+## 高级容器ApplicationContext初始化流程源码分析 
 
-# Spring高级容器初始化流程源码分析 
-
-## 入口
+### 入口
 
 > 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
 
@@ -802,7 +803,11 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("spring.xml");
 </listener>
 ```
 
-### AbstractApplicationContext的 refresh 方法
+#### AbstractApplicationContext的 refresh 方法
+
+> 12个步骤step
+>
+> step2和step11是基础容器的内容，其他step都是高级容器的特有功能
 
 ```java
 @Override
@@ -882,7 +887,7 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("spring.xml");
 	}
 ```
 
-## 创建BeanFactory流程源码分析 
+### 创建BeanFactory流程源码分析 
 
 就是AbstractApplicationContext类的 refresh 方法中的step2
 
@@ -936,7 +941,7 @@ ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
     }
     ```
 
-## 加载BeanDefinition流程分析
+### 加载BeanDefinition流程分析
 
 AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是上方代码中的loadBeanDefinitions(beanFactory)-->
 
@@ -954,7 +959,7 @@ AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是
 >
 > - BeanDefinitionParserDelegate 
 
-## Bean实例化流程分析
+### Bean实例化流程分析
 
 AbstractApplicationContext类的 refresh 方法的step 11 ：实例化剩余的单例bean（非懒加载方式）
 
