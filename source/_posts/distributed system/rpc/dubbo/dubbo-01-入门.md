@@ -564,7 +564,7 @@ Dubbo 管理控制台的下载地址为：https://github.com/apache/incubator-du
                    ref="zhifubaoService" group="pay.zhifubao" protocal="dubbo"/>
 ```
 
-# **负载均衡**
+## **负载均衡**
 
 Dubbo 内置了四种负载均衡算法。
 
@@ -583,3 +583,20 @@ Dubbo 内置了四种负载均衡算法。
 - consistent hash
 
 一致性 hash 算法。对于相同参数的请求，其会被路由到相同的提供者。
+
+### **消费者端指定**
+
+```
+    <!--暴露服务-->
+    <dubbo:ref interface="com.abc.service.SomeService"
+                   ref="weixinService" group="pay.weixin" protocal="rmi" loadBalance="random"/>
+```
+
+### 服务端指定
+
+```
+    <!--暴露服务-->
+    <dubbo:service interface="com.abc.service.SomeService"
+                   ref="weixinService" group="pay.weixin" protocal="rmi" loadBalance="random"/>
+```
+
