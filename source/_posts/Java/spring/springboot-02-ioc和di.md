@@ -72,24 +72,30 @@ tags:
 2. 需要通过xml来配置bean信息(参考Spring的配置)
 3. 将XML中配置的每个Bean的信息封装到一个Java对象里面保存（BeanDefinition），最终将bean的名称和BeanDefinition对象封装到Map集合中
 
+### 主函数面向过程
+
 ```java
-//业务代码块
 {
-    //一行代码，交给IOC创建
-   	UserService userService = getBean();
-   	
-    userDao.setDataSource(dataSource);
-	userservice.setUserDao(userDao);
-    
-    User user= new User();
-    user.setUsername("王五");
-    List<User> users =  userServie.queryUsers(user);
+   
+   		// 从XML中加载配置信息，先完成BeanDefinition的注册
+		registerBeanDefinitions();
+
+     	//一行代码，交给IOC创建
+		// 根据用户名称查询用户信息
+		UserService userService = (UserService) getBean("userService");
+
+		// 入参对象
+		Map<String, Object> param = new HashMap<>();
+		param.put("username", "王五");
+		// 根据用户名称查询用户信息
+		List<User> users = userService.queryUsers(param);
+		System.out.println(users);
 }
 ```
 
 
 
-### 缓存Bean实例、缓存BeanDefinitions以及getBean()获取Bean实例
+### 主函数缓存Bean实例、缓存BeanDefinitions以及getBean()获取Bean实例
 
 ```java
 //k:BeanName v:Bean实例对象
@@ -177,7 +183,7 @@ public void registerBeanDefinitions(Element rootElement) {
 
 
 
-### BeanDefinition.class存储Bean信息
+### BeanDefinition存储Bean信息
 
 ```java
 //id，class，scope，init-method
@@ -346,38 +352,115 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 5. 搞清楚创建Bean实例流程中各个类的作用
 6. 通过以上接口和类的理解，我们写出IoC模块
 
-
-
-### BeanFactory实例：DefaultListableBeanFactory()
+### 主函数不再面向过程，而是面向对象
 
 ```java
-//Bean工厂
-DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+public class TestSpringV3 {
 
-//读取XML的BeanDefinition阅读器
-XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+	@Test
+	public void test() throws Exception {
+        // 从XML中加载配置信息，先完成BeanDefinition的注册：registerBeanDefinitions(); 被替换成面向对象XmlBeanDefinitionReader去完成，并且把BeanDefinitions存到BeanFactory中
+        
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		// 读取XML的BeanDefinition阅读器
+		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
-Resource resource = new ClasspathResource("beans.xml");
-InputStream inputStream = resource.getResource();
-xmlBeanDefinitionReader.loadBeanDefinitions(inputStream);
+		Resource resource = new ClasspathResource("beans.xml");
+		InputStream inputStream = resource.getResource();
 
+		beanDefinitionReader.loadBeanDefinitions(inputStream);
 
-UserService userService = (UserService) beanFactory.getBean("userService"); //终于交给Bean工厂对象来实现了，面向对象了
-```
+        //面向过程的getBean()方法被替换为面向对象BeanFactory完成：BeanFactory.getBean()
+		//根据用户名称查询用户信息
+		UserService userService = (UserService) beanFactory.getBean("userService");
 
-
-
-```java
-//spring容器工厂的老大
-public interface BeanFactory {
-	Object getBean(String beanName);
+		// 入参对象
+		Map<String, Object> param = new HashMap<>();
+		param.put("username", "王五");
+		// 根据用户名称查询用户信息
+		List<User> users = userService.queryUsers(param);
+		System.out.println(users);
+	}
 }
 
 ```
 
+### XmlBeanDefinitionReader: 读取并解析BeanDefinition，交给BeanFactory
+
+```
+XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+```
+
+注意这里有个问题：new XmlBeanDefinitionReader(beanFactory) 这个构造器，竟然能够操作BeanFactory, 把BeanDefitions集合注入到其中。这权限也太危险了。所以，[需要BeanFactory实现BeanDefinitionRegistry接口对XmlBeanDefinitionReader进行限制]()。 <!--接口隔离原则，保障了类的安全-->
+
+```
+XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(其实是个BeanDefinitionRegistry);
+```
+
+```java
+public class XmlBeanDefinitionReader{
+	private BeanDefinitionRegistry beanDefinitionRegistry;
+    //构造方法，其实接受的是BeanDefinitionRegistry
+    public XmlBeanDefinitionReader(BeanDefinitionRegistry beanDefinitionRegistry){ 
+        this.beanDefinitionRegistry = beanDefinitionRegistry
+    }
+    //
+    public void loadBeanDifinitions(InputStream	inputStream){...}
+}
+```
 
 
-### 存储BeanDefinition元数据：DefaultListableBeanFactory
+
+### BeanDefinitionRegistry接口：BeanFactory对Reader暴露的操作
+
+[DefaultListableBeanFactory实现BeanDefinitionRegistry接口]()，规定了BeanFactory在XmlBeanDefinitionReader中暴露的操作。
+
+```java
+/**
+ * 专门用来对存储的BeanDefinition集合进行操作的功能接口
+ */
+public interface BeanDefinitionRegistry {
+	BeanDefinition getBeanDefinition(String beanName);
+	List<BeanDefinition> getBeanDefinitions()
+	void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
+}
+
+
+
+```
+
+### SingletonBeanRegistry接口：对存储Bean实例的集合进行操作
+
+```
+public interface SingletonBeanRegistry{
+	Object getSingleton(String beanName);
+    addSingleton(String beanName, Object bean);
+}
+```
+
+
+
+### Resource：存储class path下的资源
+
+
+
+### BeanFactory实例：DefaultListableBeanFactory
+
+数据存储功能
+
+- 存储Bean实例缓存singletonObjects，因为通过AbstractBeanFactory间接实现了SingletonBeanRegistry（有singletonObjects集合，有对应的操作）
+
+Bean操作功能
+
+- 提供getBean()方法，因为实现了BeanFactory接口
+- 提供获取所有的Bean，因为实现ListableBeanFactory
+- 提供创建Bean，因为实现了AutowiredCapableBeanFactory
+
+#### 操作BeanDefinition集合的接口：BeanDefinitionRegistry
+
+上文有。DefaultListableBeanFactory实现了该接口，从而可以操作BeanDefinition集合
+
+#### 存储BeanDefinition元数据：DefaultListableBeanFactory
 
 ```java
 //AbstractAutowireCapableBeanFactory: 可以自动创建的BeanFactory
@@ -407,7 +490,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 
-### 存储Bean实例：SingletonBeanRegistry
+#### 存储Bean实例的操作和集合：SingletonBeanRegistry
+
+```java
+public interface SingletonBeanRegistry{
+	Object getSingleton(String beanName);
+    addSingleton(String beanName, Object bean);
+}
+```
+
+
 
 ```java
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
@@ -428,7 +520,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 }
 ```
 
-
+#### 继承抽象类，间接实现上述接口
 
 ```java
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
@@ -560,7 +652,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 4. 最后是最强大的 XmlBeanFactory ，继承自 DefaultListableBeanFactory ，重写了一些功能，使自己更强大。
 
-### 2个接口封装数据集合的操作(就是实现2中，singleObjects和beanDefinitions)
+### 2个接口封装数据集合的操作(就是实现2中，集合singleObjects和beanDefinitions)
 
 - BeanDefinitionRegistry 封装了beanDefinitions
 
@@ -579,6 +671,27 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     ```
 
 - SingletonBeanRegistry封装了singleObjects
+
+  - ```java
+    public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
+    	// K:BeanName
+    	// V:Bean实例对象
+    	private Map<String, Object> singletonObjects = new HashMap<String, Object>();
+    
+    	@Override
+    	public Object getSingleton(String beanName) {
+    		return this.singletonObjects.get(beanName);
+    	}
+    
+    	@Override
+    	public void addSingleton(String beanName, Object bean) {
+    		this.singletonObjects.put(beanName, bean);
+    	}
+    
+    }
+    ```
+
+    
 
 ## BeanDefinitions继承体系（了解就行）
 
