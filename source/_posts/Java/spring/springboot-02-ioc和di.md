@@ -89,7 +89,7 @@ tags:
 
 
 
-### 一级缓存Bean实例和BeanDefinitions存储Bean元信息
+### 缓存Bean实例、缓存BeanDefinitions以及getBean()获取Bean实例
 
 ```java
 //k:BeanName v:Bean实例对象
@@ -134,7 +134,7 @@ private Object getBean(String beanName){
 
         // 根据Bean的信息，来判断该bean是单例bean还是多例（原型）bean
         if (beanDefinition.isSingleton()) {
-            // 根据Bean的信息去创建Bean的对象
+            // 根据Bean的信息去创建Bean的对象，重要流程！！！
             singletonObject = createBean(beanDefinition);
             // 将Bean的对象，存入到singletonObjects
             this.singletonObjects.put(beanName, singletonObject);
@@ -149,6 +149,30 @@ private Object getBean(String beanName){
 }
 
 
+```
+
+### init()重要的方法：registerBeanDefinitions()
+
+- [registerBeanDefinitions()按照spring标签去解析Document文档]()
+- 同时把解析出来的BeanDefinitions放入换从中Map<String, BeanDefinition> beanDefinitions = new HashMap<String, BeanDefinition>()
+
+```java
+@SuppressWarnings("unchecked")
+public void registerBeanDefinitions(Element rootElement) {
+    // 获取<bean>和自定义标签（比如mvc:interceptors）
+    List<Element> elements = rootElement.elements();
+    for (Element element : elements) {
+        // 获取标签名称
+        String name = element.getName();
+        if (name.equals("bean")) {
+            // 解析默认标签，其实也就是bean标签
+            parseDefaultElement(element);
+        } else {
+            // 解析自定义标签，比如mvc:interceptors标签回去
+            parseCustomElement(element);
+        }
+    }
+}
 ```
 
 
@@ -171,7 +195,9 @@ public class PropertyValue{
 
 ```
 
-### createBean(BeanDefinition bd)创建单例Bean
+### getBean()中的重要方法：createBean()
+
+[createBean(BeanDefinition bd)根据BeanDefinition创建单例Bean]()
 
 ```java
 private Object createBean(BeanDefinition bd) {
@@ -194,6 +220,10 @@ private Object createBean(BeanDefinition bd) {
 ```
 
 #### step 1: 实例创建
+
+- 实例工厂创建（不是重点）
+- 静态工厂创建（不是重点）
+- 构造方法创建
 
 ```Java
 private Object createBeanInstance(Class<?> clazz) {
@@ -268,7 +298,9 @@ private void setProperty(Object beanInstance, String name, Object valueToUse) {
 }
 ```
 
-#### step 3: 初始化bean：反射
+#### step 3: 初始化方法bean：反射
+
+- 有个Aware接口，需要注意
 
 ```java
 private void initBean(Object sinleton, BeanDefinition bd) {
@@ -305,7 +337,7 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 
 
 
-## 实现3: 面向对象，建立继承体系
+## 实现3: 面向对象，建立继承体系（结合下文的Spring重要接口，照着写）
 
 1. 搞清楚BeanFactory家族的接口和类的作用
 2. 搞清楚ApplicationContext家族的接口和类的作用
@@ -484,11 +516,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 ## BeanFactory继承体系（基础容器）
 
-四级接口继承体系： 
+![BeanFactory继承关系](https://upload-images.jianshu.io/upload_images/845143-c11e52d3b2159a22.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+### 四级接口继承体系
 
 1. BeanFactory 作为一个主接口不继承任何接口，暂且称为一级接口。 
-
 2. AutowireCapableBeanFactory <!--相当于我们的实现2，自动注解--> 、HierarchicalBeanFactory、ListableBeanFactory 3个子接口继承了它，进行功能上的增强。这3个子接口称为二级接口。
+   - ListableBeanFactory 能返回容器中所有的Bean
+   - HierarchicalBeanFactory能返回父类容器的功能
+   - AutowireCapableBeanFactory 负责组装，各种Aware、DI、初始化。<!--就是我们的实现2-->
 3. ConfigurableBeanFactory 可以被称为三级接口，对二级接口 HierarchicalBeanFactory 进行了再次增强，它还继承了另一个外来的接口SingletonBeanRegistry 
 4. ConfigurableListableBeanFactory 是一个更强大的接口，继承了上述的所有接口，无所不包，称为四级接口。
 
@@ -524,15 +560,33 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 4. 最后是最强大的 XmlBeanFactory ，继承自 DefaultListableBeanFactory ，重写了一些功能，使自己更强大。
 
+### 2个接口封装数据集合的操作(就是实现2中，singleObjects和beanDefinitions)
 
+- BeanDefinitionRegistry 封装了beanDefinitions
 
-## BeanDefinitions继承体系
+  - ```java
+    public interface BeanDefinitionRegistry extends AliasRegistry { 
+        // 给定bean名称，注册一个新的bean定义 
+        void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException; 
+        /** 根据指定Bean名移除对应的Bean定义 */ 
+        void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 根据指定bean名得到对应的Bean定义 */ 
+        BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 查找，指定的Bean名是否包含Bean定义 */ 
+        boolean containsBeanDefinition(String beanName); 
+        String[] getBeanDefinitionNames();//返回本容器内所有注册的Bean定义名称 
+        int getBeanDefinitionCount();//返回本容器内注册的Bean定义数目 
+        boolean isBeanNameInUse(String beanName);//指定Bean名是否被注册过。 
+    }
+    ```
 
+- SingletonBeanRegistry封装了singleObjects
 
+## BeanDefinitions继承体系（了解就行）
+
+实际只用BeanDefinition
 
 ## ApplicationContext继承体系（高级容器）
 
-
+我们自己的实现没用，源码阅读才用到
 
 
 
