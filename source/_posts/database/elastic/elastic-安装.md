@@ -283,6 +283,8 @@ mv node-v9.9.0-linux-x64 nodeJs
 
 #配置文件
 vim /etc/profile
+export NODE_HOME=/home/coder/server/node- v8.12.0-linux-x64 
+export PATH=$PATH:$NODE_HOME/bin
 
 #刷新配置
 source /etc/profile
@@ -303,4 +305,43 @@ npm install -g cnpm --registry=https://registry.npm.taobao.org
 #进入head插件解压目录，执行安装命令
 cnpm install
 ```
+
+## 配置
+
+此时未连接，需要配置才能连接：
+修改 Gruntfile.js文件：
+
+```
+
+```
+
+修改_site/app.js：
+修改IP地址，连接elasticsearch
+
+```
+
+
+
+启用CORS: 当head插件访问es时，您必须在elasticsearch中启用CORS，否则您的浏览器将拒绝跨域。
+在elasticsearch配置中：
+http.cors.enabled: true
+您还必须设置，http.cors.allow-origin因为默认情况下不允许跨域。http.cors.allow-origin: "*"
+是允许配置的，但由于这样配置的任何地方都可以访问，所以有安全风险。
+我在集群安装的时候已经配好了、如果你刚配置、需要重启ElasticSearch服务
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+访问head插件
+```
+
+
+
+## **运行**
+
+```
+npm start #启动head插件
+```
+
+启动运行端口为：9100
+
+访问：
 

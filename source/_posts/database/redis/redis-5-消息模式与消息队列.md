@@ -20,7 +20,7 @@ tags: [redis,cluster]
 
 
 
-# [Redis Stream(重点)](https://www.runoob.com/redis/redis-stream.html)
+# [Redis Stream(重点, 高性能消息队列)](https://www.runoob.com/redis/redis-stream.html)
 
 Redis 5.0 全新的数据类型:streams，官方把它定义为:以更抽象的方式建模日志的数据结构。Redis 的streams主要是一个append only的数据结构，至少在概念上它是一种在内存中表示的抽象数据类 型，只不过它们实现了更强大的操作，以克服日志文件本身的限制。
 
@@ -31,19 +31,39 @@ Redis 5.0 全新的数据类型:streams，官方把它定义为:以更抽象的�
 另外，这个功能有点类似于redis以前的Pub/Sub，但是也有基本的不同:
 
 - streams支持多个客户端(消费者)等待数据(Linux环境开多个窗口执行XREAD即可模拟)，并 且每个客户端得到的是完全相同的数据。 
-- Pub/Sub是发送忘记的方式，并且不存储任何数据;而streams模式下，所有消息被无限期追加在 streams中，除非用于显示执行删除(XDEL)。
+- [Pub/Sub是发送忘记的方式，并且不存储任何数据](Pub/Sub是发送忘记的方式，并且不存储任何数据); 而streams模式下，所有消息被无限期追加在 streams中，除非用于显示执行删除(XDEL) 。 <!--像不像Kafka，不过kafka存磁盘，Redis存缓存-->
 
 - streams的Consumer Groups也是Pub/Sub无法实现的控制方式。 
 
 ## streams数据结构
 
-<img src="https://www.runoob.com/wp-content/uploads/2020/09/en-us_image_0167982791.png" alt="img" style="zoom:50%;" />
+<img src="https://www.runoob.com/wp-content/uploads/2020/09/en-us_image_0167982791.png" alt="img"  />
 
 它主要有消息、生产者、消费者、消费组4组成
 
 streams数据结构本身非常简单，但是streams依然是Redis到目前为止最复杂的类型，其原因是实现的 一些额外的功能:一系列的阻塞操作允许消费者等待生产者加入到streams的新数据。另外还有一个称 为Consumer Groups的概念，Consumer Group概念最先由kafka提出，Redis有一个类似实现，和 kafka的Consumer Groups的目的是一样的:[允许一组客户端协调消费相同的信息流]()!
 
+## 应用场景
 
+## 常用命令
+
+### **消息队列相关命令：**
+
+- **XADD** - 添加消息到末尾
+  - **key** ：队列名称，如果不存在就创建
+  - **ID** ：消息 id，我们使用 * 表示由 redis 生成，可以自定义，但是要自己保证递增性。
+  - **field value** ： 记录。
+- **XTRIM** - 对流进行修剪，限制长度
+- **XDEL** - 删除消息
+- **XLEN** - 获取流包含的元素数量，即消息长度
+- **XRANGE** - 获取消息列表，会自动过滤已经删除的消息
+- **XREVRANGE** - 反向获取消息列表，ID 从大到小
+
+- **XREAD** - 以阻塞或非阻塞方式获取消息列表
+  - **count** ：数量
+  - **milliseconds** ：可选，阻塞毫秒数，没有设置就是非阻塞模式
+  - **key** ：队列名
+  - **id** ：消息 ID
 
 ## 案例
 
