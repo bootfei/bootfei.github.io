@@ -35,15 +35,10 @@ ln -s /opt/apps/zookeeper-3.6.2 /opt/apps/zk
 
 ## 修改配置文件zoo.cfg
 
-### 新建数据目录
-
-```
+```shell
+#新建数据目录
 dataDir=/opt/data/zookeeper
-```
-
-### 创建目录
-
-```
+#创建目录
 mkdir -p /opt/data/zk
 ```
 
@@ -62,8 +57,6 @@ export PATH=$ZK_HOME/bin/:$PATH
 source /etc/profile
 ```
 
-
-
 ## **操作** **zk**
 
 ```
@@ -77,5 +70,19 @@ zkServer.sh status
 zkServer.sh restart
 ```
 
-### 
+
+
+# 验证单机安装
+
+是否可以对外提供服务
+
+```
+curl 192.168.199.161:zk端口号
+```
+
+如果无法访问，那么关闭防火墙
+
+```
+systemctl stop firewalld.service
+```
 
