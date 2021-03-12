@@ -4,10 +4,6 @@ date: 2020-11-05 09:24:42
 tags: [java, jstack]
 ---
 
-
-
-
-
 # [如何查看系统的上下文切换情况](https://cloud.tencent.com/developer/article/1669005?from=information.detail.linux%20%E6%9F%A5%E7%9C%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2)
 
 ## vmstat 
