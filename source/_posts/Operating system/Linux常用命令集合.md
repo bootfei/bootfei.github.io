@@ -75,3 +75,15 @@ unzip [-cflptuvz][-agCjLMnoqsVX][-P <密码>][.zip文件][文件][-d <目录>][-
 ```
 -f: 使用档案名字，切记，这个参数是最后一个参数，后面只能接档案名。 
 ```
+
+
+
+# 文件夹命令
+
+```
+mkdir [-p] dirName
+
+mkdir -p /data/qifei/{data,work,plugins,scripts}
+```
+
+- -p 确保目录名称存在，不存在的就建一个。

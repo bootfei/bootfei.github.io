@@ -1,8 +1,6 @@
----
-title: kafka-01-入门
+title: kafka-01-原理
 date: 2021-02-13 17:05:46
 tags:
----
 
 # **Kafka** 概述
 
@@ -40,7 +38,21 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 # **Kafka** 工作原理与工作过程
 
-
+> 思考：
+>
+> 1. 如果集群中topic只有一个partition，那么如果client端连接上其他server，可以删除这个topic吗？
+>
+>    - 肯定是可以的。因为其他server会路由到Controller sever, 然后Controller server知道这个topic下的partition位于哪台server中。
+>
+> 2. 对于集群，哪些是client，哪些是server?区别是什么？
+>
+>    - consumer和producer都是client, 他们都不需要启动，只需要运行脚本文件就可以了。kafka集群是server，必须启动运行。
+>
+> 3. Kafka集群和Redis集群有什么区别？
+>
+>    - kafka集群是连接到zk上的，topic信息都是zk存储；Redis集群是自己管理，每个节点都会存储其他节点的信息。
+>
+>      
 
 [kafka本身即是server，又是client，体现如下]()
 
@@ -333,92 +345,45 @@ HW 截断机制可能会引发消息的丢失。
 
 解决方案: 没办法绝对避免，可以通过对每个数据都要手动提交从而减少重复的数量
 
-##  **Kafka** 集群搭建
-
- 在生产环境中为了防止单点问题，Kafka 都是以集群方式出现的。下面要搭建一个 Kafka集群，包含三个 Kafka 主机，即三个 Broker。
-
-### **Kafka** 的下载
-
-### 安装并配置第一台主机
-
-- 上传并解压。 
-
-  - ```shell
-    wget http://mirrors.shuosc.org/apache/kafka/1.0.0/kafka_2.11-1.0.0.tgz #去kafka官网找镜像
-    ```
-
-  - 将下载好的 Kafka 压缩包上传至 CentOS 虚拟机，并解压。
-
-- 创建软链接。为了屏蔽版本信息和目录，使得操作简单
-
-  ```shell
-  ln -s kafka_2.11/ kafka
-  ```
-
-- 修改配置文件。 在 kafka 安装目录下有一个 config/server.properties 文件，修改该文件。
-
-  ```properties
-  broker.id=0  #集群中kafka的broker唯一标识，默认0
-  listeners=PLAINTEXT://192.168.59.152:9092 #写当前主机IP和端口。broker之间通信用的。不配置也行，kafka会自动配置
-  log.dirs=xxx
-  num.partitions=1  #消费的主题是要存储在partition中的，如果不设立，那么默认存储在1 partition中
-  zookeeper.connect=192.168.10.32:2181  #consumer和broker是zookeeper管理的
-  ```
-
-  > 以 kafkaOS1 为母机再克隆两台 Kafka 主机。在克隆完毕后，需要修改 server.properties中的 broker.id、listeners 与 advertised.listeners。id要改为不一样的（+1就行）,listeners同样也不一样（ip改为各自的主机ip）
-
-### **kafka** 的启动与停止 
-
-- 启动 **zookeeper**
-
-  - ```shell
-    zkServer.sh start
-    ```
-
-- 启动 kafka，
-
-  - 在命令后添加-daemon 参数，可以使 kafka 以守护进程方式启动，即不占用窗口。
-
-  - ```
-    bin/kafka-server-start.sh -daemon config/server.properties
-    ```
-
-- 停止 **kafka**
-
-  - 先停kafka，再停zk
-
-  - ```
-    bin/kafka-server-stop.sh
-    ```
-
 
 
 ## **kafka** 操作 
 
-(**1**) 创建 **topic**
+> [强调：kafka的操作，只要连到任意一个集群中的broker就行，最终都会路由的由controller，因为是zk管理的]()
+
+
+
+### 创建 **topic**
 
 > partitions数量最好是与kafka server数量一致
 
 
 ```shell
-$ bin/kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 --replication-factor 1 partitions 1 --topic test_topic #分区数量是1，1个备份（replication）
+$ bin/kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 --replication-factor 1 --partitions 1 --topic test_topic #分区数量是1，1个备份（replication）
 ```
 
 ```
 ll tmp/logs  ##查看刚才创建的主题, 只有一个server有test_topic-0
 ```
 
-但是如果partitions数量与server一致，那么每个server都有test_topic-x (x=0~server数量-1)
+partitions参数
 
-如果replication数量=x>1，那么整个kafka集群总共有test_topic为x个
+- <font color="red">如果partitions < server，比如partitions=1, 那么只有一个server有test_topic，即test_topic-0</font>
+- <font color="red">如果partitions = server，那么每个server都有test_topic，即test_topic-0, test_topic-1 ....</font>
 
-(**2**) 查看 **topic**
+replication参数
+
+- <font color="red">如果replication=1，那么整个kafka集群，只有一个server含有test_topic的一个备份</font>
+
+### 查看 **topic**
 
 ```shell
 $ bin/kafka-topics.sh --list --bootstrap-server 192.168.59.153:9092 ##无所谓连接哪个bootstrap-server，因为是集群
 ```
 
-(**3**) 发送消息 该命令会创建一个生产者，然后由其生产消息,发送给topic。
+### 发送消息 
+
+该命令会创建一个生产者，然后由其生产消息,发送给topic。
 
 > --bootstrap-server 随意一个kafka server，因为broker内部有controller，会将信息进行发送给topic
 
@@ -426,18 +391,61 @@ $ bin/kafka-topics.sh --list --bootstrap-server 192.168.59.153:9092 ##无所谓�
 $ bin/kafka-console-producer.sh --topic topic_test --bootstrap-server 192.168.59.153:9092
 ```
 
-(**4**) 消费消息
+### 消费消息
 
 ```bash
 $ bin/kafka-console-consumer.sh --topic topic_test --from-beginning --bootstrap-server 192.168.59.153:9092
 ```
 
-(5) 继续生产消费
+-  --from-beginning：表示从头开始消费，否则只能消费新的消息。
 
-(**6**) 删除 **topic**
+### 继续生产消费
 
+### 删除 **topic**
+
+> --bootstrap-server 随意一个kafka server，即便这个server没有存储该topic的partition，因为broker内部有controller，会将信息进行发送给controller，然后由controller定位到含有topic partition的server，进行删除
+
+```shell
+$ bin/kafka-topics.sh kafka-consumer-groups.sh --delete --bootstrap-server 192.168.59.152:9092 --topic topic_test 
 ```
-$ bin/kafka-topics.shkafka-consumer-groups.sh --delete --bootstrap-server 192.168.59.152:9092
+
+## zk操作
+
+```shell
+zkCli.sh #进入zk命令行
+```
+
+### 查看目录信息
+
+```shell
+ls /
+[admin, brokers, cluster, config, consumers, controller, controller_epoch, feature, isr_change_notification, latest_producer_id_block, log_dir_event_notification, zookeeper]
+```
+
+### 查看kafka集群的broker
+
+```shell
+ls /
+[admin, brokers, cluster, config, consumers, controller, controller_epoch, feature, isr_change_notification, latest_producer_id_block, log_dir_event_notification, zookeeper]
+
+ls /brokers 
+[ids, seqid, topics]
+
+ls /brokers/ids #当时给broker配置的broker.id
+[0, 1, 3]
+
+get /brokers/ids/0 #查看broker.id=0的broker信息
+{"listener_security_protocol_map":{"PLAINTEXT":"PLAINTEXT"},"endpoints":["PLAINTEXT://192.168.199.134:9092"],"jmx_port":-1,"features":{},"host":"192.168.199.134","timestamp":"1615489355496","port":9092,"version":5}
+```
+
+
+
+### 查看kafka集群的topic
+
+```shell
+ls /brokers/topics
+
+get /brokers/topics/cities/partitions/0 #可以看到isr、leader信息
 ```
 
 
@@ -446,7 +454,7 @@ $ bin/kafka-topics.shkafka-consumer-groups.sh --delete --bootstrap-server 192.16
 
 我们这里说的日志不是 Kafka 的启动日志，启动日志在 Kafka 安装目录下的 logs/server.log 中。消息在磁盘上都是以日志的形式保存的。我们这里说的日志是存放在/tmp/kafka_logs 目录中的消息日志，即 partition 与 segment
 
-## 查看topic与Replicas of partition备份
+## 查看topic的分区partition与备份Replicas
 
 ```
 ls /tmp/kafka_logs
@@ -454,13 +462,59 @@ ls /tmp/kafka_logs
 
 - 可以看到[topic-主机分区号]()，如果备份=主机数量，此主机还有[topic-其他主机分区号]()
 
-## 查看partition分区
+### 1 **个分区** **1** **个备份**
+
+我们前面创建的 test 主题是 1 个分区 1 个备份。[发现只有1个broker含有test-0]()
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | test-0          |
+| broker2 | null            |
+| broker3 | null            |
+
+### **3** **个分区** **1** 个备份
+
+再次创建一个主题，命名为 one，创建三个分区，但仍为一个备份。 依次查看三台broker，可以看到[每台 broker 中都有一个 one 主题的分区，分别为one-0, one-1, one-2。]()
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | one-0           |
+| broker2 | one-1           |
+| broker3 | one-2           |
+
+### **3** **个分区** 2 个备份
+
+再次创建一个主题，命名为 p3r2，创建三个分区，2个备份。依次查看三台 broker，可以看到每台 broker 中都有2份 two 主题的分区。
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | p3r2-0, p3r2-1  |
+| broker2 | p3r2-0, p3r2-2  |
+| broker3 | p3r2-1, p3r2-2  |
+
+### **3** **个分区** 3 个备份
+
+再次创建一个主题，命名为 p3r3，创建三个分区，三个备份。依次查看三台 broker，可以看到每台 broker 中都有三份 two 主题的分区。
+
+| broker  | topic-partition       |
+| ------- | --------------------- |
+| broker1 | p3r3-0, p3r3-1,p3r2-2 |
+| broker2 | p3r3-0, p3r3-1,p3r2-2 |
+| broker3 | p3r3-0, p3r3-1,p3r2-2 |
+
+### 总结
+
+- partition是尽可能的均匀分布在各个broker上，
+- replica表示整个broker所有的partition都算上，对于每一个partition都有replica个备份
+
+## 查看特殊topic的分区
 
 ```shell
 ls /tmp/kafka_logs
 ```
 
-- 可以看到[__consumer_offsets 0->__consumer_offsets 50](),默认50个
+- 可以看到[__consumer_offsets 0 到 consumer_offsets 50](),默认50个
+- 一个用户的一个主题会被提交到一个[__consumer_offsets 分区]()中。使用主题字符串的 hash 值与 50 取模，结果即为分区索引。
 
 ## 查看段 **segment** 
 
@@ -473,9 +527,8 @@ segment 是一个逻辑概念，其由两类物理文件组成，分别为“.in
 (**2**) 查看 **segment
 ** 对于 segment 中的 log 文件，不能直接通过 cat 命令查找其内容，而是需要通过 kafka自带的一个工具查看。
 
-```
+```shell
 bin/kafka-run-class.sh kafka.tools.DumpLogSegments --files 
-/tmp/kafka-logs/test-0/00000000000000000000.log --print-data-log
+/tmp/kafka-logs/test-0/00000000000000000000.log --print-data-log #消息里面有个payload字段，就是具体的信息
 ```
 
-一个用户的一个主题会被提交到一个[__consumer_offsets 分区]()中。使用主题字符串的 hash 值与 50 取模，结果即为分区索引。

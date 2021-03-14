@@ -17,3 +17,27 @@ Ref:
       3. 虚拟机收到的请求,
    2. 特点:
    3. 配置:
+
+
+
+# 配置网络ipv4
+
+```
+vim /etc/sysconfig/network-scripts/ifcfg-xxx
+```
+
+> 我们需要修改 BOOTPROTO=dhcp 中的dhcp改为static（静态），同时在文字下方添加：
+>
+> IPADDR=192.168.1.152      #静态IP  
+>
+> GATEWAY=192.168.1.1      #默认网关  
+>
+> NETMASK=255.255.255.0  #子网掩码  
+>
+> DNS1=192.168.1.1              #DNS 配置  
+>
+> DNS2=8.8.8.8 
+
+重启：service network restart 
+
+验证：ip addr
