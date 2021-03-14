@@ -1,8 +1,6 @@
----
-title: kafka-01-入门
+title: kafka-01-原理
 date: 2021-02-13 17:05:46
 tags:
----
 
 # **Kafka** 概述
 
@@ -353,7 +351,9 @@ HW 截断机制可能会引发消息的丢失。
 
 ## **kafka** 操作 
 
-### 删除topic
+> [强调：kafka的操作，只要连到任意一个集群中的broker就行，最终都会路由的由controller，因为是zk管理的]()
+
+
 
 ### 创建 **topic**
 
@@ -361,7 +361,7 @@ HW 截断机制可能会引发消息的丢失。
 
 
 ```shell
-$ bin/kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 --replication-factor 1 partitions 1 --topic test_topic #分区数量是1，1个备份（replication）
+$ bin/kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 --replication-factor 1 --partitions 1 --topic test_topic #分区数量是1，1个备份（replication）
 ```
 
 ```
@@ -407,8 +407,47 @@ $ bin/kafka-console-consumer.sh --topic topic_test --from-beginning --bootstrap-
 
 > --bootstrap-server 随意一个kafka server，即便这个server没有存储该topic的partition，因为broker内部有controller，会将信息进行发送给controller，然后由controller定位到含有topic partition的server，进行删除
 
+```shell
+$ bin/kafka-topics.sh kafka-consumer-groups.sh --delete --bootstrap-server 192.168.59.152:9092 --topic topic_test 
 ```
-$ bin/kafka-topics.shkafka-consumer-groups.sh --delete --bootstrap-server 192.168.59.152:9092
+
+## zk操作
+
+```shell
+zkCli.sh #进入zk命令行
+```
+
+### 查看目录信息
+
+```shell
+ls /
+[admin, brokers, cluster, config, consumers, controller, controller_epoch, feature, isr_change_notification, latest_producer_id_block, log_dir_event_notification, zookeeper]
+```
+
+### 查看kafka集群的broker
+
+```shell
+ls /
+[admin, brokers, cluster, config, consumers, controller, controller_epoch, feature, isr_change_notification, latest_producer_id_block, log_dir_event_notification, zookeeper]
+
+ls /brokers 
+[ids, seqid, topics]
+
+ls /brokers/ids #当时给broker配置的broker.id
+[0, 1, 3]
+
+get /brokers/ids/0 #查看broker.id=0的broker信息
+{"listener_security_protocol_map":{"PLAINTEXT":"PLAINTEXT"},"endpoints":["PLAINTEXT://192.168.199.134:9092"],"jmx_port":-1,"features":{},"host":"192.168.199.134","timestamp":"1615489355496","port":9092,"version":5}
+```
+
+
+
+### 查看kafka集群的topic
+
+```shell
+ls /brokers/topics
+
+get /brokers/topics/cities/partitions/0 #可以看到isr、leader信息
 ```
 
 
@@ -417,7 +456,7 @@ $ bin/kafka-topics.shkafka-consumer-groups.sh --delete --bootstrap-server 192.16
 
 我们这里说的日志不是 Kafka 的启动日志，启动日志在 Kafka 安装目录下的 logs/server.log 中。消息在磁盘上都是以日志的形式保存的。我们这里说的日志是存放在/tmp/kafka_logs 目录中的消息日志，即 partition 与 segment
 
-## 查看topic与Replicas of partition备份
+## 查看topic的分区partition与备份Replicas
 
 ```
 ls /tmp/kafka_logs
@@ -425,13 +464,59 @@ ls /tmp/kafka_logs
 
 - 可以看到[topic-主机分区号]()，如果备份=主机数量，此主机还有[topic-其他主机分区号]()
 
-## 查看partition分区
+### 1 **个分区** **1** **个备份**
+
+我们前面创建的 test 主题是 1 个分区 1 个备份。[发现只有1个broker含有test-0]()
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | test-0          |
+| broker2 | null            |
+| broker3 | null            |
+
+### **3** **个分区** **1** 个备份
+
+再次创建一个主题，命名为 one，创建三个分区，但仍为一个备份。 依次查看三台broker，可以看到[每台 broker 中都有一个 one 主题的分区，分别为one-0, one-1, one-2。]()
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | one-0           |
+| broker2 | one-1           |
+| broker3 | one-2           |
+
+### **3** **个分区** 2 个备份
+
+再次创建一个主题，命名为 p3r2，创建三个分区，2个备份。依次查看三台 broker，可以看到每台 broker 中都有2份 two 主题的分区。
+
+| broker  | topic-partition |
+| ------- | --------------- |
+| broker1 | p3r2-0, p3r2-1  |
+| broker2 | p3r2-0, p3r2-2  |
+| broker3 | p3r2-1, p3r2-2  |
+
+### **3** **个分区** 3 个备份
+
+再次创建一个主题，命名为 p3r3，创建三个分区，三个备份。依次查看三台 broker，可以看到每台 broker 中都有三份 two 主题的分区。
+
+| broker  | topic-partition       |
+| ------- | --------------------- |
+| broker1 | p3r3-0, p3r3-1,p3r2-2 |
+| broker2 | p3r3-0, p3r3-1,p3r2-2 |
+| broker3 | p3r3-0, p3r3-1,p3r2-2 |
+
+### 总结
+
+- partition是尽可能的均匀分布在各个broker上，
+- replica表示整个broker所有的partition都算上，对于每一个partition都有replica个备份
+
+## 查看特殊topic的分区
 
 ```shell
 ls /tmp/kafka_logs
 ```
 
 - 可以看到[__consumer_offsets 0 到 consumer_offsets 50](),默认50个
+- 一个用户的一个主题会被提交到一个[__consumer_offsets 分区]()中。使用主题字符串的 hash 值与 50 取模，结果即为分区索引。
 
 ## 查看段 **segment** 
 
@@ -444,9 +529,8 @@ segment 是一个逻辑概念，其由两类物理文件组成，分别为“.in
 (**2**) 查看 **segment
 ** 对于 segment 中的 log 文件，不能直接通过 cat 命令查找其内容，而是需要通过 kafka自带的一个工具查看。
 
-```
+```shell
 bin/kafka-run-class.sh kafka.tools.DumpLogSegments --files 
-/tmp/kafka-logs/test-0/00000000000000000000.log --print-data-log
+/tmp/kafka-logs/test-0/00000000000000000000.log --print-data-log #消息里面有个payload字段，就是具体的信息
 ```
 
-一个用户的一个主题会被提交到一个[__consumer_offsets 分区]()中。使用主题字符串的 hash 值与 50 取模，结果即为分区索引。
