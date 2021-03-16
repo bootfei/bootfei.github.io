@@ -297,7 +297,7 @@ HW 截断机制可能会引发消息的丢失。
 
 但可能会出现部分 follower [重复接收]()消息的情况(不是[重复消费]())。<!--比如leader同步过程中宕机，则生产者没有收到ack，那么生产者重复数据，导致follower又接收一样的数据-->
 
-### 消费者消费过程和offset解析
+### 消费者消费过程和offset
 
 生产者将消息发送到 topic 中，消费者即可对其进行消费，其消费过程如下:
 
@@ -325,7 +325,7 @@ HW 截断机制可能会引发消息的丢失。
 
 6)  当 broker 接到消费者的 offset 后，会更新到相应的__consumer_offset 中
 
->  one of the brokers is designated as the group’s **coordinator** and is responsible for managing the members of the group as well as their partition assignments. <!--就是说group的offset交给某一个partition的broker来管理-->
+>  one of the brokers is designated as the group’s **coordinator** and is responsible for managing the members of the group as well as their partition assignments. <!--就是说group的offset交给某一个partition的broker来管理，并且_consumer_offsets_partition作为特殊的topic，也是有leader partition（位于不同broker）的-->
 >
 > The coordinator of each group is chosen from the leaders of the internal offsets topic `__consumer_offsets`, which is used to store committed offsets. Basically [the group’s ID is hashed to one of the partitions for this topic]() and [the leader of that partition is selected as the coordinator](). In this way, management of consumer groups is divided roughly equally across all the brokers in the cluster, which allows the number of groups to scale by increasing the number of brokers.
 >
@@ -344,18 +344,6 @@ HW 截断机制可能会引发消息的丢失。
 8)  消费者可以重置 offset，从而可以灵活消费存储在 broker 上的消息
 
 
-
-#### multi-threaded kafka consumers
-
-you can run more than one consumer in a jvm process by using threads.
-
-##### consumer with many threads
-
-if processing a record takes a while, a single consumer can run multiple threads to process records, but it is harder to manage offset for each thread/task. if one consumer runs multiple threads, then two messages on the same partitions could be processed by two different threads which make it hard to guarantee record delivery order without complex thread coordination. this setup might be appropriate if processing a single task takes a long time, but try to avoid it.
-
-##### thread per consumer
-
-if you need to run multiple consumers, then run each consumer in their own thread. this way kafka can deliver record batches to the consumer and the consumer does not have to worry about the offset ordering. a thread per consumer makes it easier to manage offsets. it is also simpler to manage failover (each process runs x num of consumer threads) as you can allow kafka to do the brunt of the work.
 
 ### 消费者重复消费问题及解决方案 
 

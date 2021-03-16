@@ -203,6 +203,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import java.util.Collections;
 import java.util.Properties;
 
+//本质上是个Runnable线程，dowork()会被run()调用
 public class SomeConsumer extends ShutdownableThread {
     private KafkaConsumer<Integer, String> consumer;
 
@@ -269,7 +270,7 @@ public class SomeConsumer extends ShutdownableThread {
 public class ConsumerTest {
     public static void main(String[] args) {
         SomeConsumer consumer = new SomeConsumer();
-        consumer.start();
+        consumer.start(); //其实就是个线程
     }
 }
 ```
@@ -284,9 +285,7 @@ public class ConsumerTest {
 
 - 创建2个消费者（不同线程），属于同一个消费者组消费者同步手动提交
 
-我猜想这两个线程交替运行，那么两个线程都只会获取kafka中的部分数据，数据并集才是整个kafka数据
-
-
+[详情见： kafka-消费者实现多线程]()
 
 ### 消费者手动同步提交
 
