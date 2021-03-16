@@ -146,7 +146,7 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 ### **Partition Leader** 与 Partition Follower
 
-- 每个 partition 有多个副本，其中有且仅有一个作为 Leader，Leader 是当前负责消息读写 的 partition。即所有读写操作只能发生于 Leader 分区上。
+- 每个 partition 有多个副本replicas，<!--这块我经常混淆，以为topic-partition-0、topic-partition-1....互为副本 --> 其中有且仅有一个作为 Leader，Leader 是当前负责消息读写 的 partition。[即所有读写操作只能发生于 Leader 分区上。](http://dpurl.cn/HxIrgGcz)
 - 所有 Follower 都需要从 Leader 同步消息，Follower 与 Leader 始终保持消息同步。 partition leader 与 partition follower 是主备关系，不是主从。
   - 主备：主干活，从不干活。除非主挂了
   - 主从：主干活，从业干活，但是一般读写分离
@@ -205,7 +205,7 @@ Kafka 集群的多个 broker 中，有一个会被选举为 controller，负责�
 
 Zookeeper 负责维护和协调 broker，负责 Broker Controller 的选举。 总结:
 
-- partition leader是brokercontroller选举出来的
+- partition leader是broker controller选举出来的
 - broker controller是zk选举出来的
 
 ### Group Coordinator
@@ -216,7 +216,7 @@ group Coordinator 是运行在每个 broker 上的进程，主要用于 Consumer
 
 > 缓存中的数据从哪里来呢?
 >
-> 当 Consumer 消费完毕提交 offset 时，会同时提交到当前 broker的coordinator 的缓存及__consumer_offset 的 partition。
+> 当 Consumer 消费完毕提交 offset 时，会同时提交到当前 broker的coordinator 的缓存__consumer_offset 的 partition。
 
 ## Kafka工作原理与过程
 
