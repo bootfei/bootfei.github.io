@@ -220,21 +220,19 @@ group Coordinator 是运行在每个 broker 上的进程，主要用于 Consumer
 
 ## Kafka工作原理与过程
 
-### 消息路由策略
+### 生产者消息路由策略
 
 在通过 API 方式发布消息时，生产者是以 Record 为消息进行发布的。Record 中包含 key 与 value，value 才是我们真正的消息本身，而 key 用于路由消息所要存放的 Partition。消息 要写入到哪个 Partition 并不是随机的，而是有路由策略的。
 
 1. 若指定了 partition，则直接写入到指定的 partition;
 
-2. 若未指定 partition 但指定了 key，则通过对 key 的 hash 值与 partition 数量取模，该取模
-
-   结果就是要选出的 partition 索引;
+2. 若未指定 partition 但指定了 key，则通过对 key 的 hash 值与 partition 数量取模，该取模结果就是要选出的 partition 索引;
 
 3. 若 partition 和 key 都未指定，则使用轮询算法选出一个 partition。
 
-### 消息写入算法
+### 生产者消息写入算法
 
-消息生产者将消息发送给 broker，并形成最终的可供消费者消费的 log，是一个比较复 杂的过程。
+生产者将消息发送给 broker，并形成最终的可供消费者消费的 log，是一个比较复 杂的过程。
 
 1) producer 向 broker 集群提交连接请求，其所连接上的任意 broker 都会向其发送 broker controller 的通信 URL，即 broker controller 主机配置文件中的 listeners 地址  <!--任意 broker为什么知道broker controller 的通信 URL呢？因为broker都是zk的客户端-->
 
@@ -274,7 +272,7 @@ HW 截断机制可能会引发消息的丢失。
 
 > 但是如何保证消息不丢呢？请看下面
 
-### 消息发送的可靠性机制
+### 生产者消息发送的可靠性机制
 
 生产者向 kafka 发送消息时，可以选择需要的可靠性级别。通过 acks 参数的值进行设置。
 
@@ -299,39 +297,67 @@ HW 截断机制可能会引发消息的丢失。
 
 但可能会出现部分 follower [重复接收]()消息的情况(不是[重复消费]())。<!--比如leader同步过程中宕机，则生产者没有收到ack，那么生产者重复数据，导致follower又接收一样的数据-->
 
-### 消费者消费过程解析
+### 消费者消费过程和offset解析
 
 生产者将消息发送到 topic 中，消费者即可对其进行消费，其消费过程如下:
+
+#### **消息重定向**
 
 1)  consumer 向 broker 集群提交连接请求，其所连接上的任意 broker 都会向其发送 broker controller 的通信 URL，即 broker controller 主机配置文件中的 listeners 地址
 
 2)  当 consumer 指定了要消费的 topic 后，其会向 broker controller 发送 poll 请求
 
-3)  broker controller 会为 consumer 分配一个或几个 partition leader，并将该 partitioin 的当前 offset 发送给 consumer
+3)  broker controller 会为 consumer 分配一个或几个 partition leader <!--比如3个broker有3个partition，那么有3个partition Leader;若有2个consumer，1个consumer分配一个Leader，另1个consumer分配2个Leader-->，并将该 partitioin 的当前 offset 发送给 consumer
+
+>  a record gets delivered to only one consumer in a consumer group.
 
 4)  consumer 会按照 broker controller 分配的 partition 对其中的消息进行消费
 
+
+
+<img src="https://www.sderosiaux.com/static/044d8e05febd37679ba9b3c1bd82c1f2/00d43/consuming.png" alt="hop" style="zoom:67%;" />
+
+#### **消费者确认收到**
+
 5)  当消费者消费完该条消息后，消费者会向 broker 发送一个该消息已被消费的反馈，即该消息的 offset
+
+#### 集群更新该group的offset
 
 6)  当 broker 接到消费者的 offset 后，会更新到相应的__consumer_offset 中
 
+>  one of the brokers is designated as the group’s **coordinator** and is responsible for managing the members of the group as well as their partition assignments. <!--就是说group的offset交给某一个partition的broker来管理-->
+>
+> The coordinator of each group is chosen from the leaders of the internal offsets topic `__consumer_offsets`, which is used to store committed offsets. Basically [the group’s ID is hashed to one of the partitions for this topic]() and [the leader of that partition is selected as the coordinator](). In this way, management of consumer groups is divided roughly equally across all the brokers in the cluster, which allows the number of groups to scale by increasing the number of brokers.
+>
+> When the consumer starts up, it finds the coordinator for its group and sends a request to join the group. The coordinator then begins a group rebalance so that the new member is assigned its fair share of the group’s partitions. Every rebalance results in a new **generation** of the group.
+
+> consumers groups each have their own offset per partition. 所以说有多少个partition，这个group就有多少个对应的offset
+>
+> the consumer groups have their own offset for every partition in the topic which is unique to what other consumer groups have.
+
+#### 重复过程，并压缩日志
+
 7)  以上过程一直重复，直到消费者停止请求消息
+
+> kafka stores offset data in a topic called `"__consumer_offset" `. these topics use log compaction, which means they only save the most recent value per key. 就是类似于Redis的AOF压缩技术，只保存最新的value
 
 8)  消费者可以重置 offset，从而可以灵活消费存储在 broker 上的消息
 
-### **Partition Leader** 选举范围
 
-当 leader 挂了后 broker controller 会从 ISR 中选一个 follower 成为新的 leader。但，若 ISR 中的所有副本都挂了怎么办?可以通过 unclean.leader.election.enable 的取值来设置 Leader 选举的范围。
 
-(**1**) **false**
+#### multi-threaded kafka consumers
 
-必须等待 ISR 列表中有副本活过来才进行新的选举。该策略可靠性有保证，但可用性低。
+you can run more than one consumer in a jvm process by using threads.
 
-(**2**) **true** 
+##### consumer with many threads
 
-在 ISR 中没有副本的情况下可以选择任何一个该 Topic 的 partition 作为新的 leader，该策略可用性高，但可靠性没有保证。可能会引发大量的消息丢失。<!--不推荐用,但是kafka用在日志系统比较多，所以丢了-->
+if processing a record takes a while, a single consumer can run multiple threads to process records, but it is harder to manage offset for each thread/task. if one consumer runs multiple threads, then two messages on the same partitions could be processed by two different threads which make it hard to guarantee record delivery order without complex thread coordination. this setup might be appropriate if processing a single task takes a long time, but try to avoid it.
 
-### 重复消费问题及解决方案 
+##### thread per consumer
+
+if you need to run multiple consumers, then run each consumer in their own thread. this way kafka can deliver record batches to the consumer and the consumer does not have to worry about the offset ordering. a thread per consumer makes it easier to manage offsets. it is also simpler to manage failover (each process runs x num of consumer threads) as you can allow kafka to do the brunt of the work.
+
+### 消费者重复消费问题及解决方案 
 
 最常见的重复消费有两种:
 
@@ -347,11 +373,31 @@ HW 截断机制可能会引发消息的丢失。
 
 解决方案: 没办法绝对避免，可以通过对每个数据都要手动提交从而减少重复的数量
 
+### **集群Partition Leader** 选举范围
 
+当 leader 挂了后 broker controller 会从 ISR 中选一个 follower 成为新的 leader。但，若 ISR 中的所有副本都挂了怎么办?
+
+可以通过 unclean.leader.election.enable 的取值来设置 Leader 选举的范围。
+
+(**1**) **false**
+
+必须等待 ISR 列表中有副本活过来才进行新的选举。该策略可靠性有保证，但可用性低。
+
+(**2**) **true** 
+
+在 ISR 中没有副本的情况下可以选择任何一个该 Topic 的 partition 作为新的 leader，该策略可用性高，但可靠性没有保证。可能会引发大量的消息丢失。<!--不推荐用,但是kafka用在日志系统比较多，所以丢了-->
 
 ## **kafka** 操作 
 
 > [强调：kafka的操作，只要连到任意一个集群中的broker就行，最终都会路由的由controller，因为是zk管理的]()
+
+### 启动/关闭kafka
+
+```shell
+bin/kafka-server-start.sh config/server.properties #启动kafka
+
+bin/kafka-server-stop.sh  #关闭kafka
+```
 
 
 
@@ -408,7 +454,7 @@ $ bin/kafka-console-consumer.sh --topic topic_test --from-beginning --bootstrap-
 > --bootstrap-server 随意一个kafka server，即便这个server没有存储该topic的partition，因为broker内部有controller，会将信息进行发送给controller，然后由controller定位到含有topic partition的server，进行删除
 
 ```shell
-$ bin/kafka-topics.sh kafka-consumer-groups.sh --delete --bootstrap-server 192.168.59.152:9092 --topic topic_test 
+$ bin/kafka-topics.sh --delete --bootstrap-server 192.168.59.152:9092 --topic topic_test 
 ```
 
 ## zk操作
@@ -448,6 +494,20 @@ get /brokers/ids/0 #查看broker.id=0的broker信息
 ls /brokers/topics
 
 get /brokers/topics/cities/partitions/0 #可以看到isr、leader信息
+```
+
+
+
+### 删除topic
+
+> rmr (deprecated) or deleteall
+
+```shell
+#找到要删除的topic，然后执行命令，此时topic被彻底删除
+rmr /brokers/topics/【topic name】
+
+#如果topic 是被标记为 marked for deletion，则通过命令 ls /admin/delete_topics，找到要删除的topic，然后执行命令：
+rmr /admin/delete_topics/【topic name】
 ```
 
 
