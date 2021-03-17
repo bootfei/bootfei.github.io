@@ -16,9 +16,26 @@ tags: git
    ``` bash
    git checkout -b 本地分支名x origin/远程分支名x
    ```
-      使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
+   ​    使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
    
-2. 版本回退
+2. 远程仓库
+
+   a. 查看远程分支
+
+   ```
+   git remote -v
+   ```
+
+   b. 从HTTPs切换到SSH，或者反过来
+
+   ```shell
+   #见官网https://docs.github.com/en/github/using-git/changing-a-remotes-url
+   git remote set-url origin git@github.com:USERNAME/REPOSITORY.git
+   ```
+
+   
+
+3. 版本回退
 
    1. 查看版本日志
 
