@@ -254,8 +254,6 @@ public class CachedFactorizer extends GenericServlet implements Servlet {
         }
         encodeIntoResponse(resp, factors);
     }
-
-    void encodeIntoResponse(ServletResponse resp, BigInteger[] factors) {}
 }
 ```
 
