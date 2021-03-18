@@ -197,7 +197,6 @@ public class SafeListener {
         SafeListener safe = new SafeListener();//等构造完后再注册
         source.registerListener(safe.listener);
         return safe;//安全发布对象
-
     }
 }
 ```
@@ -294,7 +293,7 @@ final类型的域时不能修改的（但如果final域所引用的对象是可�
 
 ### 示例：使用Volatile类型来发布不可变对象
 
-尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。
+尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件 <!--第二章的复合操作"读取-修改-写入"，违背了状态一致性，读取了过期数据-->，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。
 
 ```java
 //没有正确原子化的Servlet试图缓存它的最新结果。
@@ -307,10 +306,12 @@ public class UnsafeCachingFactorizer implements Servlet {
 
      public void service(ServletRequest req, ServletResponse resp) {
          BigInteger i = extractFromRequest(req);
+       	 //先检查后执行，必须保证lastNumber不是过期数据
          if (i.equals(lastNumber.get()))//A
              encodeIntoResponse(resp,  lastFactors.get() );//B
          else {
              BigInteger[] factors = factor(i);
+           	 //lastNumber和lastFactors他俩必须维持状态一致性
              lastNumber.set(i);//C
              lastFactors.set(factors);//D
              encodeIntoResponse(resp, factors);
@@ -319,9 +320,13 @@ public class UnsafeCachingFactorizer implements Servlet {
 }
 ```
 
-如果上面的A与B这个复合操作操作、以及C与D这个复合操作如果是原子性的，那么将不会出现线程安全性问题。如果为这两组操作创建一个不可变的类，即使在不使用同步的情况也能解决安全共享问题。下面就为UnsafeCachingFactorizer创建一个OneValueCache类，对以上操作进行了封装，它是一个不可变对象，进（构造时传进的参数）出（使用时）都对状态进行了拷贝。因为BigInteger是不可变的，所以直接使用了Arrays.copyOf来进行拷贝了，如果状态所指引的对象不是不可变对象时，就要不能使用这项技术了，因为外界可以对这些状态所指引的对象进行修改，如果这样只能使用new或深度克隆技术来进行拷贝了。
+[如果上面的A与B这个复合操作操作、以及C与D这个复合操作如果是原子性的，那么将不会出现线程安全性问题。如果为这两组操作创建一个不可变的类，即使在不使用同步的情况也能解决安全共享问题。]() <!--通过创建不可变类，对复合操作进行原子性，good idea--> 
+
+下面就为UnsafeCachingFactorizer创建一个OneValueCache类，对以上操作进行了封装，它是一个不可变对象，进（构造时传进的参数）出（使用时）都对状态进行了拷贝。因为BigInteger是不可变的，所以直接使用了Arrays.copyOf来进行拷贝了，如果状态所指引的对象不是不可变对象时，就要不能使用这项技术了，因为外界可以对这些状态所指引的对象进行修改，如果这样只能使用new或深度克隆技术来进行拷贝了。
 
 > 每当需要对一组相关数据以原子方式执行某个操作时，就可以考虑创建一个不可变的类来包含这些数据。
+>
+> <!--nb-->
 
 ```java
 @Immutable
@@ -348,7 +353,7 @@ class OneValueCache {
 
 - 如果是一个可变的对象，那么就必须使用锁来确保原子性。
 
-- 如果是一个不可变对象，那么当线程获得了对该对象的引用后，就不必担心另一个线程会修改对象的状态。
+- 如果是一个不可变对象，那么当线程获得了对该对象的引用后，就不必担心另一个线程会修改对象的状态。 <!--这段话很有意思，需要结合servlet背景并且联系前边的知识点：因为servlet对每一次服务请求都是会被new一次，所以每个请求都会有自己的--> 
 
 - 如果要更新这些变量，那么可以创建一个新的容器对象，但其他使用原有对象的线程仍然会看到对象处于一致的状态。
 
@@ -373,11 +378,11 @@ public class VolatileCachedFactorizer implements Servlet {
 }
 ```
 
-与cache相关的操作不会相互干扰，因为OneValueCache是不可变的，并且在每条相应的代码路径中只会访问它一次。通过使用包含过个状态变量的容器对象来维护不可变条件，并使用一个volatile类型的引用来确保可见性，使得Volatile Cached Factorizer在没有显式地使用锁的情况下仍然是线程安全的。
+与cache相关的操作不会相互干扰，因为OneValueCache是不可变的，并且在每条相应的代码路径中只会访问它一次 <!--这段话很有意思，看我上边的注释--> 。通过使用包含过个状态变量的容器对象来维护不可变条件，并使用一个volatile类型的引用来确保可见性，使得Volatile Cached Factorizer在没有显式地使用锁的情况下仍然是线程安全的。
 
 
 
-## 3.5 安全发布
+## 安全发布
 
 到目前为止，我们重点讨论的是如何确保对象不被发布，比如让对象封闭在线程或者另一个对象内部。当然，我们希望多个线程间安全地进行共享数据。下面程序中简单地将对象的引用存储到public域中，这不足以安全地发布它：
 
