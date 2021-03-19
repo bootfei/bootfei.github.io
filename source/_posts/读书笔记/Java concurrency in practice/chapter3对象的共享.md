@@ -301,7 +301,7 @@ final类型的域时不能修改的（但如果final域所引用的对象是可�
 
 #### 发生竞态条件
 
-尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件 <!--"读取-修改-写入"，并且违背了约束条件，读取了过期数据-->，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。
+尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件 <!--"读取-修改-写入"，并且违背了约束条件，读取了过期数据-->，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。<!--这里的线程安全问题，是lastNumber和lastFactors不一致-->
 
 ```java
 //没有正确原子化的Servlet试图缓存它的最新结果。
@@ -394,7 +394,7 @@ public class VolatileCachedFactorizer implements Servlet {
 
 ### 我个人的疑惑
 
-#### 分析
+#### 我的分析
 
 - 程序清单3-13中存在『先检查后执行』（Check-Then-Act）的竞态条件。
 - OneValueCache类的**不可变性**仅保证了对象的原子性。
@@ -402,19 +402,22 @@ public class VolatileCachedFactorizer implements Servlet {
 
 **综上，对象的不可变性+volatile可见性，并不能解决竞态条件的并发问题，所以原文的这段结论是错误的。**
 
-> 比如，假设现在缓存lastFactor是1，
+> 比如，假设现在缓存lastNumber是x，lastFactor是y
 >
-> 线程A进入cache.getFactor（i）函数执行else 语句的时候 ，
+> 线程A进入cache.getFactor（i）函数中的else语句Arrays.copyOf(lastFactors, lastFactors.length);，
 >
-> 线程B判断没有缓存，然后更新了OneValueCache，
+> 线程B判断没有缓存
+>
+> 线程B更新了OneValueCache，
 >
 > 线程A获取了的是失效的缓存之值1,这不应该啊，线程A获取的不应该是失效的值，这不就线程不安全了吗？
 
-<!--先从使用类封装对一组需要原子方式执行的相关数据-->
 
-简单代码1:
+
+简单代码1: 对操作封装在一个类中
 
 - 将先检查后执行操作A、B，还有约束条件C、D，封装为一个类的同步方法
+- 这么做，其实和chapter2的代码一样，每个请求阻塞、串行执行，并发效率低
 
 ```java
 class OneValueCache {
@@ -431,14 +434,15 @@ class OneValueCache {
 }
 ```
 
-<!--这么封装完全没有意义，只是多了synchronized。和chapter2的方法一样...-->
 
-<!--鉴于代码1只对方法进行了封装，再考虑对类的数据进行了封装-->
 
-简单代码2:
+简单代码2: 鉴于代码1只对方法进行了封装，再考虑对类的数据进行了封装
 
-- 把lastNum和lastFactors变量进行封装，放在一个类中OneValueCache
+- 把lastNum和lastFactors变量进行封装，放在一个类中OneValueCache，使得lastNum和lastFactors能维持约束性，从而保证线程安全
 - 以前的A、B操作，是判断lastNum和返回lastFactors; 现在的A、B操作，是交给OneValueCache类判断和OneValueCache类返回。好像线程安全性问题还是没有解决？
+  - 线程安全有没有解决，就是看OneValueCache能不能维持lastNum和lastFactors约束性？当然可以！
+  - 写操作：因为OneValueCache能被写入的操作，只有构造函数；而且cache = new OneValueCache(i, factors)中的i和factor(i)属于方法的临时变量，是线程安全的
+  - 读操作：因为cache.getFactors(i)第一次用于判断，第二次用于返回，在此期间，其他线程会通过构造函数修改cache，可能会失效，所以线程不安全
 
 ```java
 class OneValueCache {
@@ -464,6 +468,50 @@ public class VolatileCachedFactorizer implements Servlet {
         if ( cache.getFactors(i) != null) { //判断是否命中缓存, 对应以前的A
              encodeIntoResponse(resp, cache.getFactors(i)); //对应以前的B 
         }else{
+         		BigIntegers[] factors = factor(i);
+            cache = new OneValueCache(i, factors);
+          	encodeIntoResponse(resp, factors);
+        }    
+    }
+}
+```
+
+
+
+简单代码3: 鉴于代码2中只有读cache时，可能2次获取的cache.getFactors(i)不一致，产生线程不安全，所以现在想办法保证读操作时，保证2次获取的cache.getFactors(i)的约束性，就OK了
+
+- 使用临时变量BigInteger[] factors, 保存cache.getFactors(i)；再使得factors线程安全
+  - 前半部分很简单
+  - 后半部分，使factors线程安全，常见的解决方法就是使factors变成临时变量or不可变，那么就可以让cache.getFactors(i)每次返回的都是一个新的句柄和一个新的句柄指向的对象，这样在方法中就成为了一个局部变量，每个线程都有自己的一个句柄和句柄指向的对象，那么factors句柄就不会被其他线程获取
+  - 使用Arrays.copyOf()
+- 再想一想，写操作本身维持了约束，但是因为构造函数中lastFactors = factors，把lastFactors通过factors暴露出来了，就是逸出了，调用者可以通过factors修改lastFactors数据，那会不会有什么影响？
+  - 目前来看，没有线程安全问题；但是lastFactors不能逸出被其他调用者修改，所以也需要Arrays.copyOf()
+
+```java
+class OneValueCache {
+    private BigInteger lastNumber;
+    private BigInteger[] lastFactors;
+
+    public OneValueCache(BigInteger i,BigInteger[] factors) {
+        lastNumber  = i;
+        lastFactors = Arrays.copyOf(factors, factors.length);
+    }
+
+    public BigInteger[] getFactors(BigInteger i) {
+        if (lastNumber == null || !lastNumber.equals(i)) return null;
+        else return Arrays.copyOf(lastFactors,lastFactors.length);
+    }
+}
+
+public class VolatileCachedFactorizer implements Servlet {
+    private OneValueCache cache = new OneValueCache(null, null);
+  
+    public void service(ServletRequest req, ServletResponse resp) {
+        BigInteger i = extractFromRequest(req); //局部变量，没有线程安全性 
+      	BigIntegers[] factors = cache.getFactors(i);
+        if ( factors != null) { //判断是否命中缓存, 此时factors指向的对象，只有该线程能访问，其他线程无法访问，所以对象不可变
+             encodeIntoResponse(resp, factors); //对应以前的B，factors由于不可变性，所以安全 
+        }else{
          		factors = factor(i);
             cache = new OneValueCache(i, factors);
           	encodeIntoResponse(resp, factors);
@@ -472,7 +520,77 @@ public class VolatileCachedFactorizer implements Servlet {
 }
 ```
 
-<!--会出现线程安全性问题-->
+
+
+简单代码4: 简单代码3已经做到了很好的线程安全性
+
+- 对象初始化也需要安全，所以使用final修饰
+
+  
+
+
+
+#### 作者的本意
+
+**Short answer:**
+
+[Thread safety is not really an absolute](). You have to determine the desired behavior, and *then* ask whether the implementation gives you that behavior that in the presence of multithreading.
+
+**Longer answer:**
+
+So, what's the desired behavior here? Is it just that the right answer is always given, or is it also that it's always implemented exactly once if two threads ask for it in a row?
+
+If it's the latter — that is, if you really want to save every bit of CPU — then you're right, this isn't thread-safe. [Two requests could come in at the same time (or close enough to it) to get the factors for the same number N, and if the timings worked out, both threads could end up calculating that number.]() <!--这就是我疑惑的地方，但是程序目的并不是这样；如果要达到这种程度的线程安全性，使用锁来保证线程之间的执行顺序，避免重复计算，就像解决Redis缓存击穿-->
+
+But with a single-value cache, you already have the problem of recalculating things you already knew. For instance, [what if three requests come in, for N, K, and N again? The request for K would invalidate the cache at N, and so you'd have to recalculate it.]()<!---->
+
+So, this cache is really optimized for "streaks" of the same value, and as such the cost of twice-calculating the first couple (or even few!) answers in that streak might be an acceptable cost: in return, you get code that's free of any blocking and pretty simple to understand.
+
+[What's crucial is that it never gives you the *wrong* answer. That is, if you ask for N and K at the same time, the response for K should never give you the answer for N. This implementation gets you that guarantee, so I would call it thread safe.]()<!--程序的目的是为了保证状态的约束性，就是lastNumbers和lastFactors一致-->
+
+
+
+#### 使用Arrays.copyOf的目的
+
+[其实就是返回一个新的句柄和句柄所指向新的对象]()
+
+If you return `this.lastFactors` instead of returning a copy, the caller can do (for example)
+
+```java
+BigInteger[] lastFactors = cache.getFactors(...);
+for (int i = 0; i < lastFactors.length; i++) {
+    lastFactors[i] = null;
+}
+```
+
+and thus mutate the state of the cache, which is supposed to be immutable.
+
+The explanation is similar for the constructor. If the constructor didn't make a copy, the caller could do
+
+```java
+factors = factor(i);
+cache = new OneValueCache(i, factors); 
+for (int i = 0; i < lastFactors.length; i++) {
+    factors[i] = null;
+}
+```
+
+and thus once again mutate the state of the cache.
+
+Rule of thumb: an array is always mutable (except the empty array). So, if the state of an immutable class contains an array, then the caller must not be able to have a reference to the array.
+
+#### 使用final的目的
+
+为了保障对象初始化的线程安全
+
+#### 使用volatile的目的
+
+因为程序并没有使用锁，而是通过不可变对象，使得每个线程获取到的都是一个新句柄和新内存（在线程调用的方法中就是局部变量），所以不会有线程安全性问题
+
+现在程序有个这样的情况
+
+- 比如3个请求R1, R2, R1，第2个R1会再次计算，这其实是正常情况
+- 比如2个请求R2, R1, R1，第1和第2个R1可能也都会计算，所以使用volatile尽可能地将最新的结果通知其他线程，最大可能避免重复计算；比如第1个R1把新的结果写入内存，即使R1线程没执行完，但是R2已经获取了最新结果了。
 
 
 
@@ -544,7 +662,7 @@ Java内存模型为共享不可变对象提供了特殊的初始化安全性的�
 要发布一个静态构造的对象，最简单和最安全的方式是使用静态的初始化器：
 
 ```
-public static Holder holder = new Holder(42);1
+public static Holder holder = new Holder(42);
 ```
 
 静态初始化器由JVM在类的初始化阶段执行。由于在JVM内部存在着同步机制，因此通过这种方式初始化的任何对象都可以被安全地发布。
