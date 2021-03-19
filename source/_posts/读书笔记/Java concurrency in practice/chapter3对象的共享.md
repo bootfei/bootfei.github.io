@@ -4,15 +4,9 @@ date: 2020-11-13 09:19:03
 tags: [并发]
 ---
 
-ref: 
-
-1. java如何理解隐式地使this引用逸出
-   https://segmentfault.com/q/1010000007900854
-   https://www.cnblogs.com/viscu/p/9790755.html
-
 Abstract：第二章开头指出，要编写正确的并发程序，关键在与：在访问共享的可变状态时，需要正确的管理。第二章通过**同步**，避免多个线程同时访问相同的变量 (在《高性能MySQL》书中，这叫做**避免并发**)；而本章介绍如何**共享**和**发布对象**，从而使多个线程可以同时安全的访问相同的变量。这两章合在一起就形成了构建线程安全类以及通过java.util.concurrent类库来构建并发应用程序的重要基础。
 
-[synchronized不仅仅只有原子性，还具有内存可见性]()。我们不仅希望防止某个线程正在使用对象状态而另一个线程在同时修改该状态，而且希望确保当一个线程修改了对象状态后，其他线程能够看到发生的状态变化<!--拓展：这种内存可见性像《高性能MySQL》书中所说的Read Uncomitted事务隔离级别的可见性-->。如果没有同步，那么这种情况就无法实现。你可以通过显式地同步或者类库中内置的同步来保证对象被安全地发布。
+[synchronized不仅仅只有原子性，还具有内存可见性]()。我们不仅希望防止某个线程正在使用对象状态而另一个线程在同时修改该状态，而且希望确保当一个线程修改了对象状态后，其他线程能够看到发生的状态变化<!--这种内存可见性像MySQL中所说的Read Uncomitted事务隔离级别的可见性-->。如果没有同步，那么这种情况就无法实现。你可以通过显式地同步或者类库中内置的同步来保证对象被安全地发布。
 
 <!--这里注意：synchronized保障了变量不可修改，但是这个变量必须在同步代码块执行完了，才能被其他线程访问到最新变化。所以，我现在希望这个变量的变化，在同步代码块还没执行完时，就能及时被其他线程获取到最新数据，怎么办呢？就是volatile,使用可见性-->
 
@@ -285,7 +279,19 @@ public final class ThreeStooges {
 
 ### final域
 
-final类型的域时不能修改的（但如果final域所引用的对象是可变的，那么这些被引用的对象是可以修改的<!--毕竟final类型的域，其实是个地址，这个地址是不可变的，但是地址指向的对象是可变的-->）。然而，在Java内存模型中，final域还有着特殊的语义。final域能确保初始化过程的安全性 <!--想想类加载的过程-->，从而可以不受限制地访问不可变对象，并在共享这些对象时无须同步。
+final类型的域时不能修改的（但如果final域所引用的对象是可变的，那么这些被引用的对象是可以修改的<!--毕竟final类型的域，其实是个地址，这个地址是不可变的，但是地址指向的对象是可变的-->）。然而，在Java内存模型中，final域还有着特殊的语义。final域能确保初始化过程的安全性 <!--???why？看下边注解-->，从而可以不受限制地访问不可变对象，并在共享这些对象时无须同步。
+
+<!--
+我们认为的执行过程是怎么样的呢？
+（1）给Holder对象分配内存
+（2）调用Holder的构造函数，也就是给n赋值的过程，初始化了成员字段
+（3）将holder引用指向我们分配的内存空间
+我们认为既然第3步已经执行了（holder引用已经指向最新了），那1、2步肯定已经完成了。可是，在JVM自身的性能优化中，是允许这个顺序乱序执行的。也就是说，它不能保证执行的顺序是1、2、3，也有可能是1、3、2。假设执行了1、3，这是引用已经是最新的了，但2的构造函数没有执行，那你的对象的状态值就是失效的，另一个线程调用assertSanity自然会报出异常
+-->
+
+<!--
+对于含有final域的对象，JVM必须保证对对象的初始引用在构造函数之后执行，不能乱序执行（out of order），也就是可以保证一旦你得到了引用，final域的值都是完成了初始化的，也就是书中所说的“初始化安全性”的保证。
+-->
 
 仅包含一个或两个可变状态的“基本不可变”对象仍然比包含多个可变状态的对象简单。通过将域声明为final类型的，也相当于告诉维护人员这些域时不会变化的。
 
@@ -293,7 +299,9 @@ final类型的域时不能修改的（但如果final域所引用的对象是可�
 
 ### 示例：使用Volatile类型来发布不可变对象
 
-尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件 <!--第二章的复合操作"读取-修改-写入"，违背了状态一致性，读取了过期数据-->，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。
+#### 发生竞态条件
+
+尽管原子引用自身是线程安全的，不过UnsafeCachingFactorizer中存在竞争条件 <!--"读取-修改-写入"，并且违背了约束条件，读取了过期数据-->，当前线程在执行到A 与 B之间或者C 与 D之间，都有可能切换到其他线程，从而造成错误的结果。
 
 ```java
 //没有正确原子化的Servlet试图缓存它的最新结果。
@@ -311,7 +319,7 @@ public class UnsafeCachingFactorizer implements Servlet {
              encodeIntoResponse(resp,  lastFactors.get() );//B
          else {
              BigInteger[] factors = factor(i);
-           	 //lastNumber和lastFactors他俩必须维持状态一致性
+           	 //lastNumber和lastFactors必须维持状态的约束条件
              lastNumber.set(i);//C
              lastFactors.set(factors);//D
              encodeIntoResponse(resp, factors);
@@ -320,13 +328,15 @@ public class UnsafeCachingFactorizer implements Servlet {
 }
 ```
 
-[如果上面的A与B这个复合操作操作、以及C与D这个复合操作如果是原子性的，那么将不会出现线程安全性问题。如果为这两组操作创建一个不可变的类，即使在不使用同步的情况也能解决安全共享问题。]() <!--通过创建不可变类，对复合操作进行原子性，good idea--> 
+#### 解决竞态条件
+
+[如果上面的A与B这个复合操作操作、以及C与D这个复合操作如果是原子性的，那么将不会出现线程安全性问题。]()<!--比如使用chapter2中synchronized加锁-->
+
+[如果为这两组操作创建一个不可变的类，即使在不使用同步的情况也能解决安全共享问题。]() 
 
 下面就为UnsafeCachingFactorizer创建一个OneValueCache类，对以上操作进行了封装，它是一个不可变对象，进（构造时传进的参数）出（使用时）都对状态进行了拷贝。因为BigInteger是不可变的，所以直接使用了Arrays.copyOf来进行拷贝了，如果状态所指引的对象不是不可变对象时，就要不能使用这项技术了，因为外界可以对这些状态所指引的对象进行修改，如果这样只能使用new或深度克隆技术来进行拷贝了。
 
 > 每当需要对一组相关数据以原子方式执行某个操作时，就可以考虑创建一个不可变的类来包含这些数据。
->
-> <!--nb-->
 
 ```java
 @Immutable
@@ -353,7 +363,7 @@ class OneValueCache {
 
 - 如果是一个可变的对象，那么就必须使用锁来确保原子性。
 
-- 如果是一个不可变对象，那么当线程获得了对该对象的引用后，就不必担心另一个线程会修改对象的状态。 <!--这段话很有意思，需要结合servlet背景并且联系前边的知识点：因为servlet对每一次服务请求都是会被new一次，所以每个请求都会有自己的--> 
+- 如果是一个不可变对象，那么当线程获得了对该对象的引用后，就不必担心另一个线程会修改对象的状态。
 
 - 如果要更新这些变量，那么可以创建一个新的容器对象，但其他使用原有对象的线程仍然会看到对象处于一致的状态。
 
@@ -378,7 +388,91 @@ public class VolatileCachedFactorizer implements Servlet {
 }
 ```
 
-与cache相关的操作不会相互干扰，因为OneValueCache是不可变的，并且在每条相应的代码路径中只会访问它一次 <!--这段话很有意思，看我上边的注释--> 。通过使用包含过个状态变量的容器对象来维护不可变条件，并使用一个volatile类型的引用来确保可见性，使得Volatile Cached Factorizer在没有显式地使用锁的情况下仍然是线程安全的。
+与cache相关的操作不会相互干扰，因为OneValueCache是不可变的，并且在每条相应的代码路径中只会访问它一次 。通过使用包含过个状态变量的容器对象来维护不可变条件，并使用一个volatile类型的引用来确保可见性，使得Volatile Cached Factorizer在没有显式地使用锁的情况下仍然是线程安全的。
+
+
+
+### 我个人的疑惑
+
+#### 分析
+
+- 程序清单3-13中存在『先检查后执行』（Check-Then-Act）的竞态条件。
+- OneValueCache类的**不可变性**仅保证了对象的原子性。
+- volatile仅保证可见性，无法保证线程安全性。
+
+**综上，对象的不可变性+volatile可见性，并不能解决竞态条件的并发问题，所以原文的这段结论是错误的。**
+
+> 比如，假设现在缓存lastFactor是1，
+>
+> 线程A进入cache.getFactor（i）函数执行else 语句的时候 ，
+>
+> 线程B判断没有缓存，然后更新了OneValueCache，
+>
+> 线程A获取了的是失效的缓存之值1,这不应该啊，线程A获取的不应该是失效的值，这不就线程不安全了吗？
+
+<!--先从使用类封装对一组需要原子方式执行的相关数据-->
+
+简单代码1:
+
+- 将先检查后执行操作A、B，还有约束条件C、D，封装为一个类的同步方法
+
+```java
+class OneValueCache {
+   public synchronized void getFactors(BigInteger i) {
+      	if (i.equals(lastNumber.get()))//A
+             encodeIntoResponse(resp,  lastFactors.get() );//B
+      	else {
+             BigInteger[] factors = factor(i);
+             lastNumber.set(i);//C
+             lastFactors.set(factors);//D
+             encodeIntoResponse(resp, factors);
+         }
+    }
+}
+```
+
+<!--这么封装完全没有意义，只是多了synchronized。和chapter2的方法一样...-->
+
+<!--鉴于代码1只对方法进行了封装，再考虑对类的数据进行了封装-->
+
+简单代码2:
+
+- 把lastNum和lastFactors变量进行封装，放在一个类中OneValueCache
+- 以前的A、B操作，是判断lastNum和返回lastFactors; 现在的A、B操作，是交给OneValueCache类判断和OneValueCache类返回。好像线程安全性问题还是没有解决？
+
+```java
+class OneValueCache {
+    private BigInteger lastNumber;
+    private BigInteger[] lastFactors;
+
+    public OneValueCache(BigInteger i,BigInteger[] factors) {
+        lastNumber  = i;
+        lastFactors = factors;
+    }
+
+    public BigInteger[] getFactors(BigInteger i) {
+        if (lastNumber == null || !lastNumber.equals(i)) return null;
+        else return lastFactors;
+    }
+}
+
+public class VolatileCachedFactorizer implements Servlet {
+    private OneValueCache cache = new OneValueCache(null, null);
+  
+    public void service(ServletRequest req, ServletResponse resp) {
+        BigInteger i = extractFromRequest(req); //局部变量，没有线程安全性 
+        if ( cache.getFactors(i) != null) { //判断是否命中缓存, 对应以前的A
+             encodeIntoResponse(resp, cache.getFactors(i)); //对应以前的B 
+        }else{
+         		factors = factor(i);
+            cache = new OneValueCache(i, factors);
+          	encodeIntoResponse(resp, factors);
+        }    
+    }
+}
+```
+
+<!--会出现线程安全性问题-->
 
 
 
