@@ -12,8 +12,6 @@ tags:
 
 2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。
 
-
-
 # 自动加载总步骤
 
 <font color="red">在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现</font>
@@ -102,57 +100,74 @@ tags:
 
     
 
-### **@EnableAutoConfiguration**
+## 解析**@EnableAutoConfiguration**
 
 该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的starter以及用于自定义的类，然后交给 Spring 容器完成这些类的装配。
+
+```
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import(AutoConfigurationImportSelector.class)
+```
 
 > 它扫描的相关类有2种：一种是系统内部定义好的,如starter, 另外一种是自定义的,如controller,service
 
 ["META-INFO/spring.factories"非常重要的文件, 里面有个key = EnableAutoConfiguratin, value是众多自动配置类，如Redis配置类, Mongo配置类]()
 
-- **@Import**
+### **@Import**
 
-  - 用于导入[第一种类：框架本身所包含的自动配置相关的类](https://www.hangge.com/blog/cache/detail_2807.html)。其参数 AutoConfigurationImportSelector 类，该类用于导入自动配置的类。
+- 用于导入[第一种类：框架本身所包含的自动配置相关的类](https://www.hangge.com/blog/cache/detail_2807.html)。其参数 AutoConfigurationImportSelector 类，该类用于导入自动配置的类。
 
-  - [只是加载类的名称（我觉得更准确的说，是封装类的名称），并没有创建实例]()，什么时候创建呢？
+- [只是加载类的名称（我觉得更准确的说，是封装类的名称），并没有创建实例]()，什么时候创建呢？
 
-  - ```java
-    @Import(AutoConfigurationImportSelector.class)
-    ```
+- ```java
+  @Import(AutoConfigurationImportSelector.class)
+  ```
 
-    - [具体加载框架本身的自动配置类的过程如下]()
+  - [具体加载框架本身的自动配置类的过程如下]()
 
-    - AutoConfigurationImportSelector.class：
+  - AutoConfigurationImportSelector.class：
 
-      - getCandidateConfigurations()
-      - SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
+    - getCandidateConfigurations()
+    - SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
 
-    - SpringFactoriesLoader.class
+  - SpringFactoriesLoader.class
 
-      - loadFactoryNames
+    - loadFactoryNames
 
-      - loadSpringFactories
+    - loadSpringFactories
 
-        - ```java
-          Enumeration<URL> urls = classLoader != null ? classLoader.getResources("META-INF/spring.factories") : ClassLoader.getSystemResources("META-INF/spring.factories");
-          ```
+      - ```java
+        Enumeration<URL> urls = classLoader != null ? classLoader.getResources("META-INF/spring.factories") : ClassLoader.getSystemResources("META-INF/spring.factories");
+        ```
 
-        - 非常重要！最终@Import实现了加载"[META-INF/spring.factories]()"这个文件。那么这个文件在哪里呢？
+      - 非常重要！最终@Import实现了加载"[META-INF/spring.factories]()"这个文件。那么这个文件在哪里呢？
 
-          - 项目的source目录下没有，继续
-          - Pom.xml中有spring-boot-starter-web, 查看内部依赖，发现有spring-boot-starter,继续查看内部依赖，有spring-boot-autoconfigure依赖，在其项目下source目录，找到了！！！
+        - 项目的source目录下没有，继续
+        - Pom.xml中有spring-boot-starter-web, 查看内部依赖，发现有spring-boot-starter,继续查看内部依赖，有spring-boot-autoconfigure依赖，在其项目下source目录，找到了！！！
 
-- **@AutoConfigurationPackage** 
+### **@AutoConfigurationPackage** 
 
-  - 用于导入[第二种类：用户自定义类](https://www.hangge.com/blog/cache/detail_2807.html)，即自动扫描包中的类。
+```
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@Import(AutoConfigurationPackages.Registrar.class)
+```
 
-  - ```java
-    @Import(AutoConfigurationPackages.Registrar.class)
-    ```
+- 用于导入[第二种类：用户自定义类](https://www.hangge.com/blog/cache/detail_2807.html)，即自动扫描包中的类。
 
-    - AutoConfigurationPackages.Registrar
-      - registerBeanDefinitions()
-      - register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); [//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类]()
+- ```java
+  @Import(AutoConfigurationPackages.Registrar.class)
+  ```
+
+  - AutoConfigurationPackages.Registrar
+    - registerBeanDefinitions()
+    - register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); [//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类]()
 
 # **application.yml** 的加载
 
@@ -174,10 +189,11 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
 
 - .....
 
-
 [自己跟一下就行]()
 
-# 实战1:加载框架类 Spring Boot与Redis整合
+# 实战
+
+## 实战1:加载框架类 Spring Boot与Redis整合
 
 > SpringBoot整合了Redis
 
@@ -194,7 +210,7 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
   - 有@EnableConfigurationProperties(RedisProperties.class)注解
     - RedisProperties类有@ConfigurationProperties(prefix="spring.redis")<!--录播课有讲-->, 表明将配置文件中前缀为spring.redis的信息加载进来，并且将信息封装到RedisProperties.class中
 
-# 实战2:加载自定义类 MyBatis与Spring Boot整合
+## 实战2:加载自定义类 MyBatis与Spring Boot整合
 
 > Mybatis整合了Spring Boot
 
@@ -261,6 +277,8 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
     - 我们指定当前类用于封装来自于 Spring Boot 核心配置文件中的以 some.service 开头的 beore 与 after 属性值。
   
     - ```java
+      import lombok.Data;
+      import org.springframework.boot.context.properties.ConfigurationProperties;
       /**
        * 封装配置文件中的如下属性：
        * wrap.service.prefix

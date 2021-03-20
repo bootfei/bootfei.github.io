@@ -369,7 +369,7 @@ public class student{
       <artifactId>mysql-connector-java</artifactId>
     </dependency>
     
-    <!-- druid 驱动 -->
+    <!-- druid 驱动，数据源 -->
     <dependency>
     	<groupId>com.alibaba</groupId>
       <artifactId>druid</artifactId>
