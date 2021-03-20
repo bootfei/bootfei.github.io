@@ -297,7 +297,7 @@ final类型的域时不能修改的（但如果final域所引用的对象是可�
 
 > 正如“除非需要更高的可见性，否则应将所有的域声明为私有域是一个良好的编程习惯，”除非需要某个域是可变的，否则应将其声明为final域“也是一个良好的编程习惯。
 
-### 示例：使用Volatile类型来发布不可变对象
+### 示例：使用Volatile类型来发布不可变对象(我称之为对象封闭)
 
 #### 发生竞态条件
 
@@ -608,7 +608,7 @@ public void initialize(){
 
 由于存在可见性问题，其他线程看到的Holder对象将处于不一致的状态，即便在该对象的构造函数中已经正确地构建了不变性条件。这种不正确的发布导致其他线程看到尚未创建完成的对象。
 
-### 3.5.1 不正确的发布：正确的对象被破坏
+### 不正确的发布：正确的对象被破坏
 
 ```java
 public class Holder {
@@ -623,11 +623,45 @@ public class Holder {
 }
 ```
 
-上面程序的问题是由于对象的可见性问题引起的（<!--问题不再于Holder类本身，而在于Holder类未被正确的发布，如果把n声明为final，那么Holder将不可变，满足正确发布的要求，具体看3.5.2节。现在最根本的原因是由于JVM运行时重排序引起的-->），发布的对象可能还处于构造期间，所以是不稳定的。因为没有同步来确保Holder对其他线程可见，所以我们称Holder是“非正确发布”。
+上面程序的问题是由于对象的可见性问题引起的，发布的对象可能还处于构造期间，所以是不稳定的。因为没有同步来确保Holder对其他线程可见，所以我们称Holder是“非正确发布”。
 
 由于上面 n != n 会从主存中两次读取，这有可能从这两次读操作间切换到其他线程，这就有可能出 n!=n奇怪的问题。
 
-### 3.5.2 不可变对象与初始化安全性
+<!--看看stack上，大神怎么解释的-->
+
+> he reason why this is possible is that Java has a weak memory model. It does not guarantee ordering of read and writes.
+>
+> This particular problem can be reproduced with the following two code snippets representing two threads.
+>
+> Thread 1:
+>
+> ```java
+> someStaticVariable = new Holder(42);
+> ```
+>
+> Thread 2:
+>
+> ```java
+> someStaticVariable.assertSanity(); // can throw
+> ```
+>
+> On the surface it seems impossible that this could ever occur. In order to understand why this can happen, you have to get past the Java syntax and get down to a much lower level. If you look at the code for thread 1, it can essentially be broken down into a series of memory writes and allocations:
+>
+> 1. Alloc memory to pointer1
+> 2. Write 42 to pointer1 at offset 0
+> 3. Write pointer1 to someStaticVariable
+>
+> Because Java has a weak memory model, it is perfectly possible for the code to actually execute in the following order from the perspective of thread 2:
+>
+> 1. Alloc Memory to pointer1
+> 2. Write pointer1 to someStaticVariable
+> 3. Write 42 to pointer1 at offset 0
+>
+> Scary? Yes but it can happen.
+>
+> What this means though is that thread 2 can now call into `assertSanity` before `n` has gotten the value 42. It is possible for the value `n` to be read twice during `assertSanity`, once before operation #3 completes and once after and hence see two different values and throw an exception.
+
+### 不可变对象与初始化安全性
 
 Java内存模型为共享不可变对象提供了特殊的初始化安全性的保证，即对象在完全初始化之后才能被外界引用，所以只要是不可变对象，一旦构建完成，就可以安全地发布了。
 
@@ -639,15 +673,16 @@ Java内存模型为共享不可变对象提供了特殊的初始化安全性的�
 
 这个保证还会延伸到一个正确创建的对象中所有final类型域的值。final域可以在没有额外的同步情况下被安全地访问（因为只要构造器一旦调用完毕，则final域的也会随之初始化完并可见），然而，如果final域指向可变对象，那么访问这些对象的状态时仍然需要同步的。
 
-### 3.5.3 安全发布的常用模式（可变对象的安全发布）
+### 安全发布的常用模式（可变对象的安全发布）
 
 如果一个对象不是不可变的，它就必须要被安全的发布，通常发布线程与消费线程都必须同步。我们要确保消费线程能够看到处于发布当时的对象状态。
 
 > 为了安全地发布一个可变对象，对象的引用以及对象的状态必须同时对其他线程可见。一个正确构造的对象可以通过以下方式来安全发布：
-> 在静态初始化函数中初始化一个对象引用；static{}
-> 将对象的引用保存到volatile类型的域或者AtomicReferance对象中
-> 将对象的引用保存到某个正确构造对象的final类型域中
-> 将对象的引用保存到一个由锁保护的域中
+>
+> - 在静态初始化函数中初始化一个对象引用；static{}
+> - 将对象的引用保存到volatile类型的域或者AtomicReferance对象中
+> - 将对象的引用保存到某个正确构造对象的final类型域中
+> - 将对象的引用保存到一个由锁保护的域中
 
 线程安全中的容器提供了线程安全保证（即变向地将对象置于了同步器中进行访问），正是遵守了上述最后一条要求。
 
@@ -669,7 +704,7 @@ public static Holder holder = new Holder(42);
 
 **如果对象在创建后被修改，那么安全发布仅仅可以保证“发布当时”状态的可见性。不仅仅在发布对象时需要同步，而且在对象发布后修改了对象状态又要让其他线程可见，则也需要对每次状态的访问进行同步。为了安全地共享可变对象，可变对象必须被安全发布，同时对状态的访问需要同步化。**
 
-### 3.5.4 事实不可变对象
+### 事实不可变对象
 
 对于对象在发布后不会被修改，那么对于其他在没有额外同步的情况下安全地访问这些对象的线程来说，安全发布时足够的。
 
@@ -688,7 +723,18 @@ Collections.synchronizedMap(new HashMap<String, Date>());
 
 如果Date值在转入Map中后就不会改变，那么，synchronizedMap中同步的实现就足以将Date安全地发布，并且访问这些Date值时就不再需要额外的同步。
 
-### 3.5.5 可变对象–>对象（不可变/可变/高效）的发布约束
+<!--stack上的回答-->
+
+> If you use an `un-synchronized` `mutable map` and share it across `threads` then you will have two `thread-safety` issues :`visibility` and `atomicity`. `Thread-1` wont know if `Thread-2` has removed a `Map-Entry` or it replaced its value by a new `Date` object.
+>
+> ```java
+> // not atmoic and doesn't guarantee visiblity
+> if(map.contains(key)){
+>  map.put(key,newDate); 
+> }
+> ```
+
+### 可变对象–>对象（不可变/事实不可变/可变）的发布约束
 
 如果对象在构造后可以修改，那么安全发布只能确保“发布当时”状态的可见性。对于可变对象，不仅在发布对象时需要使用同步，而且在每次对象访问时同样需要使用同步来确保后续操作的可见性。**要安全地共享可变对象，这些对象就必须被安全地发布，并且必须是线程安全的活着由某个锁保护起来。**
 
@@ -697,7 +743,7 @@ Collections.synchronizedMap(new HashMap<String, Date>());
 > \* 事实不可变对象必须通过安全方式来发布
 > \* 可变对象必须通过安全方式来发布，并且必须是线程安全的或者由某个锁保护起来
 
-### 3.5.6 安全地共享对象
+### 安全地共享对象
 
 当获得对象的一个引用时，你需要知道在这个引用上可以执行哪些操作。在使用它之前是否需要获得一个锁？是否可以修改它的状态，或者只能读取它？许多错误都是由于没有理解共享对象的这些“既定规则”而导致。当发布一个对象时，必须明确地说明对象的访问方式。
 
