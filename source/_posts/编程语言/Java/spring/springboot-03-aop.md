@@ -5,8 +5,6 @@ categories: [java,spring]
 tags:
 ---
 
-
-
 # 读Spring源码的核心：
 
 - BeanDefinitionParser来解析BeanDefinition(如bean, tx:advice, aop:aspect)
@@ -33,7 +31,7 @@ tags:
 
 
 
-## AOP相关术语介绍 
+## AOP相关术语介绍
 
 ![][aop相关术语]
 
@@ -211,22 +209,23 @@ public class MyAspect{
 		System.out.println("logging...");
 	}
     
-    //环绕通知
-    @Around(value="execution(* *.*(...))")
-    public Object aroundAdvice(ProceedingJointPoint joinPoint){
-        Object[] args= joinPoint.getArgs();
-        Object rtValue = joinPoint.proceed(args);
-    }
+  //环绕通知
+  @Around(value="execution(* *.*(...))")
+  public Object aroundAdvice(ProceedingJointPoint joinPoint){
+    Object[] args= joinPoint.getArgs();
+    Object rtValue = joinPoint.proceed(args);
+  }
     
-    //使用@PointCut注解在切面类中定义一个通用的切入点，其他通知可以引用该切入点
-    @Before(value="MyAspect.fn()")
+  //使用@PointCut注解在切面类中定义一个通用的切入点，其他通知可以引用该切入点
+  @Before(value="MyAspect.fn()")
 	public void log(){
 		System.out.println("logging...");
 	}
-    @Before(value="execution(void com.bootfei.dao.UserDaoImpl.insert())")
-    public void fun(){
-        
-    }
+  
+  @Before(value="execution(void com.bootfei.dao.UserDaoImpl.insert())")
+  public void fun(){
+
+  }
 }
 ```
 
@@ -280,17 +279,17 @@ public class Source implements Sourceable {
 ```java
 public class Proxy implements Sourceable { 
 	private Source source; 
-    public Proxy(){ 
-        super();
-        this.source = new Source(); 
-    }
-    @Override public void method() { 
-        before(); 
-        source.method(); 
-        atfer(); 
-    }
-    private void atfer() { System.out.println("after proxy!"); }
-    private void before() { System.out.println("before proxy!"); }
+  public Proxy(){ 
+    super();
+    this.source = new Source(); 
+  }
+  @Override public void method() { 
+    before(); 
+    source.method(); 
+    atfer(); 
+  }
+  private void atfer() { System.out.println("after proxy!"); }
+  private void before() { System.out.println("before proxy!"); }
 }
 ```
 
@@ -325,7 +324,6 @@ JDK动态代理和Cglib动态代理的区别：
 <font color="red">注意: Spring具体实现时，ProxyFactory和Proxy合成了一个类了，通过ProxyFactory继承了InvocationHandler。所以上图和下方代码看起来有点对应不上，其实就是这个原因</font>
 
 ```java
-
 // JDK代理对象工厂&代理对象方法调用处理器 
 public class JDKProxyFactory implements InvocationHandler { 
     // 目标对象的引用
@@ -412,7 +410,7 @@ public class JDKProxyFactory implements InvocationHandler {
 >
 > 阅读经验分享：
 >
-> 根据自定义标签名称冒号前面的值去直接找NamespaceHandler，然后再根据自定义标签名称冒号后面的值去找BeanDefinitionParser。
+> ​        根据自定义标签名称冒号前面的值去直接找NamespaceHandler，然后再根据自定义标签名称冒号后面的值去找BeanDefinitionParser。
 
 [DefaultBeanDefinitionDocumentReader#parseBeanDefinitions 方法的第16行或者23行：]() 
 
