@@ -94,45 +94,7 @@ create database ds;
 
 use ds;
 
--- ---建表UserInfo table，导数---------------
 
-![img](https://pic2.zhimg.com/80/v2-941c5b4b99b988767c5da47330a7fc7d_1440w.jpg)
-
--- ----建表regioninfo，导数-----------------
-
-![img](https://pic4.zhimg.com/80/v2-4a1d85612a545d31a87ad683e2c34e03_1440w.jpg)
-
--- --------------UserAddress-------
-
-![img](https://pic3.zhimg.com/80/v2-3273ad323172b4e58ee8a081b363b89e_1440w.jpg)
-
-\- ----------------GoodsInfo---------------------
-
-![img](https://pic3.zhimg.com/80/v2-32e148ac2b87383d01c35db16cda2906_1440w.jpg)
-
--- ----GoodsBrand----
-
-![img](https://pic4.zhimg.com/80/v2-9cddbb193e58cef3bf869cc6a5cc6267_1440w.jpg)
-
--- ----GoodsColor----
-
-![img](https://pic1.zhimg.com/80/v2-0319a2c85d4569ff01838f4af2c4ce74_1440w.jpg)
-
--- ----GoodsSize----
-
-![img](https://pic3.zhimg.com/80/v2-78802cedfc3fbb746ec295d414936af2_1440w.jpg)
-
--- ----OrderInfo----
-
-![img](https://pic2.zhimg.com/80/v2-6aa92ff8b83f98c9572cd9d897b5a18d_1440w.jpg)
-
--- ----OrderDetail----
-
-![img](https://pic2.zhimg.com/80/v2-cf9339053983a17e3d427f4c58fd248d_1440w.jpg)
-
--- 查询导入表的行数，进行数据验证完整性
-
-![img](https://pic3.zhimg.com/80/v2-80ad216f4234bf70d4bdedf298e1829a_1440w.jpg)
 
 四、构建模型（以下使用navicat操作）
 
@@ -147,8 +109,6 @@ on orderinfo.UserID = userinfo.userid
 
 GROUP BY orderinfo.UserID ORDER BY sum(OrderAmount) desc LIMIT 10 ;
 ```
-
-![img](https://pic1.zhimg.com/80/v2-5da36fc22f50e7f5e77949e01f251268_1440w.jpg)
 
 结论：购买产品金额前10的客户，存在极大值：24k；2位客户在7k附近；其余客户大部分在3.5-5k。
 
@@ -234,6 +194,7 @@ GROUP BY City ORDER BY SUM(OrderAmount) desc LIMIT 10 ;
 
 -- 城市id 和 省份id 对应的具体名字都在regioninfo表，所以套一次子查询
 
+```
 SELECT citytop10.城市名, citytop10.金额, regioninfo.regionname as 省份名
 
 from
@@ -247,8 +208,7 @@ GROUP BY City ORDER BY SUM(OrderAmount) desc LIMIT 10) as citytop10
 LEFT JOIN regioninfo on citytop10.Province=regioninfo.regionid
 
 order by 金额 DESC;
-
-![img](https://pic2.zhimg.com/80/v2-b67a05ad02733daacd054eadeb169ddd_1440w.jpg)
+```
 
 拓展：（以下sql未写，只是个人思考）
 
@@ -305,8 +265,6 @@ FROM orderdetail LEFT JOIN goodscolor ON orderdetail.ColorID=goodscolor.ColorID
 GROUP BY orderdetail.ColorID
 
 order by SUM(orderdetail.Amount) deSC LIMIT 10;
-
-![img](https://pic3.zhimg.com/80/v2-4a71d67498f34f077d4acd56dcfcf856_1440w.jpg)
 
 结论：黑色OR白色果然是百搭款，销量稳占前2；蓝色与粉色紧随其后，推测该店铺应该女装居多。黄色销量最少，近280。
 

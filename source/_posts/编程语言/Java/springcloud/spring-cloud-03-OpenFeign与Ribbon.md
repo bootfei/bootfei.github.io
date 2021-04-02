@@ -313,10 +313,6 @@ Ribbon 支持自定义负载均衡策略。负载均衡算法类需要实现 IRu
 
     
 
-
-
-
-
 # Ribbon工作原理
 
 ### ILoadBalance 负载均衡器
@@ -535,7 +531,7 @@ RestTemplate restTemplate() {
 }
 ```
 
-使用RestTemplate进行rest操作的时候，会自动使用负载均衡策略，它内部会在RestTemplate中加入LoadBalancerInterceptor这个拦截器，这个拦截器的作用就是使用负载均衡。
+使用RestTemplate进行rest操作的时候，会自动使用负载均衡策略，它内部会在RestTemplate中加入LoadBalancerInterceptor这个[拦截器]()，这个拦截器的作用就是使用负载均衡。
 
 默认情况下会采用轮询策略，如果希望采用其它策略，则指定IRule实现，如：
 

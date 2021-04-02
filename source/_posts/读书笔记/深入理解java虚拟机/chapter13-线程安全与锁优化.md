@@ -148,7 +148,25 @@ JUC 中的 AtomicInteger 类中的 incrementAndGet() 方法就是使用 Unsafe �
                                                   int x);
 ```
 
-CAS 还有一个逻辑漏洞：如果一个变量 V 初次读取的时候是 A 值，并且在准备赋值的时候检查到它仍然是 A 值，如果这期间它的值曾经被改成了 B，后来又被改回为 A，那 CAS 操作就会误认为它从来没有被改变过。这个漏洞称为 CAS 操作的“ABA”问题。JUC 包中提供了一个一个带有标记的原子引用类“AtomicStampedReference”类来解决这个问题，它可以保证 CAS 的正确性。不过目前这个类比较“鸡肋”。大部分情况下 ABA 问题不会影响程序的正确性，如果需要解决 ABA 问题，改用传统的互斥同步可能会比原子类更高效。
+CAS 还有一个逻辑漏洞：如果一个变量 V 初次读取的时候是 A 值，并且在准备赋值的时候检查到它仍然是 A 值，如果这期间它的值曾经被改成了 B，后来又被改回为 A，那 CAS 操作就会误认为它从来没有被改变过。这个漏洞称为 CAS 操作的“ABA”问题。JUC 包中提供了一个一个带有标记的原子引用类“AtomicStampedReference”类来解决这个问题，它可以保证 CAS 的正确性。
+
+> [使用版本号解决ABA问题]()
+>
+> 只是简单的数据结构，确实不会有什么问题，如果是复杂的数据结构可能就会有问题了（**使用`AtomicReference`可以把`C A S`使用在对象上**），以链表数据结构为例，两个线程通过`C A S`去删除头节点，假设现在链表有`A->B`节点
+>
+> <img src="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabJLQZYt6OMXoBHbMIlLoNjgVt85LZlT0FGAoWB09ScvI5KITMSr9qxg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
+>
+> - 线程`1`删除`A`节点，`B`节点成为头节点，正要执行`C A S(A,A,B)`时，时间片用完，切换到线程`2`
+> - 线程`2`删除`A、B`节点
+> - 线程`2`加入`C、A`节点，链表节点变成`A->C`
+> - 线程`1`重新获取时间片，执行`C A S(A,A,B)`
+> - 丢失`C`节点
+>
+> 要解决`A B A`问题也非常简单，只要追加版本号即可，每次改变时加`1`，即`A —> B —> A`，变成`1A —> 2B —> 3A`，在`Java`中提供了`AtomicStampedRdference`可以实现这个方案
+
+不过目前这个类比较“鸡肋”。大部分情况下 ABA 问题不会影响程序的正确性，如果需要解决 ABA 问题，改用传统的互斥同步可能会比原子类更高效。
+
+
 
 #### 3. 无同步方案
 

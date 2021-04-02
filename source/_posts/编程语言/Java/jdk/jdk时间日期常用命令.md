@@ -1,0 +1,108 @@
+---
+title: jdk时间日期常用命令
+date: 2021-04-01 12:17:47
+tags:
+---
+
+
+
+## 获取当前时间
+
+```java
+import java.text.SimpleDateFormat;
+import java.util.Date;
+ 
+public class Main{
+    public static void main(String[] args){
+        SimpleDateFormat sdf = new SimpleDateFormat();// 格式化时间 
+        sdf.applyPattern("yyyy-MM-dd HH:mm:ss a");// a为am/pm的标记  
+        Date date = new Date();// 获取当前时间 
+        System.out.println("现在时间：" + sdf.format(date)); // 输出已经格式化的现在时间（24小时制） 
+    } 
+}
+```
+
+## 时间加减
+
+```java
+public static void addDays(Date d, int days){
+    Calendar c = Calendar.getInstance();
+    c.setTime(d);
+    c.add(Calendar.DATE, days);
+    d.setTime( c.getTime().getTime() );
+}
+```
+
+
+
+## string与java.util.Date互转
+
+```
+	public static void testStringConvertToDate(){
+        String stringDate = "2008-10-05";
+        /*yyyy-MM-dd格式一定要与stringDate的格式一致*/
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = sdf.parse(stringDate);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	}
+    
+   public static void testDateConvertToString(){
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
+        String stringDate = sdf.format(date);
+        System.out.println("stringDate : " + stringDate);
+   }
+    
+//将给定的日期格式的字符串转化为想要的格式字符串显示，中间通过Date类型转换
+    public static void stringToString(){
+
+        String stringDate = "2008年10月01日10时50分";
+
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy年MM月dd日");
+        SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+        String stringDate2 = null;
+        try {
+            date = sdf1.parse(stringDate);
+            stringDate2 = sdf2.format(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("date:" + date);
+        System.out.println("stringDate2:" + stringDate2);
+
+    }
+
+```
+
+
+
+## string与java.sql.Date互转
+
+```
+java.sql.date.formate(String date)
+```
+
+
+
+## MySQL int(10)时间戳转日期
+
+```mysql
+>
+mysql> SELECT FROM_UNIXTIME(1255033470);
++---------------------------+
+| FROM_UNIXTIME(1255033470) |
++---------------------------+
+| 2009-10-08 13:24:30       | 
++---------------------------+
+1 row in set (0.01 sec)
+```
+
+
+
+
+

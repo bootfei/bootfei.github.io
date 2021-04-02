@@ -1,0 +1,27 @@
+---
+title: redisson-分布式锁和定时任务只执行1次
+date: 2021-03-31 15:15:55
+tags:
+---
+
+
+
+
+
+# 分布式锁
+
+```
+redisson.getLock();
+
+
+```
+
+
+
+# 定时任务执行一次
+
+```
+#其他服务获取锁失败，直接return结束任务
+if(redisson.getLock())
+```
+
