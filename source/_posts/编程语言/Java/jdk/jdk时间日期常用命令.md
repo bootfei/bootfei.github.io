@@ -6,6 +6,8 @@ tags:
 
 
 
+# JAVA
+
 ## 获取当前时间
 
 ```java
@@ -38,23 +40,22 @@ public static void addDays(Date d, int days){
 ## string与java.util.Date互转
 
 ```
+//string->date	
 	public static void testStringConvertToDate(){
         String stringDate = "2008-10-05";
         /*yyyy-MM-dd格式一定要与stringDate的格式一致*/
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date date = sdf.parse(stringDate);
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (ParseException e) {           
         }
 	}
-    
+
+//date->string    
    public static void testDateConvertToString(){
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
         String stringDate = sdf.format(date);
-        System.out.println("stringDate : " + stringDate);
    }
     
 //将给定的日期格式的字符串转化为想要的格式字符串显示，中间通过Date类型转换
@@ -72,9 +73,6 @@ public static void addDays(Date d, int days){
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("date:" + date);
-        System.out.println("stringDate2:" + stringDate2);
-
     }
 
 ```
@@ -87,7 +85,7 @@ public static void addDays(Date d, int days){
 java.sql.date.formate(String date)
 ```
 
-
+# MYSQL
 
 ## MySQL int(10)时间戳转日期
 
@@ -104,5 +102,11 @@ mysql> SELECT FROM_UNIXTIME(1255033470);
 
 
 
+## MYSQL比较日期
 
+DATE_FORMAT入参必须是date类型，不能是字符串类型；比较的对象是字符串
+
+```mysql
+DATE_FORMAT(date类型,"%Y-%m-%d") <= "2021-04-31"
+```
 

@@ -1,5 +1,5 @@
 ---
-title: 查询线程上下文切换消耗CPU
+title: 查询CPU在线程上下文切换
 date: 2020-11-05 09:24:42
 tags: [java, jstack]
 ---
