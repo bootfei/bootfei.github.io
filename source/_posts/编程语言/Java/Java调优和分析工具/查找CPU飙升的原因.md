@@ -22,12 +22,12 @@ tags: [java, jstack]
 
 ## 第三步：找到耗费CPU的线程（16进制）
 
-根据2nd step中的返回内容，可以看到线程号117296(10进制)的java线程耗费CPU，所以需要查看该线程的详细信息，所以需要是一个jstack命令，但是，记住jstack中的nid（Native Thread ID)是系统线程id, 为16进制，需要使用top -Hp pid找到该线程的10进制id，然后使用下边的命令打印出16进制线程id
+根据2nd step中的返回内容，可以看到线程号117296(10进制)的java线程耗费CPU，所以需要查看该线程的详细信息，所以需要是一个jstack命令，但是，记住jstack中的nid（Native Thread ID)是系统线程id, 为16进制，需要使用top -Hp pid找到该线程的10进制pid，然后使用下边的命令打印出16进制线程nid
 
 ![image-20201202180132749](/Users/qifei/Library/Application Support/typora-user-images/image-20201202180132749.png)
 
 ```shell
-  printf  "%x\n" 10进制tid
+  printf  "%x\n" 10进制nid
 ```
 
 ## 第四步：打印CPU的线程(16进制)栈信息
