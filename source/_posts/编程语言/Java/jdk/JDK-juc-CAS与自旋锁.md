@@ -1,5 +1,5 @@
 ---
-title: juc深入理解01-CAS与自旋锁
+title: JDK-juc-CAS与自旋锁
 date: 2021-04-01 09:21:03
 tags:
 ---
