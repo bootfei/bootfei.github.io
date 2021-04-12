@@ -56,5 +56,31 @@ cat jstack.log | grep "java.lang.Thread.State" | sort -nr | uniq -c
 
 
 
+## 实战
 
+### 正则表达式消耗CPU
+
+```java
+List<String> patternList = new ArrayList<>;
+patternList.add("Here I am");
+patternList.add ....;
+
+String[] patternMatch = {"[\\\w\\\\s]....", "[\\\s\\\\w]",...};
+
+for(String s:patternList){
+	for(i=0; i<patternMatch.length; i++){
+		Pattern pattern = Pattern.compile(patternMatch[i]);
+    
+    Matcher matcher = pattern.matcher(s);
+    if(matcher.matches()) system.out.println("match!");
+	}
+}
+```
+
+使用第五步时：
+
+```shell
+java.lang.Thread.State: Running
+		at java.util.regex.Pattern$GroupHead.match(Pattern.java:4168)
+```
 

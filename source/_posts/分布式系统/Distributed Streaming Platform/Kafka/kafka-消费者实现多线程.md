@@ -45,7 +45,7 @@ Multiple consumers with their own threads
 
 ### Model #2. Single consumer, multiple worker processing threads
 
-<font color="red">维护一个或多个KafkaConsumer，同时维护多个事件处理线程(worker thread)</font>
+<font color="red">维护一个KafkaConsumer（可能会有多个），同时维护多个事件处理线程(worker thread)</font>
 
 ![Single consumer, multiple worker processing threads](https://howtoprogram.xyz/wp-content/uploads/2016/05/model2.png)
 

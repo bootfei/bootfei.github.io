@@ -88,6 +88,17 @@ public class ExcelHelper {
         while (cellsInRow.hasNext()) {
           Cell currentCell = cellsInRow.next();
 
+          //最好用CellType进行判断
+          if(MytempCell.getCellType() == CellType.CELL_TYPE_NUMERIC)
+           your code ...
+          else if(MytempCell.getCellType() == CellType.CELL_TYPE_STRING)
+           your code ...
+            
+          //类型转换，防止手机号读成其他格式
+          if(cell.getCellType() != Cell.CELL_TYPE_STRING){
+              cell.setCellType(Cell.CELL_TYPE_STRING);
+          }
+           
           switch (cellIdx) {
             case 0:
               tutorial.setId((long) currentCell.getNumericCellValue());

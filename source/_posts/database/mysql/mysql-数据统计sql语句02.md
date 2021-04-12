@@ -14,27 +14,29 @@ tags:
 
 所有，原子操作要交给数据库解决。
 
+## 需要插入数据中有主键or唯一索引
 
-
-## **01 insert ignore into**
+### insert ignore into
 
 即插入数据时，如果数据存在，则忽略此次插入，前提条件是插入的数据字段设置了主键或唯一索引，测试SQL语句如下，当插入本条数据时，MySQL数据库会首先检索已有数据（也就是idx_username索引），如果存在，则忽略本次插入，如果不存在，则正常插入数据：
 
 ![img](https://pic3.zhimg.com/80/v2-b64c607f476438fcf61476541f5282f2_1440w.jpg)
 
-## **02 on duplicate key update**
+### on duplicate key update
 
 即插入数据时，如果数据存在，则执行更新操作，前提条件同上，也是插入的数据字段设置了主键或唯一索引，测试SQL语句如下，当插入本条记录时，MySQL数据库会首先检索已有数据（idx_username索引），如果存在，则执行update更新操作，如果不存在，则直接插入：
 
 ![img](https://pic2.zhimg.com/80/v2-f19efc8f2d231e0d78c674b4f687698d_1440w.jpg)
 
-## **03 replace into**
+###  replace into
 
 即插入数据时，如果数据存在，则删除再插入，前提条件同上，插入的数据字段需要设置主键或唯一索引，测试SQL语句如下，当插入本条记录时，MySQL数据库会首先检索已有数据（idx_username索引），如果存在，则先删除旧数据，然后再插入，如果不存在，则直接插入：
 
 ![img](https://pic2.zhimg.com/80/v2-7c30f2c0e1930f14020d5041379ca525_1440w.jpg)
 
-## **04 insert if not exists**
+## 不需要插入数据中有主键or唯一索引
+
+###  insert if not exists
 
 即insert into … select … where not exist ... ，这种方式适合于插入的数据字段没有设置主键或唯一索引，当插入一条数据时，首先判断MySQL数据库中是否存在这条数据，如果不存在，则正常插入，如果存在，则忽略：
 
