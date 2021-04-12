@@ -30,6 +30,8 @@ tags:
 
 ### 读写逻辑类
 
+- 如果想从指定line读取， CSVParser csvParser的构造方法可以传入lineNum参数
+
 ```java
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;

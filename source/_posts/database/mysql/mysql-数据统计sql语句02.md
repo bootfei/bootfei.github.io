@@ -28,6 +28,22 @@ tags:
 
 ![img](https://pic2.zhimg.com/80/v2-f19efc8f2d231e0d78c674b4f687698d_1440w.jpg)
 
+```xml
+mybatis的写法 
+<insert id="batchAdd" parameterType="java.util.List">
+       INSERT INTO t_student(uid,student_id,study_days)
+       VALUES
+       <foreach collection="list" item="item" index="index" separator=",">
+           (#{item.uid},#{item.studentId},#{item.studyDays})
+       </foreach>
+       ON DUPLICATE KEY UPDATE
+       uid = values(uid),
+  		 student_id = values(student_id)
+   </insert>
+```
+
+
+
 ###  replace into
 
 即插入数据时，如果数据存在，则删除再插入，前提条件同上，插入的数据字段需要设置主键或唯一索引，测试SQL语句如下，当插入本条记录时，MySQL数据库会首先检索已有数据（idx_username索引），如果存在，则先删除旧数据，然后再插入，如果不存在，则直接插入：

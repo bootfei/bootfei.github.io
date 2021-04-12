@@ -30,23 +30,15 @@ tags:
 
 ### 读写逻辑类
 
+- 如果想从指定line读取， Iterator<Row> rows可以循环Line次，把iterator指向Line
+
 ```java
-package com.bezkoder.spring.files.excel.helper;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.bezkoder.spring.files.excel.model.Tutorial;
 
 public class ExcelHelper {
   public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
