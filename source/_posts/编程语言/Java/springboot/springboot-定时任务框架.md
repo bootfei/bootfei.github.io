@@ -20,6 +20,10 @@ Trigger通过cron表达式或是SimpleScheduleBuilder等类，指定任务执行
 
 Job接口是真正需要执行的任务。JobDetail接口相当于将Job接口包装了一下，Trigger和Scheduler实际用到的都是JobDetail。
 
+### Job接口
+
+Job接口是真正需要执行的任务，由客户自行定义
+
 # SpringBoot官方文档解读
 
 SpringBoot官方写了`spring-boot-starter-quartz`。使用过SpringBoot的同学都知道这是一个官方提供的启动器，有了这个启动器，集成的操作就会被大大简化。
@@ -108,6 +112,8 @@ spring:
 
 第1节中提到的第一个子需求是在每天0点执行的，是一个周期性的任务，任务内容也是确定的，所以直接在代码里注册JobDetail和Trigger的bean就可以了。当然，这些JobDetail和Trigger也是会被持久化到数据库里。
 
+JobDetail和Trigger
+
 ```java
 /**
  * Quartz的相关配置，注册JobDetail和Trigger
@@ -139,13 +145,15 @@ public class QuartzConfig {
 }
 ```
 
-builder类创建了一个JobDetail和一个Trigger并注册成为Spring bean。从第3节中摘录的官方文档中，我们已经知道这些bean会自动关联到调度器上。需要注意的是JobDetail和Trigger需要设置组名和自己的名字，用来作为唯一标识。当然，JobDetail和Trigger的唯一标识可以相同，因为他们是不同的类。
+builder类创建了一个JobDetail和一个Trigger并注册成为Spring bean。从摘录的官方文档中，我们已经知道这些bean会自动关联到调度器上。需要注意的是JobDetail和Trigger需要设置组名和自己的名字，用来作为唯一标识。当然，JobDetail和Trigger的唯一标识可以相同，因为他们是不同的类。
 
-Trigger通过cron表达式指定了任务执行的周期。对cron表达式不熟悉的同学可以百度学习一下。
+Trigger通过cron表达式指定了任务执行的周期。
 
-JobDetail里有一个StartOfDayJob类，这个类就是Job接口的一个实现类，里面定义了任务的具体内容，看一下代码：
+### QuartzJobBean（Job类逻辑）
 
-```
+JobDetail里有一个StartOfDayJob类，这个类就是Job接口的一个实现类，里面定义了任务的具体内容
+
+```java
 @Component
 public class StartOfDayJob extends QuartzJobBean {
     private StudentService studentService;
@@ -167,11 +175,11 @@ public class StartOfDayJob extends QuartzJobBean {
 >
 > 网上很多博客也是这么介绍的。但是根据我的实际测试，这样写可以完成依赖注入，但我还不知道它的实现原理。
 
-![编写定时任务]()
+![编写定时任务](https://segmentfault.com/img/bVbGMZp)
 
-![依赖注入成功]()
+![依赖注入成功](https://segmentfault.com/img/bVbGMZq)
 
-## 4.5 注册无周期性的定时任务
+## 注册无周期性的定时任务
 
 第1节中提到的第二个子需求是学生请假，显然请假是不定时的，一次性的，而且不具有周期性。
 
@@ -184,7 +192,7 @@ public class StartOfDayJob extends QuartzJobBean {
 
 实体类：
 
-```
+```java
 public class LeaveApplication {
     @TableId(type = IdType.AUTO)
     private Integer id;
@@ -198,34 +206,34 @@ public class LeaveApplication {
     private String disapprovedReason;
     private Long checkerUsername;
     private LocalDateTime checkTime;
-
-    // 省略getter、setter
 }
 ```
 
 Service层逻辑，重要的地方已在注释中说明。
 
-```
+### JobDetail和Trigger还有Scheduler
+
+- [客户端类]()将[待执行的任务类]()封装成JobDetail和Trigger，然后将两者交给scheduler。这样JobDetail和Trigger都含有客户端类想要实现的逻辑和参数表，并且数据库也对其持久化
+- 在封装JobDetail的同时，JobDetail会接收[客户端想要的Job类]()为入参，比如JobDetail接收LeaveStartJob.class。
+  - 对于具体的业务场景，JobDetail接收LeaveStartJob.class这个操作会被执行多次，那么框架是如何识别该执行哪个JobDetail呢？通过withIdentity()方法，指定任务组名和任务名
+
+```java
 @Service
 public class LeaveApplicationServiceImpl implements LeaveApplicationService {
     @Autowired
     private Scheduler scheduler;
-    
-    // 省略其他方法与其他依赖
-
-    /**
+  
+       /**
      * 添加job和trigger到scheduler
      */
     private void addJobAndTrigger(LeaveApplication leaveApplication) {
         Long proposerUsername = leaveApplication.getProposerUsername();
-        // 创建请假开始Job
-        LocalDateTime startTime = leaveApplication.getStartTime();
-        JobDetail startJobDetail = JobBuilder.newJob(LeaveStartJob.class)
-                // 指定任务组名和任务名
+        
+        LocalDateTime startTime = leaveApplication.getStartTime();// 创建请假开始Job
+        JobDetail startJobDetail = JobBuilder.newJob(LeaveStartJob.class)            
                 .withIdentity(leaveApplication.getStartTime().toString(),
-                        proposerUsername + "_start")
-                // 添加一些参数，执行的时候用
-                .usingJobData("username", proposerUsername)
+                        proposerUsername + "_start")// 指定任务组名和任务名        
+                .usingJobData("username", proposerUsername)// 添加一些参数，执行的时候用
                 .usingJobData("time", startTime.toString())
                 .build();
         // 创建请假开始任务的触发器
@@ -237,10 +245,9 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
                 startTime.getDayOfMonth(),
                 startTime.getMonth().getValue(),
                 startTime.getYear());
-        CronTrigger startCronTrigger = TriggerBuilder.newTrigger()
-                // 指定触发器组名和触发器名
+        CronTrigger startCronTrigger = TriggerBuilder.newTrigger()                
                 .withIdentity(leaveApplication.getStartTime().toString(),
-                        proposerUsername + "_start")
+                        proposerUsername + "_start")// 指定触发器组名和触发器名
                 .withSchedule(CronScheduleBuilder.cronSchedule(startCron))
                 .build();
 
@@ -255,9 +262,9 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
 }
 ```
 
-Job类逻辑，重要的地方已在注释中说明。
+### QuartzJobBean（Job类逻辑）
 
-```
+```java
 @Component
 public class LeaveStartJob extends QuartzJobBean {
     private Scheduler scheduler;
@@ -297,8 +304,3 @@ public class LeaveStartJob extends QuartzJobBean {
 }
 ```
 
-# 5 总结
-
-上文所述的内容应该可以满足绝大部分定时任务的需求。我在查阅网上的博客之后，发现大部分博客里介绍的Quartz使用还是停留在Spring阶段，配置也都是通过xml，因此我在实现了功能以后，将整个过程总结了一下，留给需要的人以及以后的自己做参考。
-
-总体上来说，Quartz实现定时任务还是非常方便的，与SpringBoot整合之后配置也非常简单，是实现定时任务的不错的选择。

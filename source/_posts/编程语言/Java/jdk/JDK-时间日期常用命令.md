@@ -35,6 +35,21 @@ public static void addDays(Date d, int days){
 }
 ```
 
+### 时间比较
+
+```java
+			Date d1 = sdformat.parse("2019-04-15");
+      Date d2 = sdformat.parse("2019-08-10");
+      
+      if(d1.compareTo(d2) > 0) {
+         System.out.println("Date 1 occurs after Date 2");
+      } else if(d1.compareTo(d2) < 0) {
+         System.out.println("Date 1 occurs before Date 2");
+      } else if(d1.compareTo(d2) == 0) {
+         System.out.println("Both dates are equal");
+      }
+```
+
 
 
 ## string与java.util.Date互转
