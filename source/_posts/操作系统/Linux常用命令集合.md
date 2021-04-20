@@ -87,3 +87,17 @@ mkdir -p /data/qifei/{data,work,plugins,scripts}
 ```
 
 - -p 确保目录名称存在，不存在的就建一个。
+
+
+
+
+
+# 文件查看
+
+## 查看压缩日志文件命令zcat 
+
+```
+#查看gz类型的压缩日志
+gunzip -c service.log.gz | less
+```
+

@@ -115,3 +115,14 @@ select product_sales.* from product_sales,
 ```
 
 This will return the posts with the latest record in each group.
+
+
+
+# Combine results of 2 queries to multiple columns
+
+```
+非常基础的sql
+
+select a.id, bi.name from (select id from a) a, (select name from b) b
+```
+

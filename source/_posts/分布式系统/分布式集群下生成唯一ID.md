@@ -169,10 +169,8 @@ snowflake 是 twitter 开源的分布式ID生成算法，其核心思想为，�
 该算法 java 版本的实现代码如下：
 
 ```
-package com;
- 
 public class SnowflakeIdGenerator {
-    //================================================Algorithm's Parameter=============================================
+   
     // 系统开始时间截 (UTC 2017-06-28 00:00:00)
     private final long startTime = 1498608000000L;
     // 机器id所占的位数
@@ -194,7 +192,7 @@ public class SnowflakeIdGenerator {
     private final long timestampMoveBits = sequenceBits + workerIdBits + dataCenterIdBits;
     // 生成序列的掩码(12位所对应的最大整数值)，这里为4095 (0b111111111111=0xfff=4095)
     private final long sequenceMask = -1L ^ (-1L << sequenceBits);
-    //=================================================Works's Parameter================================================
+   
     /**
      * 工作机器ID(0~31)
      */
@@ -211,7 +209,7 @@ public class SnowflakeIdGenerator {
      * 上次生成ID的时间截
      */
     private long lastTimestamp = -1L;
-    //===============================================Constructors=======================================================
+ 
     /**
      * 构造函数
      *

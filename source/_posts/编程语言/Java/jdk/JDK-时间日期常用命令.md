@@ -11,17 +11,12 @@ tags:
 ## 获取当前时间
 
 ```java
-import java.text.SimpleDateFormat;
-import java.util.Date;
- 
-public class Main{
+
     public static void main(String[] args){
-        SimpleDateFormat sdf = new SimpleDateFormat();// 格式化时间 
-        sdf.applyPattern("yyyy-MM-dd HH:mm:ss a");// a为am/pm的标记  
-        Date date = new Date();// 获取当前时间 
-        System.out.println("现在时间：" + sdf.format(date)); // 输出已经格式化的现在时间（24小时制） 
+       SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			 Date date = new Date(System.currentTimeMillis());
     } 
-}
+
 ```
 
 ## 时间加减
@@ -92,6 +87,19 @@ public static void addDays(Date d, int days){
 
 ```
 
+## timestamp与java.util.Date互转
+
+
+
+## milliseconds与java.util.Date互转
+
+```
+String myDate = "2014/10/29 18:10:45";
+SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+Date date = sdf.parse(myDate);
+long millis = date.getTime();
+```
+
 
 
 ## string与java.sql.Date互转
@@ -99,6 +107,14 @@ public static void addDays(Date d, int days){
 ```
 java.sql.date.formate(String date)
 ```
+
+
+
+
+
+
+
+
 
 # MYSQL
 
@@ -122,6 +138,6 @@ mysql> SELECT FROM_UNIXTIME(1255033470);
 DATE_FORMAT入参必须是date类型，不能是字符串类型；比较的对象是字符串
 
 ```mysql
-DATE_FORMAT(date类型,"%Y-%m-%d") <= "2021-04-31"
+DATE_FORMAT(datetime类型/date类型,"%Y-%m-%d") <= "2021-04-31"
 ```
 
