@@ -146,49 +146,108 @@ public class HttpServer1 {
 
 ### Request类
 
-​     代码清单如下：
-
-![img](http://sishuok.com/forum/upload/2012/4/10/4c922e9a44ee3ddd4ee011682ce92bfc__%E6%9C%AA%E5%91%BD%E5%90%8D.jpg)
-
 该类实现了javax.servlet.ServletRequest接口，但并不返回实际内容。
 
-### 2.3.3 Response类
+### Response类
 
 实现了javax.servlet.ServletResponse接口，大部分方法都返回一个空值，除了getWriter方法以外。
 
-​    
-
 ​     在getWriter方法中，PrintWriter类的构造函数的第二个参数表示是否启用autoFlush。因此，若是设置为false，则如果是servlet的service方法的最后一行调用打印方法，则该打印内容不会被发送到客户端。这个bug会在后续的版本中修改。
 
-### 2.3.4 StaticResourceProcessor类
+### StaticResourceProcessor类
 
 该类用于处理对静态资源的请求。
 
-![img](http://sishuok.com/forum/upload/2012/4/10/989e8598515028c242f26f1d87062b59__%E6%9C%AA%E5%91%BD%E5%90%8D.jpg)
+```
+public class StaticResourceProcessor {
+    public void process(Request request, Response response) {
+        try {
+            response.sendStaticResource();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
-### 2.3.5 ServletProcessor1类
+### ServletProcessor1类
 
 ​     该类用于处理对servlet资源的请求。
 
+```java
+public class ServletProcessor1 {
+    public void process(Request request, Response response) {
+        String uri = request.getUri();
+        String servletName = uri.substring(uri.lastIndexOf("/") + 1);
+        URLClassLoader loader = null;
+        try {
+            URL[] urls = new URL[1];
+            URLStreamHandler streamHandler = null;
+            File classPath = new File(Constants.WEB_ROOT); //类加载器需要加载的目标地址
+
+            String repository = (new URL("file", null, classPath.getCanonicalPath() + File.separator)).toString();
+            urls[0] = new URL(null, repository, streamHandler);
+            loader = new URLClassLoader(urls);
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+
+        Class myClass = null;
+        try {
+            myClass = loader.loadClass(servletName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Servlet servlet = null;
+        try {
+            servlet = (Servlet) myClass.newInstance();  //很有意思，使用的是newInstance()而不是new，因为把类加载与类实例化分开了
+            servlet.service((ServletRequest) request, (ServletResponse) response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
  
 
- ![img](http://sishuok.com/forum/upload/2012/4/10/0ac1b4ee9af1eb801650991bf0d8c28b__%E6%9C%AA%E5%91%BD%E5%90%8D.jpg)  
+该类很简单，只有一个process方法。
 
-该类很简单，只有一个process方法。载入servlet时使用的是UrlClassLoader类，它是ClassLoader类的直接子类，有三种构造方法。
+- 为了载入servlet类，需要从URI中获取servlet的类名称，由request负责；
 
-l     public URLClassLoader(URL[] urls);
+- 为了载入servlet类，载入servlet时使用的是UrlClassLoader类，它是ClassLoader类的直接子类，有三种构造方法。
+  - public URLClassLoader(URL[] urls);
+  - public URL(URL context, java.lang.String spec, URLStreamHandler hander) throws MalformedURLException
+  - public URL(java.lang.String protocol, java.lang.String host, java.lang.String file) throws MalformedURLException
 
-参数为一个Url对象的数组，每个url指明了从哪里查找servlet类。若某个Url是以“/”结尾的，则认为它是一个目录；否则，认为它是一个jar文件，必要时会将它下载并解压。
+  第一个构造函数，参数为一个Url对象的数组，每个url指明了从哪里查找servlet类。若某个Url是以“/”结尾的，则认为它是一个目录；否则，认为它是一个jar文件，必要时会将它下载并解压。 <!--这里使用的是Constans.WEB_ROOT，其实就是项目编译后的WEB_INFO/Class目录-->
+
+- 加载并创建完servlet类以后<!--所以必须使用加载和newInstance()方式分布进行-->，将其向下转型为javax.servlet.servlet，并调用其service()方法
 
 注：在servlet容器中，查找servlet类的位置称为repository。
 
 在我们的应用程序中，servlet容器只需要查找一个repository，在工作目录的webroot路径下。
 
-l     public URL(URL context, java.lang.String spec, URLStreamHandler hander) throws MalformedURLException
 
-l     public URL(java.lang.String protocol, java.lang.String host, java.lang.String file) throws MalformedURLException
 
-## 2.4  Application 2
+### 验证
+
+Linux下启动项目
+
+```
+java -classpath ./lib/servlet.jar:./  ex02.pyrmont.HttpServer1
+```
+
+测试访问servlet
+
+```
+http://localhost:8080/servlet/Primitiveservlet
+```
+
+
+
+## Application 2
 
 在之前的程序中，有一个严重的问题，必须将ex02.pyrmont.Request和ex02.pyrmont.Response分别转型为javax.servlet.ServletRequest和javax.servlet.ServletResponse，再作为参数传递给具体的servlet的service方法。这样并不安全，熟知servlet容器的人可以将ServletRequest和ServletResponse类向下转型为Request和Response类，并执行parse和sendStaticResource方法。
 

@@ -70,7 +70,7 @@ static final int tableSizeFor(int cap) {
 }
 ```
 
-`tableSizeFor`的作用是找到大于`cap`的最小的2的整数幂，我们假设n(注意是n，不是cap哈)对应的二进制为000001xxxxxx，其中x代表的二进制位是0是1我们不关心，
+`tableSizeFor`的作用是找到大于`cap`的最小的2的整数幂，我们假设n(注意是n，不是cap哈)对应的二进制为000001xxxxxx，其中x代表的二进制位是0是1我们不关心
 
 `n |= n >>> 1;`执行后`n`的值为：
 
