@@ -36,9 +36,9 @@ tags:
 - HttpNioClient的问题
   - 获取和释放链接都需要加锁，对应网关这样的代理服务场景，会频繁的建链和关闭链接，势必会影响性能。
 
-基于tomcat的存在的这些问题，我们后面对接入端做改造，用Netty做接入层和服务调用层，也就是我们的第二版，能彻底解决上面的问题，达到理想的性能。
-
 ## 第二版 Netty + 全异步
+
+tomcat 划分为 Netty接入层 + Netty服务调用层
 
 > 基于Netty的优势，我们实现了全异步，无锁，分层的架构
 
@@ -46,15 +46,18 @@ tags:
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04nz126TrHT3iaXq3d9BcbIAkqCz6mht3J4iaY8t1owyF0ymt3qwHPm9djwczAK9iaaEhPXx1jXYIsQpA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
 
-### 接入层
+### 接入层（协议层，IO线程）
 
 > Netty的io线程，负责http协议的编解码工作，同时对协议层面的异常做监控报警
 
-对http协议的编解码做了优化，对异常，攻击性请求监控可视化，比如我们对http的请求行和请求头大小是有限制的，tomcat是请求行和请求加在一起，不超过8k，netty是分别有大小限制，假如客户端发送了超过阀值的请求，带cookie的请求很容易超过，正常情况下，netty就直接响应400给客户端，经过改造后，我们只取正常大小的部分，同时标记协议解析失败，到业务层后，就可以判断出是那个服务出现这类问题，其他的一些攻击性的请求，比如只发请求头，不发body/或者发部分这些都需要监控和报警。
+，
 
-### 业务逻辑层
+- **对http协议的编解码做了优化**: http的请求行和请求头大小是有限制的，tomcat是请求行和请求加在一起，不超过8k，netty是分别有大小限制，假如客户端发送了超过阀值的请求，带cookie的请求很容易超过，正常情况下，netty就直接响应400给客户端，经过改造后，我们只取正常大小的部分，同时标记协议解析失败，到业务层后，就可以判断出是那个服务出现这类问题
+- **对异常/攻击性请求监控可视化**: 比如只发请求头，不发body/或者发部分这些都需要监控和报警。
 
-> 负责对API路由，流量调度等一序列的支持业务的公有逻辑，都在这层实现，采样责任链模式，这层不会有io操作。
+### 业务逻辑层（Worker线程）
+
+> 负责对API路由，流量调度等一序列的支持业务的公有逻辑，都在这层实现，采样责任链模式，这层不会有io操作。<!--很重要，没有IO操作会极大提升吞吐量和响应能力-->
 
 在业界和一些大厂的网关设计中，业务逻辑层基本都是设计成责任链模式，公有的业务逻辑也在这层实现，我们在这层也是相同的套路，支持了：
 
@@ -82,7 +85,7 @@ tags:
 
 链接池的原理如下图：
 
-![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04nz126TrHT3iaXq3d9BcbIAkhAuM89Q7l3S7KRdn3o3RfAEZXFDNoP2XWFEZyGCRS3viaZ3rTU71KCQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom: 67%;" />
 
 服务调用层除了异步发起远程调用外，还需要对后端服务的链接进行管理，http不同于rpc，http的链接是独占的，所以在释放的时候要特别小心，一定要等服务端响应完了才能释放，还有就是链接关闭的处理也要小心，总结如下几点：
 
@@ -108,9 +111,9 @@ tags:
 
 ### 全链路超时机制
 
-下面是我们在整个链路种一个超时处理的机制。
+下面是我们在整个链路中加一个超时处理的机制。
 
-![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04nz126TrHT3iaXq3d9BcbIAk1yreIiadB5sRJqF5lFFiaM4ooullE2AUsDutnMbKsCVJwJwccPOHKpeg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:80%;" />
 
 - 协议解析超时
 - 等待队列超时
@@ -157,11 +160,11 @@ tags:
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04nz126TrHT3iaXq3d9BcbIAk1pHtcHPsr7IrLddIPAK7N8rbPaiabY8JnUzu998Gg8undRfPqqIwM4Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
 
-我们整个网关没有涉及到io操作，但我们在业务逻辑这块还是和netty的io编解码线程异步，是有两个原因，1是防止开发写的代码有阻塞，2是业务逻辑打日志可能会比较多，在突发的情况下，但是我们在push线程时，支持用netty的io线程替代，这里做的工作比较少，这里有异步修改为同步后(通过修改配置调整)，cpu的上下文切换减少20%，进而提高了整体的吞吐量，就是不能为了异步而异步，zull2的设计和我们的类似，
+我们整个网关没有涉及到io操作，但我们在业务逻辑这块还是和netty的io编解码线程异步，是有两个原因，1是防止开发写的代码有阻塞，2是业务逻辑打日志可能会比较多，在突发的情况下，但是我们在push线程时，支持用netty的io线程替代，这里做的工作比较少，这里有异步修改为同步后(通过修改配置调整)，cpu的上下文切换减少20%，进而提高了整体的吞吐量，就是不能为了异步而异步，zull2的设计和我们的类似
 
 ### GC优化
 
-在高并发系统，gc的优化不可避免，我们在用了对象池技术和堆外内存时，对象很少进入老年代，另外我们年轻代会设置的比较大，而且SurvivorRatio=2，晋升年龄设置最大15，尽量对象在年轻代就回收掉， 但监控发现老年代的内存还是会缓慢增长，通过dump分析，我们每个后端服务创建一个链接，都时有一个socket，socket的AbstractPlainSocketImpl，而AbstractPlainSocketImpl就重写了Object类的finalize方法，实现如下：
+在高并发系统，gc的优化不可避免，我们在用了对象池技术和堆外内存时，对象很少进入老年代，另外我们年轻代会设置的比较大，而且SurvivorRatio=2，晋升年龄设置最大15，<!--这是一个优化点，需要根据日志，确认晋升年龄=x的时候，新生代的对象几乎不进入老年代了，15太大了，太过保守了--> 尽量对象在年轻代就回收掉， 但监控发现老年代的内存还是会缓慢增长，通过dump分析，我们每个后端服务创建一个链接，都时有一个socket，socket的AbstractPlainSocketImpl，而AbstractPlainSocketImpl就重写了Object类的finalize方法，实现如下：
 
 ```
 /**
@@ -176,38 +179,8 @@ protected void finalize() throws IOException {
 
 ### 日志
 
-高并发下，特别是netty的io线程除了要执行该线程上的io读写操作，还有执行异步任务和定时任务，如果io线程处理不过来队列里的任务，很有可能导致新进来异步任务出现被拒绝的情况，那什么情况下可能呢，io是异步读写的问题不大，就是多耗点cpu，最有可能block住io线程的是我们打的日志，目前log4j的ConsoleAppender日志immediateFlush属性默认为true,即每次打log都是同步写flush到磁盘的，这个对于内存操作来说，慢了很多，同时AsyncAppender的日志队列满了也会block住线程,log4j默认的buffer大小是128，而且是block的，即如果buffer的大小达到128，就阻塞了写日志的线程，在并发写日志量大的的情况下，特别是堆栈很多时，log4j的Dispatcher线程会出现变慢要刷盘，这样buffer就不能快速消费，很容易写满日志事件，导致netty io线程block住，所以我们在打日志时，也要注意精简。
+高并发下，特别是netty的io线程除了要执行该线程上的io读写操作，还有执行异步任务和定时任务，如果io线程处理不过来队列里的任务，很有可能导致新进来异步任务出现被拒绝的情况，那什么情况下可能呢，io是异步读写的问题不大，就是多耗点cpu，最有可能block住io线程的是我们打的日志，目前log4j的ConsoleAppender日志immediateFlush属性默认为true,即每次打log都是同步写flush到磁盘的 <!--我认为，这其实是和mysql的redo log一样，确保每次的日志(mysql是事务日志)都能持久化，这里不应该牺牲数据的持久性--> ，这个对于内存操作来说，慢了很多，同时AsyncAppender的日志队列满了也会block住线程,log4j默认的buffer大小是128，而且是block的，即如果buffer的大小达到128，就阻塞了写日志的线程，在并发写日志量大的的情况下，特别是堆栈很多时，log4j的Dispatcher线程会出现变慢要刷盘，这样buffer就不能快速消费，很容易写满日志事件，导致netty io线程block住，所以我们在打日志时，也要注意精简。
 
 ## 未来规划
 
-现在我们都是基于http1，现在http2相对于http1关键实现了在链接层面的服务，即一个链接上可以发送多个http请求，即http的链接也能和rpc的链接一样，建几个链接就可以了，彻底解决了http1链接不能复用导致每次都建链和慢启动的开销，我们也在基于netty升级到http2,除了技术升级外，我们对监控报警也一直在持续优化，怎么提供给业务方准确无误的报警，也是一直在努力，还有一个就是降级，作为统一接入网关，和业务方做好全方位的降级措施，也是一直在完善的点，保证全站任何故障都能通过网关第一时间降级，也是我们的重点。
-
-## 总结
-
-网关已经是一个互联网公司的标配，这里总结实践过程中的一些心得和体会，希望给大家一些参考以及一些问题的解决思路，我们也还在不断完善中，同时我们也在做多活的项目，感兴趣的同学可以加入我们。
-
-来源 | https://www.jianshu.com/p/165b1941cdfa
-
-
-
-![yangyidba](http://mmbiz.qpic.cn/mmbiz_png/bCobNTxafWMWcZ3rA7IOVIicsssaHcCib17dMweCfEibeTeKAKdK5whYlOsRBcmoiczc1qvFCOoS4YIUibYhufKGiceA/0?wx_fmt=png)
-
-**yangyidba** 
-
-记录工作，生活的地方。
-
-203篇原创内容
-
-
-
-Official Account
-
-Reads 381
-
-Like2Wow2
-
-收藏此内容的人还喜欢 
-
-为什么微服务一定要有网关？ 为什么微服务一定要有网关？ ... Reads 1321 顶级架构师 不喜欢不看的原因OK内容质量低 不看此公众号微服务架构中10个常用的设计模式 微服务架构中10个常用的设计模式 ... Reads 2180 架构之家 不喜欢不看的原因OK内容质量低 不看此公众号一日一技：Python自带的优先级调度器 一日一技：Python自带的优先级调度器 ... 赞 17 未闻Code 不喜欢不看的原因OK内容质量低 不看此公众号
-
-写下你的留言
+现在我们都是基于http1，现在http2相对于http1关键实现了在链接层面的服务，即一个链接上可以发送多个http请求，即http的链接也能和rpc的链接一样，建几个链接就可以了，彻底解决了http1链接不能复用导致每次都建链和慢启动的开销，我们也在基于netty升级到http2,除了技术升级外，我们对监控报警也一直在持续优化，怎么提供给业务方准确无误的报警，也是一直在努力，还有一个就是降级，作为统一接入网关，和业务方做好全方位的降级措施，也是一直在完善的点，保证全站任何故障都能通过网关第一时间降级，也是我们的重点。                              
