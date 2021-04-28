@@ -1,5 +1,5 @@
 ---
-title: springboot-05-组件详解和加载流程
+title: spring-05-组件详解和加载流程
 date: 2020-10-17 19:52:16
 categories: [java,spring]
 tags:

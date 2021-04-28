@@ -70,7 +70,6 @@ http://machineName:port/servlet/servletClass
 ```
 
 但是，若要调用其他的servlet（如ModernServlet），则servlet容器抛出异常。在后面的章节中，你将学会如何构建可以兼具两种功能的servlet容器。
-HttpServer1类的定义在代码清单2-2中。
 
 ```java
 public class HttpServer1 {
@@ -217,6 +216,7 @@ public class ServletProcessor1 {
 - 为了载入servlet类，需要从URI中获取servlet的类名称，由request负责；
 
 - 为了载入servlet类，载入servlet时使用的是UrlClassLoader类，它是ClassLoader类的直接子类，有三种构造方法。
+
   - public URLClassLoader(URL[] urls);
   - public URL(URL context, java.lang.String spec, URLStreamHandler hander) throws MalformedURLException
   - public URL(java.lang.String protocol, java.lang.String host, java.lang.String file) throws MalformedURLException
@@ -259,12 +259,19 @@ http://localhost:8080/servlet/Primitiveservlet
 
 在第二个应用程序中，添加了两个façade类，RequestFacade和ResponseFacade。RequestFacade类实现了ServletRequest接口，通过在其构造方法中传入一个ServletRequest类型引用的Request对象来实例化。ServletRequest接口中每个方法的实现都会调用Request对象的相应方法。但是，ServletRequest对象本身是private类型，这样就不能从类的外部进行访问。这里也不再将Request对象向上转型为ServletRequest对象，而是创建一个RequestFacade对象，并把它传给service方法。这样，就算是将在servlet中获取了ServletRequest对象，并向下转型为RequestFacade对象，也不能再访问ServletRequest接口中的方法了，就可以避免前面所说的安全问题。
 
-​     RequestFacade.java代码如下：
 
-![img](http://sishuok.com/forum/upload/2012/4/10/81a96e844958fa8c316c88141885b4cd__%E6%9C%AA%E5%91%BD%E5%90%8D.jpg)
 
-注意它的构造函数，接收一个Request对象，然后向上转型为ServletRequest对象，赋给其private成员变量request。该类的其他方法中，都是调用request的相应方法实现的，这样就将ServletRequest完整的封装得RequestFacade中了。
+> 注意: 它的构造函数，接收一个Request对象，然后向上转型为ServletRequest对象，赋给其private成员变量request。该类的其他方法中，都是调用request的相应方法实现的，这样就将ServletRequest完整的封装得RequestFacade中了。
+>
 
-​     同理，ResponseFacade类也是这样的。
+ serveltProcess方法修改以下部分：
 
-​     Application 2中的类包括，HttpServer2、Request、Response、StaticResourceProcessor、ServletProcessor2、Constants。
+```java
+        try {
+            servlet = (Servlet) myClass.newInstance();  //很有意思，使用的是newInstance()而不是new，因为把类加载与类实例化分开了
+            servlet.service((ServletRequest) requestFacade, (ServletResponse) responseFacade);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+```
+

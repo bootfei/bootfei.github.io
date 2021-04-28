@@ -1,5 +1,5 @@
 ---
-title: springboot-02-ioc和di
+title: spring-02-ioc和di
 date: 2020-10-17 19:52:16
 categories: [java,spring]
 tags:
