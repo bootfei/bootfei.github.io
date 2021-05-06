@@ -5,14 +5,109 @@ categories: [java,spring]
 tags:
 ---
 
-
-
 # 核心概念
 
 1. 自动装配
 2. 起步依赖
 3. 内置Tomcat
 4. 可以以jar方式去部署启动
+
+## Spring重要接口
+
+### BeanFactory继承体系（基础容器）
+
+![BeanFactory继承关系](https://upload-images.jianshu.io/upload_images/845143-c11e52d3b2159a22.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+### 四级接口继承体系
+
+1. BeanFactory 作为一个主接口不继承任何接口，暂且称为一级接口。 
+2. AutowireCapableBeanFactory <!--相当于我们的实现2，自动注解--> 、HierarchicalBeanFactory、ListableBeanFactory 3个子接口继承了它，进行功能上的增强。这3个子接口称为二级接口。
+   - ListableBeanFactory 能返回容器中所有的Bean
+   - HierarchicalBeanFactory能返回父类容器的功能
+   - AutowireCapableBeanFactory 负责组装，各种Aware、DI、初始化。<!--就是我们的实现2-->
+3. ConfigurableBeanFactory 可以被称为三级接口，对二级接口 HierarchicalBeanFactory 进行了再次增强，它还继承了另一个外来的接口SingletonBeanRegistry 
+4. ConfigurableListableBeanFactory 是一个更强大的接口，继承了上述的所有接口，无所不包，称为四级接口。
+
+> 总结：
+>
+> |-- BeanFactory 是Spring bean容器的根接口.
+>
+> 提供获取bean,是否包含bean,是否单例与原型,获取bean类型,bean 别名的api.
+>
+> |-- -- AutowireCapableBeanFactory 提供工厂的装配功能。
+>
+> |-- -- HierarchicalBeanFactory 提供父容器的访问功能
+>
+> |-- -- -- ConfigurableBeanFactory 如名,提供factory的配置功能,眼花缭乱好多api
+>
+> |-- -- -- -- ConfigurableListableBeanFactory 集大成者,提供解析,修改bean定义,并初始化单例.
+>
+> |-- -- ListableBeanFactory 提供容器内bean实例的枚举功能.这边不会考虑父容器内的实
+>
+> 例.
+>
+> 看到这边,我们是不是想起了设计模式原则里的接口隔离原则。 
+
+
+
+下面是继承关系的2个抽象类和2个实现类： 
+
+1. AbstractBeanFactory 作为一个抽象类，实现了三级接口 ConfigurableBeanFactory 大部分功能。
+
+2. AbstractAutowireCapableBeanFactory 同样是抽象类，继承自 AbstractBeanFactory ，并额外实现了二级接口 AutowireCapableBeanFactory 。 
+
+3. DefaultListableBeanFactory <!--就是实现3的Bean Factory的实现类--> 继承自 AbstractAutowireCapableBeanFactory ，实现了最强大的四级接口 ConfigurableListableBeanFactory ，并实现了一个外来接口BeanDefinitionRegistry ，它并非抽象类。
+
+4. 最后是最强大的 XmlBeanFactory ，继承自 DefaultListableBeanFactory ，重写了一些功能，使自己更强大。
+
+### 2个接口封装数据集合的操作(就是实现2中，集合singleObjects和beanDefinitions)
+
+- BeanDefinitionRegistry 封装了beanDefinitions
+
+  - ```java
+    public interface BeanDefinitionRegistry extends AliasRegistry { 
+        // 给定bean名称，注册一个新的bean定义 
+        void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException; 
+        /** 根据指定Bean名移除对应的Bean定义 */ 
+        void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 根据指定bean名得到对应的Bean定义 */ 
+        BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 查找，指定的Bean名是否包含Bean定义 */ 
+        boolean containsBeanDefinition(String beanName); 
+        String[] getBeanDefinitionNames();//返回本容器内所有注册的Bean定义名称 
+        int getBeanDefinitionCount();//返回本容器内注册的Bean定义数目 
+        boolean isBeanNameInUse(String beanName);//指定Bean名是否被注册过。 
+    }
+    ```
+
+- SingletonBeanRegistry封装了singleObjects
+
+  - ```java
+    public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
+    	// K:BeanName
+    	// V:Bean实例对象
+    	private Map<String, Object> singletonObjects = new HashMap<String, Object>();
+    
+    	@Override
+    	public Object getSingleton(String beanName) {
+    		return this.singletonObjects.get(beanName);
+    	}
+    
+    	@Override
+    	public void addSingleton(String beanName, Object bean) {
+    		this.singletonObjects.put(beanName, bean);
+    	}
+    
+    }
+    ```
+
+    
+
+### BeanDefinitions继承体系（了解就行）
+
+实际只用BeanDefinition
+
+### ApplicationContext继承体系（高级容器）
+
+我们自己的实现没用，源码阅读才用到
 
 ## 容器
 
@@ -22,14 +117,167 @@ tags:
 ## 循环依赖
 
  * A-->B	B-->A形成闭环
-      * 构造方法的循环依赖（无法解决的）
-      * setter方法的循环依赖（Spring使用三级缓存技术解决）
+   * 构造方法的循环依赖（无法解决的）
+   * setter方法的循环依赖（Spring使用三级缓存技术解决）
+
+# Bean实例化过程
+
+Bean的一生从总体上来说可以分为两个阶段：
+
+- 容器启动阶段
+- Bean实例化阶段
+
+容器的启动阶段做了很多的预热工作，为后面Bean的实例化做好了充分的准备，我们首先看一下容器的启动阶段都做了哪些预热工作。
+
+## 容器启动阶段
+
+### 配置元信息
+
+必要的信息可以是Spring过去支持最完善的xml配置文件，或者是其他形式的例如properties的磁盘文件，也可以是现在主流的注解，甚至是直接的代码硬编码。总之，这些创建对象所需要的必要信息称为配置元信息。
+
+### BeanDefination（元信息的内存形式）
+
+我们只是需要知道配置元信息被加载到内存之后是以BeanDefination的形存在的即可。
+
+### BeanDefinationReader（元信息的读取）
+
+Spring中xml配置文件中一个个的Bean定义，但是Spring是要靠BeanDefinationReader了。
+
+不同的BeanDefinationReader各自拥有各自的本领。
+
+- 读取xml配置元信息，那么可以使用XmlBeanDefinationReader。
+
+- 读取properties配置文件，那么可以使用PropertiesBeanDefinitionReader加载。
+
+- 读取注解配置元信息，那么可以使用 AnnotatedBeanDefinitionReader加载。
+- 读取自定义的配置信息，那么可以自定义BeanDefinationReader来控制配置元信息的加载
+
+总的来说，BeanDefinationReader的作用就是加载配置元信息，并将其转化为内存形式的BeanDefination，存在某一个地方
+
+### BeanDefinationRegistry（元信息内存形式的内存位置）
+
+Spring通过BeanDefinationReader将配置元信息加载到内存生成相应的BeanDefination之后，就将其注册到BeanDefinationRegistry中，BeanDefinationRegistry就是一个存放BeanDefination的Map，通过特定的Bean定义的id，映射到相应的BeanDefination。
+
+### BeanFactoryPostProcessor(解析BeanDef中的占位符)
+
+BeanFactoryPostProcessor是容器启动阶段Spring提供的一个扩展点，主要负责对注册到BeanDefinationRegistry中的一个个的BeanDefination进行一定程度上的修改与替换。
+
+例如我们的配置元信息中有些可能会修改的配置信息散落到各处，不够灵活，修改相应配置的时候比较麻烦，这时我们可以使用占位符的方式来配置。例如配置Jdbc的DataSource连接的时候可以这样配置:
+
+```
+<bean id="dataSource"  
+    class="org.apache.commons.dbcp.BasicDataSource"  
+    destroy-method="close">  
+    <property name="maxIdle" value="${jdbc.maxIdle}"></property>  
+    <property name="maxActive" value="${jdbc.maxActive}"></property>  
+    <property name="maxWait" value="${jdbc.maxWait}"></property>  
+    <property name="minIdle" value="${jdbc.minIdle}"></property>  
+  
+    <property name="driverClassName"  
+        value="${jdbc.driverClassName}">  
+    </property>  
+    <property name="url" value="${jdbc.url}"></property>  
+  
+    <property name="username" value="${jdbc.username}"></property>  
+    <property name="password" value="${jdbc.password}"></property>  
+</bean> 
+```
+
+BeanFactoryPostProcessor就会对注册到BeanDefinationRegistry中的BeanDefination做最后的修改，替换`$`占位符为配置文件中的真实的数据。
+
+至此，整个容器启动阶段就算完成了，容器的启动阶段的最终产物就是注册到BeanDefinationRegistry中的一个个BeanDefination了，这就是Spring为Bean实例化所做的预热的工作。<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBzOtg5OQ6icxfKTvViaePJOczt8icmDz64YEmm1NjOzOkpl7C4dU8Arrc4xFFniayWje5TkK8AydcAtg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:67%;" />
 
 
 
+## Bean实例化阶段
+
+需要指出，容器启动阶段与Bean实例化阶段存在多少时间差，Spring把这个决定权交给了我们程序员
+
+- 如果选择懒汉式的方式，那么直到我们伸手向Spring要依赖对象实例之前，其都是以BeanDefinationRegistry中的一个个的BeanDefination的形式存在，也就是Spring只有在我们需要依赖对象的时候才开启相应对象的实例化阶段。
+- 如果选择饿汉式的方式，容器启动阶段完成之后，将立即启动Bean实例化阶段，通过隐式的调用所有依赖对象的getBean方法来实例化所有配置的Bean并保存起来。 <!--其实饿汉式也是通过懒汉式实现的-->
+
+### 对象创建策略
+
+对象的创建采用了[策略模式]()，借助我们前面BeanDefinationRegistry中的BeanDefination,我们可以使用[反射的方式]()创建对象，也可以使用CGlib字节码生成创建对象。这个时候，内存中应该已经有一个我们想要的具体的依赖对象的实例了。
+
+### BeanWrapper——对象的外衣
+
+Spring中的Bean并不是单独存在的，由于Spring IOC容器中要管理多种类型的对象，因此为了统一对不同类型对象的访问，***Spring给所有创建的Bean实例穿上了一层外套***，这个外套就是BeanWrapper。BeanWrapper实际上是对反射相关API的简单封装，使得上层使用反射完成相关的业务逻辑大大的简化，我们要获取某个对象的属性，调用某个对象的方法，现在不需要在写繁杂的反射API了以及处理一堆麻烦的异常，直接通过BeanWrapper就可以完成相关操作。
+
+### 设置对象属性
+
+上一步包裹在BeanWrapper中的对象，Spring需要为其设置属性以及依赖对象。
+
+- 对于基本类型的属性
+  - 如果配置元信息中有配置，那么将直接使用配置元信息中的设置值赋值即可，
+  - 如果没有配置，那么得益于JVM对象实例化过程，属性依然可以被赋予默认的初始化零值。
+- 对于引用类型的属性，Spring会将所有已经创建好的对象放入一个Map结构中，此时Spring会检查所依赖的对象是否已经在容器的map中有对应对象的实例了。
+  - 如果有，那么直接注入
+  - 如果没有，那么Spring会暂时放下该对象的实例化过程，转而先去实例化依赖对象，再回过头来完成该对象的实例化过程。
+
+> 这里有一个Spring中的经典问题，那就是Spring是如何解决循环依赖的？
+>
+> 这里简单提一下，Spring是通过三级缓存解决循环依赖，并且只能解决Setter注入的循环依赖
+
+### 检查Aware相关接口
+
+如果想要依赖Spring中的相关对象，使用Spring的相关API,那么可以实现相应的Aware接口，Spring IOC容器就会为我们自动注入相关依赖对象实例。
+
+Spring IOC容器大体可以分为两种，BeanFactory提供IOC思想所设想所有的功能，同时也融入AOP等相关功能模块，可以说BeanFactory是Spring提供的一个基本的IOC容器。ApplicationContext构建于BeanFactory之上，同时提供了诸如容器内的时间发布、统一的资源加载策略、国际化的支持等功能，是Spring提供的更为高级的IOC容器。
+
+对于BeanFactory来说，这一步的实现是先检查相关的Aware接口，然后去Spring的对象池(也就是容器的Map结构)中去查找相关的实例(例如对于ApplicationContextAware接口，就去找ApplicationContext实例)，也就是说我们必须要在配置文件中或者使用注解的方式，将相关实例注册容器中，BeanFactory才可以为我们自动注入。
+
+而对于ApplicationContext，由于其本身继承了一系列的相关接口，所以当检测到Aware相关接口，需要相关依赖对象的时候，ApplicationContext完全可以将自身注入到其中，ApplicationContext实现这一步是通过下面BeanPostProcessor。
+
+![img](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c34631d663f5498e8b151a0eaf5905fe~tplv-k3u1fbpfcp-watermark.image)
+
+> 例如ApplicationContext继承自ResourceLoader和MessageSource，那么当我们实现ResourceLoaderAware和MessageSourceAware相关接口时，就将其自身注入到业务对象中即可。
+
+### BeanPostProcessor前置处理
+
+> 只要记住BeanFactoryPostProcessor存在于容器启动阶段，而BeanPostProcessor存在于对象实例化阶段，BeanFactoryPostProcessor关注***对象被创建之前*** 那些配置的修改，而BeanPostProcessor阶段关注***对象已经被创建之后*** 的功能增强，替换等操作
+
+BeanPostProcessor与BeanFactoryPostProcessor都是Spring在Bean生产过程中强有力的扩展点。如果你还对它感到很陌生，那么你肯定知道Spring中著名的AOP(面向切面编程)，其实就是依赖BeanPostProcessor对Bean对象功能增强的。
+
+BeanPostProcessor前置处理就是在要生产的Bean实例放到容器之前，允许程序员对Bean实例进行一定程度的修改，替换等操作。
+
+前面讲到的ApplicationContext对于Aware接口的检查与自动注入就是通过BeanPostProcessor实现的，在这一步Spring将检查Bean中是否实现了相关的Aware接口，如果是的话，那么就将其自身注入Bean中即可。Spring中AOP就是在这一步实现的偷梁换柱，产生对于原生对象的代理对象，然后将对原生对象上的方法调用，转而使用代理对象的相同方法调用实现的。
+
+### 自定义初始化逻辑
+
+在所有的准备工作完成之后，如果我们的Bean还有一定的初始化逻辑，那么Spring将允许我们通过两种方式配置我们的初始化逻辑：(1)InitializingBean  (2)配置init-method参数
+
+一般通过配置init-method方法比较灵活。
+
+### BeanPostProcess后置处理
+
+与前置处理类似，这里是在Bean自定义逻辑也执行完成之后，Spring又留给我们的最后一个扩展点。我们可以在这里在做一些我们想要的扩展。
+
+### 自定义销毁逻辑
+
+这一步对应自定义初始化逻辑，同样有两种方式：(1)实现DisposableBean接口 (2)配置destory-method参数。
+
+这里一个比较典型的应用就是配置dataSource的时候destory-method为数据库连接的close()方法。
+
+### 使用
+
+经过了以上道道工序，我们像对待平常的对象一样对待Spring为我们产生的Bean实例
+
+### 调用回调销毁接口
+
+Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容器关闭的时候)，这时候Spring将以回调的方式调用我们自定义的销毁逻辑，
 
 
-# IOC模块仿写
+
+![img](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7a23065fc2124b79993b669044da8e82~tplv-k3u1fbpfcp-watermark.image)
+
+> 需要指出，容器启动阶段与Bean实例化阶段之间的桥梁就是我们可以选择自定义配置的延迟加载策略，如果我们配置了Bean的延迟加载策略，那么只有我们在真实的使用依赖对象的时候，Spring才会开始Bean的实例化阶段。而如果我们没有开启Bean的延迟加载，那么在容器启动阶段之后，就会紧接着进入Bean实例化阶段，通过隐式的调用getBean方法，来实例化相关Bean。
+
+
+
+# 仿写Bean实例化过程
+
+## IOC模块仿写
 
 ![][手写IOC框架]
 
@@ -604,106 +852,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 
-# Spring重要接口
-
-## BeanFactory继承体系（基础容器）
-
-![BeanFactory继承关系](https://upload-images.jianshu.io/upload_images/845143-c11e52d3b2159a22.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
-### 四级接口继承体系
-
-1. BeanFactory 作为一个主接口不继承任何接口，暂且称为一级接口。 
-2. AutowireCapableBeanFactory <!--相当于我们的实现2，自动注解--> 、HierarchicalBeanFactory、ListableBeanFactory 3个子接口继承了它，进行功能上的增强。这3个子接口称为二级接口。
-   - ListableBeanFactory 能返回容器中所有的Bean
-   - HierarchicalBeanFactory能返回父类容器的功能
-   - AutowireCapableBeanFactory 负责组装，各种Aware、DI、初始化。<!--就是我们的实现2-->
-3. ConfigurableBeanFactory 可以被称为三级接口，对二级接口 HierarchicalBeanFactory 进行了再次增强，它还继承了另一个外来的接口SingletonBeanRegistry 
-4. ConfigurableListableBeanFactory 是一个更强大的接口，继承了上述的所有接口，无所不包，称为四级接口。
-
-> 总结：
->
-> |-- BeanFactory 是Spring bean容器的根接口.
->
-> 提供获取bean,是否包含bean,是否单例与原型,获取bean类型,bean 别名的api.
->
-> |-- -- AutowireCapableBeanFactory 提供工厂的装配功能。
->
-> |-- -- HierarchicalBeanFactory 提供父容器的访问功能
->
-> |-- -- -- ConfigurableBeanFactory 如名,提供factory的配置功能,眼花缭乱好多api
->
-> |-- -- -- -- ConfigurableListableBeanFactory 集大成者,提供解析,修改bean定义,并初始化单例.
->
-> |-- -- ListableBeanFactory 提供容器内bean实例的枚举功能.这边不会考虑父容器内的实
->
-> 例.
->
-> 看到这边,我们是不是想起了设计模式原则里的接口隔离原则。 
 
 
 
-下面是继承关系的2个抽象类和2个实现类： 
 
-1. AbstractBeanFactory 作为一个抽象类，实现了三级接口 ConfigurableBeanFactory 大部分功能。
-
-2. AbstractAutowireCapableBeanFactory 同样是抽象类，继承自 AbstractBeanFactory ，并额外实现了二级接口 AutowireCapableBeanFactory 。 
-
-3. DefaultListableBeanFactory <!--就是实现3的Bean Factory的实现类--> 继承自 AbstractAutowireCapableBeanFactory ，实现了最强大的四级接口 ConfigurableListableBeanFactory ，并实现了一个外来接口BeanDefinitionRegistry ，它并非抽象类。
-
-4. 最后是最强大的 XmlBeanFactory ，继承自 DefaultListableBeanFactory ，重写了一些功能，使自己更强大。
-
-### 2个接口封装数据集合的操作(就是实现2中，集合singleObjects和beanDefinitions)
-
-- BeanDefinitionRegistry 封装了beanDefinitions
-
-  - ```java
-    public interface BeanDefinitionRegistry extends AliasRegistry { 
-        // 给定bean名称，注册一个新的bean定义 
-        void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException; 
-        /** 根据指定Bean名移除对应的Bean定义 */ 
-        void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 根据指定bean名得到对应的Bean定义 */ 
-        BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 查找，指定的Bean名是否包含Bean定义 */ 
-        boolean containsBeanDefinition(String beanName); 
-        String[] getBeanDefinitionNames();//返回本容器内所有注册的Bean定义名称 
-        int getBeanDefinitionCount();//返回本容器内注册的Bean定义数目 
-        boolean isBeanNameInUse(String beanName);//指定Bean名是否被注册过。 
-    }
-    ```
-
-- SingletonBeanRegistry封装了singleObjects
-
-  - ```java
-    public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
-    	// K:BeanName
-    	// V:Bean实例对象
-    	private Map<String, Object> singletonObjects = new HashMap<String, Object>();
-    
-    	@Override
-    	public Object getSingleton(String beanName) {
-    		return this.singletonObjects.get(beanName);
-    	}
-    
-    	@Override
-    	public void addSingleton(String beanName, Object bean) {
-    		this.singletonObjects.put(beanName, bean);
-    	}
-    
-    }
-    ```
-
-    
-
-## BeanDefinitions继承体系（了解就行）
-
-实际只用BeanDefinition
-
-## ApplicationContext继承体系（高级容器）
-
-我们自己的实现没用，源码阅读才用到
-
-
-
-# Spring IOC源码
+# Spring IOC源码解析
 
 ## 基础容器BeanFactory对BeanDefinition注册
 
