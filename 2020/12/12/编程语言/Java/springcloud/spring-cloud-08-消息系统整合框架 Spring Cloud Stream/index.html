@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="spring boot本来就整合kafka，为什么spring cloud为什么还要整合kafka呢？ 因为spring boot使用kafka很麻烦；  简介一个轻量级的事件驱动微服务框架，用于快速构建可连接到外部系统的应用程序。 在 Spring Boot 应用程序之间使用 Kafka 或 RabbitMQ 发送和接收消息的简单声明式模型。 Spring Cloud Stream 是一个用来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring-cloud-8.消息系统整合框架 Spring Cloud Stream">
+<meta property="og:url" content="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="spring boot本来就整合kafka，为什么spring cloud为什么还要整合kafka呢？ 因为spring boot使用kafka很麻烦；  简介一个轻量级的事件驱动微服务框架，用于快速构建可连接到外部系统的应用程序。 在 Spring Boot 应用程序之间使用 Kafka 或 RabbitMQ 发送和接收消息的简单声明式模型。 Spring Cloud Stream 是一个用来">
+<meta property="og:locale">
+<meta property="og:image" content="data:image/png;base64,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">
+<meta property="article:published_time" content="2020-12-12T07:40:07.000Z">
+<meta property="article:modified_time" content="2021-02-08T14:20:22.100Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/png;base64,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">
+
+
+<link rel="canonical" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>spring-cloud-8.消息系统整合框架 Spring Cloud Stream | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">原理模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E8%80%85"><span class="nav-number">3.1.</span> <span class="nav-text">创建消息生产者</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">附录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#spring-cloud-stream%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">4.1.</span> <span class="nav-text">spring cloud stream原理图</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          spring-cloud-8.消息系统整合框架 Spring Cloud Stream
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-12 15:40:07" itemprop="dateCreated datePublished" datetime="2020-12-12T15:40:07+08:00">2020-12-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-02-08 22:20:22" itemprop="dateModified" datetime="2021-02-08T22:20:22+08:00">2021-02-08</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>spring boot本来就整合kafka，为什么spring cloud为什么还要整合kafka呢？</p>
+<p>因为spring boot使用kafka很麻烦；</p>
+</blockquote>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>一个轻量级的事件驱动微服务框架，用于快速构建可连接到外部系统的应用程序。 在 Spring Boot 应用程序之间使用 Kafka 或 RabbitMQ 发送和接收消息的简单声明式模型。</p>
+<p>Spring Cloud Stream 是一个用来为微服务应用构建消息驱动能力的框架。通过使用 Spring Cloud Stream，可以有效简化开发人员对消息中间件的使用复杂度，让系统开发人员 可以有更多的精力关注于核心业务逻辑的处理。但是目前 Spring Cloud Stream 只支持 RabbitMQ 和 Kafka 的自动化配置。</p>
+<h1 id="原理模型"><a href="#原理模型" class="headerlink" title="原理模型"></a>原理模型</h1><p>应用程序的核心部分(Application Core)通过 inputs 与 outputs 管道，与中间件连接， 而管道是通过绑定器 Binder 与中间件相绑定的。</p>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><h2 id="创建消息生产者"><a href="#创建消息生产者" class="headerlink" title="创建消息生产者"></a>创建消息生产者</h2><blockquote>
+<p>总步骤</p>
+<ul>
+<li>导入spring-cloud-stream-binder-kafka依赖</li>
+<li>创建消息生产者类。在生产者类上添加@EnableBinding()注解，并声明管道 </li>
+<li>定义处理器，在处理器中调用消息生产者，使其发送消息</li>
+<li>在配置文件中注册kafka集群，并指定管道所绑定的主题及类型</li>
+</ul>
+</blockquote>
+<ul>
+<li><p>添加依赖</p>
+<ul>
+<li><pre><code class="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt; 
+  &lt;artifactId&gt;spring-cloud-stream-binder-kafka&lt;/artifactId&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 创建消息生产者类</span><br><span class="line"></span><br><span class="line">  - 添加@EnableBinding()注解，并声明管道 </span><br><span class="line"></span><br><span class="line">  - 管道(outputs)可以自定义, 仿照Source写就可以</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;java</span><br><span class="line">      public interface CustomSource &#123;</span><br><span class="line">          String CHANNEL_NAME &#x3D; &quot;xxx&quot;;</span><br><span class="line">      </span><br><span class="line">          @Output(CustomSource.CHANNEL_NAME)</span><br><span class="line">          MessageChannel output();</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+- [有了自定义outputs, 那么一个消息就可以通过多个outputs可以发给多个主题]()</code></pre>
+</li>
+<li><pre><code class="java">@Component
+// 将MQ与生产者类通过消息管道相绑定
+@EnableBinding(&#123;Source.class,CustomSource.class&#125;)
+public class SomeProducer &#123;
+    // 必须使用byName方式的自动注入,因为还有Source.ERROR，所以使用byName
+    @Autowired
+    @Qualifier(Source.OUTPUT)
+    private MessageChannel channel;
+
+    @Autowired
+    @Qualifier(Source.OUTPUT)
+    private MessageChannel customedChannel;
+
+    public String sendMessage(String msg) &#123;
+        // 通过消息管道outputs发送消息，即消息写入到消息管道outputs，再通过消息管道写入到MQ
+        channel.send(MessageBuilder.withPayload(msg).build());
+          customedChannel.send(MessageBuilder.withPayload(msg).build());
+        return msg;
+    &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改Controller, 调用消息生产者，使其发送消息</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @RestController</span><br><span class="line">    public class SomeController &#123;</span><br><span class="line">        &#x2F;&#x2F; 将生产者注入</span><br><span class="line">        @Autowired</span><br><span class="line">        private SomeProducer producer;</span><br><span class="line">    </span><br><span class="line">        @PostMapping(&quot;&#x2F;msg&#x2F;send&quot;)</span><br><span class="line">        public String sendHandler(@RequestParam(&quot;message&quot;) String msg) &#123;</span><br><span class="line">            &#x2F;&#x2F; 生产者发送消息</span><br><span class="line">            return producer.sendMessage(msg);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">spring:
+  application:
+    name: abcmsc-consumer-depart
+
+  cloud:
+    stream:
+      kafka:
+        binder:
+          # 指定要连接的kafka集群
+          brokers: kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092
+          # 指定是否自动创建主题
+          auto-create-topics: true
+      bindings: #绑定了2个管道output：output和xxx
+        output:  # 指定要绑定的输出管道，及要输出到单管道中的消息主题及类型
+          destination: names #kafka topic
+          content-type: text/plain
+
+                xxx: 
+          destination: cities
+          content-type: text/plain
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">## 创建消息消费者</span><br><span class="line"></span><br><span class="line">Spring Cloud Stream 提供了三种创建消费者的方式，这三种方式的都是在消费者类的“消 费”方法上添加注解。只要有新的消息写入到了管道，该“消费”方法就会执行。只不过三种注解，其底层的实现方式不同。即当新消息到来后，触发“消费”方法去执行的实现方式 不同。</span><br><span class="line"></span><br><span class="line">- @PostConstruct:以发布&#x2F;订阅方式实现</span><br><span class="line">- @ServiceActivator:以新消息激活服务的方式实现 </span><br><span class="line">- @StreamListener:以监听方式实现</span><br><span class="line"></span><br><span class="line">&gt; 总步骤</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 导入spring-cloud-stream-binder-kafka依赖</span><br><span class="line">&gt; - 创建消费者类。在消费者类上添加@EnableBinding()注解，并声明管道。 在消费者类中定义消费方法，在方法上添加相应的注解。</span><br><span class="line">&gt; - 在配置文件中注册kafka集群，并指定管道所绑定的主题</span><br><span class="line"></span><br><span class="line">- 添加依赖（同上）</span><br><span class="line"></span><br><span class="line">- 创建消费者类</span><br><span class="line"></span><br><span class="line">  - 只以@PostConstruct为例</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @Component</span><br><span class="line">    @EnableBinding(&#123;Sink.class&#125;)</span><br><span class="line">    public class SomeConsumer &#123;</span><br><span class="line">        @Autowired</span><br><span class="line">        @Qualifier(Sink.INPUT)</span><br><span class="line">        private SubscribableChannel channel;</span><br><span class="line">      </span><br><span class="line">        @PostConstruct</span><br><span class="line">        public void printMessage() &#123;</span><br><span class="line">            channel.subscribe(msg -&gt; &#123;</span><br><span class="line">                &#x2F;&#x2F; MessageHeaders headers &#x3D; msg.getHeaders();</span><br><span class="line">                System.out.println(new String((byte[])msg.getPayload()));</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          # 指定要连接的kafka集群
+          brokers: kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092
+          # 指定是否自动创建主题
+          auto-create-topics: true
+      bindings:
+        # 指定要绑定的输入管道input，及要消费的管道中的消息主题
+        input:
+          destination: names</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="spring-cloud-stream原理图"><a href="#spring-cloud-stream原理图" class="headerlink" title="spring cloud stream原理图"></a>spring cloud stream原理图</h2><p><img src="data:image/png;base64,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" alt="Image result for spring cloud steam"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-OpenFeign%E4%B8%8ERibbon/" rel="prev" title="spring-cloud-03-OpenFeign与Ribbon">
+                  <i class="fa fa-chevron-left"></i> spring-cloud-03-OpenFeign与Ribbon
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-01-%E5%85%A5%E9%97%A8/" rel="next" title="spring-cloud-1.入门">
+                  spring-cloud-1.入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

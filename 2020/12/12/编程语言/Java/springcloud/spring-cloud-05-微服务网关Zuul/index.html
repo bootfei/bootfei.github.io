@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="概述网关是系统唯一对外的入口，介于客户端(eg.浏览器)与服务器端之间，用于对请求进行鉴权、限流、 路由、监控等功能 Zuul 主要提供了对请求的路由与过滤功能。  路由:将外部请求转发到具体的微服务实例上，是外部访问微服务的统一入口。  过滤:对请求的处理过程进行干预，对请求进行校验、鉴权等处理。  Zuul也是Eureka client，从Eureka server获取其他consumer的信">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring-cloud-5-微服务网关Zuul">
+<meta property="og:url" content="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-05-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Zuul/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="概述网关是系统唯一对外的入口，介于客户端(eg.浏览器)与服务器端之间，用于对请求进行鉴权、限流、 路由、监控等功能 Zuul 主要提供了对请求的路由与过滤功能。  路由:将外部请求转发到具体的微服务实例上，是外部访问微服务的统一入口。  过滤:对请求的处理过程进行干预，对请求进行校验、鉴权等处理。  Zuul也是Eureka client，从Eureka server获取其他consumer的信">
+<meta property="og:locale">
+<meta property="og:image" content="http://yuwb.pub/usr/uploads/2018/11/1832100691.png">
+<meta property="article:published_time" content="2020-12-12T07:40:07.000Z">
+<meta property="article:modified_time" content="2021-02-08T03:46:12.542Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yuwb.pub/usr/uploads/2018/11/1832100691.png">
+
+
+<link rel="canonical" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-05-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Zuul/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>spring-cloud-5-微服务网关Zuul | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-zuul-%E7%BD%91%E5%85%B3%E5%B7%A5%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">创建 zuul 网关工程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">路由策略配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%89%8D%E8%BE%8D"><span class="nav-number">3.1.</span> <span class="nav-text">路由前辍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%8F%E6%84%9F%E8%AF%B7%E6%B1%82%E5%A4%B4%E5%B1%8F%E8%94%BD"><span class="nav-number">3.2.</span> <span class="nav-text">敏感请求头屏蔽</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E8%BF%87%E6%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">请求过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zuul-server"><span class="nav-number">4.1.</span> <span class="nav-text">Zuul server</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%861"><span class="nav-number">4.1.1.</span> <span class="nav-text">原理1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%862"><span class="nav-number">4.1.2.</span> <span class="nav-text">原理2</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Zuul%E7%9A%84%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">Zuul的高可用</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-05-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Zuul/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          spring-cloud-5-微服务网关Zuul
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-12 15:40:07" itemprop="dateCreated datePublished" datetime="2020-12-12T15:40:07+08:00">2020-12-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-02-08 11:46:12" itemprop="dateModified" datetime="2021-02-08T11:46:12+08:00">2021-02-08</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>网关是系统唯一对外的入口，介于客户端(eg.浏览器)与服务器端之间，用于对请求进行鉴权、限流、 路由、监控等功能</p>
+<p>Zuul 主要提供了对请求的路由与过滤功能。</p>
+<ul>
+<li>路由:将外部请求转发到具体的微服务实例上，是外部访问微服务的统一入口。 </li>
+<li>过滤:对请求的处理过程进行干预，对请求进行校验、鉴权等处理。</li>
+</ul>
+<p>Zuul也是Eureka client，从Eureka server获取其他consumer的信息。</p>
+<h1 id="创建-zuul-网关工程"><a href="#创建-zuul-网关工程" class="headerlink" title="创建 zuul 网关工程"></a>创建 <strong>zuul</strong> 网关工程</h1><ul>
+<li><p>导入依赖</p>
+<ul>
+<li><p>首先除了 eureka client 依赖后，将其它依赖全部删除，然后再导入 zuul 依赖。</p>
+</li>
+<li><pre><code class="xml">&lt;!--zuul 依赖--&gt; 
+&lt;dependency&gt;
+&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt; 
+&lt;artifactId&gt;spring-cloud-starter-netflix-zuul&lt;/artifactId&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改启动类</span><br><span class="line"></span><br><span class="line">  - @EnableZuulProxy</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - 与其他Eureka client一样，向Eureka发送信息和从Eureka获取信息</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    server:</span><br><span class="line">    	port: 9000</span><br><span class="line">    eureka:</span><br><span class="line">    	client:</span><br><span class="line">    		service-url:</span><br><span class="line">			default-zone: http&#x2F;&#x2F;...</span><br></pre></td></tr></table></figure>
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>如何测试：</p>
+<ul>
+<li><p>访问路径 = zuul地址 + <a href="">consumer微服务名称</a> + consumer接口</p>
+</li>
+<li><p>访问<a target="_blank" rel="noopener" href="http://localhost:9000/abcmsc-consumer-depart-8080/consumer/get/1">http://localhost:9000/abcmsc-consumer-depart-8080/consumer/get/1</a></p>
+</li>
+</ul>
+</blockquote>
+<h1 id="路由策略配置"><a href="#路由策略配置" class="headerlink" title="路由策略配置"></a>路由策略配置</h1><p>前面的访问方式，需要将<a href="">微服务名称</a>暴露给用户，会存在安全性问题。所以，可以自定义路径来替代微服务名称，即自定义路由策略。</p>
+<ul>
+<li><p>修改配置文件</p>
+<ul>
+<li><p>在配置文件中添加如下配置。</p>
+</li>
+<li><pre><code class="yaml">zuul:
+    routes:
+        #指定路由规则
+        abcmsc-consumer-depart-8080: /abc8000/**
+        abcmsc-consumer-depart-8090: /abc9000/**
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&gt; 如何测试：</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 访问路径 &#x3D; zuul地址 + zuul的路由规则 + consumer接口</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 访问http:&#x2F;&#x2F;localhost:9000&#x2F;abc8000&#x2F;consumer&#x2F;get&#x2F;1</span><br><span class="line"></span><br><span class="line">## 屏蔽微服务名称</span><br><span class="line"></span><br><span class="line">原来的[微服务名称]()方式还是可以访问，所以必须屏蔽。</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - 在配置文件中添加如下配置。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    zuul:</span><br><span class="line">    	routes:</span><br><span class="line">    		#指定路由规则</span><br><span class="line">    		abcmsc-consumer-depart-8080: &#x2F;abc8000&#x2F;**</span><br><span class="line">    		abcmsc-consumer-depart-8090: &#x2F;abc9000&#x2F;**</span><br><span class="line">    	#屏蔽所有微服务名称</span><br><span class="line">    	ignore-services: &quot;*&quot;</span><br><span class="line">    		</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>如何测试：</p>
+<ul>
+<li><p>访问路径 = zuul地址 + <a href="">consumer微服务名称的别称</a> + consumer接口</p>
+</li>
+<li><p>访问<a target="_blank" rel="noopener" href="http://localhost:9000/abcmsc-consumer-depart-8080/consumer/depart/get/1%E5%A4%B1%E6%95%88">http://localhost:9000/abcmsc-consumer-depart-8080/consumer/depart/get/1失效</a></p>
+</li>
+</ul>
+</blockquote>
+<h2 id="路由前辍"><a href="#路由前辍" class="headerlink" title="路由前辍"></a>路由前辍</h2><p>在配置路由策略时，可以为路由路径配置一个统一的前辍，以便为请求归类。</p>
+<ul>
+<li><p>修改配置文件</p>
+<ul>
+<li><p>在配置文件中添加如下配置。</p>
+</li>
+<li><pre><code class="yaml">zuul:
+    ##指定前缀
+    prefix: /abc
+    routes:
+        #指定路由规则
+        abcmsc-consumer-depart-8080: /abc8000/**
+        abcmsc-consumer-depart-8090: /abc9000/**
+    #屏蔽所有微服务名称
+    ignore-services: &quot;*&quot;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&gt; 如何测试：</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 访问路径 &#x3D; zuul地址 + 前缀 + [consumer微服务名称的别称]() + consumer接口</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 访问http:&#x2F;&#x2F;localhost:9000&#x2F;abc&#x2F;abc8000&#x2F;consumer&#x2F;depart&#x2F;get&#x2F;1</span><br><span class="line"></span><br><span class="line">## 路径屏蔽</span><br><span class="line"></span><br><span class="line"> 可以指定屏蔽掉的路径 URI，即只要用户请求中包含指定的 URI 路径，那么该请求将无法访问到指定的服务。通过该方式可以限制用户的权限。</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - 在配置文件中添加如下配置。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    zuul:</span><br><span class="line">    	##指定前缀</span><br><span class="line">    	prefix: &#x2F;abc</span><br><span class="line">    	routes:</span><br><span class="line">    		#指定路由规则</span><br><span class="line">    		abcmsc-consumer-depart-8080: &#x2F;abc8000&#x2F;**</span><br><span class="line">    		abcmsc-consumer-depart-8090: &#x2F;abc9000&#x2F;**</span><br><span class="line">    	#屏蔽所有微服务名称</span><br><span class="line">    	ignore-services: &quot;*&quot;</span><br><span class="line">    	#屏蔽指定URI</span><br><span class="line">    	ignore-patterns: &#x2F;**&#x2F;list&#x2F;**</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>如何测试：</p>
+<ul>
+<li>访问<a target="_blank" rel="noopener" href="http://localhost:9000/abc/abc8000/consumer/depart/list%E5%A4%B1%E6%95%88">http://localhost:9000/abc/abc8000/consumer/depart/list失效</a></li>
+</ul>
+</blockquote>
+<h2 id="敏感请求头屏蔽"><a href="#敏感请求头屏蔽" class="headerlink" title="敏感请求头屏蔽"></a>敏感请求头屏蔽</h2><p>默认情况下，像 Cookie、Set-Cookie 等敏感请求头信息会被 zuul 屏蔽掉，我们可以将这些默认屏蔽去掉，当然，也可以添加要屏蔽的请求头。</p>
+<ul>
+<li><p>修改配置文件</p>
+<ul>
+<li><p>在配置文件中添加如下配置。</p>
+</li>
+<li><pre><code class="yaml">zuul:
+    ##指定前缀
+    prefix: /abc
+    routes:
+        #指定路由规则
+        abcmsc-consumer-depart-8080: /abc8000/**
+        abcmsc-consumer-depart-8090: /abc9000/**
+    #屏蔽所有微服务名称
+    ignore-services: &quot;*&quot;
+    #屏蔽指定URI
+    ignore-patterns: /**/list/**
+    #设置需要屏蔽的敏感头
+    sensitive-headers: token, set-cookies,cookies
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 对Conumser负载均衡</span><br><span class="line"></span><br><span class="line">查看zuul的依赖，有Hystrix和ribbon，所以可以负载均衡。</span><br><span class="line"></span><br><span class="line">用户提交的请求被路由到一个指定的微服务中，若该微服务名称的主机有多个，则默认采用负载均衡策略是轮询。</span><br><span class="line"></span><br><span class="line">- 创建多个conusmer</span><br><span class="line"></span><br><span class="line">  - 微服务名称都设置为abc-consumer-depart</span><br><span class="line"></span><br><span class="line">- Zuul server</span><br><span class="line"></span><br><span class="line">  - 修改配置文件，指定路由规则，则自动进行负载均衡</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;yaml</span><br><span class="line">      zuul:</span><br><span class="line">        ##指定前缀</span><br><span class="line">        prefix: &#x2F;abc</span><br><span class="line">        routes:</span><br><span class="line">          #指定路由规则</span><br><span class="line">          abcmsc-consumer-depart: &#x2F;abc123&#x2F;**</span><br></pre></td></tr></table></figure>
+
+- 测试访问http://localhost:9000/abc/abc123/consumer/depart/list发现负载均衡</code></pre>
+</li>
+<li><p>修改负载均衡策略，使用随机策略</p>
+<ul>
+<li><p>启动类</p>
+</li>
+<li><pre><code class="java">@EnableZuulProxy
+@SpringBootApplication&#123;
+    ....
+    @Bean
+    public IRule getRule()&#123;
+        return new RandomRule();
+    &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">      </span><br><span class="line"></span><br><span class="line"># 对Conumser服务降级</span><br><span class="line"></span><br><span class="line">当消费者调用提供者时由于各种原因出现无法调用的情况时，消费者可以进行服务降级。那么，若客户端通过网关调用消费者无法调用时, 同样可以降级。</span><br><span class="line"></span><br><span class="line">- 在Zuul server中定义 **fallback** 类</span><br><span class="line"></span><br><span class="line">  - 可以对指定微服务降级，通过getRoute()方法 + 在fallbackResponse()方法中对route做判断</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @Component</span><br><span class="line">    public class ConsumerFallback implements FallbackProvider &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public String getRoute() &#123;</span><br><span class="line">            &#x2F;&#x2F; 对指定的微服务进行降级</span><br><span class="line">            &#x2F;&#x2F; return &quot;abcmsc-consumer-depart-8080&quot;;</span><br><span class="line">            &#x2F;&#x2F; 指定对所有微服务进行降级</span><br><span class="line">            return &quot;*&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        @Override</span><br><span class="line">        public ClientHttpResponse fallbackResponse(String route, Throwable cause) &#123;</span><br><span class="line">            &#x2F;&#x2F; 若微服务不是abcmsc-consumer-depart-8080，则不进行降级</span><br><span class="line">            &#x2F;&#x2F; if (!&quot;abcmsc-consumer-depart-8080&quot;.equals(route)) &#123;</span><br><span class="line">            &#x2F;&#x2F;     return null;</span><br><span class="line">            &#x2F;&#x2F; &#125;</span><br><span class="line">    </span><br><span class="line">            &#x2F;&#x2F; 仅对abcmsc-consumer-depart-8080进行降级</span><br><span class="line">            return new ClientHttpResponse() &#123;</span><br><span class="line">                @Override</span><br><span class="line">                public HttpHeaders getHeaders() &#123;</span><br><span class="line">                    HttpHeaders headers &#x3D; new HttpHeaders();</span><br><span class="line">                    headers.setContentType(MediaType.APPLICATION_JSON);</span><br><span class="line">                    return headers;</span><br><span class="line">                &#125;</span><br><span class="line">    </span><br><span class="line">                @Override</span><br><span class="line">                public InputStream getBody() throws IOException &#123;</span><br><span class="line">                    String msg &#x3D; &quot;fallback:&quot; + route;</span><br><span class="line">                    return new ByteArrayInputStream(msg.getBytes());</span><br><span class="line">                &#125;</span><br><span class="line">    </span><br><span class="line">                @Override</span><br><span class="line">                public HttpStatus getStatusCode() throws IOException &#123;</span><br><span class="line">                    return HttpStatus.SERVICE_UNAVAILABLE;</span><br><span class="line">                &#125;</span><br><span class="line">    </span><br><span class="line">                @Override</span><br><span class="line">                public int getRawStatusCode() throws IOException &#123;</span><br><span class="line">                    return HttpStatus.SERVICE_UNAVAILABLE.value();</span><br><span class="line">                &#125;</span><br><span class="line">    </span><br><span class="line">                @Override</span><br><span class="line">                public String getStatusText() throws IOException &#123;</span><br><span class="line">                    return HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase();</span><br><span class="line">                &#125;</span><br><span class="line">    </span><br><span class="line">                @Override</span><br><span class="line">                public void close() &#123;</span><br><span class="line">                    &#x2F;&#x2F; 写资源释放代码</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="请求过滤"><a href="#请求过滤" class="headerlink" title="请求过滤"></a>请求过滤</h1><p>在服务路由之前、中、后，可以对请求进行过滤，使其只能访问它应该访问到的资源，增强安全性。此时需要通过 ZuulFilter 过滤器来实现对外服务的安全控制。</p>
+<img src="http://yuwb.pub/usr/uploads/2018/11/1832100691.png" style="zoom:50%;" />
+
+<ul>
+<li><p>需求</p>
+<ul>
+<li>该过滤的条件是，只有请求参数携带有 user 的请求才可访问/abc8080 工程，否则返回 401，未授权。当然，对/abc8090 工程的访问没有限制。简单来说就是，只有当访问/abc8080 且 user 为空时是通不过过滤的，其它请求都可以。</li>
+</ul>
+</li>
+<li><p>定义 <strong>RouteFilter</strong> 类</p>
+<ul>
+<li><pre><code class="java">@Component
+public class RouteFilter extends ZuulFilter &#123;
+    @Override
+    public String filterType() &#123;
+        // &quot;pre&quot;,进行路由之前过滤
+        return FilterConstants.PRE_TYPE;
+    &#125;
+
+    @Override
+    public int filterOrder() &#123;
+          // 越小，越靠前执行
+        return -5;
+    &#125;
+
+      //为true表示通过
+    @Override
+    public boolean shouldFilter() &#123;
+        // 获取当前的请求上下文对象
+        RequestContext context = RequestContext.getCurrentContext();
+        // 从请求上下文中获取当前请求信息
+        HttpServletRequest request = context.getRequest();
+        String user = request.getParameter(&quot;user&quot;);
+        String uri = request.getRequestURI();
+        if (uri.contains(&quot;/abc8080&quot;) &amp;&amp; StringUtils.isEmpty(user)) &#123;
+            // 指定当前请求未通过zuul过滤，默认值为true
+            context.setSendZuulResponse(false);
+            context.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());
+            return false;
+        &#125;
+        return true;
+    &#125;
+
+    @Override
+    public Object run() throws ZuulException &#123;
+        System.out.println(&quot;通过过滤&quot;);
+        return null;
+    &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"># 令牌桶限流</span><br><span class="line"></span><br><span class="line">通过对请求限流的方式避免系统遭受“雪崩之灾”。</span><br><span class="line"></span><br><span class="line">我们下面的代码使用 Guava 库的 RateLimit 完成限流的，而其底层使用的是令牌桶算法 实现的限流，所以我们先来学习一下令牌桶限流算法。</span><br><span class="line"></span><br><span class="line">## 原理</span><br><span class="line"></span><br><span class="line">- 令牌桶算法</span><br><span class="line">- 漏斗限流算法</span><br><span class="line"></span><br><span class="line">实现</span><br><span class="line"></span><br><span class="line">- 修改**RouteFilter** 类</span><br><span class="line">  - 重写逻辑代码，即shouldFilter()方法</span><br><span class="line">  - 具体代码（略）</span><br><span class="line"></span><br><span class="line"># 多维请求限流 </span><br><span class="line"></span><br><span class="line">## 原理</span><br><span class="line"></span><br><span class="line">使用 Guava 的 RateLimit 令牌桶算法可以实现对请求的限流，但其限流粒度有些大。有 个老外使用路由过滤，针对 Zuul 编写了一个限流库(spring-cloud-zuul-ratelimit)，提供多种细 粒度限流策略，在导入该依赖后我们就可以直接使用了。</span><br><span class="line"></span><br><span class="line">其限流策略，即限流查验的对象类型有:</span><br><span class="line"></span><br><span class="line">- user:针对用户的限流，即对单位时间窗内经过网关的用户数量的限制。</span><br><span class="line">- origin:针对客户端IP的限流，即对单位时间窗内经过网关的IP数量的限制。 </span><br><span class="line">- url:针对请求URL的限流，即对单位时间窗内经过网关的URL数量的限制。</span><br><span class="line"></span><br><span class="line">[对于某个请求，只要不符合任意一项，都无法通过。]()</span><br><span class="line"></span><br><span class="line">## 实现</span><br><span class="line"></span><br><span class="line">- 删除RouteFilter类</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!-- spring-cloud-zuul-ratelimit 依赖 --&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;com.marcosbarbero.cloud&lt;&#x2F;groupId&gt; </span><br><span class="line">      &lt;artifactId&gt;spring-cloud-zuul-ratelimit&lt;&#x2F;artifactId》</span><br><span class="line">      &lt;version&gt;2.0.5.RELEASE&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">zuul:
+  routes:
+    abcmsc-consumer-depart-8080: /abc8080/**
+    abcmsc-consumer-depart-8090: /abc8090/**
+
+  ratelimit:
+    enabled: true  # 开启限流
+    # 设置限流策略
+    # 在一个单位时间窗内通过该zuul的用户数量、ip数量及url数量，都不能超过3个
+    default-policy:
+      quota: 1   # 指定限流的时间窗数量
+      refresh-interval: 3    # 指定单位时间窗大小，单位秒
+      limit: 3  # 在指定的单位时间窗内启用限流的限定值
+      type: user,origin,url   # 指定限流查验的类型
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 添加异常处理页面</span><br><span class="line"></span><br><span class="line">  - 在 src&#x2F;main&#x2F;resources 目录下再定义新的目录 public&#x2F;error，必须是这个目录名称。然后 在该目录中定义一个异常处理页面，名称必须是异常状态码，扩展名必须为 html。</span><br><span class="line"></span><br><span class="line"># 灰度发布</span><br><span class="line"></span><br><span class="line">## 原理</span><br><span class="line"></span><br><span class="line">(**1**) 什么是灰度发布 灰度发布，又名金丝雀发布，是系统迭代更新、平滑过渡的一种上线发布方式。</span><br><span class="line"></span><br><span class="line">(**2**) **Zuul** 灰度发布原理 生产环境中，可以实现灰度发布的技术很多，我们这里要讲的是 zuul 对于灰度发布的实现。而其实现也是基于 Eureka 元数据的(自定义元数据)。</span><br><span class="line"></span><br><span class="line">## consumer</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - 添加Eureka元数据</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    eureka:</span><br><span class="line">    	client:</span><br><span class="line">    		....略</span><br><span class="line">    		</span><br><span class="line">    	instance:</span><br><span class="line">      	metadata-map: #指定添加的元数据</span><br><span class="line">      		host-mark: running-host #生产的机器</span><br><span class="line">      		#host-mark: gray-host #灰度发布的机器</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Zuul-server"><a href="#Zuul-server" class="headerlink" title="Zuul server"></a>Zuul server</h2><h3 id="原理1"><a href="#原理1" class="headerlink" title="原理1"></a>原理1</h3><p><a href=""> browser携带gray-host请求头, Zuul通过过滤器检测请求头；若携带gray-host请求头，那么把该请求路由到灰度发布的机器。</a></p>
+<ul>
+<li><p>添加依赖: 不是Spring cloud官网开发的</p>
+<ul>
+<li><pre><code class="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.jmnarloch&lt;/groupId&gt; 
+  &lt;artifactId&gt;ribbon-discovery-filter-spring-cloud-starter&lt;/artifactId&gt;
+  &lt;version&gt;2.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">- 定义过滤器</span><br><span class="line"></span><br><span class="line">  - 通过过滤器实现灰度发布</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    mport io.jmnarloch.spring.cloud.ribbon.support.RibbonFilterContextHolder;</span><br><span class="line">    import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;</span><br><span class="line">    import org.springframework.util.StringUtils;</span><br><span class="line">    </span><br><span class="line">    import javax.servlet.http.HttpServletRequest;</span><br><span class="line">    </span><br><span class="line">    &#x2F;&#x2F; @Component</span><br><span class="line">    public class GrayFilter extends ZuulFilter &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public String filterType() &#123;</span><br><span class="line">            return FilterConstants.PRE_TYPE;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        @Override</span><br><span class="line">        public int filterOrder() &#123;</span><br><span class="line">            return -5;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        @Override</span><br><span class="line">        public boolean shouldFilter() &#123;</span><br><span class="line">            &#x2F;&#x2F; 所有请求都通过zuul过滤</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        @Override</span><br><span class="line">        public Object run() throws ZuulException &#123;</span><br><span class="line">            RequestContext context &#x3D; RequestContext.getCurrentContext();</span><br><span class="line">            HttpServletRequest request &#x3D; context.getRequest();</span><br><span class="line">            &#x2F;&#x2F; 获取指定的请求头信息，该头信息在浏览器提交请求时携带，用于区分该请求要被路由到哪个主机处理</span><br><span class="line">            String mark &#x3D; request.getHeader(&quot;gray-mark&quot;);</span><br><span class="line">            &#x2F;&#x2F; 默认将请求路由到running-host上</span><br><span class="line">            RibbonFilterContextHolder.getCurrentContext().add(&quot;host-mark&quot;, &quot;running-host&quot;);</span><br><span class="line">            &#x2F;&#x2F; 若mark的值不为空且值为enable，则将请求路由到gray-host，其它请求会路由到默认的running-host</span><br><span class="line">            if (!StringUtils.isEmpty(mark) &amp;&amp; &quot;enable&quot;.equals(mark)) &#123;</span><br><span class="line">                RibbonFilterContextHolder.getCurrentContext().add(&quot;host-mark&quot;, &quot;gray-host&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="原理2"><a href="#原理2" class="headerlink" title="原理2"></a>原理2</h3><p>原理1得需要2套页面，一个不带gray-host，一个带gray-host，所以不方便。现在改为交替访问gray-host。</p>
+<ul>
+<li><p>定义过滤器</p>
+<ul>
+<li><p>通过全局变量Boolean flag，每次交互访问gray-host</p>
+</li>
+<li><pre><code class="java">@Component
+public class GrayFilter2 extends ZuulFilter &#123;
+    // 定义一个原子布尔变量，是为了解决当前单例中全局变量的线程安全问题
+    private AtomicBoolean flag = new AtomicBoolean(true);
+
+    @Override
+    public String filterType() &#123;
+        return FilterConstants.PRE_TYPE;
+    &#125;
+
+    @Override
+    public int filterOrder() &#123;
+        return -5;
+    &#125;
+
+    @Override
+    public boolean shouldFilter() &#123;
+        // 所有请求都通过zuul过滤
+        return true;
+    &#125;
+
+    @Override
+    public Object run() throws ZuulException &#123;
+        RequestContext context = RequestContext.getCurrentContext();
+        HttpServletRequest request = context.getRequest();
+
+        // 根据布尔变量的值的不同，路由到不同的主机，然后再将布尔值取反
+        if (flag.get()) &#123;
+            RibbonFilterContextHolder.getCurrentContext().add(&quot;host-mark&quot;, &quot;running-host&quot;);
+            flag.set(false);
+        &#125; else &#123;
+            RibbonFilterContextHolder.getCurrentContext().add(&quot;host-mark&quot;, &quot;gray-host&quot;);
+            flag.set(true);
+        &#125;
+
+        return null;
+    &#125;
+&#125;</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="Zuul的高可用"><a href="#Zuul的高可用" class="headerlink" title="Zuul的高可用"></a><strong>Zuul</strong>的高可用</h1><p>Zuul 的高可用非常关键，因为外部请求到后端微服务的流量都会经过 Zuul。故而在生产 环境中，我们一般都需要部署高可用的 Zuul 以避免单点故障。</p>
+<p>作为整个系统入口路由的高可用，需要借助额外的负载均衡器来实现，例如 Nginx、 HAProxy、F5 等。在 Zuul 集群的前端部分部署负载均衡服务器。Zuul 客户端将请求发送到负 载均衡器，负载均衡器将请求转发到其代理的其中一个 Zuul 节点。这样，就可以实现 Zuul 的高可用。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-01-Eureka%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="prev" title="spring-cloud-1.Eureka源码解析">
+                  <i class="fa fa-chevron-left"></i> spring-cloud-1.Eureka源码解析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-OpenFeign%E4%B8%8ERibbon/" rel="next" title="spring-cloud-03-OpenFeign与Ribbon">
+                  spring-cloud-03-OpenFeign与Ribbon <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

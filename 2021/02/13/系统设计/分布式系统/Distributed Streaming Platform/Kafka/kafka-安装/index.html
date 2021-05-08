@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="集群架构在生产环境中为了防止单点问题，Kafka 都是以集群方式出现的。下面要搭建一个 Kafka集群，包含三个 Kafka 主机，即三个 Broker 安装并配置第一台主机Kafka 的下载 上传并解压。   wget http:&#x2F;&#x2F;mirrors.shuosc.org&#x2F;apache&#x2F;kafka&#x2F;1.0.0&#x2F;kafka_2.11-1.0.0.tgz #去kafka官网找镜像 123456- 将下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kafka-安装">
+<meta property="og:url" content="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-%E5%AE%89%E8%A3%85/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="集群架构在生产环境中为了防止单点问题，Kafka 都是以集群方式出现的。下面要搭建一个 Kafka集群，包含三个 Kafka 主机，即三个 Broker 安装并配置第一台主机Kafka 的下载 上传并解压。   wget http:&#x2F;&#x2F;mirrors.shuosc.org&#x2F;apache&#x2F;kafka&#x2F;1.0.0&#x2F;kafka_2.11-1.0.0.tgz #去kafka官网找镜像 123456- 将下">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-02-13T09:05:46.000Z">
+<meta property="article:modified_time" content="2021-03-14T02:22:17.625Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-%E5%AE%89%E8%A3%85/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>kafka-安装 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">集群架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%B9%B6%E9%85%8D%E7%BD%AE%E7%AC%AC%E4%B8%80%E5%8F%B0%E4%B8%BB%E6%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">安装并配置第一台主机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-%E7%9A%84%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.1.</span> <span class="nav-text">Kafka 的下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kafka-%E7%9A%84%E5%90%AF%E5%8A%A8%E4%B8%8E%E5%81%9C%E6%AD%A2"><span class="nav-number">2.2.</span> <span class="nav-text">kafka 的启动与停止</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kafka%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%98%B2%E7%81%AB%E5%A2%99%E6%98%AF%E5%90%A6%E5%85%B3%E9%97%AD"><span class="nav-number">2.3.</span> <span class="nav-text">kafka服务器防火墙是否关闭</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kafka%E6%98%AF%E5%90%A6%E6%9C%89%E6%B6%88%E6%81%AF%E6%97%A5%E5%BF%97"><span class="nav-number">2.4.</span> <span class="nav-text">kafka是否有消息日志</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kafka-安装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-02-13 17:05:46" itemprop="dateCreated datePublished" datetime="2021-02-13T17:05:46+08:00">2021-02-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-14 10:22:17" itemprop="dateModified" datetime="2021-03-14T10:22:17+08:00">2021-03-14</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="集群架构"><a href="#集群架构" class="headerlink" title="集群架构"></a>集群架构</h1><p>在生产环境中为了防止单点问题，Kafka 都是以集群方式出现的。下面要搭建一个 Kafka集群，包含三个 Kafka 主机，即三个 Broker</p>
+<h1 id="安装并配置第一台主机"><a href="#安装并配置第一台主机" class="headerlink" title="安装并配置第一台主机"></a><strong>安装并配置第一台主机</strong></h1><h2 id="Kafka-的下载"><a href="#Kafka-的下载" class="headerlink" title="Kafka 的下载"></a><strong>Kafka</strong> 的下载</h2><ul>
+<li><p>上传并解压。 </p>
+<ul>
+<li><pre><code class="shell">wget http://mirrors.shuosc.org/apache/kafka/1.0.0/kafka_2.11-1.0.0.tgz #去kafka官网找镜像
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 将下载好的 Kafka 压缩包上传至 CentOS 虚拟机，并解压。</span><br><span class="line"></span><br><span class="line">  &#96;&#96;&#96;shell</span><br><span class="line">  #使用-C命令解压到&#x2F;opt&#x2F;apps目录下</span><br><span class="line">  tar -xzf kafka_2.12-2.7.0.tgz -C &#x2F;opt&#x2F;apps</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>创建软链接。为了屏蔽版本信息和目录，使得操作简单</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s kafka_2.11/ kafka</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改配置文件。 在 kafka 安装目录下有一个 config/server.properties 文件，修改该文件。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">broker.id</span>=<span class="string">0  #集群中kafka的broker唯一标识，默认0</span></span><br><span class="line"><span class="attr">listeners</span>=<span class="string">PLAINTEXT://192.168.59.152:9092 #写当前主机IP和端口。broker之间通信用的。不配置也行，kafka会自动配置</span></span><br><span class="line"><span class="meta">log.dirs</span>=<span class="string">xxx</span></span><br><span class="line"><span class="meta">num.partitions</span>=<span class="string">1  #消费的主题是要存储在partition中的，如果不设立，那么默认存储在1 partition中</span></span><br><span class="line"><span class="meta">zookeeper.connect</span>=<span class="string">192.168.10.32:2181  #consumer和broker是zookeeper管理的</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以 kafkaOS1 为母机再克隆两台 Kafka 主机。在克隆完毕后，需要修改 server.properties中的 broker.id、listeners 与 advertised.listeners。id要改为不一样的（+1就行）,listeners同样也不一样（ip改为各自的主机ip）</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="kafka-的启动与停止"><a href="#kafka-的启动与停止" class="headerlink" title="kafka 的启动与停止"></a><strong>kafka</strong> 的启动与停止</h2><ul>
+<li><p>启动 <strong>zookeeper</strong></p>
+<ul>
+<li><pre><code class="shell">zkServer.sh start
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 启动 kafka，</span><br><span class="line"></span><br><span class="line">  - 在命令后添加-daemon 参数，可以使 kafka 以守护进程方式启动，即不占用窗口。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;</span><br><span class="line">    bin&#x2F;kafka-server-start.sh -daemon config&#x2F;server.properties</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>停止 <strong>kafka</strong></p>
+<ul>
+<li><p>先停kafka，再停zk</p>
+</li>
+<li><pre><code>bin/kafka-server-stop.sh
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># 验证</span><br><span class="line"></span><br><span class="line">## kafka是否启动</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;shell</span><br><span class="line">jps -lmv #查看程序是否允许，如果没有，可能是因为user权限不足，必须使用root权限查看</span><br><span class="line">ps -ef | grep kafka #若启动成功，一定能看到</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="kafka服务器防火墙是否关闭"><a href="#kafka服务器防火墙是否关闭" class="headerlink" title="kafka服务器防火墙是否关闭"></a>kafka服务器防火墙是否关闭</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl server地址：9092 #如果没反应，关闭服务器防火墙</span><br><span class="line">systemctrl stop firewalld.service</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>防火墙不关闭，导致kafka broker与kafka controller之间没办法通信</p>
+</blockquote>
+<h2 id="kafka是否有消息日志"><a href="#kafka是否有消息日志" class="headerlink" title="kafka是否有消息日志"></a>kafka是否有消息日志</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ll /tmp/kafka-logs #检查是否有topic-partition文件，如果创建topic的时候partition只有一个，那么在集群中好好找找，只有一个broker有这个文件		</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>必须向topic发送过消息，才能有日志。否则，只有zk存储有topic，但是kafka没有存储消息日志</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/" rel="prev" title="mysql-6-MySQL分库分表篇">
+                  <i class="fa fa-chevron-left"></i> mysql-6-MySQL分库分表篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-02-Java%20API%E5%92%8C%E6%8F%90%E4%BA%A4%E6%96%B9%E5%BC%8F/" rel="next" title="kafka-03-API">
+                  kafka-03-API <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

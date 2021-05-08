@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="Spring就是父容器，SpringMvc就是子容器，子容器可以访问父容器的内容，父容器不能访问子容器的东西。有点类似java里面的继承的味道，子类可以继承父类共有方法和变量，可以访问它们，父类不可以访问子类的方法和变量。在这里就会衍生出几个比较经典的问题：  为什么需要父子容器？ 是否可以把所有类都通过Spring容器来管理？（Spring的applicationContext.xml中配置全局">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot-04-父子容器">
+<meta property="og:url" content="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-04-%E7%88%B6%E5%AD%90%E5%AE%B9%E5%99%A8/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="Spring就是父容器，SpringMvc就是子容器，子容器可以访问父容器的内容，父容器不能访问子容器的东西。有点类似java里面的继承的味道，子类可以继承父类共有方法和变量，可以访问它们，父类不可以访问子类的方法和变量。在这里就会衍生出几个比较经典的问题：  为什么需要父子容器？ 是否可以把所有类都通过Spring容器来管理？（Spring的applicationContext.xml中配置全局">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicd8HYAuu5icgYtIBibc3T8GDib34mBYBNS1e38p5kYfZvDicDtKcaPlKxFw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicuuCX4lfhl92VWJQ5giccp4pIM7CeTUODe214USqP5gjibBNzNncwrWuA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZica1FZbchfGhcNibEgZuL5QC0LZqicjwRZMiakEdicec0qy6LVKNWXVMMn9Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZiccPsA5gDib890BOuQmFb6OZ0Vxe4Vqhm4pjWYRsRKEDb4AcJN43Agibsg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicBwHej2kQUFJGicQegEAuTo4q8V9j0GADxmpGDeajhTribicSWIgZEVu4Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZic5eW09yvicicjcb8xtjbicVbZJ8zl2ZxdHwF3xGp5bTLMITqM9cMGeofCw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicHpNuL6FGSbdMvS3NLfvDic3kECN4GvOl3Dlx9nEP78PQcAFVQG6w9cg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-04-16T01:30:13.000Z">
+<meta property="article:modified_time" content="2021-04-16T01:31:22.706Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicd8HYAuu5icgYtIBibc3T8GDib34mBYBNS1e38p5kYfZvDicDtKcaPlKxFw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-04-%E7%88%B6%E5%AD%90%E5%AE%B9%E5%99%A8/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>springboot-04-父子容器 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="nav-number">1.</span> <span class="nav-text">Spring的启动</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E6%98%AF%E6%9C%89%E4%B8%A4%E4%B8%AA%E5%AE%B9%E5%99%A8%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">如何验证是有两个容器？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96SpringIoc"><span class="nav-number">3.0.1.</span> <span class="nav-text">初始化SpringIoc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96-Spring-MVC"><span class="nav-number">3.0.2.</span> <span class="nav-text">初始化 Spring MVC</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%94"><span class="nav-number">4.</span> <span class="nav-text">问题解答</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-04-%E7%88%B6%E5%AD%90%E5%AE%B9%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          springboot-04-父子容器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-04-16 09:30:13 / Modified: 09:31:22" itemprop="dateCreated datePublished" datetime="2021-04-16T09:30:13+08:00">2021-04-16</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>Spring</code>就是父容器，<code>SpringMvc</code>就是子容器，子容器可以访问父容器的内容，父容器不能访问子容器的东西。有点类似java里面的继承的味道，子类可以继承父类共有方法和变量，可以访问它们，父类不可以访问子类的方法和变量。在这里就会衍生出几个比较经典的问题：</p>
+<ul>
+<li>为什么需要父子容器？</li>
+<li>是否可以把所有类都通过<code>Spring</code>容器来管理？（<code>Spring</code>的<code>applicationContext.xml</code>中配置全局扫描)</li>
+<li>是否可以把我们所需的类都放入<code>Spring-mvc</code>子容器里面来管理（<code>springmvc</code>的<code>spring-servlet.xml</code>中配置全局扫描）?</li>
+<li>同时通过两个容器同时来管理所有的类？如果能够把上面这四个问题可以说个所以然来，个人觉得<code>Spring</code>的父子容器应该问题不大了。我们可以看下官网提供的父子容器的图片<img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicd8HYAuu5icgYtIBibc3T8GDib34mBYBNS1e38p5kYfZvDicDtKcaPlKxFw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></li>
+<li>上图中显示了2个<code>WebApplicationContext</code>实例，为了进行区分，分别称之为：<code>Servlet WebApplicationContext</code>(子容器)、<code>Root WebApplicationContext</code>(父容器)。</li>
+<li><strong>Servlet WebApplicationContext</strong>：这是对J2EE三层架构中的<code>web</code>层进行配置，如控制器(<code>controller</code>)、视图解析器(<code>view resolvers</code>)等相关的bean。通过<code>spring mvc</code>中提供的DispatchServlet来加载配置，通常情况下，配置文件的名称为spring-servlet.xml。</li>
+<li><strong>Root WebApplicationContext</strong>：这是对J2EE三层架构中的<code>service</code>层、<code>dao</code>层进行配置，如业务<code>bean</code>，数据源(<code>DataSource</code>)等。通常情况下，配置文件的名称为<code>applicationContext.xml</code>。在<code>web</code>应用中，其一般通过<code>ContextLoaderListener</code>来加载。</li>
+</ul>
+<h1 id="Spring的启动"><a href="#Spring的启动" class="headerlink" title="Spring的启动"></a>Spring的启动</h1><p>要想很好的理解它们之间的关系，我们就有必要先弄清楚Spring的启动流程。要弄清楚这个启动流程我们就需要搭建一个<code>SpringMvc</code>项目，说句实话，用惯了<code>SpringBooot</code>开箱即用,突然在回过头来搭建一个<code>SpringMvc</code>项目还真有点不习惯，一大堆的配置文件。（虽然也可以用注解来实现）具体怎么搭建<code>SpringMvc</code>项目这个就不介绍了，搭建好项目我们运行起来可以看到控制台会输出如下日志：<img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicuuCX4lfhl92VWJQ5giccp4pIM7CeTUODe214USqP5gjibBNzNncwrWuA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">日志里面分别打印出了父容器和子容器分别的一个耗时。</p>
+<h1 id="如何验证是有两个容器？"><a href="#如何验证是有两个容器？" class="headerlink" title="如何验证是有两个容器？"></a>如何验证是有两个容器？</h1><p>我们只需要<code>Controller</code>与我们的<code>Service</code>中实现<code>ApplicationContextAware</code>接口，就可以得知对应的管理容器：在<code>Service</code>所属的父容器里面我们可以看到父容器对应的对象是<code>XmlWebApplicationContext@3972</code><img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZica1FZbchfGhcNibEgZuL5QC0LZqicjwRZMiakEdicec0qy6LVKNWXVMMn9Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">在<code>Controller</code>中对应的容器对象是<code>XmlWebApplicationContext@4114</code><img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZiccPsA5gDib890BOuQmFb6OZ0Vxe4Vqhm4pjWYRsRKEDb4AcJN43Agibsg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">由此可见它们是两个不同的容器。</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><p>我们知道<code>SpringServletContainerInitializer</code>从 <code>servlet 3.0</code>开始，<code>Tomcat</code> 启动时会自动加载实现了 <code>ServletContainerInitializer</code><br>接口的类（需要在 <code>META-INF/services</code> 目录下新建配置文件）也称为 <code>SPI（Service Provider Interface）</code> 机制，<code>SPI</code>的应用还是挺广的比如我们的<code>JDBC</code>、还有<code>Dubbo</code>框架里面都有用到，如果还有不是很了解<code>SPI</code>机制的 可以去学习下。所以我们的入口就是<code>SpringServletContainerInitializer</code>的<code>onStartup</code>方法，这也应该是web容器启动调用<code>Spring</code>相关的第一个方法。</p>
+<h3 id="初始化SpringIoc"><a href="#初始化SpringIoc" class="headerlink" title="初始化SpringIoc"></a>初始化SpringIoc</h3><p>如果实在找不到入口的话，我们可以 根据控制台打印的日志，然后拿着日志进行反向查找这应该总能找到开始加载父容器的地方。启动的时候控制台应该会打印出“<code>Root WebApplicationContext: initialization started</code>” 我们拿着这个日志就能定位到代码了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">public WebApplicationContext initWebApplicationContext(ServletContext servletContext) &#123;</span><br><span class="line">  if (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) !&#x3D; null) &#123;</span><br><span class="line">   throw new IllegalStateException(</span><br><span class="line">     &quot;Cannot initialize context because there is already a root application context present - &quot; +</span><br><span class="line">     &quot;check whether you have multiple ContextLoader* definitions in your web.xml!&quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  servletContext.log(&quot;Initializing Spring root WebApplicationContext&quot;);</span><br><span class="line">  Log logger &#x3D; LogFactory.getLog(ContextLoader.class);</span><br><span class="line">  if (logger.isInfoEnabled()) &#123;</span><br><span class="line">   logger.info(&quot;Root WebApplicationContext: initialization started&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  long startTime &#x3D; System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">  try &#123;</span><br><span class="line">   &#x2F;&#x2F; Store context in local instance variable, to guarantee that</span><br><span class="line">   &#x2F;&#x2F; it is available on ServletContext shutdown.</span><br><span class="line">   if (this.context &#x3D;&#x3D; null) &#123;</span><br><span class="line">    &#x2F;&#x2F; 通过反射去创建context </span><br><span class="line">    this.context &#x3D; createWebApplicationContext(servletContext);</span><br><span class="line">   &#125;</span><br><span class="line">   if (this.context instanceof ConfigurableWebApplicationContext) &#123;</span><br><span class="line">    ConfigurableWebApplicationContext cwac &#x3D; (ConfigurableWebApplicationContext) this.context;</span><br><span class="line">    if (!cwac.isActive()) &#123;</span><br><span class="line">     &#x2F;&#x2F; The context has not yet been refreshed -&gt; provide services such as</span><br><span class="line">     &#x2F;&#x2F; setting the parent context, setting the application context id, etc</span><br><span class="line">     if (cwac.getParent() &#x3D;&#x3D; null) &#123;</span><br><span class="line">      &#x2F;&#x2F; The context instance was injected without an explicit parent -&gt;</span><br><span class="line">      &#x2F;&#x2F; determine parent for root web application context, if any.</span><br><span class="line">      ApplicationContext parent &#x3D; loadParentContext(servletContext);</span><br><span class="line">      cwac.setParent(parent);</span><br><span class="line">     &#125;</span><br><span class="line">      &#x2F;&#x2F; IOC容器初始化</span><br><span class="line">     configureAndRefreshWebApplicationContext(cwac, servletContext);</span><br><span class="line">    &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);</span><br><span class="line"></span><br><span class="line">   ClassLoader ccl &#x3D; Thread.currentThread().getContextClassLoader();</span><br><span class="line">   if (ccl &#x3D;&#x3D; ContextLoader.class.getClassLoader()) &#123;</span><br><span class="line">    currentContext &#x3D; this.context;</span><br><span class="line">   &#125;</span><br><span class="line">   else if (ccl !&#x3D; null) &#123;</span><br><span class="line">    currentContextPerThread.put(ccl, this.context);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   if (logger.isInfoEnabled()) &#123;</span><br><span class="line">    long elapsedTime &#x3D; System.currentTimeMillis() - startTime;</span><br><span class="line">    logger.info(&quot;Root WebApplicationContext initialized in &quot; + elapsedTime + &quot; ms&quot;);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   return this.context;</span><br><span class="line">  &#125;</span><br><span class="line">  catch (RuntimeException | Error ex) &#123;</span><br><span class="line">   logger.error(&quot;Context initialization failed&quot;, ex);</span><br><span class="line">   servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ex);</span><br><span class="line">   throw ex;</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码就是创建父容器的地方。</p>
+<h3 id="初始化-Spring-MVC"><a href="#初始化-Spring-MVC" class="headerlink" title="初始化 Spring MVC"></a>初始化 Spring MVC</h3><p>接着我们再来看看创建子容器的地方：在<code>FrameworkServlet</code>类<img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicBwHej2kQUFJGicQegEAuTo4q8V9j0GADxmpGDeajhTribicSWIgZEVu4Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">上述代码是不是会有个疑问我们怎么就会执行<code>FrameworkServlet</code>的<code>initServletBean</code>方法。这是由于我们在<code>web.xml</code> 里面配置了<code>DispatcherServlet</code>，然后web容器就会去调用<code>DispatcherServlet</code>的<code>init</code>方法，并且这个方法只会被执行一次。通过init方法就会去执行到<code>initWebApplicationContext</code>这个方法了，这就是web子容器的一个启动执行顺序。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;servlet&gt;</span><br><span class="line">    &lt;servlet-name&gt;dispatcher&lt;&#x2F;servlet-name&gt;</span><br><span class="line">    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;&#x2F;servlet-class&gt;</span><br><span class="line">    &#x2F;&#x2F; 如果不配置这个load-on-startup 1 不会再项目启动的时候执行inti方法。而是首次访问再启动</span><br><span class="line">    &lt;load-on-startup&gt;1&lt;&#x2F;load-on-startup&gt;</span><br><span class="line">  &lt;&#x2F;servlet&gt;</span><br></pre></td></tr></table></figure>
+
+<p>大概流程如下：<img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZic5eW09yvicicjcb8xtjbicVbZJ8zl2ZxdHwF3xGp5bTLMITqM9cMGeofCw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">从上述代码我们可以发现子容器是自己重新通过反射<code>new</code>了一个新的容器作为子容器， 并且设置自己的父容器为<code>Spring</code> 初始化创建的<code>WebApplicationContext</code>。然后就是去加载我们在<code>web.xml</code> 里面配置的<code>Springmvc</code>的配置文件，然后通过创建的子容器去执行<code>refresh</code>方法，这个方法我相信很多人应该都比较清楚了。</p>
+<h1 id="问题解答"><a href="#问题解答" class="headerlink" title="问题解答"></a>问题解答</h1><p>我们知道了<code>Sping</code>父容器以及<code>SpingMvc</code>子容器的一个启动过程，以及每个容器都分别干了什么事情现在再回过头来看看上述四个问题。</p>
+<ul>
+<li><strong>为什么需要父子容器？</strong>父子容器的主要作用应该是划分框架边界。有点单一职责的味道。在<code>J2EE</code>三层架构中，在<code>service</code>层我们一般使用<code>spring</code>框架来管理， 而在<code>web</code>层则有多种选择，如<code>spring mvc、struts</code>等。因此，通常对于<code>web</code>层我们会使用单独的配置文件。例如在上面的案例中，一开始我们使用<code>spring-servlet.xml</code>来配置web层，使用applicationContext.xml来配置<code>service</code>、<code>dao</code>层。如果现在我们想把<code>web</code>层从<code>spring mvc</code>替换成<code>struts</code>，那么只需要将<code>spring-servlet.xml</code>替换成<code>Struts</code>的配置文件<code>struts.xml</code>即可，而<code>applicationContext.xml</code>不需要改变。</li>
+<li>**是否可以把所有类都通过Spring父容器来管理？（Spring的applicationContext.xml中配置全局扫描)**所有的类都通过父容器来管理的配置就是如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;context:component-scan  use-default-filters&#x3D;&quot;false&quot;  base-package&#x3D;&quot;cn.javajr&quot;&gt;</span><br><span class="line">        &lt;context:include-filter type&#x3D;&quot;annotation&quot; expression&#x3D;&quot;org.springframework.stereotype.Service&quot; &#x2F;&gt;</span><br><span class="line">        &lt;context:include-filter type&#x3D;&quot;annotation&quot; expression&#x3D;&quot;org.springframework.stereotype.Component&quot; &#x2F;&gt;</span><br><span class="line">        &lt;context:include-filter type&#x3D;&quot;annotation&quot; expression&#x3D;&quot;org.springframework.stereotype.Repository&quot; &#x2F;&gt;</span><br><span class="line">        &lt;context:include-filter type&#x3D;&quot;annotation&quot; expression&#x3D;&quot;org.springframework.stereotype.Controller&quot; &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;context:component-scan&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>SpringMvc</code>的配置里面不配置扫描包路径。很显然这种方式是行不通的，这样会导致我们请求接口的时候产生<code>404</code>。因为在解析@ReqestMapping注解的过程中<code>initHandlerMethods</code>()函数只是对<code>Spring MVC</code> 容器中的<code>bean</code>进行处理的，并没有去查找父容器的<code>bean</code>， 因此不会对父容器中含有<code>@RequestMapping</code>注解的函数进行处理，更不会生成相应的<code>handler</code>。所以当请求过来时找不到处理的<code>handler</code>，导致404。<img src="https://mmbiz.qpic.cn/mmbiz_png/qu3ItokgsAptNmswNYxGwRhk0TU4spZicHpNuL6FGSbdMvS3NLfvDic3kECN4GvOl3Dlx9nEP78PQcAFVQG6w9cg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<ul>
+<li><strong>是否可以把我们所需的类都放入Spring-mvc子容器里面来管理（springmvc的spring-servlet.xml中配置全局扫描）?**这个是把包的扫描配置<code>spring-servlet.xml</code>中这个是可行的。为什么可行因为无非就是把所有的东西全部交给子容器来管理了，子容器执行了<code>refresh</code>方法，把在它的配置文件里面的东西全部加载管理起来来了。虽然可以这么做不过一般应该是不推荐这么去做的，一般人也不会这么干的。</strong>如果你的项目里有用到事物、或者aop记得也需要把这部分配置需要放到Spring-mvc子容器的配置文件来，不然一部分内容在子容器和一部分内容在父容器,可能就会导致你的事物或者AOP不生效<strong>。（这里不就有个经典的八股文吗？</strong>你有遇到事物不起作用的时候**，其实这也是一种情况）</li>
+<li><strong>同时通过两个容器同时来管理所有的类？</strong>这个问题应该是比较好回答了，肯定不会通过这种方式来的，先不说会不会引发其他问题，首先两个容器里面都放一份一样的对象，造成了内存浪费。再者的话子容器会覆盖父容器加载，本来可能父容器配置了事物生成的是代理对象，但是被子容器一覆盖，又成了原生对象。这就导致了你的事物不起作用了。在补充一个问题：<strong>SpringBoot 里面是否还有父子容器</strong>？我们下篇再见！</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>其实父子容器对于程序员来说是无感的，是一个并没有什么用的知识点，都是<code>Spring</code>帮我们处理了，但是我们还是需要知道有这么个东西，不然我们有可能遇到问题的时候可能不知道如何下手。比如为啥我这个事物不起作用了，我这个<code>aop</code>怎么也不行了，网上都是这么配置的。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="prev" title="JDK-正则表达式">
+                  <i class="fa fa-chevron-left"></i> JDK-正则表达式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/16/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E2%80%9C12306%E2%80%9D-%E6%98%AF%E5%A6%82%E4%BD%95%E6%94%AF%E6%92%91%E8%B5%B7%E7%99%BE%E4%B8%87-QPS-%E7%9A%84%EF%BC%9F/" rel="next" title="">
+                   <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
