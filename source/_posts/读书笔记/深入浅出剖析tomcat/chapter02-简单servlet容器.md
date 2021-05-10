@@ -251,7 +251,9 @@ http://localhost:8080/servlet/Primitiveservlet
 
 在之前的程序中，有一个严重的问题，必须将ex02.pyrmont.Request和ex02.pyrmont.Response分别转型为javax.servlet.ServletRequest和javax.servlet.ServletResponse，再作为参数传递给具体的servlet的service方法。这样并不安全，熟知servlet容器的人可以将ServletRequest和ServletResponse类向下转型为Request和Response类，并执行parse和sendStaticResource方法。
 
-​     一种解决方案是将这两个方法的访问修饰符改为默认的（即，default），这样就可以避免包外访问。另一种更好的方案是使用外观设计模式。uml图如下：
+- 一种解决方案是将这两个方法的访问修饰符改为默认的（即，default），这样就可以避免包外访问。<!--很多第三方jar包都这样使用，比如shiro-->
+
+- 另一种更好的方案是使用外观设计模式。uml图如下：
 
 ![img](http://sishuok.com/forum/upload/2012/4/10/8cdb2ac0da1fdb61ed7cdfdb2694b664__%E6%9C%AA%E5%91%BD%E5%90%8D.jpg)
 
@@ -262,13 +264,12 @@ http://localhost:8080/servlet/Primitiveservlet
 
 
 > 注意: 它的构造函数，接收一个Request对象，然后向上转型为ServletRequest对象，赋给其private成员变量request。该类的其他方法中，都是调用request的相应方法实现的，这样就将ServletRequest完整的封装得RequestFacade中了。
->
 
  serveltProcess方法修改以下部分：
 
 ```java
         try {
-            servlet = (Servlet) myClass.newInstance();  //很有意思，使用的是newInstance()而不是new，因为把类加载与类实例化分开了
+            servlet = (Servlet) myClass.newInstance();  //很有意思，使用的是newInstance()而不是new，因为把类加载与类实例化分开了, tomcat需要破坏双亲委派，使用线程级别的类加载器
             servlet.service((ServletRequest) requestFacade, (ServletResponse) responseFacade);
         } catch (Exception e) {
             e.printStackTrace();

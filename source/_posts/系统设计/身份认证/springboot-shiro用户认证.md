@@ -1065,10 +1065,6 @@ public class UserController {
 }
 ```
 
-[![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
 
-![img](https://img2020.cnblogs.com/i-beta/1645290/202003/1645290-20200313110633859-1021094929.png)
-
- 
 
  Demo地址：https://github.com/DeityJian/springboot-shiro.git
