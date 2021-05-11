@@ -54,7 +54,7 @@ mybatis的写法
 
 ###  insert if not exists
 
-即insert into … select … where not exist ... ，这种方式适合于插入的数据字段没有设置主键或唯一索引，当插入一条数据时，首先判断MySQL数据库中是否存在这条数据，如果不存在，则正常插入，如果存在，则忽略：
+即insert into … select … where  exist ... ，这种方式适合于插入的数据字段没有设置主键或唯一索引，当插入一条数据时，首先判断MySQL数据库中是否存在这条数据，如果不存在，则正常插入，如果存在，则忽略：
 
 ![img](https://pic4.zhimg.com/80/v2-f44696934ba126b67e6ab5477c9eaed3_1440w.jpg)
 
