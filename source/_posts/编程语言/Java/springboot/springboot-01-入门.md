@@ -176,7 +176,6 @@ management.endpoints.web.exposure.exclude=env,beans #关闭env,beans终端
 一般情况下，[主配置文件]()中存放[系统中定义好的属性设置]()，而[自定义属性]()一般会写入[自定义的配置文件]()中。也就是说，Java 代码除了可以读取主配置文件中的属性外，还可以读取指定配置文件中的属性，可以通过@PropertySource 注解加载指定的配置文件。
 
 > spring boot 官网给出说明，@PropertySource 注解不能加载 yml文件。所以其建议自定义配置文件就使用approperties文件。
->
 
 - 修改property配置文件: 
 
@@ -350,114 +349,6 @@ public class student{
   - [Iocalhost:8000/index.jsp]() :访问到index.jsp页面
   - [Iocalhost:8000/test/register.jsp]() : 访问到welcome.jsp页面
 
-## **Spring Boot** 中使用 **MyBatis**
-
-- 导入三个依赖:
-
-  - mybatis 与 Spring Boot 整合依赖，mysql 驱动依赖， Druid 数据源依赖。
-
-  - ```xml
-    <!--mybatis 与 spring boot 整合依赖-->
-    <dependency>
-    	<groupId>org.mybatis.spring.boot</groupId>
-      <artifactId>mybatis-spring-boot-starter</artifactId>
-    </dependency>
-    
-    <!--mysql 驱动-->
-    <dependency>
-    	<groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-    </dependency>
-    
-    <!-- druid 驱动，数据源 -->
-    <dependency>
-    	<groupId>com.alibaba</groupId>
-      <artifactId>druid</artifactId>
-      <version>1.1.12</version>
-    </dependency>
-    ```
-
-- 定义 Service接口
-
-  - ```java
-    public class StudentService{
-    	@Autowired
-    	private IstudentDao dao;
-    }
-    ```
-
-    
-
-- 定义 **Dao** 接口
-
-  - Com.abc.dao目录
-
-  - ```java
-    //Dao 接口上要添加@Mapper 注解。
-    public interface IstudentDao{
-    	void insertStudent(Student s);
-    }
-    ```
-
-- 定义映射文件
-
-  - Com.abc.dao目录， <!--与Dao接口在同一目录-->
-
-  - ```xml
-    <?xml version="1.0" encoding="UTF-8" ?>   
-    <!DOCTYPE mapper   
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    <mapper namespace="com.abc.dao.IstudentDao">
-        <!-- 这里namespace必须是UserMapper接口的路径” -->
-        <insert id="insertStudent">
-            insert into student(name,age) values(#{name},#{age})
-        </insert>
-    </mapper>
-    ```
-
-- 注册资源目录
-
-  - 在 pom 文件中将 dao 目录注册为资源目录。
-
-  - ```xml
-     <!-- dao 目录注册为资源目录 -->
-    <build>
-      <resources>
-        <resource>
-        	<directory>src/main/java</directory>
-          <includes>
-            <include>**/*.xml</include>
-          </includes>
-        </resource>
-      </resources>
-    </build>
-    ```
-
-- 修改主配置文件
-
-  - 注册映射文件
-
-    - ```properties
-      mybatis.mapper-location=classpath:com/abc/dao/.xml
-      ```
-
-  - 注册实体类别名
-
-    - ```properties
-      mybatis.type-aliases-packages=com.abc.beans
-      ```
-
-  - 注册数据源
-
-    - ```properties
-      spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
-      spring.datasource.driver-class-name=com.mysql.jdbc.Driver
-      spring.datasource.url=jdbc:mysql:///test
-      spring.datasource.username=root
-      spring.datasource.password=root
-      ```
-
 ## **Spring Boot** 的事务支持
 
 若工程直接或间接依赖于 spring-tx，则框架会自动注入 DataSourceTransactionManager事务管理器;若依赖于 spring-boot-data-jpa，则会自动注入 JpaTransactionManager。
@@ -537,206 +428,63 @@ Spring Boot 中使用的日志技术为 logback。其与 Log4J 都出自同一�
     </configuration>
     ```
 
-## **Spring Boot** 中使用 **Redis**
+## Spring boot中使用线程池
 
-> 高并发下访问 Redis，存在什么问题?存在三个问题: 
->
-> - 缓存穿透: 为DB查询为null的数据预设一个值
-> - 缓存雪崩: 提前规划好缓存到期时间
-> - 热点缓存: 属于缓存雪崩的特例，有一个缓存到期了，大量请求访问这个缓存无效，从而大量请求数据库。双重检测锁机制
+- 配置类
 
-- 定义需求
-
-  - 当前工程完成让用户在页面中输入要查询学生的 id，其首先会查看 Redis 缓存中是否存在，若存在，则直接从 Redis 中读取;若不存在，则先从 DB 中查询出来，然后再存放到 Redis 缓存中
-  - 但用户也可以通过页面注册学生，一旦有新的学生注册，则需要将缓存中的学生信 息清空。根据 id 查询出的学生信息要求必须是实时性的，其适合使用注解方式的 Redis 缓存。
-
-- 添加依赖
-
-  - 小技巧：如redis,mybatis等依赖，[可以从父spring依赖中（ctrl + c）找到该依赖和版本号]()，然后添加
-
-  - 在 pom 文件中添加 Spring Boot 与 Redis 整合依赖。
-
-  - ```xml
-    <!--mybatis 与 spring boot 整合依赖-->
-    <dependency>
-    	<groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-redis</artifactId>
-    </dependency>
-    ```
-
-- 修改主配置文件
-
-  - ```properties
-    #单机redis
-    spring.redis.host=
-    spring.redis.port=
-    spring.redis.password=
-    
-    #集群redis
-    spring.redis.sentinel.master=mymaster
-    spring.redis.sentinel.nodes=sentine1:22076
-    
-    spring.cache.type=redis
-    spring.cache.cache-names=realTimeCache
-    ```
-
-- 修改启动类
-
-  - 添加@EnableCaching: 开启缓存
-
-- 修改实体类 **Student**
-
-  - 由于要将查询的实体类对象缓存到 Redis，Redis 要求实体类必须序列化。所以需要实体类实现序列化接口。
+  - 使用@Configuration和@EnableAsync这两个注解，表示这是个配置类，并且是线程池的配置类
 
   - ```java
-    public class Student implements Serializable{
-    	private static final Long serialVersionUID=397293791;
-    }
-    ```
-
-- 修改 **Service** 接口实现类
-
-  - @CacheEvict(value="", allEntries="")  清楚所有缓存。业务场景，插入必须清楚所缓存
-
-  - @Cacheable(value="", key="") 如果没有缓存，那么查数据库，并添加缓存；如果有缓存，查询指定缓存
-
-  - ```java
-    @Cacheable(value="realTimeCache", key="'student'+#id")
-    public student findStudent(int id){
-    	return dao.findStudent(id);
-    }
+    @Configuration
+    @EnableAsync
+    public class ExecutorConfig {
+        @Bean(name = "asyncServiceExecutor")
+        public Executor asyncServiceExecutor() {
+            logger.info("start asyncServiceExecutor");
+            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+            //配置核心线程数
+            executor.setCorePoolSize(corePoolSize);
+            //配置最大线程数
+            executor.setMaxPoolSize(maxPoolSize);
+            //配置队列大小
+            executor.setQueueCapacity(queueCapacity);
+            //配置线程池中的线程的名称前缀
+            executor.setThreadNamePrefix(namePrefix);
     
-    @CacheEvict(value="realTimeCache", allEntries="true")  
-    @Transactional
-    public void addStudent(Student s){
-      dao.insertStudent(s);
-    }
-    ```
-
-- [使用双重检查锁解决热点缓存]()
-
-  - ```java
-    public Integer getStudentsCount(){
-    	BoundValueOperations<Object,Object> ops = redisTemplate.boundValuesOps("count");
-      Object cnt= ops.getValue();//第一重检查
-      if(cnt == null){ 
-        //1nd请求来到，2nd请求，3rd请求...，因为这个锁而阻塞
-        synchronized(this){
-          cnt= ops.getValue();//第二重检查
-          if(cnt==null){ 
-            cnt = dao.findStudentsCount();
-            opt.set(cnt,10,TimeUnits.Seconds);
-          }
+            // rejection-policy：当pool已经达到max size的时候，如何处理新任务
+            // CALLER_RUNS：不在新线程中执行任务，而是有调用者所在的线程来执行
+            executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+            //执行初始化
+            executor.initialize();
+            return executor;
         }
-      }
-      
-      return (Integer) cnt;
     }
     ```
 
-  - [是否存在线程安全问题呢？]()
+- 实现类
 
-    - 首先，synchronized(this)中的锁必须是单例的, @Component已经保证该锁的对象在Spring容器中是单例了，所以此处没有线程安全
+  - 将Service层的服务异步化，在executeAsync()方法上增加注解@Async("asyncServiceExecutor")，asyncServiceExecutor方法是前面ExecutorConfig.java中的方法名，表明executeAsync方法进入的线程池是asyncServiceExecutor方法创建的。
 
-    - ```java
-      private Integer cnt = new Integer(1);
-      public Integer getStudentsCount(){
-        if(cnt == null){ 
-          synchronized(this){
-            if(cnt==null){ 
-              //以下这个new语句的底层步骤
-              //1: 申请一个堆空间space
-              //2: 使用对象初始数据初始化对空间space
-              //3: cnt应用指向堆空间space
-             	cnt = new Integer(2);
+- 增强实现类的功能：在每次提交线程的时候都会将当前线程池的运行状况打印出来
+
+  - Override父类的execute、submit等方法，在里面调用showThreadPoolInfo()方法
+
+  - ```java
+    private void showThreadPoolInfo(String prefix) {
+            ThreadPoolExecutor threadPoolExecutor = getThreadPoolExecutor();
+    
+            if (null == threadPoolExecutor) {
+                return;
             }
-          }
+    
+            logger.info("{}, {},taskCount [{}], completedTaskCount [{}], activeCount [{}], queueSize [{}]",
+                    this.getThreadNamePrefix(),
+                    prefix,
+                    threadPoolExecutor.getTaskCount(),
+                    threadPoolExecutor.getCompletedTaskCount(),
+                    threadPoolExecutor.getActiveCount(),
+                    threadPoolExecutor.getQueue().size());
         }
-        
-        return (Integer) cnt;
-      }
-      ```
-
-      - 第一个请求来到，如果2,3的步骤被编译器优化，3先执行；然后第二个请求来到，if(cnt==null)为真, 那么则返回一个没有经过2步骤的cnt对象
-      - 解决方法：[cnt设置为volatile保证编译器不优化(推荐) 或者是 设置该方法为同步(略)]()
-
-  
-
-## Spring Boot 中使用Dubbo
-
-  ### 步骤
-
-  - 消费者与提供者工程均需要导入四个依赖 
-    -  Dubbo 与 Spring Boot 整合依赖
-    -  zkClient依赖
-    -  slf4j-log4j12依赖
-
-  - 自定义 commons 工程依赖 
-  - 提供者工程
-    - 将 Service 接口实现类的@Service 注解更换为阿里的注解，并添加@Component 注解
-    - 在启动类上添加@EnableDubboConfiguration 与@EnableTransactionManager 注解
-    - 修改配置文件:指定应用名称与注册中心地址 
-  -  消费者工程
-    - 将处理器中 Service 的声明上的@Autowired 注解更换为阿里的@Reference 注解 
-    -  在启动类上添加@EnableDubboConfiguration 注解
-    -  修改配置文件:指定应用名称与注册中心地址
-
-
-
-### 定义 **commons** 工程
-
-- 依赖：无，因为是纯java项目
-- 定义实体类
-- 定义业务接口
-
-### 定义提供者
-
-- 依赖：
-
-  - 添加 **dubbo** 与 **spring boot** 整合依赖，需要从alibaba的github中找到依赖
-  - 添加 **zkClient** 依赖
-  - dubboCommons依赖
-  - 还有其他的mysql, druid,mybatis依赖
-
-- 定义业务接口
-
-  - 将 Service 接口实现类的@Service 注解更换为阿里的注解，并添加@Component 注解
-
-- 修改启动类
-
-  - 添加@EnableDubboConfiguration 与@EnableTransactionManager 注解
-
-- 修改配置文件
-
-  - ```yaml
-    spring:
-      # 功能等价于 spring-dubbo 配置文件中的<dubbo:application/> # 该名称是由服务治理平台使用
-      application:
-      	name: 11-provider-springboot # 指定zk注册中心
-      dubbo:
-      	registry: zookeeper://zkOS:2181
-      # zk 集群作注册中心
-      # registry: zookeeper://zkOS1:2181?backup=zkOS2:2181,zkOS3:2181
-    ```
-
-### 定义消费者(略)
-
-- 依赖：
-  - 添加 **dubbo** 与 **spring boot** 整合依赖，需要从alibaba的github中找到依赖
-  - 添加 **zkClient** 依赖
-  - dubboCommons依赖
-
-- 修改配置文件
-
-  - ```yaml
-    spring:
-      # 功能等价于 spring-dubbo 配置文件中的<dubbo:application/> # 该名称是由服务治理平台使用
-      application:
-      	name: 11-consumer-springboot # 指定zk注册中心
-      dubbo:
-      	registry: zookeeper://zkOS:2181
-      # zk 集群作注册中心
-      # registry: zookeeper://zkOS1:2181?backup=zkOS2:2181,zkOS3:2181
     ```
 
     
