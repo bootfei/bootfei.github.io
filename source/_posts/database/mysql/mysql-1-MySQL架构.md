@@ -6,6 +6,8 @@ tags: [mysql]
 
 # 逻辑架构
 
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqJzkUrnjTeacVVydLWic1p6gBvBNaeKmPS1D3c0FHPruU00lpiaeptWONZlOG7Iq5zIKHgMoib45rlg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom: 67%;" />
+
 ## 逻辑架构图
 
 ### 连接器

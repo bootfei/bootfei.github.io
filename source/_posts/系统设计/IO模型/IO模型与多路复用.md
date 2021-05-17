@@ -6,14 +6,11 @@ tags: [redis,IO模型]
 
 # User space/Kernel space
 
-学习 Linux 时，经常可以看到两个词:User space(用户空间)和 Kernel space(内核空间)。
-
 虚拟内存被操作系统划分成两块:内核空间和用户空间，内核空间是内核代码运行的地方，用户空间是用户程序代码运行的地方。当进程运行在内核空间时就处于内核态，当进程运行在用户空间时就处于用户态。
 
-查看 CPU 时间在 User space 与 Kernel Space 之间的分配情况，可以使用top命令。它的第三行输出就是 CPU 时间分配统计。
+查看 CPU 时间在 User space 与 Kernel Space 之间的分配情况，可以使用top命令。
 
 - 第一项24.8 us(user 的缩写)就是 CPU 消耗在 User space 的时间百分比，第二项0.5 sy(system 的 缩写)是消耗在 Kernel space 的时间百分比。
-- 随便也说一下其他 6 个指标的含义。
 - ni:niceness 的缩写，CPU 消耗在 nice 进程(低优先级)的时间百分比
 - id:idle 的缩写，CPU 消耗在闲置进程的时间百分比，这个值越低，表示 CPU 越忙
 - wa:wait 的缩写，CPU 等待外部 I/O 的时间百分比，这段时间 CPU 不能干其他事，但是也没有执行运算，这个 值太高就说明外部设备有问题
@@ -25,11 +22,9 @@ tags: [redis,IO模型]
 有必要简单地说说慢速I/O设备和内存之间的数据传输方式。
 
 - PIO
-  我们拿磁盘来说，很早以前，磁盘和内存之间的数据传输是需要CPU控制的，也就是说如果我们读取磁盘文件到内存中，数据要经过CPU存储转发，这种方式称为PIO。显然这种方式非常不合理，需要占用大量的CPU时间来读取文件，造成文件访问时系统几乎停止响应。
-- DMA
-  后来，DMA（直接内存访问，Direct Memory Access）取代了PIO，它可以不经过CPU而直接进行磁盘和内存的数据交换。在DMA模式下，CPU只需要向DMA控制器下达指令，让DMA控制器来处理数据的传送即可，DMA控制器通过系统总线来传输数据，传送完毕再通知CPU，这样就在很大程度上降低了CPU占有率，大大节省了系统资源，而它的传输速度与PIO的差异其实并不十分明显，因为这主要取决于慢速设备的速度。
-
-可以肯定的是，PIO模式的计算机我们现在已经很少见到了。
+  - 很早以前，磁盘和内存之间的数据传输是需要CPU控制的。显然这种方式非常不合理，需要占用大量的CPU时间来读取文件，造成文件访问时系统几乎停止响应。
+- DMA：直接内存访问，Direct Memory Access
+  - 取代了PIO，它可以不经过CPU而直接进行磁盘和内存的数据交换。在DMA模式下，CPU只需要向DMA控制器下达指令，让DMA控制器来处理数据的传送即可，DMA控制器通过系统总线来传输数据，传送完毕再通知CPU，这样就在很大程度上降低了CPU占有率，大大节省了系统资源，而它的传输速度与PIO的差异其实并不十分明显，因为这主要取决于慢速设备的速度。
 
 # 缓存IO与直接IO
 
@@ -64,8 +59,6 @@ tags: [redis,IO模型]
 
 然而，对于一些较复杂的应用(MySQL)，它们为了充分提高性能，会绕过[内核缓冲区]()，由程序自己管理并且实现IO缓存，包括缓存机制和写延迟机制，以支持独特的查询机制，比如Mysql通过合理的策略来提高查询缓存命中率。另一方面，绕过[内核缓冲区]()也可以减少系统内存的开销，因为内核缓冲区本身就在使用系统内存。
 
-<img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy8yMzEyNDQ4Ni04YTE3MjI0ZDYyNDE2MDUx?x-oss-process=image/format,png" alt="image" style="zoom: 33%;" />
-
 优缺点：
 
 - 优点：
@@ -77,50 +70,81 @@ Linux提供了对这种需求的支持，即在open()系统调用中增加参数
 
 # IO访问方式
 
-## 磁盘IO
+## 传统网络传输方式
 
-<img src="https://yqfile.alicdn.com/img_41dd13543f263358e3ac143b5dcac23e.jpeg" alt="图片描述" style="zoom:75%;" />
+在传统的文件传输里面（read/write方式），在实现上事实上是比較复杂的，须要经过多次上下文的切换。
 
-当应用程序调用read接口时，操作系统检查在内核的高速缓存有没有需要的数据，如果已经缓存了，那么就直接从 缓存中返回，如果没有，则从磁盘中读取，然后缓存在操作系统的缓存中。
+```
+read(file, tmp_buf, len);    
+write(socket, tmp_buf, len); 
+```
 
-应用程序调用write接口时，将数据从用户地址空间复制到内核地址空间的缓存中，这时对用户程序来说，写操作已 经完成，至于什么时候再写到磁盘中，由操作系统决定，除非显示调用了sync同步命令。
+ 以上两行代码是传统的read/write方式进行文件到socket的传输。
 
-## 网络IO`(I/Osendfile/零拷贝,kafka的特性`)
+当须要对一个文件进行传输的时候，其详细流程细节例如以下：
+
+1、调用read函数，DMA将文件数据从[硬盘hard drive]() copy到[kenerl buffer]()
+
+2、read函数返回。文件数据从[kernel buffer]() copy到[user buffer]()
+
+3、write函数调用。将文件数据从用户缓冲区copy到内核的[socke buffer]()。
+
+4、DMA将数据从内核的[socket buffe]()r copy到[网卡hard drive]()。
+
+以上细节是传统read/write方式进行网络文件传输的方式，我们能够看到，在这个过程其中。文件数据实际上是经过了四次CPU copy操作：
+
+> 硬盘—>内核buf—>用户buf—>socket相关缓冲区(内核)—>协议引擎
+
+
 
 网络传输的第4层（传输层）TCP协议通过socket获取IO流完成的
-
-### 普通的网络传输步骤
-
-1）操作系统将数据从[磁盘hard drive]()复制到[内核缓存kernel buffer]()中
-2）应用将数据从[内核缓存]()复制到[应用缓存user buffer]()中
-3）应用将数据写回[内核的Socket缓存 (socket buffer)]()中
-4）操作系统将数据从[Socket缓存]()区复制到[网卡缓存 (protocal engine)]()，然后将其通过网络发出
 
 ![图片描述](https://yqfile.alicdn.com/img_268ed262dadff71f51f42ad10ea46c9c.jpeg)
 
 
 
-1、当调用read系统调用时,通过DMA（Direct Memory Access）将数据copy到内核模式
-2、然后由CPU控制将内核模式数据copy到用户模式下的 buffer中
-3、read调用完成后，write调用首先将用户模式下 buffer中的数据copy到内核模式下的socket buffer中
-4、最后通过DMA copy将内核模式下的socket buffer中的数据copy到网卡设备中传送。
+## Linux2.1 sendfile
 
-从上面的过程可以看出，数据白白从内核模式到用户模式走了一圈，浪费了两次copy，而这两次copy都是CPU copy，即占用CPU资源。
+而sendfile系统调用则提供了一种降低以上多次copy。提升文件传输性能的方法。
+
+Sendfile系统调用是在2.1版本号内核时引进的：
+
+```
+sendfile(socket, file, len);   
+```
+
+执行流程例如以下：
+
+1、sendfile系统调用，DMA将文件数据从[磁盘hard drive]() copy至[kenerl buffer]()
+
+2、CPU再从[kenerl buffer]()copy至内核中 [socket buffer]()
+
+3、最后CPU再从 [socket buffer]() copy到 [网卡hard drive]()
 
 
+![img](https://images2017.cnblogs.com/blog/498077/201710/498077-20171016180755459-1271825824.png)
 
-### sendFile
+sendfile与read/write方式相比，少了 一次模式切换一次CPU copy。但是从上述过程中也可以发现从kernel buffer中将数据copy到socket buffer是没必要的。
 
-Linux2.4内核对sendfile做了改进，下图所示
-![图片描述](https://yqfile.alicdn.com/img_8b7e24bd7f67281e97cd0cf6a32d513e.jpeg)
+## Linux2.4 sendfile
+
+而在内核版本号2.4之后，文件描写叙述符结果被改变，sendfile实现了更简单的方式，系统调用方式仍然一样，细节与2.1版本号的 不同之处在于，当文件数据被拷贝到内核缓冲区时，不再将全部数据copy到socket相关的缓冲区，而是只将记录数据位置和长度相关的数据保存到 socket相关的缓存，而实际数据将由DMA模块直接发送到协议引擎，再次降低了一次copy操作。
+
 改进后的处理过程如下：
-1、DMA copy将磁盘数据copy到kernel buffer中
-2、向socket buffer中追加当前要发送的数据在kernel buffer中的位置和偏移量
-3、DMA gather copy根据socket buffer中的位置和偏移量直接将kernel buffer中的数据copy到网卡上。
-经过上述过程，数据只经过了2次copy就从磁盘传送出去了。（事实上这个Zero copy是针对内核来讲的，数据在内核模式下是Zero－copy的）。
+
+1. DMA将磁盘数据copy到[kernel buffer]()
+2. 向socket buffer中追加当前要发送的数据在kernel buffer中的位置和偏移量
+3. DMA根据socket buffer中的位置和偏移量直接将kernel buffer中的数据copy到网卡上。
+
+![图片描述](https://yqfile.alicdn.com/img_8b7e24bd7f67281e97cd0cf6a32d513e.jpeg)
+
+经过上述过程，数据只经过了2次copy就从磁盘传送出去了。
+（可能有人要纠结“不是说Zero－Copy么？怎么还有两次copy啊”，[事实上这个Zero copy是针对内核来讲的]()，数据在内核模式下是Zero－copy的）
 当前许多高性能http server都引入了sendfile机制，如nginx，lighttpd等。
 
-### FileChannel.transferTo(`Java中的零拷贝`)
+
+
+## FileChannel.transferTo(`Java中的零拷贝`)
 
 Java NIO中FileChannel.transferTo(long position, long count, WriteableByteChannel target)方法将当前通道中的数据传送到目标通道target中，在支持Zero-Copy的linux系统中，transferTo()的实现依赖于 sendfile()调用。
 
@@ -130,13 +154,7 @@ Java NIO中FileChannel.transferTo(long position, long count, WriteableByteChanne
 
 ![图片描述](https://yqfile.alicdn.com/img_8cb2e11479b0cb46056998b6d32f1f3b.jpeg)
 
-整个数据通路涉及4次数据复制和2个系统调用，如果使用sendfile则可以避免多次数据复制，操作系统可以**直接将数据从内核页缓存中复制到网卡缓存**，这样可以大大加快整个过程的速度。
-
-大多数时候，我们都在向Web服务器请求静态文件，比如图片、样式表等，根据前面的介绍，我们知道在处理这些请求的过程中，磁盘文件的数据先要经过内核缓冲区，然后到达用户内存空间，因为是不需要任何处理的静态数据，所以它们又被送到网卡对应的内核缓冲区，接着再被送入网卡进行发送。
-
-数据从内核出去，绕了一圈，又回到内核，没有任何变化，看起来真是浪费时间。在Linux 2.4的内核中，尝试性地引入了一个称为khttpd的内核级Web服务器程序，它只处理静态文件的请求。引入它的目的便在于内核希望请求的处理尽量在内核完成，减少内核态的切换以及用户态数据复制的开销。
-
-同时，Linux通过系统调用将这种机制提供给了开发者，那就是sendfile()系统调用。它可以将磁盘文件的特定部分直接传送到代表客户端的socket描述符，加快了静态文件的请求速度，同时也减少了CPU和内存的开销。
+Linux通过系统调用将这种机制提供给了开发者，那就是sendfile()系统调用。它可以将磁盘文件的特定部分直接传送到代表客户端的socket描述符，加快了静态文件的请求速度，同时也减少了CPU和内存的开销。
 
 在OpenBSD和NetBSD中没有提供对sendfile的支持。通过strace的跟踪看到了Apache在处理151字节的小文件时，使用了mmap()系统调用来实现内存映射，但是**在Apache处理较大文件的时候，内存映射会导致较大的内存开销，得不偿失**，所以Apache使用了sendfile64()来传送文件，sendfile64()是sendfile()的扩展实现，它在Linux 2.4之后的版本中提供。
 
@@ -151,69 +169,6 @@ Java NIO中FileChannel.transferTo(long position, long count, WriteableByteChanne
   - 服务器响应延时 + 带宽限制 + 网络延时 + 跳转路由延时 + 本地接收延时 决定。（一般为几十到几千毫秒，受环境干扰极大）
 
 所以两者一般来说网络IO延时要大于磁盘IO的延时。
-
-
-
-# Socket网络编程
-
-第4层传输层TCP协议就是使用socket接收和发送IO流
-
-## 客户端
-
-```java
-public class SocketClient {
-  public static void main(String args[]) throws Exception {
-      // 要连接的服务端IP地址和端口 
-    	String host = "127.0.0.1"; int port = 55533;
-      // 与服务端建立连接
-      Socket socket = new Socket(host, port);
-      // 建立连接后获得输出流
-      OutputStream outputStream = socket.getOutputStream(); 
-    	String message="你好 yiwangzhibujian"; 
-    	socket.getOutputStream().write(message.getBytes("UTF-8"));
-    	outputStream.close();
-      socket.close();
-} }
-```
-
-
-
-## 服务端
-
-```java
-public class SocketServer {
-   public static void main(String args[]) throws Exception {
-      // 监听指定的端口
-      int port = 55533;
-      ServerSocket server = new ServerSocket(port); // server将一直等待连接的到来 
-     	System.out.println("server将一直等待连接的到来");
-      //如果使用多线程，那就需要线程池，防止并发过高时创建过多线程耗尽资源 
-      ExecutorService threadPool = Executors.newFixedThreadPool(100);
-      while (true) {
-      Socket socket = server.accept();
-      Runnable runnable=()->{
-          try {
-            // 建立好连接后，从socket中获取输入流，并建立缓冲区进行读取 
-            InputStream inputStream = socket.getInputStream(); 
-            byte[] bytes = new byte[1024];
-            int len;
-            StringBuilder sb = new StringBuilder();
-            while ((len = inputStream.read(bytes)) != -1) {
-  // 注意指定编码格式，发送方和接收方一定要统一，建议使用UTF-8
-              sb.append(new String(bytes, 0, len, "UTF-8"));
-            }
-            System.out.println("get message from client: " + sb);
-            inputStream.close();
-            socket.close();
-          } catch (Exception e) {
-            e.printStackTrace();
-					} 
-      };
-      threadPool.submit(runnable);
-    }
-	} 
-}
-```
 
 
 

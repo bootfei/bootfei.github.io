@@ -273,9 +273,3 @@ Redis 支持数据的持久化，可以将内存中的数据保持在磁盘中�
 redis 的速度比 memcached 快很多
 
 Memcached 是多线程，非阻塞 IO 复用的网络模型；Redis 使用单线程的 IO 复用模型。
-
-![Redis与Memcached的区别与比较](https://user-gold-cdn.xitu.io/2018/4/18/162d7773080d4570?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
-
-如果想要更详细了解的话，可以查看慕课网上的这篇手记（非常推荐） **：《脚踏两只船的困惑 - Memcached 与 Redis》**：[www.imooc.com/article/23549(opens new window)](https://www.imooc.com/article/23549)
-
-**终极策略：** 使用 Redis 的 String 类型做的事，都可以用 Memcached 替换，以此换取更好的性能提升； 除此以外，优先考虑 Redis；

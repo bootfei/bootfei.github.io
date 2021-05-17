@@ -1,10 +1,10 @@
 ---
-title: redis-7-升级为多线程
+title: redis-7-单多线程以及线程安全
 date: 2021-05-10 13:27:23
 tags:
 ---
 
-Redis作为一个基于内存的缓存系统，一直以高性能著称，因没有上下文切换以及无锁操作，即使在单线程处理情况下，读速度仍可达到11万次/s，写速度达到8.1万次/s。但是，单线程的设计也给Redis带来一些问题：
+单线程的设计也给Redis带来一些问题：
 
 - 只能使用CPU一个核；
 - 如果删除的键过大（比如Set类型中有上百万个对象），会导致服务端阻塞好几秒；
@@ -12,24 +12,84 @@ Redis作为一个基于内存的缓存系统，一直以高性能著称，因没
 
 针对上面问题，Redis在4.0版本以及6.0版本分别引入了`Lazy Free`以及`多线程IO`，逐步向多线程过渡
 
-## 单线程原理
+## 单线程体现在哪里？
+
+### 版本不同，单线程不同
+
+> **正确的说法是，redis只使用了单个线程去处理客户端的网络请求。到6.0版本，那这个答案还要修正为多线程处理网络请求，但是真正操作数据部分程序是单线程的。**
+
+- Redis的版本很多3.x、4.x、6.x，版本不同架构也是不同的，不限定版本问这种问题，是不是有点耍流氓。
+- 限定版本之后 比如4.x，严格意义来说Redis也不是单线程，而是负责处理客户端的请求的线程是单线程。
+- 最新版本的6.0版本，告别了大家印象中的单线程，用一种全新的多线程来解决问题
+
+![img](https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/2226BB23364A3092021556482C0880F0.jpg)
+
+### 事件处理是单线程
 
 Redis服务器是一个事件驱动程序，服务器需要处理以下两类事件：
 
 - `文件事件`：Redis服务器通过套接字与客户端（或者其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象；服务器与客户端的通信会产生相应的文件事件，而服务器则通过监听并处理这些事件来完成一系列网络通信操作，比如连接`accept`，`read`，`write`，`close`等；
 - `时间事件`：Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象，比如过期键清理，服务状态统计等。
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZGKyAlBBia6Au7U9ScIxh5QsI1KJaCuFaLsoJIWzpuVyCqALjd9dWX8A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZGKyAlBBia6Au7U9ScIxh5QsI1KJaCuFaLsoJIWzpuVyCqALjd9dWX8A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom: 33%;" />
 
-如上图，Redis将文件事件和时间事件进行抽象，时间轮训器会监听I/O事件表，一旦有文件事件就绪，Redis就会优先处理文件事件，接着处理时间事件。在上述所有事件处理上，Redis都是以`单线程`形式处理，所以说Redis是单线程的。
+如上图，Redis将文件事件和时间事件进行抽象，时间轮训器会监听I/O事件表，一旦有文件事件就绪，Redis就会优先处理文件事件，接着处理时间事件。[在上述所有事件处理上，Redis都是以`单线程`形式处理，所以说Redis是单线程的]()
 
-此外，如下图，Redis基于Reactor模式开发了自己的I/O事件处理器，也就是文件事件处理器，Redis在I/O事件处理上，采用了I/O多路复用技术，同时监听多个套接字，并为套接字关联不同的事件处理函数，通过单线程实现了多客户端并发处理。
+Redis基于Reactor模式开发了自己的I/O事件处理器，也就是文件事件处理器，Redis在I/O事件处理上，采用了I/O多路复用技术，同时监听多个套接字，并为套接字关联不同的事件处理函数，[通过单线程实现了多客户端并发处理]()。
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZBrrXaOVX2HR8uoJLd4PIpJBmIUXiaVfsp2UPtl5n3icmsRzhpcgIISdA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)多路复用件
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZBrrXaOVX2HR8uoJLd4PIpJBmIUXiaVfsp2UPtl5n3icmsRzhpcgIISdA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:33%;" />
 
-正因为这样的设计，在数据处理上避免了加锁操作，既使得实现上足够简洁，也保证了其高性能。[当然，Redis单线程只是指其在事件处理上，实际上，Redis也并不是单线程的，比如生成RDB文件，就会fork一个子进程来实现]()
+正因为这样的设计，在数据处理上避免了加锁操作，既使得实现上足够简洁，也保证了其高性能。
 
-## Lazy Free机制
+
+
+## 单线程瓶颈
+
+### CPU利用率
+
+通常来说多线程对于提高CPU利用率有重要作用，但是Redis对于提高CPU利用率并不感冒，在Redis看来如果要提高CPU利用率，那在一台机器部署多个实例就好了。
+
+> 其实在Redis 4.0就引入了多个线程来实现数据的异步删除等功能，但是其处理读写请求的仍然只有一个线程，所以仍然算是狭义上的单线程。
+
+抛开CPU之后，影响Redis性能的地方主要就剩下：**内存和网络IO**。
+
+### 内存
+
+内存更多属于硬件范畴的东西，比如我们用容量更大、吞吐率更高的内存介质来进行优化，因此对于Redis来说可以优化的空间有限。
+
+### 网络IO
+
+在优化网络IO之前，我们有必要回顾下Redis单线程整体架构：
+
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/D62600E64DD64120A1AFC7B02C249F05.jpg" alt="img" style="zoom: 50%;" />
+
+Redis采用Reactor模式的网络模型，对于一个客户端请求，主线程负责一个完整的处理过程：
+
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/17AC77F7B141692BBB88D38395BDAB5A.jpg" alt="img" style="zoom: 50%;" />
+
+从socket中读取数据和往socket写数据都是比较耗时的网络IO操作，解析请求和内存交互耗时可能远小于IO操作。
+
+对于这种问题，我们常见的解决方法是标准的多线程化：
+
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/9AE12897F8FCA20AA8BADAF3D04E3E56.jpg" alt="img" style="zoom:50%;" />
+
+该方案中工作线程的功能是一样的，MemCached就是采用这种方案，具体的流程：
+
+> Memcached采用 master-woker 模式进行工作，主线程采用 Libevent 监听和处理事件，主线程将连接请求封装为任务放到队列中，根据算法选择空闲的工作线程，相应的工作线程处理完成后通过soeket与客户端进行数据交互。
+
+但是Redis 6.0的多线程并没有这么做。
+
+
+
+## 多线程体现在哪里？
+
+### 生成RBD日志文件
+
+[当然，Redis单线程只是指其在事件处理上，实际上，Redis也并不是单线程的，比如生成RDB文件，就会fork一个子进程来实现]()
+
+
+
+### 4.0 Lazy Free机制
 
 如上所知，Redis在处理客户端命令时是以单线程形式运行，而且处理速度很快，期间不会响应其他客户端请求，但若客户端向Redis发送一条耗时较长的命令，比如删除一个含有上百万对象的Set键，或者执行flushdb，flushall操作，Redis服务器需要回收大量的内存空间，导致服务器卡住好几秒，对负载较高的缓存系统而言将会是个灾难。为了解决这个问题，在Redis 4.0版本引入了`Lazy Free`，将`慢操作`异步化，这也是在事件处理上向多线程迈进了一步。
 
@@ -145,17 +205,35 @@ typedef struct zskiplistNode {
 
 > Now that values of aggregated data types are fully unshared, and client output buffers don’t contain shared objects as well, there is a lot to exploit. For example it is finally possible to implement threaded I/O in Redis, so that different clients are served by different threads. This means that we’ll have a global lock only when accessing the database, but the clients read/write syscalls and even the parsing of the command the client is sending, can happen in different threads.
 
-## 多线程I/O及其局限性
+### 6.0 多线程I/O
+
+单线程给Redis带来的好处，或许更大。
+
+另外一点如果做成[标准化的多线程（见单线程瓶颈 - 网络IO）]()，对于Redis来说可能更不好处理，因为多线程带来的线程安全问题和底层复杂的数据结构操作都十分棘手。
+
+Redis 6.0将处理过程中最耗时的Socket的读取、请求解析、写入单独外包出去，剩下的命令执行仍然由单线程来完成和内存的数据交互。
+
+这样一来，网络IO操作就变成多线程化了，其他核心部分仍然是线程安全的，确实是个不错的折中办法。
+
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/45B0A1BFD93CE1E776FBD5BFE6D2756D.jpg" alt="img" style="zoom:50%;" />
+
+> 画外音：**Redis 6.0 将网络数据读写、请求协议解析通过多个IO线程的来处理 ，对于真正的命令执行来说，仍然使用主线程操作，真是个很特别的多线程啊！**
+
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/0AC4121F88297E685697B648CE50BD5D.jpg" alt="img" style="zoom:50%;" />
+
+## 多线程瓶颈
+
+#### 多线程I/O及其局限性
 
 Redis在4.0版本引入了`Lazy Free`，自此Redis有了一个`Lazy Free`线程专门用于大键的回收，同时，也去掉了聚合类型的共享对象，这为多线程带来可能，Redis也不负众望，在6.0版本实现了`多线程I/O`。
 
-### 实现原理
+##### 实现原理
 
 正如官方以前的回复，Redis的性能瓶颈并不在CPU上，而是在内存和网络上。因此6.0发布的多线程并未将事件处理改成多线程，而是在I/O上，此外，如果把事件处理改成多线程，不但会导致锁竞争，而且会有频繁的上下文切换，即使用分段锁来减少竞争，对Redis内核也会有较大改动，性能也不一定有明显提升。
 
-![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)多线程IO实现
 
-如上图红色部分，就是Redis实现的多线程部分，利用多核来分担I/O读写负荷。在`事件处理线程`每次获取到可读事件时，会将所有就绪的读事件分配给`I/O线程`，并进行等待，在所有`I/O线程`完成读操作后，`事件处理线程`开始执行任务处理，在处理结束后，同样将写事件分配给`I/O线程`，等待所有`I/O`线程完成写操作。
+
+是Redis实现的多线程部分，利用多核来分担I/O读写负荷。在`事件处理线程`每次获取到可读事件时，会将所有就绪的读事件分配给`I/O线程`，并进行等待，在所有`I/O线程`完成读操作后，`事件处理线程`开始执行任务处理，在处理结束后，同样将写事件分配给`I/O线程`，等待所有`I/O`线程完成写操作。
 
 以读事件处理为例，看下`事件处理线程`任务分配流程：
 
@@ -222,11 +300,11 @@ void *IOThreadMain(void *myid) {
 }
 ```
 
-### 局限性
+##### 局限性
 
 从上面实现上看，6.0版本的多线程并非彻底的多线程，`I/O线程`只能同时执行读或者同时执行写操作，期间`事件处理线程`一直处于等待状态，并非流水线模型，有很多轮训等待开销。
 
-### Tair多线程实现原理
+##### Tair多线程实现原理
 
 相较于6.0版本的多线程，Tair的多线程实现更加优雅。如下图，Tair的`Main Thread`负责客户端连接建立等，`IO Thread`负责请求读取、响应发送、命令解析等，`Worker Thread`线程专门用于事件处理。`IO Thread`读取用户的请求并进行解析，之后将解析结果以命令的形式放在队列中发送给`Worker Thread`处理。`Worker Thread`将命令处理完成后生成响应，通过另一条队列发送给`IO Thread`。为了提高线程的并行度，`IO Thread`和`Worker Thread`之间采用**无锁队列**和**管道**进行数据交换，整体性能会更好。![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
