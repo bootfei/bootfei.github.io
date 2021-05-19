@@ -308,7 +308,7 @@ void *IOThreadMain(void *myid) {
 
 相较于6.0版本的多线程，Tair的多线程实现更加优雅。如下图，Tair的`Main Thread`负责客户端连接建立等，`IO Thread`负责请求读取、响应发送、命令解析等，`Worker Thread`线程专门用于事件处理。`IO Thread`读取用户的请求并进行解析，之后将解析结果以命令的形式放在队列中发送给`Worker Thread`处理。`Worker Thread`将命令处理完成后生成响应，通过另一条队列发送给`IO Thread`。为了提高线程的并行度，`IO Thread`和`Worker Thread`之间采用**无锁队列**和**管道**进行数据交换，整体性能会更好。![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)
 
-## 小结
+#### 小结
 
 Redis 4.0引入`Lazy Free`线程，解决了诸如大键删除导致服务器阻塞问题，在6.0版本引入了`I/O Thread`线程，正式实现了多线程，但相较于Tair，并不太优雅，而且性能提升上并不多，压测看，多线程版本性能是单线程版本的2倍，Tair多线程版本则是单线程版本的3倍。在作者看来，Redis多线程无非两种思路，`I/O threading`和`Slow commands threading`，正如作者在其博客中所说：
 
@@ -318,3 +318,25 @@ Redis 4.0引入`Lazy Free`线程，解决了诸如大键删除导致服务器阻
 
 Redis作者更倾向于采用集群方式来解决`I/O threading`，尤其是在6.0版本发布的原生Redis Cluster Proxy背景下，使得集群更加易用。此外，作者更倾向于`slow operations threading`（比如4.0版本发布的`Lazy Free`）来解决多线程问题。后续版本，是否会将`IO Thread`实现的更加完善，采用Module实现对慢操作的优化，着实值得期待。
 
+
+
+## 线程安全问题
+
+### 读取过期数据
+
+典型场景是：
+
+- Redis 内存储了一个用户的状态：`user5277=idle`；
+- 客户端连接 A 读取了用户状态，获取到用户的空闲状态 `status = get("user5277")`；
+- 客户端连接 B 也同样读取了用户状态；
+- 客户端连接 A 给用户安排了一个任务，并将 Redis 内用户状态置为忙碌 `set("user5277", "busy")`；
+- 客户端连接 B 同样设置用户为忙碌状态。
+- 可是此时用户却被同时分配了两个任务。
+
+
+
+解决方法1：给用户状态加锁就行了，使同一时间内只能有一个客户端操作用户状态。不过加锁我们就需要考虑锁粒度、死锁等问题了，无疑添加了程序的复杂性，不利于维护。
+
+
+
+解决方法2：使用lua脚本，保证[复合命令]()的原子性

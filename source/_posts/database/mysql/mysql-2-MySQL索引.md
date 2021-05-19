@@ -6,11 +6,7 @@ tags: [mysql]
 
 # 索引介绍
 
-## 索引是什么
-
 官方介绍索引是帮助MySQL**高效获取数据**的**数据结构**。更通俗的说，数据库索引好比是一本书前面的目录，能**加快数据库的查询速度**。
-
-## 索引的优缺点
 
 优势：
 
@@ -29,17 +25,15 @@ tags: [mysql]
 
 # 索引的分类
 
-## 单列索引
+- 单列索引
 
-## 组合索引
+- 组合索引(最常用)
 
-## 全文索引
+- 全文索引
 
-## 空间索引
+- 空间索引
 
 # 索引的创建
-
-## 创建索引
 
 - 单列索引之普通索引
 
@@ -68,9 +62,7 @@ tags: [mysql]
   ALTER TABLE article ADD INDEX index_titme_time (title(50),time(10)) ;
   ```
 
-## 删除索引
 
-## 查看索引
 
 # 索引原理
 
@@ -186,19 +178,6 @@ ALTER TABLE 'table_name' ADD INDEX index_name(col1,col2,col3）
 
 
 ```mysql
-create table tuser( 
-
-    id int primary key, 
-
-    name varchar(100), 
-
-    age int, 
-
-    sex char(1), 
-
-    address varchar(100) 
-
-);
 
 alter table tuser add index idx_name_age(name(100),age); 
 
@@ -282,8 +261,6 @@ explain select * from tuser where name='asd' or age=23;
 
 
 # 查看索引执行
-
-## 介绍
 
 MySQL 提供了一个 **EXPLAIN** **命令**, 它可以**对** **SELECT** **语句的执行计划进行分析**,
 
@@ -452,7 +429,7 @@ select结果列中使用到了索引，type会显示为index。
 留意下这个列的值，算一下你的多列索引总长度就知道有没有使用到所有的列了。
 另外，key_len只计算where条件用到的索引长度，而排序和分组就算用到了索引，也不会计算到 key_len
 
-## rows
+## rows（优化的重要参数指标）
 
 这里是执行计划中估算的扫描行数，不是精确值（InnoDB不是精确的值，MyISAM是精确的值，主要原因是InnoDB里面使用了MVCC
 
@@ -630,6 +607,18 @@ role_goods 表上有组合索引 index(roleId,status,number) ，下面的select�
 ### using where（重要）
 
 表示存储引擎返回的记录并不是所有的都满足查询条件，需要在server层进行过滤。
+
+
+
+# 索引分析案例
+
+
+
+
+
+
+
+
 
 # 附录
 

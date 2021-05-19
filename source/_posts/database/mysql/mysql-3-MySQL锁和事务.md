@@ -8,7 +8,7 @@ tags: [mysql]
 
 ![avatar][MySQL锁整体图]
 
-## 介绍
+
 
 - 按照锁的粒度来说，MySQL主要包含三种类型（级别）的锁定机制：
   - 全局锁：锁的是整个database。由MySQL的SQL layer层实现的 
@@ -21,6 +21,25 @@ tags: [mysql]
 
 - 表级锁：开销小，加锁快；不会出现死锁；锁定粒度大，发生锁冲突的概率最高，并发度最低； 
 - 行级锁：开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低，并发度也最高； 
+
+## 一次封锁or两段锁？
+
+因为有大量的并发访问，为了预防死锁，一般应用中推荐使用一次封锁法，就是在方法的开始阶段，已经预先知道会用到哪些数据，然后全部锁住，在方法运行之后，再全部解锁。这种方式可以有效的避免循环死锁，但在数据库中却不适用，因为在事务开始阶段，数据库并不知道会用到哪些数据。
+
+数据库遵循的是两段锁协议，将事务分成两个阶段，加锁阶段和解锁阶段（所以叫两段锁）
+
+- 加锁阶段：在该阶段可以进行加锁操作。在对任何数据进行读操作之前要申请并获得S锁（共享锁，其它事务可以继续加共享锁，但不能加排它锁），在进行写操作之前要申请并获得X锁（排它锁，其它事务不能再获得任何锁）。加锁不成功，则事务进入等待状态，直到加锁成功才继续执行。
+- 解锁阶段：当事务释放了一个封锁以后，事务进入解锁阶段，在该阶段只能进行解锁操作不能再进行加锁操作。
+
+| 事务                 | 加锁/解锁处理                                      |
+| :------------------- | :------------------------------------------------- |
+| begin；              |                                                    |
+| insert into test ….. | 加insert对应的锁                                   |
+| update test set…     | 加update对应的锁                                   |
+| delete from test ….  | 加delete对应的锁                                   |
+| commit;              | 事务提交时，同时释放insert、update、delete对应的锁 |
+
+这种方式虽然无法避免死锁，但是两段锁协议可以保证事务的并发调度是串行化（串行化很重要，尤其是在数据恢复和备份的时候）的。
 
 
 
@@ -63,10 +82,6 @@ SELECT * FROM table_name WHERE ... FOR UPDATE
 对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及数据集加排他锁（X)；
 
 对于普通SELECT语句，InnoDB不会加任何锁
-
-### 两阶段锁
-
-传统RDBMS加锁的一个原则，就是2PL (Two-Phase Locking，二阶段锁)。相对而言，2PL比较容易理解，说的是锁操作分为两个阶段：加锁阶段与解锁阶段，并且保证加锁阶段与解锁阶段不相交。
 
 ### 查看MySQL的锁状态
 
@@ -149,79 +164,306 @@ mysql> show status like 'innodb_row_lock%';
 - 在RR,RU事务隔离级别下，解决了[插入幻读]()的问题
 - 插入的数据，必须是索引列，因为锁只对索引生效
 
-### 间隙锁防止两种情况
+间隙锁防止两种情况
 
 1、防止插入间隙内的数据 
 
 2、防止已有数据更新为间隙内的数据
 
-### 示例
 
 
+## 悲观锁和乐观锁
+
+- 悲观锁
+
+正如其名，它指的是对数据被外界（包括本系统当前的其他事务，以及来自外部系统的事务处理）修改持保守态度，因此，在整个数据处理过程中，将数据处于锁定状态。悲观锁的实现，往往依靠数据库提供的锁机制（也只有数据库层提供的锁机制才能真正保证数据访问的排他性，否则，即使在本系统中实现了加锁机制，也无法保证外部系统不会修改数据）。
+
+在悲观锁的情况下，为了保证事务的隔离性，就需要一致性锁定读。读取数据时给加锁，其它事务无法修改这些数据。修改删除数据时也要加锁，其它事务无法读取这些数据。
+
+- 乐观锁
+
+相对悲观锁而言，乐观锁机制采取了更加宽松的加锁机制。悲观锁大多数情况下依靠数据库的锁机制实现，以保证操作最大程度的独占性。但随之而来的就是数据库性能的大量开销，特别是对长事务而言，这样的开销往往无法承受。
+
+而乐观锁机制在一定程度上解决了这个问题。乐观锁，大多是基于数据版本（ Version ）记录机制实现。何谓数据版本？即为数据增加一个版本标识，在基于数据库表的版本解决方案中，一般是通过为数据库表增加一个 “version” 字段来实现。读取出数据时，将此版本号一同读出，之后更新时，对此版本号加一。此时，将提交数据的版本数据与数据库表对应记录的当前版本信息进行比对，如果提交的数据版本号大于数据库表当前版本号，则予以更新，否则认为是过期数据。
+
+要说明的是，MVCC的实现没有固定的规范，每个数据库都会有不同的实现方式，这里讨论的是InnoDB的MVCC。
 
 ## 死锁
 
 常见的是AB-BA场景，<!--示例中用的是2条sql语句，你能用1条sql语句-->
 
-| Session a                                                    | Session b                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| begin                                                        | begin                                                        |
-| --手动加行写锁 id=1 ，使用索引<br />update mylock set name='m' where id=1; | --手动加行写锁 id=2 ，使用索引 <br />update mylock set name='m' where id=2; |
-| update mylock set name='nn' where id=2; -- 加写锁被阻塞      |                                                              |
-|                                                              | update mylock set name='nn' where id=1; -- 加写锁会死锁，不允许操作 |
+### 常见的2种死锁场景
+
+下面，来看看两个死锁的例子 (一个是两个Session的两条SQL产生死锁；另一个是两个Session的一条SQL，产生死锁)：
+
+
+
+<img src="https://pic3.zhimg.com/80/v2-5d48639658d0fdbd8f32cdd45742cde6_1440w.jpg" alt="img" style="zoom:25%;" />
+
+
+
+
+
+<img src="https://pic4.zhimg.com/80/v2-245dae2298d649e89ff14d61073e140f_1440w.jpg" alt="img" style="zoom:25%;" />
+
+
+
+上面的两个死锁用例。
+
+- 第一个非常好理解，也是最常见的死锁，每个事务执行两条SQL，分别持有了一把锁，然后加另一把锁，产生死锁。<!--常见的AB-BA场景-->
+
+
+
+- 第二个用例，虽然每个Session都只有一条语句，仍旧会产生死锁。要分析这个死锁，首先必须用到本文前面提到的MySQL加锁的规则 -- [记录是按照一条一条顺序加锁的]()。
+
+
+针对Session 1，从name索引出发，读到的[hdc, 1]，[hdc, 6]均满足条件，不仅会加name索引上的记录X锁，而且会加聚簇索引上的记录X锁，[加锁顺序为先[1,hdc,100]，后[6,hdc,10]]()。
+
+而Session 2，从pubtime索引出发，[10,6],[100,1]均满足过滤条件，同样也会加聚簇索引上的记录X锁，加锁顺序为[[6,hdc,10]，后[1,hdc,100]]()。发现没有，跟Session 1的加锁顺序正好相反，如果两个Session恰好都持有了第一把锁，请求加第二把锁，死锁就发生了。
+
+
+
+> 结论：死锁的发生与否，并不在于事务中有多少条SQL语句，[死锁的关键在于：两个(或以上)的Session加锁的顺序不一致。]()
+>
+> 而使用本文上面提到的，分析MySQL每条SQL语句的加锁规则，分析出每条语句的加锁顺序，然后检查多个并发SQL间是否存在以相反的顺序加锁的情况，就可以分析出各种潜在的死锁情况，也可以分析出线上死锁发生的原因。
+
+### 如何解决死锁呢
+
+MySQL默认会主动探知死锁，并回滚某一个影响最小的事务。等另一事务执行完成之后，再重新执行该 事务。
+
+### 如何避免死锁
+
+1、注意程序的逻辑
+
+根本的原因是程序逻辑的顺序，最常见的是交替更新 
+
+> Transaction 1: 更新表A -> 更新表B
+> Transaction 2: 更新表B -> 更新表A 
+>
+> Transaction获得两个资源
+
+2、保持事务的轻量 越是轻量的事务，占有越少的锁资源，这样发生死锁的几率就越小
+
+3、提高运行的速度 避免使用子查询，尽量使用主键等等
+
+4、尽量快提交事务，减少持有锁的时间 越早提交事务，锁就越早释放
+
+
 
 
 
 # MySQL事务
 
-## 介绍
-
-在MySQL中的事务是由存储引擎实现的，而且支持事务的存储引擎不多，我们主要讲解InnoDB存储引 擎中的事务。
-
-## 4大特性
+事务4大特性：
 
 - 原子性(atomicity) :事务最小工作单元，要么全成功，要么全失败 。
 - 一致性(consistency): 事务开始和结束后，数据库的完整性不会被破坏 。
 - 隔离性(isolation):不同事务之间互不影响，四种隔离级别为RU,RC,RR,Serializable
 - 持久性(durability) :事务提交后，对数据的修改是永久性的，即使系统故障也不会丢失 。
 
-## 隔离级别
+Mysql的4种事务方式：
 
-### RU(读未提交):
+- 未提交读(Read Uncommitted)：允许脏读，也就是可能读取到其他会话中未提交事务修改的数据
+- 提交读(Read Committed)：只能读取到已经提交的数据。Oracle等多数数据库默认都是该级别 (不重复读)
+- 可重复读(Repeated Read)：可重复读。在同一个事务内的查询都是事务开始时刻一致的，InnoDB默认级别。在SQL标准中，该隔离级别消除了不可重复读，但是还存在幻象读
+- 串行读(Serializable)：完全串行化的读，每次读都需要获得表级共享锁，读写相互都会阻塞
 
-- 脏读：一个事务读取到另一个事务未提交的数据。
+## 隔离级别与锁的关系
 
-### RC(读已提交): 
+### RU(读未提交)
 
-- 不可重复读: 一个事务因读取到另一个事务已提交的update, 导致对同一条记录读取两次以上的结果不一致。
+不加任何锁
 
-### RR(可重复读)：
+### RC(读已提交)
 
-- 幻读: 一个事务因读取到另一个事务已提交的insert数据或者delete数据, 导致对同一张表读取两次以上的结果不一致
+在RC级别中，数据的读取都是不加锁的，但是数据的写入、修改和删除是需要加锁的。
+
+测试：
+
+由于MySQL的InnoDB默认是使用的RR级别，所以我们先要将该session开启成RC级别，并且设置binlog的模式
+
+```sql
+SET session transaction isolation level read committed;
+SET SESSION binlog_format = 'ROW';（或者是MIXED）
+```
+
+| 事务A                                                        | 事务B                                                        |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| begin;                                                       | begin;                                                       |
+| update class_teacher set class_name=‘初三二班’ where teacher_id=1; | update class_teacher set class_name=‘初三三班’ where teacher_id=1; |
+| commit;                                                      |                                                              |
+
+为了防止并发过程中的修改冲突，事务A中MySQL给teacher_id=1的数据行加锁，并一直不commit（释放锁），那么事务B也就一直拿不到该行锁，wait直到超时。
+
+> 这时我们要注意到，teacher_id是有索引的，如果是没有索引的class_name呢？update class_teacher set teacher_id=3 where class_name = ‘初三一班’; 那么MySQL会给整张表的所有数据行的加行锁。这里听起来有点不可思议，但是当sql运行的过程中，MySQL并不知道哪些数据行是 class_name = ‘初三一班’的（没有索引嘛），如果一个条件无法通过索引快速过滤，存储引擎层面就会将所有记录加锁后返回，再由MySQL Server层进行过滤。
+>
+> 但在实际使用过程当中，MySQL做了一些改进，在MySQL Server过滤条件，发现不满足后，会调用unlock_row方法，把不满足条件的记录释放锁 (违背了二段锁协议的约束)。这样做，保证了最后只会持有满足条件记录上的锁，但是每条记录的加锁操作还是不能省略的。可见即使是MySQL，为了效率也是会违反规范的。（参见《高性能MySQL》中文第三版p181）
+>
+> 这种情况同样适用于MySQL的默认隔离级别RR。所以对一个数据量很大的表做批量修改的时候，如果无法使用相应的索引，MySQL Server过滤数据的的时候特别慢，就会出现虽然没有修改某些行的数据，但是它们还是被锁住了的现象。
+
+
+
+### RR(可重复读)
+
+这是MySQL中InnoDB默认的隔离级别。我们姑且分“读”和“写”两个模块来讲解。
+
+#### 读
+
+读就是可重读，可重读这个概念是一事务的多个实例在并发读取数据时，会看到同样的数据行
+
+RC（不可重读）模式下的展现
+
+| 事务A                                                        | 事务B                                                      |
+| :----------------------------------------------------------- | :--------------------------------------------------------- |
+| begin;                                                       | begin;                                                     |
+| select id,class_name,teacher_id from class_teacher where teacher_id=1;idclass_nameteacher_id1初三二班12初三一班1 |                                                            |
+|                                                              | update class_teacher set class_name='初三三班' where id=1; |
+|                                                              | commit;                                                    |
+| select id,class_name,teacher_id from class_teacher where teacher_id=1;idclass_nameteacher_id1初三三班12初三一班1 读到了事务B修改的数据，和第一次查询的结果不一样，是不可重读的。 |                                                            |
+| commit;                                                      |                                                            |
+
+事务B修改id=1的数据提交之后，事务A同样的查询，后一次和前一次的结果不一样，这就是不可重读（重新读取产生的结果不一样）。这就很可能带来一些问题，那么我们来看看在RR级别中MySQL的表现：
+
+| 事务A                                                        | 事务B                                                        | 事务C                                                        |
+| :----------------------------------------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| begin;                                                       | begin;                                                       | begin;                                                       |
+| select id,class_name,teacher_id from class_teacher where teacher_id=1;idclass_nameteacher_id1初三二班12初三一班1 |                                                              |                                                              |
+|                                                              | update class_teacher set class_name='初三三班' where id=1;commit; |                                                              |
+|                                                              |                                                              | insert into class_teacher values (null,'初三三班',1);commit; |
+| select id,class_name,teacher_id from class_teacher where teacher_id=1;idclass_nameteacher_id1初三二班12初三一班1 没有读到事务B修改的数据，和第一次sql读取的一样，是可重复读的。没有读到事务C新添加的数据。 |                                                              |                                                              |
+| commit;                                                      |                                                              |                                                              |
+
+我们注意到，当teacher_id=1时，事务A先做了一次读取，事务B中间修改了id=1的数据，并commit之后，事务A第二次读到的数据和第一次完全相同。所以说它是可重读的。那么MySQL是怎么做到的呢？这里姑且卖个关子，我们往下看。
+
+#### 不可重复读和幻读的区别
+
+很多人容易搞混不可重复读和幻读，确实这两者有些相似。但不可重复读重点在于update和delete，而幻读的重点在于insert。
+
+如果使用锁机制来实现这两种隔离级别，在可重复读中，该sql第一次读取到数据后，就将这些数据加锁，其它事务无法修改这些数据，就可以实现可重复读了。但这种方法却无法锁住insert的数据，所以当事务A先前读取了数据，或者修改了全部数据，事务B还是可以insert数据提交，这时事务A就会发现莫名其妙多了一条之前没有的数据，这就是幻读，不能通过行锁来避免。需要Serializable隔离级别 ，读用读锁，写用写锁，读锁和写锁互斥，这么做可以有效的避免幻读、不可重复读、脏读等问题，但会极大的降低数据库的并发能力。
+
+所以说不可重复读和幻读最大的区别，就在于如何通过锁机制来解决他们产生的问题。
+
+上文说的，是使用[悲观锁]()机制来处理这两种问题，但是MySQL、ORACLE、PostgreSQL等成熟的数据库，出于性能考虑，都是使用了以[乐观锁为理论基础的MVCC（多版本并发控制）]()来避免这两种问题。
+
+
+
+#### MVCC在MySQL的InnoDB中的实现
+
+在InnoDB中，会在每行数据后添加两个额外的隐藏的值来实现MVCC，这两个值一个记录这行数据何时被创建，另外一个记录这行数据何时过期（或者被删除）。 在实际操作中，存储的并不是时间，而是事务的版本号，每开启一个新事务，事务的版本号就会递增。 在可重读Repeatable reads事务隔离级别下：
+
+- SELECT时，读取创建版本号<=当前事务版本号，删除版本号为空或>当前事务版本号。
+- INSERT时，保存当前事务版本号为行的创建版本号
+- DELETE时，保存当前事务版本号为行的删除版本号
+- UPDATE时，插入一条新纪录，保存当前事务版本号为行创建版本号，同时保存当前事务版本号到原来删除的行
+
+通过MVCC，虽然每行记录都需要额外的存储空间，更多的行检查工作以及一些额外的维护工作，但可以减少锁的使用，大多数读操作都不用加锁，读数据操作很简单，性能很好，并且也能保证只会读取到符合标准的行，也只锁住必要行。
+
+我们不管从数据库方面的教课书中学到，还是从网络上看到，大都是上文中事务的四种隔离级别这一模块列出的意思，RR级别是可重复读的，但无法解决幻读，而只有在Serializable级别才能解决幻读。于是我就加了一个事务C来展示效果。在事务C中添加了一条teacher_id=1的数据commit，RR级别中应该会有幻读现象，事务A在查询teacher_id=1的数据时会读到事务C新加的数据。但是测试后发现，在MySQL中是不存在这种情况的，在事务C提交后，事务A还是不会读到这条数据。[可见在MySQL的RR级别中，是解决了幻读的读问题的]()。
+
+![innodb_lock_1](https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/6eb5d3b1.png)
+
+读问题解决了，根据MVCC的定义，并发提交数据时会出现冲突，那么冲突时如何解决呢？我们再来看看InnoDB中RR级别对于写数据的处理。
+
+#### “读”与“读”的区别
+
+可能有读者会疑惑，[事务的隔离级别其实都是对于读数据的定义]()，但到了这里，就被拆成了读和写两个模块来讲解。[这主要是因为MySQL中的读，和事务隔离级别中的读，是不一样的]()。
+
+我们且看，在RR级别中，通过MVCC机制，虽然让数据变得可重复读，但我们读到的数据可能是历史数据，是不及时的数据，不是数据库当前的数据！这在一些对于数据的时效特别敏感的业务中，就很可能出问题。
+
+对于这种读取历史数据的方式，我们叫它快照读 (snapshot read)，而读取数据库当前版本数据的方式，叫当前读 (current read)。很显然，在MVCC中：
+
+- 快照读：就是select
+  - select * from table ….;
+- 当前读：特殊的读操作，插入/更新/删除操作，属于当前读，处理的都是当前的数据，需要加锁。
+  - select * from table where ? lock in share mode;  //共享锁
+  - select * from table where ? for update; //互斥锁
+  - insert;  //互斥锁
+  - update ;  //互斥锁
+  - delete; //互斥锁
+
+[事务的隔离级别实际上都是定义了当前读的级别]( //互斥锁)，MySQL为了减少锁处理（包括等待其它锁）的时间，提升并发能力，引入了快照读的概念，使得select不用加锁。而update、insert这些“当前读”，就需要另外的模块来解决了。 <!--我就是经常搞混-->
+
+#### 写（”当前读”）
+
+事务的隔离级别中虽然只定义了读数据的要求，实际上这也可以说是写数据的要求。上文的“读”，实际是讲的快照读；而这里说的“写”就是当前读了。
+
+为了解决当前读中的幻读问题，MySQL事务使用了Next-Key锁。
+
+
+
+#### Next-Key锁
+
+Next-Key锁是行锁和GAP（间隙锁）的合并，行锁上文已经介绍了，接下来说下GAP间隙锁。
+
+行锁可以防止不同事务版本的数据修改提交时造成数据冲突的情况。但如何避免别的事务插入数据就成了问题。我们可以看看RR级别和RC级别的对比
+
+RC级别：
+
+| 事务A                                                        | 事务B                                                        |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| begin;                                                       | begin;                                                       |
+| select id,class_name,teacher_id from class_teacher where teacher_id=30;idclass_nameteacher_id2初三二班30 |                                                              |
+| update class_teacher set class_name='初三四班' where teacher_id=30; |                                                              |
+|                                                              | insert into class_teacher values (null,'初三二班',30);commit; |
+| select id,class_name,teacher_id from class_teacher where teacher_id=30;idclass_nameteacher_id2初三四班3010初三二班30 |                                                              |
+
+RR级别：
+
+| 事务A                                                        | 事务B                                                        |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| begin;                                                       | begin;                                                       |
+| select id,class_name,teacher_id from class_teacher where teacher_id=30;idclass_nameteacher_id2初三二班30 |                                                              |
+| update class_teacher set class_name='初三四班' where teacher_id=30; |                                                              |
+|                                                              | insert into class_teacher values (null,'初三二班',30);waiting.... |
+| select id,class_name,teacher_id from class_teacher where teacher_id=30;idclass_nameteacher_id2初三四班30 |                                                              |
+| commit;                                                      | 事务Acommit后，事务B的insert执行。                           |
+
+通过对比我们可以发现，在RC级别中，事务A修改了所有teacher_id=30的数据，但是当事务Binsert进新数据后，事务A发现莫名其妙多了一行teacher_id=30的数据，而且没有被之前的update语句所修改，这就是“当前读”的幻读。
+
+RR级别中，事务A在update后加锁，事务B无法插入新数据，这样事务A在update前后读的数据保持一致，避免了幻读。这个锁，就是Gap锁。
+
+MySQL是这么实现的：
+
+在class_teacher这张表中，teacher_id是个索引，那么它就会维护一套B+树的数据关系，为了简化，我们用链表结构来表达（实际上是个树形结构，但原理相同）
+
+![innodb_lock_2](https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/b3b6a55f.png)
+
+
+
+如图所示，InnoDB使用的是聚集索引，teacher_id身为二级索引，就要维护一个索引字段和主键id的树状结构（这里用链表形式表现），并保持顺序排列。
+
+Innodb将这段数据分成几个个区间
+
+- (negative infinity, 5],
+- (5,30],
+- (30,positive infinity)；
+
+update class_teacher set class_name=‘初三四班’ where teacher_id=30;不仅用行锁，锁住了相应的数据行；同时也在两边的区间，（5,30]和（30，positive infinity），都加入了gap锁。这样事务B就无法在这个两个区间insert进新数据。
+
+受限于这种实现方式，Innodb很多时候会锁住不需要锁的区间。如下所示：
+
+| 事务A                                                        | 事务B                                                        | 事务C                                                  |
+| :----------------------------------------------------------- | :----------------------------------------------------------- | :----------------------------------------------------- |
+| begin;                                                       | begin;                                                       | begin;                                                 |
+| select id,class_name,teacher_id from class_teacher;idclass_nameteacher_id1初三一班52初三二班30 |                                                              |                                                        |
+| update class_teacher set class_name='初一一班' where teacher_id=20; |                                                              |                                                        |
+|                                                              | insert into class_teacher values (null,'初三五班',10);waiting ..... | insert into class_teacher values (null,'初三五班',40); |
+| commit;                                                      | 事务A commit之后，这条语句才插入成功                         | commit;                                                |
+|                                                              | commit;                                                      |                                                        |
+
+update的teacher_id=20是在(5，30]区间，即使没有修改任何数据，Innodb也会在这个区间加gap锁，而其它区间不会影响，事务C正常插入。
+
+如果使用的是没有索引的字段，比如update class_teacher set teacher_id=7 where class_name=‘初三八班（即使没有匹配到任何数据）’,那么会给全表加入gap锁。同时，它不能像上文中行锁一样经过MySQL Server过滤自动解除不满足条件的锁，因为没有索引，则这些字段也就没有排序，也就没有区间。除非该事务提交，否则其它事务无法插入任何数据。
+
+行锁防止别的事务修改或删除，GAP锁防止别的事务新增，行锁和GAP锁结合形成的的Next-Key锁共同解决了RR级别在写数据时的幻读问题。
 
 ### SERIALIZABLE (串行化)
 
-- 读要加共享读锁，写要加排他写锁，造成事务的串行
+这个级别很简单，读加共享锁，写加排他锁，读写互斥。使用的悲观锁的理论，实现简单，数据更加安全，但是并发能力非常差。如果你的业务并发的特别少或者没有并发，同时又要求数据及时可靠的话，可以使用这种模式。
 
-### 丢失更新 
+这里要吐槽一句，不要看到select就说不会加锁了，在Serializable这个级别，还是会加锁的！
 
-<!--需要通过业务层面解决这种更新问题-->
 
-示例一
-
-<img src="https://img-blog.csdnimg.cn/20190527235415511.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NlYW54d3E=,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
-
-示例二
-
-<img src="https://img-blog.csdnimg.cn/20190527235434398.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NlYW54d3E=,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
-
-### 总结
-
-数据库的事务并发问题需要使用并发控制机制去解决，数据库的并发控制机制有很多，最为常见的就是锁机制。
-
-[锁机制一般会给竞争资源加锁，阻塞读或者写操作来解决事务之间的竞争条件, 最终保证事务的可串行化。]()
-
-[而MVCC则引入了另外一种并发控制，它让读写操作互不阻塞，每一个写操作都会创建一个新版本的数据，读操作会从有限多个版本的数据中挑选一个最合适的结果直接返回，由此解决了事务的竞争条件。]()
 
 ## 版本链
 
@@ -315,7 +557,7 @@ UPDATE t SET c = '张飞' WHERE id = 1; # Transaction 200
 
 
 
-## MVCC总结
+## MVCC原理
 
 从上边的描述中我们可以看出来，所谓的MVCC(Multi-Version Concurrency Control ，多版本并发控制)指的就是在使用 READ COMMITTD 、 REPEATABLE READ 这两种隔离级别的事务在执行普通的SEELCT 操作时访问记录的版本链的过程，这样子可以使不同事务的 [读-写 、 写-读 操作并发执行]()，从而提升系统性能。
 
@@ -323,31 +565,7 @@ READ COMMITTD 、 REPEATABLE READ 这两个隔离级别的一个很大不同就�
 
 ### 当前读和快照读
 
-在MVCC并发控制中，读操作可以分成两类:快照读(snapshot read)与当前读 (current read)。
-
-- 快照读，读取的是记录的可见版本 (有可能是历史版本)，不用加锁。
-
-- 当前读，读取的是记录的最新版本，并且当前读返回的记录，都会加上锁，保证其他事务不会再并发修
-
-  改这条记录。
-
-以MySQL InnoDB为例:
-
-**快照读:**简单的select操作，属于快照读，不加锁。(当然，也有例外，下面会分析)
-
-```mysql
-select * from table where ? ;
-```
-
-**当前读:**特殊的读操作，插入/更新/删除操作，**属于当前读，需要加锁**。
-
-```mysql
-select * from table where ? lock in share mode;//共享锁(S)
-select * from table where ? for update;//排他锁(X)
-insert into table values (...) ; //排他锁(X)
-update table set ? where ? ; //排他锁(X)
-delete from table where ? ; //排他锁(X)
-```
+前文已经介绍
 
 
 
@@ -396,11 +614,11 @@ delete from table where ? ; //排他锁(X)
 >
 > MVCC的最大好处就是读不加锁，读写不冲突，同时还能保证事务的隔离性。
 
-### 事务总结
+## 事务总结
 
 [事务的隔离性由多版本控制机制和锁实现，而原子性，持久性和一致性主要是通过redo log、undo log 和Force Log at Commit机制机制来完成的。]()
 
-> redo log用于在崩溃时恢复数据，undo log用于对事务的影响进行撤销，也可以用于多版本控 制。而Force Log at Commit机制保证事务提交后redo log日志都已经持久化。
+> redo log用于在崩溃时恢复数据，undo log用于对事务的影响进行撤销，也可以用于多版本控制。而Force Log at Commit机制保证事务提交后redo log日志都已经持久化。
 >
 > **注意事项:**
 >
@@ -572,7 +790,6 @@ id是主键，Read Committed隔离级别，只需要将主键上，id = 10的记
 > 记录[6,c]之前，不会插入id=10的记录；[6,c]与[10,b]间可以插入[10, aa]；[10,b]与[10,d]间，可以插入新的[10,bb],[10,c]等；[10,d]与[11,f]间可以插入满足条件的[10,e],[10,z]等；而[11,f]之后也不会插入满足条件的记录。因此，为了保证[6,c]与[10,b]间，[10,b]与[10,d]间，[10,d]与[11,f]不会插入新的满足条件的记录，MySQL选择了用GAP锁，将这三个GAP给锁起来。
 >
 > Insert操作，如insert [10,aa]，首先会定位到[6,c]与[10,b]间，然后在插入前，会检查这个GAP是否已经被锁上，如果被锁上，则Insert不能插入记录。因此，通过第一遍的当前读，不仅将满足条件的记录锁上 (X锁)，与组合三类似。同时还是增加3把GAP锁，将可能插入满足条件记录的3个GAP给锁上，保证后续的Insert不能插入新的id=10的记录，也就杜绝了同一事务的第二次当前读，出现幻象的情况。
->
 
 
 
@@ -605,7 +822,6 @@ id是主键，Read Committed隔离级别，只需要将主键上，id = 10的记
 
 
 > 结论：在Repeatable Read隔离级别下，如果进行全表扫描的当前读，那么会锁上表中的所有记录，同时会锁上聚簇索引内的所有GAP，杜绝所有的并发 更新/删除/插入 操作。
->
 
 
 
@@ -677,61 +893,75 @@ select * from t1 where id = 10
 
 
 
-## 死锁原理与分析
-
-### 常见的2种死锁场景
-
-下面，来看看两个死锁的例子 (一个是两个Session的两条SQL产生死锁；另一个是两个Session的一条SQL，产生死锁)：
 
 
+# MySql丢失更新
 
-<img src="https://pic3.zhimg.com/80/v2-5d48639658d0fdbd8f32cdd45742cde6_1440w.jpg" alt="img" style="zoom:25%;" />
+### 第一类：回滚丢失
 
+<img src="https://img-blog.csdnimg.cn/20190527235434398.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NlYW54d3E=,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
 
+目前来看，数据库已经做了处理，没有出现过这样的情况。
 
 
 
-<img src="https://pic4.zhimg.com/80/v2-245dae2298d649e89ff14d61073e140f_1440w.jpg" alt="img" style="zoom:25%;" />
+### 第二类
+
+<img src="https://img-blog.csdnimg.cn/20190527235415511.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NlYW54d3E=,size_16,color_FFFFFF,t_70" style="zoom:67%;" />
 
 
 
-> 上面的两个死锁用例。第一个非常好理解，也是最常见的死锁，每个事务执行两条SQL，分别持有了一把锁，然后加另一把锁，产生死锁。<!--常见的AB-BA场景-->
->
+<!--这块我一直觉得有问题，在知乎上和大牛沟通讨论过，必须更加具体的讨论-->
+
+<img src="https://pic1.zhimg.com/80/v2-9e7d34b7602af6344ce9007482fbc7f9_1440w.jpg?source=1940ef5c" alt="img" style="zoom:50%;" />
+
+作者：奔腾年代
+链接：https://www.zhihu.com/question/56612006/answer/1358870216
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 <!--我从知乎上大家的讨论得来的-->
 
 
 
-> 第二个用例，虽然每个Session都只有一条语句，仍旧会产生死锁。要分析这个死锁，首先必须用到本文前面提到的MySQL加锁的规则 -- 记录是按照一条一条顺序加锁的。
->
-> 针对Session 1，从name索引出发，读到的[hdc, 1]，[hdc, 6]均满足条件，不仅会加name索引上的记录X锁，而且会加聚簇索引上的记录X锁，[加锁顺序为先[1,hdc,100]，后[6,hdc,10]]()。
->
-> 而Session 2，从pubtime索引出发，[10,6],[100,1]均满足过滤条件，同样也会加聚簇索引上的记录X锁，加锁顺序为[[6,hdc,10]，后[1,hdc,100]]()。发现没有，跟Session 1的加锁顺序正好相反，如果两个Session恰好都持有了第一把锁，请求加第二把锁，死锁就发生了。
+其实，很明显了；如果我们做的操作不是 `update account set balance = 90 where id = 1`, 而是 `update account set balance = balance - 10 where id = 1`, 就可以利用 MySQL 的一致性非锁定读的能力解决掉更新丢失，以为 `update` 这类更新操作会触发当前读，读取到行的最新版本的数据后，再执行更新操作；如果有两个update操作，那么其中一个就会阻塞，直到另一个 commit 后，才会执行。那么总结一下，解决更新丢失 (Update Lost) 的方法可以有三种：
 
+- 一致性锁定读
 
+```mysql
+begin;
+// 所有的会话都并发执行这个SQL，只有一个可以获取 X 锁成功，其他的都等待
+select id, name, balance from account where id = 1 for update;
+// 假设返回：balance = 100;
 
-> 结论：死锁的发生与否，并不在于事务中有多少条SQL语句，[死锁的关键在于：两个(或以上)的Session加锁的顺序不一致。]()
->
-> 而使用本文上面提到的，分析MySQL每条SQL语句的加锁规则，分析出每条语句的加锁顺序，然后检查多个并发SQL间是否存在以相反的顺序加锁的情况，就可以分析出各种潜在的死锁情况，也可以分析出线上死锁发生的原因。
+// 应用代码：balance += 10;  balance = 110
+update account set balance = 110 where id = 1;
+commit;
+```
 
-### 如何解决死锁呢
+-  乐观锁
 
-MySQL默认会主动探知死锁，并回滚某一个影响最小的事务。等另一事务执行完成之后，再重新执行该 事务。
+```mysql
+begin;
+select id, name, balance, version from account where id = 1;
 
-### 如何避免死锁
+// 假设 balance = 100, version = 1
+// 应用代码：balance += 10;  balance = 110
+update account set balance = 110, version = version + 1 where id = 1 and version = 1;
+commit;
+```
 
-1、注意程序的逻辑
+- 一致性非锁定读，但是更新策略不一样
 
-根本的原因是程序逻辑的顺序，最常见的是交替更新 
+```mysql
+begin;
+// 执行快照读
+select id, balance from account where id = 1;
+// 这个数据有可能会被其他的并发更新给修改掉，不一定是最新的数据
 
-> Transaction 1: 更新表A -> 更新表B
-> Transaction 2: 更新表B -> 更新表A 
->
-> Transaction获得两个资源
-
-2、保持事务的轻量 越是轻量的事务，占有越少的锁资源，这样发生死锁的几率就越小
-
-3、提高运行的速度 避免使用子查询，尽量使用主键等等
-
-4、尽量快提交事务，减少持有锁的时间 越早提交事务，锁就越早释放
+// 执行update操作，注意这里的不同，是直接对余额做 增/减 操作，
+//  利用一致性读视图在update时执行当前读的特点，也就是说如果有多个会话执行 update，其余的会被阻塞
+update account set balance = balance + 10 where id = 1;
+commit;
+```
 
 # 附录
 

@@ -6,7 +6,7 @@ tags:
 
 
 
-# 统计销量最高的员工
+### 统计销量最高的员工
 
 ```sql
 SELECT orderinfo.UserID,sum(OrderAmount) from orderinfo LEFT JOIN userinfo
@@ -16,34 +16,34 @@ on orderinfo.UserID = userinfo.userid
 GROUP BY orderinfo.UserID ORDER BY sum(OrderAmount) desc LIMIT 10 ;
 ```
 
-求出最畅销的十个商品 所属的品牌中各个不同尺码的销售额(锻炼sql，分步写，思路清晰)
+先查到10个畅销商品所属于的品牌
 
-4.4.1、先查到10个畅销商品所属于的品牌
-
-```
+```mysql
 CREATE table top10brand(
 
-SELECT typeid from orderdetail left JOIN goodsinfo
+  SELECT typeid from orderdetail left JOIN goodsinfo
 
-on orderdetail.GoodsID= goodsinfo.goodsid
+  on orderdetail.GoodsID= goodsinfo.goodsid
 
-GROUP BY orderdetail.GoodsID
+  GROUP BY orderdetail.GoodsID
 
-ORDER BY sum(GoodsPrice*Amount) desc LIMIT 10
+  ORDER BY sum(GoodsPrice*Amount) desc LIMIT 10
 
 );
-```
 
 SELECT * from top10brand;
-
-4.4.2、内连接各个表
-
 ```
+
+
+
+内连接各个表
+
+```mysql
 SELECT orderdetail.SizeID,sum(GoodsPrice*Amount) from goodsinfo
 
-INNER JOIN top10brand on top10brand.typeid=goodsinfo.typeid
+  INNER JOIN top10brand on top10brand.typeid=goodsinfo.typeid
 
-INNER JOIN orderdetail ON orderdetail.GoodsID = goodsinfo.goodsid
+  INNER JOIN orderdetail ON orderdetail.GoodsID = goodsinfo.goodsid
 
 GROUP BY orderdetail.SizeID
 
@@ -54,7 +54,7 @@ ORDER BY sum(GoodsPrice*Amount) desc;
 
 
 
-# select结果update到表中
+### select结果update到表中
 
 ```mysql
 UPDATE sale
@@ -78,7 +78,7 @@ SET sale.FqtyIn = sale2.qty
 
 
 
-# select结果insert到表中
+### select结果insert到表中
 
 ```mysql
 
@@ -90,7 +90,7 @@ insert into tableA (列1，列2，列3) select 列1，列2，常量  from tableB
 
 
 
-# Get Last Record In Each Group
+### Get Last Record In Each Group
 
 **我现在需要取出每个分类中最新的内容**
 select * from test group by category_id order by `date`
@@ -118,11 +118,30 @@ This will return the posts with the latest record in each group.
 
 
 
-# Combine results of 2 queries to multiple columns
+### Combine results of 2 queries to multiple columns
 
 ```
 非常基础的sql
 
 select a.id, bi.name from (select id from a) a, (select name from b) b
+```
+
+
+
+### join on 多个条件中的任意一个即可
+
+What I would need is something like this:
+
+```sql
+Select * from Table1 as t1     
+LEFT JOIN Table2 as t2 
+on t1.checkcode = (t2.checkcode1 OR t2.checkcode2)     
+```
+
+Try like this,
+
+```sql
+Select * from Table1 as t1  
+LEFT JOIN Table2 as t2 on t1.checkcode = t2.checkcode1 OR t1.checkcode = t2.checkcode2
 ```
 
