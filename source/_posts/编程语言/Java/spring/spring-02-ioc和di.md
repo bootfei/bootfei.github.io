@@ -101,7 +101,7 @@ tags:
 
     
 
-### BeanDefinitions继承体系（了解就行）
+### BeanDefinitions继承体系（了解）
 
 实际只用BeanDefinition
 
@@ -277,19 +277,11 @@ Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容
 
 # 仿写Bean实例化过程
 
-## IOC模块仿写
+
 
 ![][手写IOC框架]
 
-> 需求：实现用户查询功能
->
->    * 业务层UserService
->      		* UserServiceImpl
->           	*	持久层
->           		* UserDao
->           		* UserDaoImpl
->           	* PO层
->           		* User
+
 
 ## 实现1: 不用IOC
 
@@ -858,13 +850,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 # Spring IOC源码解析
 
-## 基础容器BeanFactory对BeanDefinition注册
+## xml配置方式
+
+### 基础容器BeanFactory对BeanDefinition注册
 
 > 原来Spring提供了一个基础容器的实现：XMLBeanFactory
 >
 > 但是后来这个类被遗弃了，使用DefaultListableBeanFactory来代替。
 
-### 入口1：和实现2的流程一样，可惜被抛弃了
+#### 入口1：和实现2的流程一样，可惜被抛弃了
 
 XmlBeanFactory#构造方法中
 
@@ -877,11 +871,11 @@ DataSource dataSource = (DataSource) beanFactory.getBean("dataSource");
 System.out.println(dataSource);
 ```
 
-### 入口2：和实现3的流程一样，专门做BeanDefinition解析
+#### 入口2：和实现3的流程一样，专门做BeanDefinition解析
 
 ```java
 public void test1() { 
-// 指定XML路径 
+		// 指定XML路径 
     String path = "spring/beans.xml"; 
     // 创建DefaultListableBeanFactory工厂，这也就是Spring的基本容器 
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
@@ -898,21 +892,19 @@ public void test1() {
 
 
 
-入口：XmlBeanDefinitionReader#<font color="red">loadBeanDefinitions()</font>;
-	流程：
-		|-	AbstractBeanDefinitionReader#loadBeanDefinitions
-			|-	#loadBeanDefinitions：--通过ResourcePatternResolver获取指定路径的Resource对象，然后继续去加载并解析
-				|- XmlBeanDefinitionReader#loadBeanDefinitions：给Resource对象包装成EncodedResource，之所以封装数据，是因为要给这个数据设置一些其他的属性
-					|- #loadBeanDefinitions：通过EncodedResource获取InputStream
-						|- #doLoadBeanDefinitions：根据InputStream创建Document文档对象
-							|- #registerBeanDefinitions：委托BeanDefinitionDocumentReader去按照Spring的语义去完成Document文档对象的解析工作
-								|- DefaultBeanDefinitionDocumentReader#registerBeanDefinitions
-									|- #[do]()RegisterBeanDefinitions：<font color="red">委托给BeanDefinitionParserDelegate去完成具体的BeanDefinition解析工作</font>
-										|- #parseBeanDefinitions
-											|- #parseDefaultElement：解析默认的元素比如bean标签、import标签等不需要加前缀的标签
-												|- #processBeanDefinition
-													|- BeanDefinitionParserDelegate#parseBeanDefinitionElement
-	
+- 入口：[XmlBeanDefinitionReader]()#<font color="red">loadBeanDefinitions()</font>;
+  - AbstractBeanDefinitionReader#loadBeanDefinitions：通过ResourcePatternResolver获取指定路径的Resource对象，然后继续去加载并解析
+  - [XmlBeanDefinitionReader]()#loadBeanDefinitions：给Resource对象包装成EncodedResource，之所以封装数据，是因为要给这个数据设置一些其他的属性
+    - loadBeanDefinitions：通过EncodedResource获取InputStream
+    - doLoadBeanDefinitions：根据InputStream创建Document文档对象
+    - registerBeanDefinitions：委托[BeanDefinitionDocumentReader]()去按照Spring的语义去完成Document文档对象的解析工作
+  - [DefaultBeanDefinitionDocumentReader]()#registerBeanDefinitions
+    - doRegisterBeanDefinitions：委托给[BeanDefinitionParserDelegate]()去完成具体的BeanDefinition解析工作
+    - parseBeanDefinitions
+    - parseDefaultElement：解析默认的元素比如bean标签、import标签等不需要加前缀的标签
+    - processBeanDefinition
+  - [BeanDefinitionParserDelegate]()#parseBeanDefinitionElement
+    	
 
 	流程总结：
 		AbstractBeanDefinitionReader
@@ -920,7 +912,7 @@ public void test1() {
 			
 		DefaultBeanDefinitionDocumentReader
 		BeanDefinitionParserDelegate：主要是用来解析默认命名空间下的标签，比如bean标签
-## 基础容器BeanFactory对Bean实例创建流程源码阅读
+### 基础容器BeanFactory对Bean实例创建
 
 AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
 
@@ -928,11 +920,11 @@ AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBe
 
 
 
-## 高级容器ApplicationContext对BeanDefinition注册
+### 高级容器ApplicationContext对BeanDefinition注册
 
 step2
 
-## 高级容器ApplicationContext初始化流程源码分析 
+### 高级容器ApplicationContext初始化流程源码分析 
 
 ### 入口
 
