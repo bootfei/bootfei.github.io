@@ -16,3 +16,4 @@ tags: [nginx]
    https://www.nginx.com/resources/wiki/start/topics/tutorials/install/
 3. 阿里云ECS实例的配置, 比较详细
    https://developer.aliyun.com/article/699966
+

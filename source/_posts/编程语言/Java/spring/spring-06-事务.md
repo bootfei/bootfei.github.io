@@ -1,30 +1,26 @@
 ---
-title: spring-事务
-date: 2021-04-25 08:31:31
+title: spring-06-事务
+date: 2021-05-21 08:07:39
 tags:
 ---
+
+# 事务流程源码分析
+
+## 获取TransactionInterceptor的BeanDefinition 
+
+找入口 
+
+AbstractBeanDefinitionParser#parse 方法：
+
+
+
+# 事务的应用
 
 ## 数据库的事务
 
 > 数据库事务（Transaction，简写为 TX）是数据库管理系统执行过程中的一个逻辑单位，是可以提交或回滚的工作的原子单元。当事务对数据库进行多次更改时，要么在提交事务时所有更改都成功，要么在回滚事务时所有更改都被撤消。
 
 ## Mysql 中的事务
-
-```mysql
-START TRANSACTION
-    [transaction_characteristic [, transaction_characteristic] ...]
-
-transaction_characteristic: {
-    WITH CONSISTENT SNAPSHOT
-  | READ WRITE
-  | READ ONLY
-}
-
-BEGIN [WORK]
-COMMIT [WORK] [AND [NO] CHAIN] [[NO] RELEASE]
-ROLLBACK [WORK] [AND [NO] CHAIN] [[NO] RELEASE]
-SET autocommit = {0 | 1}
-```
 
 - `START TRANSACTION`或 `BEGIN`开始新事务。
 - `COMMIT` 提交当前事务。
@@ -109,7 +105,7 @@ public void updateCoffeeSales(HashMap<String, Integer> salesForWeek)
 }
 ```
 
-## Spring 事务管理器（Transaction Manager）简介
+## Spring 事务管理器简介
 
 Spring 为事务管理提供了统一的抽象，有以下优点：<!--注意：Spring只提供抽象，不提供实现-->
 
@@ -126,7 +122,7 @@ Spring 为事务管理提供了统一的抽象，有以下优点：<!--注意：
 
 事务，自然是控制业务的，在一个业务流程内，往往希望保证原子性，要么全成功要么全失败。
 
-所以事务一般是加载`@Service`层，一个 Service 内调用了多个数据库操作（比如 Dao），在 Service 结束后事务自动提交，如有异常抛出则事务回滚。
+所以事务一般是加载`@Service`层，一个 Service方法内调用了多个数据库操作（比如 Dao），在 Service 结束后事务自动提交，如有异常抛出则事务回滚。
 
 这也是 Spring 事务管理的基本使用原则。
 
@@ -223,7 +219,7 @@ Isolation {
 }
 ```
 
-### 传播行为 (Propagation behavior)
+### 传播行为
 
 传播行为和数据库功能无关，只是事务管理器为了处理复杂业务而设计的一个机制。
 
@@ -233,12 +229,17 @@ Isolation {
 
 Spring 支持以下几种传播行为：
 
-- REQUIRED：默认策略，优先使用当前事务（及当前线程绑定的事务资源），如果不存在事务，则开启新事务
-- SUPPORTS：优先使用当前的事务（及当前线程绑定的事务资源），如果不存在事务，则以无事务方式运行
-- MANDATORY：优先使用当前的事务，如果不存在事务，则抛出异常
-- REQUIRES_NEW：创建一个新事务，如果存在当前事务，则挂起（Suspend）
-- NOT_SUPPORTED：以非事务方式执行，如果当前事务存在，则挂起当前事务。
-- NEVER：以非事务方式执行，如果当前事务存在，则抛出异常
+| **PROPAGATION TYPE**          | **DESCRIPTION**                                              |
+| :---------------------------- | :----------------------------------------------------------- |
+| **PROPAGATION_REQUIRED**      | 支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。 如果正要执行的事务不在另外一个事务里，那么就起一个新的事务; 比如说，`ServiceB.methodB`的事务级别定义为PROPAGATION_`REQUIRED`, 那么由于执行`ServiceA.methodA`的时候， `ServiceA.methodA`已经起了事务，这时调用`ServiceB.methodB`，`ServiceB.methodB`看到自己已经运行在`ServiceA.methodA` 的事务内部，就不再起新的事务。而假如`ServiceA.methodA`运行的时`候ServiceB.method`B发现自己没有在事务中，他就会为自己新建一个事务。 这样，在`ServiceA.methodA`或者在`ServiceB.methodB`内的任何地方出现异常，事务都会被回滚。即使`ServiceB.methodB`的事务已经被提交，但是`ServiceA.methodA`在接下来fail要回滚，`ServiceB.methodB`也要回滚。 |
+| **PROPAGATION_SUPPORTS**      | 支持当前事务，如果当前没有事务，就以非事务方式执行。 如果当前在事务中，即以事务的形式运行，如果当前不在一个事务中，那么就以非事务的形式运行。 |
+| **PROPAGATION_MANDATORY**     | 支持当前事务，如果当前没有事务，就抛出异常。 必须在一个事务中运行，也就是说，他只能被一个父事务调用。否则，他就要抛出异常。 |
+| **PROPAGATION_REQUIRES_NEW**  | 新建事务，如果当前存在事务，把当前事务挂起。 比如我们设计`ServiceA.methodA`的事务级别为PROPAGATION_`REQUIRED`，`ServiceB.methodB`的事务级别为PROPAGATION_`REQUIRES_NEW`，那么当执行到`ServiceB.methodB`的时候，`ServiceA.methodA`所在的事务就会挂起，`ServiceB.methodB`会起一个新的事务，等待`ServiceB.methodB`的事务完成以后，他才继续执行。他与PROPAGATION_`REQUIRED `的事务区别在于事务的回滚程度了。因为`ServiceB.methodB`是新起一个事务，那么就是存在两个不同的事务。如果`ServiceB.methodB`已经提交，那么`ServiceA.methodA`失败回滚，`ServiceB.methodB`是不会回滚的。如果`ServiceB.methodB`失败回滚，如果他抛出的异常被`ServiceA.methodA`捕获，`ServiceA.methodA`事务仍然可能提交。 |
+| **PROPAGATION_NOT_SUPPORTED** | 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。 不支持当前事务。比如`ServiceA.methodA`的事务级别是PROPAGATION_`REQUIRED`，而`ServiceB.methodB`的事务级别是PROPAGATION_`NOT_SUPPORTED`，那么当执行到`ServiceB.methodB`时，`ServiceA.methodA`的事务挂起，而`ServiceB.methodB`则以非事务的方式运行完，再继续`ServiceA.methodA`的事务。 |
+| **PROPAGATION_NEVER**         | 以非事务方式执行，如果当前存在事务，则抛出异常。 不能在事务中运行。假设`ServiceA.methodA`的事务级别是PROPAGATION_`REQUIRED`，而ServiceB.methodB的事务级别是PROPAGATION_`NEVER`， 那么`ServiceB.methodB`就要抛出异常了。 |
+| **PROPAGATION_NESTED**        | 支持当前事务，新增Savepoint点，与当前事务同步提交或回滚。 理解Nested的关键是savepoint。他与PROPAGATION_`REQUIRES_NEW`的区别是，PROPAGATION_`REQUIRES_NEW`另起一个事务，将会与他的父事务相互独立，而Nested的事务和他的父事务是相依的，他的提交是要等和他的父事务一块提交的。也就是说，如果父事务最后回滚，他也要回滚的。 而`Nested`事务的好处也是他有一个savepoint。 |
+
+
 
 ### 回滚策略
 
@@ -255,8 +256,6 @@ Spring 支持以下几种传播行为：
 Class<? extends Throwable>[] rollbackFor() default {};
 # 异常类ClassName，可以是FullName/SimpleName
 String[] rollbackForClassName() default {};
-
-复制代码
 ```
 
 #### NoRollback
@@ -399,8 +398,8 @@ protected Object invokeWithinTransaction(Method method, Class<?> targetClass, fi
 
 - 对于复杂一些的业务流程，会出现各种类之间的调用，Spring 是如何做到保持同一个事务的？
   -  其实基本原理很简单，只需要将当前事务（Connection）隐式的保存至事务管理器内，后续方法在执行 JDBC 操作前，从事务管理器内获取即可：
-  - 比如`HibernateTemplate`中的`SessionFactory`中的`getCurrentSession`，这里的`getCurrentSession`就是从（可能是间接的）Spring 事务管理器中获取的
-  - **Spring 事务管理器将处理事务时的相关临时资源（Connection 等）存在`org.springframework.transaction.support.TransactionSynchronizationManager`中，通过 ThreadLocal 维护**
+  -  比如`HibernateTemplate`中的`SessionFactory`中的`getCurrentSession`，这里的`getCurrentSession`就是从（可能是间接的）Spring 事务管理器中获取的
+  -  **Spring 事务管理器将处理事务时的相关临时资源（Connection 等）存在`org.springframework.transaction.support.TransactionSynchronizationManager`中，通过 ThreadLocal 维护**
 
 ```java
 public abstract class TransactionSynchronizationManager {
@@ -434,29 +433,47 @@ public abstract class TransactionSynchronizationManager {
 
 ### 常见问题
 
-#### 事务没生效
+#### 同类之间的方法调用导致事务没生效
 
 有下列代码，入口为 test 方法，在 testTx 方法中配置了 @Transactional 注解，同时在插入数据后抛出 RuntimeException 异常，但是方法执行后插入的数据并没有回滚，竟然插入成功了
 
-```
-public void test(){
-    testTx();
-}
+```java
+public xxxService{
+    public void test(){
+        testTx();
+    }
 
-@Transactional
-public void testTx(){
-    UrlMappingEntity urlMappingEntity = new UrlMappingEntity();
-    urlMappingEntity.setUrl("http://www.baidu.com");
-    urlMappingEntity.setExpireIn(777l);
-    urlMappingEntity.setCreateTime(new Date());
-    urlMappingRepository.save(urlMappingEntity);
-    if(true){
-        throw new RuntimeException();
+    @Transactional
+    public void testTx(){
+        UrlMappingEntity urlMappingEntity = new UrlMappingEntity();
+        urlMappingEntity.setUrl("http://www.baidu.com");
+
+        urlMappingRepository.save(urlMappingEntity);
+        if(true){
+            throw new RuntimeException();
+        }
     }
 }
 ```
 
-这里不生效的原因是因为入口的方法 / 类没有增加 @Transaction 注解，由于 Spring 的事务管理器也是基于 AOP 实现的，不管是 Cglib(ASM) 还是 Jdk 的动态代理，本质上也都是子类机制；在同类之间的方法调用会直接调用本类代码，不会执行动态代理曾的代码；所以在这个例子中，由于入口方法`test`没有增加代理注解，所以`textTx`方法上增加的事务注解并不会生效
+这里不生效的原因是因为入口的方法 / 类没有增加 @Transaction 注解，由于 Spring 的事务管理器也是基于 AOP 实现的，不管是 Cglib(ASM) 还是 Jdk 的动态代理，本质上也都是子类机制；在同类之间的方法调用会直接调用本类代码，不会执行动态代理曾的代码；由于入口方法`test`没有增加代理注解，所以`textTx`方法上增加的事务注解并不会生效
+
+解决方法：
+
+1. 方法testTx是一个内部方法，使用手动开始事务，不能用注解
+
+2. 通过在方法内部获得当前类代理对象的方式，通过代理对象调用方法B
+
+   - springboot启动类加上注解:`@EnableAspectJAutoProxy(exposeProxy = true)`
+
+   - 方法test内部获取代理对象调用方法
+
+     ```java
+     public void test(){
+     		xxxServiceImpl proxyObj = (xxxServiceImpl) AopContext.currentProxy();
+         proxyObj.testTx();
+     }
+     ```
 
 #### 异步后事务失效
 
@@ -515,7 +532,5 @@ public void testSubTx(){
         throw new RuntimeException();
     }
 }
-
-复制代码
 ```
 

@@ -5,7 +5,7 @@ categories: [java,spring]
 tags:
 ---
 
-# 读Spring源码的核心：
+# 读Spring源码的核心
 
 - BeanDefinitionParser来解析BeanDefinition(如bean, tx:advice, aop:aspect)
 - BeanDefinition对应的Bean作用分析
@@ -26,8 +26,6 @@ tags:
 > - 作用： AOP采取横向抽取机制，补充了 传统纵向继承体系（OOP）无法解决的重复性代码优化（性能监 视、事务管理、安全检查、缓存），[将业务逻辑和系统处理的代码（关闭连接、性能检测、权限认证、事务管理、操作日志记录）解耦]()。
 >
 > - 优势：重复性代码被抽取出来之后，维护更加方便不想修改原有代码前提下，可以动态横向添加共性代码。
->   - 纵向继承体系：<img src="https://pic3.zhimg.com/80/v2-67cd1a7b599aedb409562c62683f469e_720w.jpg" alt="img" style="zoom:50%;" />
->   - 横向抽取机制：<img src="https://pic2.zhimg.com/80/v2-4657119063e51d8b9c0386252a701995_720w.jpg" alt="img" style="zoom:50%;" />
 
 
 

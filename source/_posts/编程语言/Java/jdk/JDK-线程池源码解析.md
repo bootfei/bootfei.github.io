@@ -5,13 +5,7 @@ categories: [java,oom]
 tags:
 ---
 
-# 创建线程池并提交任务
-
-![img](https://pic4.zhimg.com/80/v2-e8b4855879346a0496d625e9a4e7d6bf_720w.jpg)
-
-## ThreadPoolExecutor 构造函数
-
-![img](https://pic3.zhimg.com/80/v2-4b2d277a4764a12a43827b62b8db8472_720w.jpg)
+# 创建线程池
 
 一步一步点进去最终会执行到下面这个新构造方法：
 
@@ -23,7 +17,7 @@ tags:
 
 2、给线程池的属性赋值；
 
-## 提交任务方法: submit(Runnable task)
+# 提交任务方法: submit(Runnable)
 
 线程池对象调用了父类（AbstractExecutorService）中的submit方法；
 
@@ -106,7 +100,7 @@ private static boolean isRunning(int c) {
 
 上面的几个记住核心的就可以了，尤其第一个和第二个。
 
-## 执行任务的方法：execute(Runnnable command)
+# 执行任务execute(Runnnable )
 
 ```java
 public void execute(Runnable command) {
@@ -151,23 +145,21 @@ public void execute(Runnable command) {
 }
 ```
 
-# 任务队列添加任务
+这块代码可以分为三块来看
 
-## 新的任务如果被提交到了队列中：
+第一块：意思是当一个任务被提交时首先会去检查线程池中的工作线程是否小于核心线程，如果是则调用addWorker方法创建新的线程；
 
- 那么执行step2: workQueue.offer(command)
+第二块：当前线程池中核心线程已满，但是任务队列未满，则添加到队列中;
+
+第三块：当前线程池中核心线程已满，任务队列也满了，就尝试调用addWorker创建新的线程（非核心），如果创建线程失败则执行拒绝策略；
 
 
-
-# 线程池创建线程
 
 > 总流程：
 >
 > addWorker()所创建的线程Worker，会在KeepLive销毁之前，一直调用循环方法getTask()，从workQueue队列获取任务。
 
-## 创建新的非核心线程：addWorker()方法创建worker线程
-
-
+## 第一块：addWorker()方法创建worker线程
 
 ```java
 // 第一个参数是准备提交给这个线程执行的任务，之前说了，可以为 null
@@ -286,7 +278,7 @@ private boolean addWorker(Runnable firstTask, boolean core) {
 
 这两行代码是重点，运行到这里我们发现线程池才为我们创建了线程worker；
 
-## **Worker执行线程的启动：t.start()**
+### Worker执行线程的启动
 
 线程已经创建完成了，那线程又是怎么启动的呢? 顺着上面的代码继续往下看，你会看到一行很熟悉的代码
 
@@ -298,9 +290,9 @@ t.start();
 
 
 
-# 线程的复用: t.start()复用线程
+### Worker线程的复用
 
-## worker：真正干活的线程
+#### worker：真正干活的线程
 
 内部类 Worker，因为 Doug Lea 把线程池中的线程包装成了一个个 Worker，翻译成工人，就是线程池中做任务的线程。所以到这里，我们知道任务是 Runnable（内部变量名叫 task 或 command），线程是 Worker。
 
@@ -346,11 +338,9 @@ Worker 这里又用到了抽象类 AbstractQueuedSynchronizer。<!--题外话，
 
 - 当[new 一个Worker]()实例对象时,线程工厂创建线程会把这个当前类对象，也就是Worker实例，当作一个任务透传给线程
 - [addWorder]()这个方法会调用Worker的执行线程t ==> t.start(), 那么就会启动[Worker中的run()方法]() <!--废话-->
-- 
+- [Worker封装了任务Runnable和执行线程t]()！！！
 
-[Worker封装了任务Runnable和执行线程t]()！！！
-
-## worker中的run()：委托给runWorker()方法
+#### worker中的run()：委托给runWorker()方法
 
 ```java
 private final class Worker
@@ -387,7 +377,7 @@ private final class Worker
 }
 ```
 
-## runWorker(Worker w)方法
+#### runWorker(Worker w)方法
 
 ```java
 final void runWorker(Worker w) {
@@ -457,7 +447,7 @@ finally {
 
 
 
-## runWorker()中的循环判断：getTask()方法 ---真正从任务队列消费任务
+#### runWorker()中的循环判断：getTask()方法 ---真正从任务队列消费任务
 
 getTask()方法才是工作线程Worker能够不断从任务队列消费任务的原因，保证Worker不断运行。
 
@@ -539,3 +529,12 @@ private Runnable getTask() {
 ```
 
 你会发现这个方法实际上是在从队列中获取任务；OK ，到这里是不是很清楚了，[循环从队列中获取任务并赋值给task,然后调用task的run方法，以此循环]()。。。。这样对于处理队列里的任务就不需要重新new 一个线程来处理了，因此实现了线程的重复利用；
+
+
+
+## 第二块：新的任务被提交到了队列中
+
+ 那么执行step2: workQueue.offer(command)
+
+
+

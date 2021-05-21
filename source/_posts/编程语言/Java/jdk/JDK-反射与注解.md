@@ -6,8 +6,6 @@ tags:
 
 ## 注解
 
-### 注解定义
-
 Java 注解(Annotation)又称 Java 标注，是 JDK5.0 引入的一种注释机制。
 
 ### 使用场景

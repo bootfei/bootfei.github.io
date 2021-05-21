@@ -920,23 +920,33 @@ AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBe
 
 
 
-### 高级容器ApplicationContext对BeanDefinition注册
 
-step2
 
-### 高级容器ApplicationContext初始化流程源码分析 
+### 高级容器ApplicationContext初始化流程
 
-### 入口
+注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
 
-> 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
+#### 入口1: java入口
 
-- java入口
+<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
 
-```java
-ApplicationContext ctx = new ClassPathXmlApplicationContext("spring.xml");
-```
+-  new ClassPathXmlApplicationContext("spring.xml"): 初始化ClassPathXmlApplicationContext;
 
-- web程序入口
+  - [AbstractRefreshableConfigApplicationContext]().setConfigLocations(configLocations): 设置xml文件路径
+
+  - [AbstractApplicationContext.]()refresh(): 这个方法内容太多，对于ClassPathXmlApplicationContext加载bean，只需了解它的obtainFreshBeanFactory方法。
+
+    - obtainFreshBeanFactory(): 获取BeanFactory
+    - 
+
+    
+
+    作者：xiaoming_he
+    链接：https://www.jianshu.com/p/d707057497af
+    来源：简书
+    著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+#### 入口2: web程序入口
 
 ```xml
 <context-param> 
@@ -1031,6 +1041,14 @@ ApplicationContext ctx = new ClassPathXmlApplicationContext("spring.xml");
 		}
 	}
 ```
+
+
+
+### 高级容器ApplicationContext对BeanDefinition注册
+
+高级容器初始化流程中的step2
+
+
 
 ### 创建BeanFactory流程源码分析 
 

@@ -5,16 +5,6 @@ categories: [java,spring]
 tags:
 ---
 
-# 事务流程源码分析
-
-## 获取TransactionInterceptor的BeanDefinition 
-
-找入口 
-
-AbstractBeanDefinitionParser#parse 方法：
-
-
-
 
 
 ## 执行TransactionInterceptor流程分析 
