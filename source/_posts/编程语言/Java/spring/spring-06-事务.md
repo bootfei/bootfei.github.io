@@ -475,6 +475,15 @@ public xxxService{
      }
      ```
 
+3. xxxService维护一个自己的xxxService，注意使用延迟加载避免循环依赖
+
+   ```
+   @Autowire
+   private xxxService service;
+   ```
+
+   
+
 #### 异步后事务失效
 
 比如在一个事务方法中，开启了子线程操作库，那么此时子线程的事务和主线程事务是不同的。

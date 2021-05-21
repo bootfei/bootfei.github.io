@@ -95,8 +95,6 @@ write(socket, tmp_buf, len);
 
 > 硬盘—>内核buf—>用户buf—>socket相关缓冲区(内核)—>协议引擎
 
-
-
 网络传输的第4层（传输层）TCP协议通过socket获取IO流完成的
 
 ![图片描述](https://yqfile.alicdn.com/img_268ed262dadff71f51f42ad10ea46c9c.jpeg)

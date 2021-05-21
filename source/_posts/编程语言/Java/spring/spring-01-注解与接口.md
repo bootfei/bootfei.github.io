@@ -177,6 +177,41 @@ private void callRunner(CommandLineRunner runner, ApplicationArguments args) {
 
 ## 注解
 
+### @Autowire
+
+#### 实践
+
+##### 注解在field上
+
+```
+@Autowire
+xxxService service;
+```
+
+##### 注解在Collection上
+
+**Spring 会自动将 xxxEntity接口的实现类注入到这个Map中。前提是你这个实现类得是交给Spring 容器管理的。**
+
+这个Map的key值就是你的 bean id，你可以用@Component("value")的方式设置，若干用默认的方式的话，就是首字母小写。value值则为对应的策略实现类。
+
+```
+@Autowrei
+Map<String, xxxEntity> map;
+
+-----
+@Component
+public xxxEntity1 extends xxxEntity1{...}
+
+@Component
+public xxxEntity2 extends xxxEntity1{...}
+```
+
+
+
+##### 注解在方法上
+
+
+
 ### @Qualifier
 
 #### 官方的介绍
