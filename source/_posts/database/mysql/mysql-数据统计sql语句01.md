@@ -145,3 +145,15 @@ Select * from Table1 as t1
 LEFT JOIN Table2 as t2 on t1.checkcode = t2.checkcode1 OR t1.checkcode = t2.checkcode2
 ```
 
+
+
+### 排序以后rank
+
+注意：千万不要有where语句
+
+```
+select @rank := @rank + 1
+from t1, (select @rank :=0) rank
+order by t1.age desc
+```
+
