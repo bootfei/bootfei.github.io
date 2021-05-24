@@ -168,8 +168,6 @@ instrumentation.addTransformer((ClassFileTransformer) instance);
 
 OnionClassFileTransformer类所依赖的agent-core包下的类，自然也会被使用OnionClassLoader类加载器加载，包括agent-core依赖的第三方jar包。
 
-
-
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/yibbONzdtFf2t8JVXHNXRpibzSgFAqUAMkfyP8gypoicPR23f3cqb0icdKtGjjAicYowOAHJr07HqlV9YPbqqqPE4qg/640)
 
 ## **适配webmvc框架**
