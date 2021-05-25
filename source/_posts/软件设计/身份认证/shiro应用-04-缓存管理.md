@@ -115,7 +115,7 @@ public class RedisCacheManager implements CacheManager {
 }
 ```
 
-### 在配置类中配置上缓存管理器，需要设置到Shiro的安全管理器中才能生效
+### 在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效
 
 ```java
 /**

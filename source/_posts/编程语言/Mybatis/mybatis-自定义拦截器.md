@@ -6,7 +6,7 @@ tags:
 
 首先熟悉一下Mybatis的执行过程，如下图：
 
-<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3sTLNItu74rpxaibkopwwJ78osHCNjbw40aWj7YraIlZtwmLl4fwibRlw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" />
+<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3sTLNItu74rpxaibkopwwJ78osHCNjbw40aWj7YraIlZtwmLl4fwibRlw/640" alt="Image" />
 
 ## 类型
 

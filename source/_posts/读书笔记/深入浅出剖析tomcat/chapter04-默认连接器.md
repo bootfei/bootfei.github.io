@@ -149,7 +149,7 @@ public void run() {
        }   
        // Hand this socket off to an Httpprocessor   
        HttpProcessor processor = new Httpprocessor(this);   
-       processor.process(socket);   
+       processor.process(socket);   //同步的！！！
      }   
    } 
 ```
@@ -185,7 +185,7 @@ public void run() {
   // Process requests until we receive a shutdown signal   
   while (!stopped) {   
     // Wait for the next socket to be assigned   
-    Socket socket = await();     //阻塞了
+    Socket socket = await();     //阻塞了！！！
     if (socket == null)   
       continue;   
     // Process the request from this socket   
@@ -204,12 +204,69 @@ public void run() {
 }  
 ```
 
-这个循环体做的事是：获取socket，处理它，调用connector的recycle方法将当前的HttpProcessor入栈。
+这个循环体做的事是：[获取socket]()，[进行处理]()，[调用connector的recycle方法将当前的HttpProcessor入栈]()。
 
-> 注意，循环体在执行到await方法时会暂停当前处理器线程的控制流，直到获取到一个新的socket。换句话说，在HttpConnector调用HttpProcessor实例的assign方法前，程序会一直等下去。但是，assign方法并不是在当前线程中执行的，而是在HttpConnector的run方法中被调用的。这里称HttpConnector实例所在的线程为连接器线程（connector thread）。
+> 注意，循环体在执行到await方法时会暂停当前处理器线程的控制流，直到获取到一个新的socket。换句话说，在HttpConnector调用HttpProcessor实例的assign方法前，HttpProcessor在await()会一直等下去。但是，assign方法并不是在当前线程中执行的，而是在HttpConnector的run方法中被调用的。这里称HttpConnector实例所在的线程为连接器线程（connector thread）。
+
+### Connector和Processor线程互相通知对方
 
 那么，assign方法是如何通知await方法它已经被调用了呢？方法是使用一个成为available的boolean变量和java.lang.Object的wait和notifyAll方法。
 
 > 注意，wait方法会暂停本对象所在的当前线程，使其处于等待状态，直到另一线程调用了该对象的notify或notifyAll方法。
 
-### Connector和Processor线程互相通知对方
+#### Processor的assign()方法
+
+> 在Connector的run()中被调用,processor.assign(socket)
+
+```java
+synchronized void assign(Socket socket) { 
+   // Wait for the processor to get the previous socket 
+   while (available) { 
+     try { 
+       wait(); 
+     } 
+     catch (InterruptedException e) { 
+     } 
+   } 
+   // Store the newly available Socket and notify our thread 
+   this.socket = socket; 
+   available = true; 
+   notifyAll(); 
+   ... 
+}
+```
+
+#### Processor的await()方法
+
+> 在Connector的run()中被调用,processor.start()
+
+```java
+private boolean available = false;
+
+private synchronized Socket await() { 
+   // Wait for the Connector to provide a new Socket 
+    while (!available) { 
+     try { 
+       wait(); 
+     } 
+     catch (InterruptedException e) { 
+     } 
+   } 
+ 
+   // Notify the Connector that we have received this Socket 
+   Socket socket = this.socket; 
+   available = false; 
+   notifyAll(); 
+   return (socket); 
+}
+```
+
+当处理器线程刚刚启动时，available值为false，线程在循环体内wait，直到任意一个线程调用了notify或notifyAll方法。也就是说，调用wait方法会使线程暂定，直到连接器线程调用HttpProcessor实例的notify或notifyAll方法。
+
+当一个新socket被设置后，连接器线程调用HttpProcessor的assign方法。此时available变量的值为false，会跳过循环体，该socket对象被设置到HttpProcessor实例的socket变量中。然后连接器变量设置了available为true，调用notifyAll方法，唤醒处理器线程。此时available的值为true，跳出循环体，将socket对象赋值给局部变量，将available设置为false，调用notifyAll方法，并将给socket返回。
+
+#### 问题
+
+- 为什么await方法要使用一个局部变量保存socket对象的引用，而不返回实例的socket变量呢？是因为在当前socket被处理完之前，可能会有新的http请求过来，产生新的socket对象将其覆盖。 <!--线程安全：使用栈内的局部变量，保证线程独有。否则，对象的局部变量socket（句柄），可能会被重新赋值，指向堆中的新的socket对象-->
+
+- 为什么await方法要调用notifyAll方法？考虑这种情况，当available变量的值还是true时，有一个新的socket达到。在这种情况下，连接器线程会在assign方法的循环体中暂停，直到处理器线程调用notifyAll方法。
