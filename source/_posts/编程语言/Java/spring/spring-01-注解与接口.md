@@ -1,5 +1,5 @@
 ---
-title: spring-01-入门
+]]]]]]]title: spring-01-入门
 date: 2020-10-17 19:52:16
 categories: [java,spring]
 tags:
@@ -352,9 +352,9 @@ public class TestController {
 
 ## @Component，@Service等注解是如何被解析的？
 
-#### @Component解析流程
+### @Component解析流程
 
-##### 入口ContextNamespaceHandler#init()
+#### 入口ContextNamespaceHandler#init()
 
 Spring Framework2.0开始，引入可扩展的XML编程机制，该机制要求XML Schema命名空间需要与Handler建立映射关系。
 
@@ -364,7 +364,7 @@ Spring Framework2.0开始，引入可扩展的XML编程机制，该机制要求X
 
 如上图所示 ContextNamespaceHandler对应xml配置文件的<context:... />,  分析的入口。
 
-##### ComponentScanBeanDefinitionParser#parse()
+#### ComponentScanBeanDefinitionParser#parse()
 
 ContextNamespaceHandler#init()方法注册了ComponentScanBeanDefinitionParser
 
@@ -378,7 +378,7 @@ ContextNamespaceHandler#init()方法注册了ComponentScanBeanDefinitionParser
 >
 > ClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);
 
-##### ClassPathBeanDefinitionScanner#doScan()
+#### ClassPathBeanDefinitionScanner#doScan()
 
 ComponentScanBeanDefinitionParser#parse()中有scanner.doScan()
 
@@ -416,9 +416,9 @@ protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 
 findCandidateComponents：从classPath扫描组件，并转换为备选BeanDefinition，也就是要解析@Component。
 
-##### ClassPathScanningCandidateComponentProvider#findCandidateComponents
+#### ClassPathScanningCandidateComponentProvider#findCandidateComponents
 
-findCandidateComponents在其父类ClassPathScanningCandidateComponentProvider 中。
+findCandidateComponents在ClassPathBeanDefinitionScanner父类ClassPathScanningCandidateComponentProvider 中。
 
 ```java
 public class ClassPathScanningCandidateComponentProvider implements EnvironmentCapable, ResourceLoaderAware {
@@ -465,7 +465,29 @@ findCandidateComponents大体思路如下：
 - `isCandidateComponent` 判断是否是备选组件
 - `candidates.add(sbd);` 添加到返回结果的list
 
-**ClassPathScanningCandidateComponentProvider#isCandidateComponent**
+
+
+#### ClassPathScanningCandidateComponentProvider#scanCandidateComponents
+
+```java
+private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+ //省略其他代码
+ MetadataReader metadataReader   
+             =getMetadataReaderFactory().getMetadataReader(resource);  
+   if(isCandidateComponent(metadataReader)){
+       //....
+   }         
+}
+
+public final MetadataReaderFactory getMetadataReaderFactory() {
+   if (this.metadataReaderFactory == null) {
+      this.metadataReaderFactory = new CachingMetadataReaderFactory();
+   }
+   return this.metadataReaderFactory;
+}
+```
+
+#### **ClassPathScanningCandidateComponentProvider#isCandidateComponent**
 
 ```java
 protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
@@ -479,7 +501,9 @@ protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOE
 }
 ```
 
-includeFilters由registerDefaultFilters()设置初始值，有@Component，没有@Service啊？<!--别急，在Service解析流程有解释-->
+- **line3: includeFilters由registerDefaultFilters()设置初始值**
+
+有@Component，没有@Service啊？<!--别急，在Service解析流程有解释-->
 
 ```java
 protected void registerDefaultFilters() {
@@ -504,29 +528,7 @@ protected void registerDefaultFilters() {
 }
 ```
 
-
-
-##### ClassPathScanningCandidateComponentProvider#scanCandidateComponents
-
-```java
-private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
- //省略其他代码
- MetadataReader metadataReader   
-             =getMetadataReaderFactory().getMetadataReader(resource);  
-   if(isCandidateComponent(metadataReader)){
-       //....
-   }         
-}
-
-public final MetadataReaderFactory getMetadataReaderFactory() {
-   if (this.metadataReaderFactory == null) {
-      this.metadataReaderFactory = new CachingMetadataReaderFactory();
-   }
-   return this.metadataReaderFactory;
-}
-```
-
-**确定metadataReader**
+- **line4: 确定metadataReader**
 
 CachingMetadataReaderFactory继承自 SimpleMetadataReaderFactory，就是对SimpleMetadataReaderFactory加了一层缓存。
 
@@ -544,16 +546,16 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory{
 这里可以看出
 
 ```
-MetadataReader metadataReader =new SimpleMetadataReader(...);
+MetadataReader metadataReader = new SimpleMetadataReader(...);
 ```
 
-**查看match方法找重点方法**
+- **line4: 查看TypeFilter.match()找重点方法**
 
 <img src="https://mmbiz.qpic.cn/mmbiz_gif/JfTPiahTHJhpasNr82txibgDK8LDTzxQHic2Q7z0jlXTw7hz4rsU0fLicG4LOJJvPSiaqon6iajAVFaicGNk4BPjcL07A/640" alt="Image" style="zoom:50%;" />
 
 AnnotationTypeFilter#matchself方法如下：
 
-```
+```java
 @Override
 protected boolean matchSelf(MetadataReader metadataReader) {
    AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
@@ -564,72 +566,35 @@ protected boolean matchSelf(MetadataReader metadataReader) {
 
 是metadata.hasMetaAnnotation法，从名称看是处理元注解，我们重点关注
 
-
-
-#### @Service解析流程
-
-Spring如何处理@Service的注解的呢？？？？
-
-查阅官方文档，下面这话：
-
-https://docs.spring.io/spring/docs/5.0.17.RELEASE/spring-framework-reference/core.html#beans-meta-annotations
-
-> @Component is a generic stereotype for any Spring-managed component. @Repository, @Service, and @Controller are specializations of @Component
-
-```java
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-// @Service 派生自@Component
-@Component
-public @interface Service {
-
-   /**
-    * The value may indicate a suggestion for a logical component name,
-    * to be turned into a Spring bean in case of an autodetected component.
-    * @return the suggested component name, if any (or empty String otherwise)
-    */
-   @AliasFor(annotation = Component.class)
-   String value() default "";
-
-}
-```
-
-@Component是@Service的元注解，Spring 大概率，在读取@Service，也读取了它的元注解，并将@Service作为@Component处理。
-
-
-
-#### 逐步分析
-
 ##### 查找metadata.hasMetaAnnotation
+
 metadata=metadataReader.getAnnotationMetadata();
 metadataReader =new SimpleMetadataReader(...)
 metadata= new SimpleMetadataReader#getAnnotationMetadata()
 
 ```java
 //SimpleMetadataReader 的构造方法
-SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
-   InputStream is = new BufferedInputStream(resource.getInputStream());
-   ClassReader classReader;
-   try {
-      classReader = new ClassReader(is);
-   }
-   catch (IllegalArgumentException ex) {
-      throw new NestedIOException("ASM ClassReader failed to parse class file - " +
-            "probably due to a new Java class file version that isn't supported yet: " + resource, ex);
-   }
-   finally {
-      is.close();
-   }
+public SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
+       InputStream is = new BufferedInputStream(resource.getInputStream());
+       ClassReader classReader;
+       try {
+          classReader = new ClassReader(is);
+       }
+       catch (IllegalArgumentException ex) {
+         
+       }
+       finally {
+          is.close();
+       }
 
-   AnnotationMetadataReadingVisitor visitor =
-            new AnnotationMetadataReadingVisitor(classLoader);
-   classReader.accept(visitor, ClassReader.SKIP_DEBUG);
+       AnnotationMetadataReadingVisitor visitor =
+                new AnnotationMetadataReadingVisitor(classLoader);
+       classReader.accept(visitor, ClassReader.SKIP_DEBUG);
 
-   this.annotationMetadata = visitor;
-   // (since AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor)
-   this.classMetadata = visitor;
-   this.resource = resource;
+       this.annotationMetadata = visitor;
+       // (since AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor)
+       this.classMetadata = visitor;
+       this.resource = resource;
 }
 ```
 
@@ -663,19 +628,17 @@ public boolean hasMetaAnnotation(String metaAnnotationType) {
 
 这里面核心就是metaAnnotationMap，搜索AnnotationMetadataReadingVisitor类，没有发现赋值的地方？？！。
 
-推荐：[Java面试练题宝典](https://mp.weixin.qq.com/s?__biz=MzIyNDU2ODA4OQ==&mid=2247486846&idx=1&sn=75bd4dcdbaad73191a1e4dbf691c118a&scene=21#wechat_redirect)
-
 ##### 查找metaAnnotationMap赋值
 
 回到SimpleMetadataReader 的方法，
 
-```
+```java
 //这个accept方法，很可疑，在赋值之前执行
-SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
-//省略其他代码
-AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
-classReader.accept(visitor, ClassReader.SKIP_DEBUG);
- this.annotationMetadata = visitor;
+public SimpleMetadataReader(Resource resource, @Nullable ClassLoader classLoader) throws IOException {
+    //省略其他代码
+    AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
+    classReader.accept(visitor, ClassReader.SKIP_DEBUG);
+     this.annotationMetadata = visitor;
  }
 ```
 
@@ -802,6 +765,39 @@ public void visitEnd() {
 ```
 
 内部方法recursivelyCollectMetaAnnotations 递归的读取注解，与注解的元注解（读@Service，再读元注解@Component），并设置到metaAnnotationMap，也就是AnnotationMetadataReadingVisitor 中的metaAnnotationMap中。
+
+### @Service解析流程
+
+Spring如何处理@Service的注解的呢？？？？
+
+查阅官方文档，下面这话：
+
+https://docs.spring.io/spring/docs/5.0.17.RELEASE/spring-framework-reference/core.html#beans-meta-annotations
+
+> @Component is a generic stereotype for any Spring-managed component. @Repository, @Service, and @Controller are specializations of @Component
+
+```java
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+// @Service 派生自@Component
+@Component
+public @interface Service {
+
+   /**
+    * The value may indicate a suggestion for a logical component name,
+    * to be turned into a Spring bean in case of an autodetected component.
+    * @return the suggested component name, if any (or empty String otherwise)
+    */
+   @AliasFor(annotation = Component.class)
+   String value() default "";
+
+}
+```
+
+@Component是@Service的元注解，Spring 大概率，在读取@Service，也读取了它的元注解，并将@Service作为@Component处理。
+
+
 
 #### 总结
 
