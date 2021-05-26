@@ -169,7 +169,7 @@ public void run() {
          continue;   
        }   
        // Hand this socket off to an Httpprocessor   
-       HttpProcessor processor = new Httpprocessor(this);   
+       HttpProcessor processor = createProcessor(); 
        processor.start();
        processor.assign(socket);   
      }   
@@ -243,6 +243,12 @@ synchronized void assign(Socket socket) {
 ```java
 private boolean available = false;
 
+/**
+     * The socket we are currently processing a request for.  This object
+     * is used for inter-thread communication only.
+     */
+private Socket socket = null;
+
 private synchronized Socket await() { 
    // Wait for the Connector to provide a new Socket 
     while (!available) { 
@@ -267,6 +273,8 @@ private synchronized Socket await() {
 
 #### 问题
 
-- 为什么await方法要使用一个局部变量保存socket对象的引用，而不返回实例的socket变量呢？是因为在当前socket被处理完之前，可能会有新的http请求过来，产生新的socket对象将其覆盖。 <!--线程安全：使用栈内的局部变量，保证线程独有。否则，对象的局部变量socket（句柄），可能会被重新赋值，指向堆中的新的socket对象-->
+- 为什么await方法要使用一个局部变量保存socket对象的引用，而不返回实例的socket变量呢？是因为在当前socket被处理完之前，可能会有新的http请求过来，产生新的socket对象将其覆盖。 <!--虽然现在的processor是从线程池里面获取复用，每个processor线程都有自己的对象（比如socket,availbale），但是考虑这种线程安全的情况：如果。所以使用栈内的局部变量，保证线程独有。否则，对象的局部变量socket（句柄），可能会被重新赋值，指向堆中的新的socket对象-->
 
 - 为什么await方法要调用notifyAll方法？考虑这种情况，当available变量的值还是true时，有一个新的socket达到。在这种情况下，连接器线程会在assign方法的循环体中暂停，直到处理器线程调用notifyAll方法。
+
+<!--对象的变量-->

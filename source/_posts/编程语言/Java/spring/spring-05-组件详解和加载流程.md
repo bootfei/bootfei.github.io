@@ -31,7 +31,7 @@ Bean组件主要解决：Bean 的定义、Bean 的创建以及对 Bean 的解析
 
 **（1）[Bean 的创建]()时典型的工厂模式，他的顶级接口是 BeanFactory，下图是这个工厂的继承层次关系：**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2Fgn875ficGpAYiczicEvaHjOyMOOd1IP6sbfzhcyj0lfDJWh9GREeAhmlg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2Fgn875ficGpAYiczicEvaHjOyMOOd1IP6sbfzhcyj0lfDJWh9GREeAhmlg/640)
 
 BeanFactory 有三个子类：ListableBeanFactory、HierarchicalBeanFactory 和 AutowireCapableBeanFactory。但[最终的默认实现类是 DefaultListableBeanFactory]()。实现多接口是为了区分在 Spring 内部操作对象传递和转化时，对对象的数据访问所做的限制。 <!--这就是接口隔离原则-->
 
@@ -41,7 +41,7 @@ BeanFactory 有三个子类：ListableBeanFactory、HierarchicalBeanFactory 和 
 
 **（2）[Bean 的定义]()主要有 BeanDefinition 描述，如下图说明了这些类的层次关系：**
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FT79cPBhHbVL49icicWiahCE0zJAGvfn2AKLXjAkUZtMGeBP9Eb6kicq2XQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FT79cPBhHbVL49icicWiahCE0zJAGvfn2AKLXjAkUZtMGeBP9Eb6kicq2XQ/640)
 
 Bean 的定义就是完整的描述了在 Spring 的配置文件中你定义的节点中所有的信息，包括各种子节点。当 Spring 成功解析你定义的一个节点后，在 Spring 的内部他就被转化成 BeanDefinition 对象。以后所有的操作都是对这个对象完成的。
 
@@ -144,7 +144,7 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 
 ## BeanFactory 工厂创建
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FjjcXWJGaIb5Im6hWI5zIiaF7kwP9atOWcd0lvibicdicgORc3bLXaoMbicg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FjjcXWJGaIb5Im6hWI5zIiaF7kwP9atOWcd0lvibicdicgORc3bLXaoMbicg/640)
 
 （1）这个方法就是构建整个 Ioc 容器过程的完整的代码，了解了里面的每一行代码基本上就了解大部分 Spring 的原理和功能了。
 
