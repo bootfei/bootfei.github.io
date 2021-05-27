@@ -142,7 +142,7 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 <img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoiciaQjQmnl41Ar8CboQn8XZVIILicbUIBDLNrQkwM9LLGQl9W4NZobXGpQ/640" alt="图片" style="zoom:50%;" />
 
-这个功能有什么用呢？
+
 
 这是为了提供消息的【有序性】。
 
