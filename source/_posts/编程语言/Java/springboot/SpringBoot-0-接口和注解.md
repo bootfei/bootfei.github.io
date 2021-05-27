@@ -10,7 +10,7 @@ tags:
 
 
 
-## 接口
+## 注解
 
 ### @Conditional
 
@@ -185,6 +185,186 @@ public class AppConfig {
 }
 ```
 
+
+
+
+
+##### 自动配置类中的条件注解
+
+------
+
+在spring.factories文件中随便找一个自动配置类，来看看是怎样实现的。MongoDataAutoConfiguration的源码，发现它声明了@ConditionalOnClass注解，通过看该注解的源码后可以发现，这是一个组合了@Conditional的组合注解，它的条件类是OnClassCondition。
+
+```
+@Configuration
+@ConditionalOnClass({Mongo.class, MongoTemplate.class})
+@EnableConfigurationProperties({MongoProperties.class})
+@AutoConfigureAfter({MongoAutoConfiguration.class})
+public class MongoDataAutoConfiguration {
+	....
+}
+
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional({OnClassCondition.class})
+public @interface ConditionalOnClass {
+    Class<?>[] value() default {};
+
+    String[] name() default {};
+}
+```
+
+然后，我们开始看OnClassCondition的源码，发现它并没有直接实现Condition接口，只好往上找，发现它的父类SpringBootCondition实现了Condition接口。
+
+```java
+class OnClassCondition extends SpringBootCondition implements AutoConfigurationImportFilter, BeanFactoryAware, BeanClassLoaderAware {
+	.....
+}
+
+public abstract class SpringBootCondition implements Condition {
+    private final Log logger = LogFactory.getLog(this.getClass());
+
+    public SpringBootCondition() {
+    }
+
+    public final boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String classOrMethodName = getClassOrMethodName(metadata);
+
+        try {
+            ConditionOutcome ex = this.getMatchOutcome(context, metadata);
+            this.logOutcome(classOrMethodName, ex);
+            this.recordEvaluation(context, classOrMethodName, ex);
+            return ex.isMatch();
+        } catch (NoClassDefFoundError var5) {
+          
+        } catch (RuntimeException var6) {
+          
+        }
+    }
+
+    public abstract ConditionOutcome getMatchOutcome(ConditionContext var1, AnnotatedTypeMetadata var2);
+}
+```
+
+SpringBootCondition实现的matches方法依赖于一个抽象方法this.getMatchOutcome(context, metadata)，我们在它的子类OnClassCondition中可以找到这个方法的具体实现。
+
+```java
+public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    ClassLoader classLoader = context.getClassLoader();
+    ConditionMessage matchMessage = ConditionMessage.empty();
+    // 找出所有ConditionalOnClass注解的属性
+    List onClasses = this.getCandidates(metadata, ConditionalOnClass.class);
+    List onMissingClasses;
+    if(onClasses != null) {
+        // 找出不在类路径中的类
+        onMissingClasses = this.getMatches(onClasses, OnClassCondition.MatchType.MISSING, classLoader);
+        // 如果存在不在类路径中的类，匹配失败
+        if(!onMissingClasses.isEmpty()) {
+            return ConditionOutcome.noMatch(ConditionMessage.forCondition(ConditionalOnClass.class, new Object[0]).didNotFind("required class", "required classes").items(Style.QUOTE, onMissingClasses));
+        }
+
+        matchMessage = matchMessage.andCondition(ConditionalOnClass.class, new Object[0]).found("required class", "required classes").items(Style.QUOTE, this.getMatches(onClasses, OnClassCondition.MatchType.PRESENT, classLoader));
+    }
+
+    // 接着找出所有ConditionalOnMissingClass注解的属性
+    // 它与ConditionalOnClass注解的含义正好相反，所以以下逻辑也与上面相反
+    onMissingClasses = this.getCandidates(metadata, ConditionalOnMissingClass.class);
+    if(onMissingClasses != null) {
+        List present = this.getMatches(onMissingClasses, OnClassCondition.MatchType.PRESENT, classLoader);
+        if(!present.isEmpty()) {
+            return ConditionOutcome.noMatch(ConditionMessage.forCondition(ConditionalOnMissingClass.class, new Object[0]).found("unwanted class", "unwanted classes").items(Style.QUOTE, present));
+        }
+
+        matchMessage = matchMessage.andCondition(ConditionalOnMissingClass.class, new Object[0]).didNotFind("unwanted class", "unwanted classes").items(Style.QUOTE, this.getMatches(onMissingClasses, OnClassCondition.MatchType.MISSING, classLoader));
+    }
+
+    return ConditionOutcome.match(matchMessage);
+}
+
+// 获得所有annotationType注解的属性
+private List<String> getCandidates(AnnotatedTypeMetadata metadata, Class<?> annotationType) {
+    MultiValueMap attributes = metadata.getAllAnnotationAttributes(annotationType.getName(), true);
+    ArrayList candidates = new ArrayList();
+    if(attributes == null) {
+        return Collections.emptyList();
+    } else {
+        this.addAll(candidates, (List)attributes.get("value"));
+        this.addAll(candidates, (List)attributes.get("name"));
+        return candidates;
+    }
+}
+
+private void addAll(List<String> list, List<Object> itemsToAdd) {
+    if(itemsToAdd != null) {
+        Iterator var3 = itemsToAdd.iterator();
+
+        while(var3.hasNext()) {
+            Object item = var3.next();
+            Collections.addAll(list, (String[])((String[])item));
+        }
+    }
+
+}    
+
+// 根据matchType.matches方法来进行匹配
+private List<String> getMatches(Collection<String> candidates, OnClassCondition.MatchType matchType, ClassLoader classLoader) {
+    ArrayList matches = new ArrayList(candidates.size());
+    Iterator var5 = candidates.iterator();
+
+    while(var5.hasNext()) {
+        String candidate = (String)var5.next();
+        if(matchType.matches(candidate, classLoader)) {
+            matches.add(candidate);
+        }
+    }
+
+    return matches;
+}
+```
+
+关于match的具体实现在MatchType中，它是一个枚举类，提供了PRESENT和MISSING两种实现，前者返回类路径中是否存在该类，后者相反。
+
+```
+private static enum MatchType {
+    PRESENT {
+        public boolean matches(String className, ClassLoader classLoader) {
+            return OnClassCondition.MatchType.isPresent(className, classLoader);
+        }
+    },
+    MISSING {
+        public boolean matches(String className, ClassLoader classLoader) {
+            return !OnClassCondition.MatchType.isPresent(className, classLoader);
+        }
+    };
+
+    private MatchType() {
+    }
+
+    // 跟我们之前看过的案例一样，都利用了类加载功能来进行判断
+    private static boolean isPresent(String className, ClassLoader classLoader) {
+        if(classLoader == null) {
+            classLoader = ClassUtils.getDefaultClassLoader();
+        }
+
+        try {
+            forName(className, classLoader);
+            return true;
+        } catch (Throwable var3) {
+            return false;
+        }
+    }
+
+    private static Class<?> forName(String className, ClassLoader classLoader) throws ClassNotFoundException {
+        return classLoader != null?classLoader.loadClass(className):Class.forName(className);
+    }
+
+    public abstract boolean matches(String var1, ClassLoader var2);
+}
+```
+
+现在终于真相大白，@ConditionalOnClass的含义是指定的类必须存在于类路径下，MongoDataAutoConfiguration类中声明了类路径下必须含有Mongo.class, MongoTemplate.class这两个类，否则该自动配置类不会被加载。
+
 ### @Profile
 
 #### 使用
@@ -282,7 +462,7 @@ class ProfileCondition implements Condition {
 
 ### @EnableAutoConfiguration
 
-
+@SpringBootApplication中的重要注解，用于发现Spring.factories文件中需要自动装配的类
 
 #### 原理
 
@@ -302,7 +482,9 @@ public @interface EnableAutoConfiguration {
 }
 ```
 
-我们发现@Import（Spring 提供的一个注解，可以导入配置类或者Bean到当前类中）导入了EnableAutoConfigurationImportSelector类，根据名字来看，它应该就是我们要找到的目标了。不过查看它的源码发现它已经被Deprecated了，而官方API中告知我们去查看它的父类AutoConfigurationImportSelector。
+##### @Import
+
+@Import（Spring 提供的一个注解，可以导入配置类或者Bean到当前类中）导入了EnableAutoConfigurationImportSelector类，根据名字来看，它应该就是我们要找到的目标了。不过查看它的源码发现它已经被Deprecated了，而官方API中告知我们去查看它的父类AutoConfigurationImportSelector。
 
 ```
 /** @deprecated */
@@ -316,6 +498,8 @@ public class EnableAutoConfigurationImportSelector extends AutoConfigurationImpo
     }
 }
 ```
+
+##### AutoConfigurationImportSelector#selectImports
 
 由于AutoConfigurationImportSelector的源码太长了，这里我只截出关键的地方，显然方法selectImports是选择自动配置的主入口，它调用了其他的几个方法来加载元数据等信息，最后返回一个包含许多自动配置类信息的字符串数组。
 
@@ -342,6 +526,8 @@ public String[] selectImports(AnnotationMetadata annotationMetadata) {
     }
 }
 ```
+
+##### AutoConfigurationImportSelector#getCandidateConfigurations
 
 重点在于方法getCandidateConfigurations()返回了自动配置类的信息列表，而它通过调用SpringFactoriesLoader.loadFactoryNames()来扫描加载含有META-INF/spring.factories文件的jar包，该文件记录了具有哪些自动配置类。
 
@@ -377,3 +563,17 @@ public static List<String> loadFactoryNames(Class<?> factoryClass, ClassLoader c
 ```
 
 [![spring.factories](http://wx2.sinaimg.cn/large/63503acbly1fn9iobng7zj21270o9gpg.jpg)](http://wx2.sinaimg.cn/large/63503acbly1fn9iobng7zj21270o9gpg.jpg)
+
+
+
+
+
+
+
+
+
+
+
+## 接口
+
+@

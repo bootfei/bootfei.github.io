@@ -4,15 +4,13 @@ date: 2020-12-03 12:12:59
 tags:
 ---
 
-# Spring boot特点
 
-## 自动配置（最大特点）
 
-## 注解
+## 自动配置（SpringBoot最大特点）
 
-2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。
+注解：2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。
 
-# 自动加载总步骤
+### 自动加载总步骤
 
 <font color="red">在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现</font>
 
@@ -27,9 +25,9 @@ tags:
 - @SpringBootApplication包含了@EnalbeAutoConfiguration表明启动自动加载
 - 自动加载会
 
-# 自动配置源码解析
+### 自动配置源码解析
 
-## 解析**@SpringBootApplication**
+#### 解析**@SpringBootApplication**
 
 @SpringBootApplication 注解其实就是一个组合注解。包含有
 
@@ -43,20 +41,11 @@ tags:
 
   
 
-### 元注解
-
-前四个是专门(即只能)用于对注解进行注解的，称为元注解。
-
-- @Target
-- @Retention
-- @Documented
-- @Inherited:表示注解会被子类自动继承。
-
-### **@SpringBootConfiguration** 
+##### **@SpringBootConfiguration** 
 
 查看该注解的源码注解可知，该注解与@Configuration 注解功能相同，仅表示当前类为一个 JavaConfig 类，其就是为 Spring Boot 专门创建的一个注解。表明该类交给Spring容器管理。
 
-### **@ComponentScan** 
+##### **@ComponentScan** 
 
 顾名思义，用于完成组件扫描。不过需要注意，其[仅仅用于配置组件扫描指令]()，并没有真正扫描，更没有装配其中的类，这个[真正扫描是由@EnableAutoConfiguration 完成的](https://www.hangge.com/blog/cache/detail_2807.html)。
 
@@ -66,7 +55,7 @@ tags:
 
 说明了Spring会扫描该类所在的包，这个包下的所有类及其子包中的类！！！
 
-### **@EnableXxx**
+##### **@EnableXxx**
 
 @EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注 解，就会自动导入某些类。所以该类注解是组合注解，一般都会包含一个@Import 注解，用 于导入指定的多个类，而被导入的类一般分为三种:[配置类、选择器与注册器](https://www.hangge.com/blog/cache/detail_2807.html)。
 
@@ -100,7 +89,7 @@ tags:
 
     
 
-## 解析**@EnableAutoConfiguration**
+#### 解析**@EnableAutoConfiguration**
 
 该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的starter以及用于自定义的类，然后交给 Spring 容器完成这些类的装配。
 
@@ -117,7 +106,7 @@ tags:
 
 ["META-INFO/spring.factories"非常重要的文件, 里面有个key = EnableAutoConfiguratin, value是众多自动配置类，如Redis配置类, Mongo配置类]()
 
-### **@Import**
+##### **@Import**
 
 - 用于导入[第一种类：框架本身所包含的自动配置相关的类](https://www.hangge.com/blog/cache/detail_2807.html)。其参数 AutoConfigurationImportSelector 类，该类用于导入自动配置的类。
 
@@ -149,7 +138,7 @@ tags:
         - 项目的source目录下没有，继续
         - Pom.xml中有spring-boot-starter-web, 查看内部依赖，发现有spring-boot-starter,继续查看内部依赖，有spring-boot-autoconfigure依赖，在其项目下source目录，找到了！！！
 
-### **@AutoConfigurationPackage** 
+##### **@AutoConfigurationPackage** 
 
 ```
 @Target(ElementType.TYPE)
@@ -169,7 +158,7 @@ tags:
     - registerBeanDefinitions()
     - register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); [//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类]()
 
-# **application.yml** 的加载
+### 配置文件application.yml的加载
 
 application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重要，那么，该文件是 如何加载到内存的呢?需要从启动类的 run()方法开始跟踪。
 
@@ -189,11 +178,11 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
 
 - .....
 
-[自己跟一下就行]()
 
-# 实战
 
-## 实战1:加载框架类 Spring Boot与Redis整合
+### 实践
+
+#### Spring Boot整合Redis
 
 > SpringBoot整合了Redis
 
@@ -208,16 +197,9 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
     - 表明如果路径下有RedisOperation.class才会生效; 
     - RedisOperations.class就是Redis的操作对象
   - 有@EnableConfigurationProperties(RedisProperties.class)注解
-    - RedisProperties类有@ConfigurationProperties(prefix="spring.redis")<!--录播课有讲-->, 表明将配置文件中前缀为spring.redis的信息加载进来，并且将信息封装到RedisProperties.class中
+    - RedisProperties类有@ConfigurationProperties(prefix="spring.redis")， 表明将配置文件中前缀为spring.redis的信息加载进来，并且将信息封装到RedisProperties.class中
 
-## 实战2:加载自定义类 MyBatis与Spring Boot整合
-
-> Mybatis整合了Spring Boot
-
-> 总步骤：
->
-> - 首先@SpringBootApplication的@注解，通过spring-boot-starter下的spring.factories, 加载了框架自定义的RedisAutoConfiguration类
-> - 然后RedisAutoConfiguration类加载了配置文件中的"spring.redis"
+#### MyBatis整合Spring Boot
 
 - 在 External Libraries 中找到 mybatis-spring-boot-starter 依赖。
   - 但是该依赖下却没有META-INF/spring.factories文件。再往下找依赖。
@@ -232,9 +214,9 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
 
 
 
-# 自定义 **Starter**
+## 自定义 **Starter**
 
-## 创建starter
+### 创建starter
 
 > 总步骤
 >
@@ -331,7 +313,7 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
 
 
 
-## 使用starter
+### 使用starter
 
 > 总步骤
 >
@@ -381,9 +363,9 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
 
   
 
-# 常见问题问答
+## 常见问题问答
 
-## starter和maven引入依赖有什么区别
+### starter和maven引入依赖有什么区别
 
 - 相同点
   - 都引入了某个类的依赖
