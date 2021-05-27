@@ -309,9 +309,6 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
       org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.abc.config.WrapAutoConfiguration
       ```
   
-      
-
-
 
 ### 使用starter
 

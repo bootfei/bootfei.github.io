@@ -66,13 +66,23 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 ### **Topic**
 
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoiceC6jqOkYFjtPoeOAo1wvsbFtDel2RHtibficibBLdAia9N7kXOGBibtKb6g/640" alt="图片" style="zoom:33%;" />
+
 主题。在 Kafka 中，使用一个类别属性来划分消息的所属类，划分消息的这个类称为 topic。 topic 相当于消息的分类标签，是一个逻辑概念。<!--其他MQ也有-->
+
+这条消息会发送给消费者、不允许被改动、一直呆在队列中。
+
+（消息在队列中能呆多久，可以修改 Kafka 的配置）
 
 位置：[tmp/kafka-logs/[topic]-[partition]]()
 
 ### **Partition**
 
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoichnToavnycnkmcu8u3ibIJVo2jicc3EDEUhk7h8T8aRyVCXqpxEIciaKcg/640" alt="图片" style="zoom:33%;" />
+
 分区。topic 中的消息被分割为一个或多个 partition，其是一个物理概念，对应到系统上 就是一个或若干个目录。<!--其他MQ没有-->
+
+上面 Topic 的描述中，把 Topic 看做了一个队列，实际上，一个 Topic 是由多个队列组成的，被称为Partition（分区）
 
 位置：[tmp/kafka-logs/[topic]-[partition]]()<!--如果是集群，每个broker的partition不同，是递增关系-->
 
@@ -118,9 +128,39 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 生产者。即消息的发布者，其会将某 topic 的消息发布到相应的 partition 中。
 
+生产者发送消息时，默认是面向 Topic 的，由 Topic 决定放在哪个 Partition，默认使用轮询策略。
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoicKzFIfLcEgicGicmpmUFVD4LYgLYSUua8gT8OE5r10VWmnH6bBscIJpuw/640" alt="图片" style="zoom:50%;" />
+
+也可以配置 Topic，让同类型的消息都在同一个 Partition。
+
+例如，处理用户消息，可以让某一个用户所有消息都在一个 Partition。
+
+例如，用户1发送了3条消息：A、B、C，默认情况下，这3条消息是在不同的 Partition 中（如 P1、P2、P3）。
+
+在配置之后，可以确保用户1的所有消息都发到同一个分区中（如 P1）。
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoiciaQjQmnl41Ar8CboQn8XZVIILicbUIBDLNrQkwM9LLGQl9W4NZobXGpQ/640" alt="图片" style="zoom:50%;" />
+
+这个功能有什么用呢？
+
+这是为了提供消息的【有序性】。
+
+消息在不同的 Partition 是不能保证有序的，只有一个 Partition 内的消息是有序的。
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5Tjqcmoicx1YpULtrqbaOgSCGBhntg8uu3yicUz7h7UNbwA10Eb2Ku2gvMKCTPCA/640" alt="图片" style="zoom:50%;" />
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5Tjqcmoicg73MqiaWljQyKfU38WnmEu3gTgWyOEVoaSHvFpyTxkicMv6qDTLSMauQ/640" alt="图片" style="zoom:50%;" />
+
+
+
 ### **Consumer Group**
 
-消费者。可以从 broker 中读取消息，其是以 consumer group 的形式出现的。
+如果是消费者组接收消息，Kafka 会把一条消息路由到组中的某一个服务。
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoicEq46rljUkYkoRJyUunBkGpFv5EuOGqBopyNU25uSOFY1GjP3zNquFg/640" alt="图片" style="zoom:33%;" />
+
+这样有助于消息的负载均衡，也方便扩展消费者。
 
 - consumer group 是 kafka 提供的可扩展且具有容错性的消费者机制。组内可以有多个消 费者，它们共享一个公共的 ID，即 group ID。[组内的所有消费者会协调在一起平均消费订阅主题的所有分区]()。
 
@@ -128,7 +168,7 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 - 组中 consumer 数量与 partition 数量的对应关系如下。
 
-  - <img src="https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/assets/ktdg_04in01.png" alt="4 partition, 1 consumer" style="zoom: 25%;" />
+  
 
   - <img src="https://www.oreilly.com/library/view/kafka-the-definitive/9781491936153/assets/ktdg_04in02.png" alt="ktdg 04in02" style="zoom: 25%;" />
 
