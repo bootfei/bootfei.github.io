@@ -13,6 +13,72 @@ tags: [mysql]
 
 
 
+### Explain命令原理
+
+#### id列原理
+
+这一列总是包含一个编号，标示select所属的行。数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的就表示这是一个结果集，不需要使用它来进行查询。
+
+#### rows 计算原理
+
+```mysql
+select
+    c.*
+from
+    hotel_info_original c 
+left join
+    hotel_info_collection h 
+on
+    c.hotel_type=h.hotel_type 
+and
+    c.hotel_id =h.hotel_id 
+where
+    h.hotel_id is null
+```
+
+这个sql是用来查询出 c 表中有 h 表中无的记录，所以想到了用 left join 的特性（返回左边全部记录，右表不满足匹配条件的记录对应行返回 null）来满足需求，不料这个查询非常慢。先来看查询计划：
+
+**![img](https://images2015.cnblogs.com/blog/544496/201707/544496-20170711162211978-591320154.jpg)**
+
+　　rows代表这个步骤相对上一步结果的每一行需要扫描的行数，可以看到这个sql需要扫描的行数为35773*8134，非常大的一个数字。
+
+　　**在EXPLAIN结果中，第一行出现的表就是驱动表。**
+
+> **rows (JSON name: rows)**
+>
+> The rows column indicates the number of rows MySQL believes it must examine to execute the query.
+>
+> For [InnoDB] tables, this number is an estimate, and may not always be exact.
+
+http://dev.mysql.com/doc/refman/5.7/en/explain-output.html#explain_rows
+
+查找 MYSQL 源码来看看：
+
+```
+文件1：sql/opt_explain_traditional.cc   关键部分：push(&items, column_buffer.col_rows, nil)
+
+文件2：sql/opt_explain.cc   关键部分：select->quick->records
+
+文件3：sql/opt_range.cc   关键部分：check_quick_select
+```
+
+而 check_quick_select 的功能，在 MySQL 源码中的注释为：
+
+> Calculate estimate of number records that will be retrieved by a range scan on given index using given SEL_ARG intervals tree.
+
+
+
+MySQL Explain 里的 rows 这个值
+
+- 是 MySQL 认为它要检查的行数（仅做参考），而不是结果集里的行数；
+- 同时 SQL 里的 LIMIT 和这个也是没有直接关系的。
+
+另外，很多优化手段，例如关联缓冲区和查询缓存，都无法影响到 rows 的显示。MySQL 可能不必真的读所有它估计到的行，它也不知道任何关于操作系统或硬件缓存的信息。
+
+
+
+
+
 ### 慢查询优化基本步骤
 
 0.先运行看看是否真的很慢，注意设置SQL_NO_CACHE
@@ -29,7 +95,7 @@ tags: [mysql]
 
 6.观察结果，不符合预期继续从0分析
 
-### 慢查询案例
+### [慢查询案例](https://tech.meituan.com/2014/06/30/mysql-index.html)
 
 #### 复杂语句写法
 
@@ -87,9 +153,15 @@ where
 </font>
 ```
 
-简述一下执行计划，首先mysql根据idx_last_upd_date索引扫描cm_log表获得379条记录；然后查表扫描了63727条记录，分为两部分，derived表示构造表，也就是不存在的表，可以简单理解成是一个语句形成的结果集，后面的数字表示语句的ID。derived2表示的是ID = 2的查询构造了虚拟表，并且返回了63727条记录。我们再来看看ID = 2的语句究竟做了写什么返回了这么大量的数据，首先全表扫描employee表13317条记录，然后根据索引emp_certificate_empid关联emp_certificate表，rows = 1表示，每个关联都只锁定了一条记录，效率比较高。获得后，再和cm_log的379条记录根据规则关联。从执行过程上可以看出返回了太多的数据，返回的数据绝大部分cm_log都用不到，因为cm_log只锁定了379条记录。
+简述一下执行计划，
 
-如何优化呢？可以看到我们在运行完后还是要和cm_log做join,那么我们能不能之前和cm_log做join呢？仔细分析语句不难发现，其基本思想是如果cm_log的ref_table是EmpCertificate就关联emp_certificate表，如果ref_table是Employee就关联employee表，我们完全可以拆成两部分，并用union连接起来，注意这里用union，而不用union all是因为原语句有“distinct”来得到唯一的记录，而union恰好具备了这种功能。如果原语句中没有distinct不需要去重，我们就可以直接使用union all了，因为使用union需要去重的动作，会影响SQL性能。
+首先mysql根据idx_last_upd_date索引扫描cm_log表获得379条记录；然后查表扫描了63727条记录，分为两部分，derived表示构造表，也就是不存在的表，可以简单理解成是一个语句形成的结果集，后面的数字表示语句的ID。derived2表示的是ID = 2的查询构造了虚拟表，并且返回了63727条记录。我们再来看看ID = 2的语句究竟做了写什么返回了这么大量的数据，首先全表扫描employee表13317条记录 <!--第1个derive-->，然后根据索引emp_certificate_empid关联emp_certificate表 <!--第2个derive-->，rows = 1表示，每个关联都只锁定了一条记录，效率比较高。获得后，再和cm_log的379条记录根据规则关联 <!--379 * 63727，最后只有53条记录满足要求-->。从执行过程上可以看出返回了太多的数据，返回的数据绝大部分cm_log都用不到，因为cm_log只锁定了379条记录。
+
+如何优化呢？
+
+可以看到我们在运行完后还是要和cm_log做join,那么我们能不能之前和cm_log做join呢？仔细分析语句不难发现，其基本思想是如果cm_log的ref_table是EmpCertificate就关联emp_certificate表，如果ref_table是Employee就关联employee表。我们完全可以拆成两部分，并用union连接起来。
+
+> 注意这里用union，而不用union all是因为原语句有“distinct”来得到唯一的记录，而union恰好具备了这种功能。如果原语句中没有distinct不需要去重，我们就可以直接使用union all了，因为使用union需要去重的动作，会影响SQL性能。
 
 优化过的语句如下：
 

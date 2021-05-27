@@ -268,13 +268,51 @@ mysql> show global status like 'innodb_buffer_pool_pages_%';
 
   - 解决方案3:单表分页时，使用自增主键排序之后，先使用where条件 id > offset值，limit后面只 写rows
 
-## **其他查询优化**
+## 利用Exist小表驱动大表
 
-- 小表驱动大表，建议使用left join时，以小表关联大表，因为使用join的话，第一张表是必须全扫 描的，以少关联多就可以减少这个扫描次数。
+- 永远小表驱动大表，即小的数据集驱动大的数据集。
 
-explain---select列的信息，显示查询顺序。
- A表10万条记录
- B表一千万条记录 需求:关联A表和B表去查询数据。比如结果能匹配的也就10条记录
+```mysql
+select * from A where id in (select id from B)
+等价于：
+for select id from B
+	for select * from A where A.id = B.id
+
+当B表的数据集必须小于A表的数据集时，用in 优于exists
+
+select * from A where exists (select 1 from B where B.id=A.id)
+等价于：
+for select * from A
+	for select * from B where B.id = A.id
+当A表的数据集小于B表的数据集时，用exists优于in
+```
+
+- exists
+
+```python
+select ... from table where exists (subquery)
+# 该语法可以理解为： 将主查询的数据，放到子查询中做条件验证，根据验证结果(True or False),来决定主查询的数据结果是否得以保证。
+```
+
+- 提示：
+
+```mysql
+1.exists(subquery)只返回True or False ,因此子查询中select * 也可以是select 1或是 select 'X' .官方说法是实际执行时会忽略select清单，因此没有区别。
+2.exists子查询的实际执行过程可能经过了优化而不是我们理解上的逐条对比，如果担忧效率问题，可进行实际检验以确定是否有效率问题
+3.exists子查询往往也可以用条件表达式，其他子查询或者 join来代替，何种最优需要具体问题具体分析。	
+```
+
+<!--有种情况，是select .. from xxx where exist (...) order by xxx，这种情况，不能直接套用以前的执行顺序，即from -> where -> order by，实际上是from中的结果row，要在字表中进行验证，如果满足exist要求，进入order by中 -->
+
+
+
+## 利用left join小表驱动大表
+
+小表驱动大表，建议使用left join时，以小表关联大表，因为使用join的话，第一张表是必须全扫 描的，以少关联多就可以减少这个扫描次数。
+
+
+
+## 避免
 
 - 避免全表扫描，mysql在使用不等于(!=或者<>)的时候无法使用导致全表扫描。在查询的时候，如 果对索引使用不等于的操作将会导致索引失效，进行全表扫描
 
