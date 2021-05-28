@@ -189,23 +189,15 @@ java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
 
 当RUNNABLE状态线程在阻塞到IO操作时候，此时线程状态还是RUNNABLE ，但是实际在linux线程模型中是阻塞状态，比如线程A阻塞在 java.nio.channels.Selector.select() 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 的 java.nio.channels.Selector 会立即返回。
 
-# 线程池内线程的状态
+### 线程池内线程的状态
 
-平常使用线程都是使用的线程池ThreadPoolExecutor，那么线程池内的线程的通常是处于什么状态呢？
+- 预热阶段，线程状态也是从NEW->RUNNABLE-BLOCKED/WAITING/TIMED_WAITING状态
 
-比如new ThreadPoolExecutor(10, 10, 60L,TimeUnit.MINUTES, new LinkedBlockingQueue(1024))
-
-在预热阶段，线程状态也是从NEW->RUNNABLE-BLOCKED/WAITING/TIMED_WAITING状态，等待10个线程全部启动后，此时如果线程池没有请求接入，那么线程池内的线程状态是waiting，如何分析的呢？
-
-线程池活动达到core线程后，接入的请求都会存放到队列内，预热的线程是java.util.concurrent.ThreadPoolExecutor.Worker对象，该对象不断从队列内取出任务进行执行，如果队列内任务为空，那么就会在该队列阻塞
-
-![img](http://f1.babyitellyou.com/sp1/img/20201206/e34a6a1a4d14f07248ae32de5f359ee7.png)
-
-getTask方法代码截图如下：
+- 线程池活动达到core线程后，接入的请求都会存放到队列内，如果队列内任务为空，那么Worker线程getTask()阻塞，处于waiting状态
 
 ![img](http://f1.babyitellyou.com/sp1/img/20201206/87d263be12c962900f8a33fa6b68e264.png)
 
-其中代码@1和@2最终都是使用的LockSupport.park()挂起线程，因此，线程池内的线程空闲时候，线程状态是waiting状态。
+其中代码@1和@2底层都是使用的LockSupport.park()挂起线程 <!--ReentrantLock锁--> ，因此，线程池内的线程空闲时候，线程状态是waiting状态。
 
 验证如下:
 
@@ -231,11 +223,17 @@ getTask方法代码截图如下：
 
  
 
-# java线程状态对应使用cpu
+### java线程状态对应使用cpu
 
-java线程的不同状态，是否使用cpu资源呢?
+NEW 这个好理解，线程刚创建，还未执行，并不使用cpu 
 
-NEW 这个好理解，线程刚创建，还未执行，并不使用cpu RUNNABLE 线程处于可运行状态，但是实际可能是正在运行或者等待io资源，因此不能完全确定是否在使用cpu资源。 BLOCKED 线程阻塞状态，肯定不会使用cpu资源 WAITING 线程休眠状态，肯定不会使用cpu资源 TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
+RUNNABLE 线程处于可运行状态，但是实际可能是正在运行或者等待io资源，因此不能完全确定是否在使用cpu资源。 
+
+BLOCKED 线程阻塞状态，肯定不会使用cpu资源 
+
+WAITING 线程休眠状态，肯定不会使用cpu资源 
+
+TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 
  
 
@@ -257,7 +255,7 @@ NEW 这个好理解，线程刚创建，还未执行，并不使用cpu RUNNABLE 
 
  
 
-# sleep、yield、wait、join的区别
+### sleep、yield、wait、join的区别
 
 首先sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源（因为状态非runnable状态都不消耗cpu资源）
 
@@ -267,9 +265,7 @@ sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法
 
 wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，sleep是线程的方法，跟锁没关系，wait，notify，notifyall 都是Object对象的方法，是一起使用的，用于锁机制。
 
- 
-
-有个特殊的Thread.sleep(0)，操作这个动作是让出cpu，让其它线程又机会获取cpu资源执行，但是执行这个动作，线程也会处于time_waiting状态吗？然后立刻又恢复runnable状态，不知道自己这个理解是否正确，也无法验证。
+有个特殊的Thread.sleep(0)，操作这个动作是让出cpu，让其它线程又机会获取cpu资源执行
 
  
 
