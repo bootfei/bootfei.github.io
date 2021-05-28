@@ -267,7 +267,7 @@ private boolean addWorker(Runnable firstTask, boolean core) {
 }
 ```
 
-两个关键点：
+三个关键点：
 
 - 创建一个worker对象
 
@@ -289,15 +289,15 @@ private boolean addWorker(Runnable firstTask, boolean core) {
 
   
 
-###### **worker：真正干活的线程**
+###### ThreadPoolExecutor的内部类worker：真正干活的线程
 
-内部类 Worker，因为 Doug Lea 把线程池中的线程包装成了一个个 Worker，翻译成工人，就是线程池中做任务的线程。所以到这里，我们知道任务是 Runnable（内部变量名叫 task 或 command），线程是 Worker。
+ThreadPoolExecutor的内部类 Worker，因为 Doug Lea 把线程池中的线程包装成了一个个 Worker，放在HashSet<Worker> workers中。所以worker中，任务是 Runnable（内部变量名叫 task 或 command），线程是 Thread。
 
 ```java
 private final class Worker extends AbstractQueuedSynchronizer implements Runnable{
     private static final long serialVersionUID = 6138294804551838833L;
 
-    final Thread thread; // 这个是真正的线程，任务靠你啦
+    final Thread thread; // 这个是真正的线程，任务靠你啦!!!
 
     // 前面说了，这里的 Runnable 是任务。为什么叫 firstTask？因为在创建线程的时候，如果同时指定了
     // 这个线程起来以后需要执行的第一个任务，那么第一个任务就是存放在这里的(线程可不止执行这一个任务)
@@ -326,13 +326,13 @@ Worker 这里又用到了抽象类 AbstractQueuedSynchronizer。<!--题外话，
 
 从源码上看Worker这个类实现了Runnable接口
 
-- 当[new 一个Worker]()实例对象时,线程工厂创建线程会把这个当前类对象，也就是Worker实例，当作一个任务透传给线程
+- 构造函数：线程工厂创建线程，把自己这个Worker实例传给线程 <!--因为worker就是一个Runnable-->
 - [addWorder]()这个方法会调用Worker的执行线程t ==> t.start(), 那么就会启动[Worker中的run()方法]() <!--废话-->
 - [Worker封装了任务Runnable和执行线程t]()！！！
 
-###### runWorker(): 真正干活的方法
+###### ThreadPoolExecutor.runWorker(): 真正干活的方法
 
-worker中的run()：委托给runWorker()方法
+worker中的run()：委托给ThreadPoolExecutor.runWorker()方法
 
 ```java
 final void runWorker(Worker w) {
@@ -357,7 +357,7 @@ final void runWorker(Worker w) {
                     beforeExecute(wt, task);
                     Throwable thrown = null;
                     try {
-                        task.run();
+                        task.run(); //task运行在当前线程中！！！
                     } catch (RuntimeException x) {
                         thrown = x; throw x;
                     } catch (Error x) {
@@ -380,19 +380,23 @@ final void runWorker(Worker w) {
     }
 ```
 
-里面有个循环，循环的条件是
+3个关键点：
+
+- 里面有个循环，循环的条件是
 
 ```java
  while (task != null || (task = getTask()) != null) 
 ```
 
-假如task不为空，我们进入循环会执行任务；
+- 假如task不为空，进入循环会执行任务，并且可以看到，是在当前线程执行task
+
 
 ```text
 task.run();
 ```
 
-继续再往下finally代码块：代码的中task被重新赋值为空，然后执行下一循环；
+- 继续再往下finally代码块：代码的中task被重新赋值为空，然后执行下一循环；
+
 
 ```java
 finally {
@@ -410,8 +414,8 @@ getTask()方法才是工作线程Worker能够不断从任务队列消费任务�
 
 > 此方法有三种可能：
 >
-> 1. 阻塞直到获取到任务返回。默认 corePoolSize 之内的线程是不会被回收的，它们会一直等待任务
-> 2. 超时退出。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭
+> 1. take方式取任务的特点是从缓存队列中取任务，若队列为空,则进入阻塞状态，阻塞直到获取到任务返回。默认 corePoolSize 之内的线程是不会被回收的，它们会一直等待任务
+> 2. poll方式取任务的特点是从缓存队列中取任务,最长等待keepAliveTime的时长，取不到返回null。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭
 > 3. 如果发生了以下条件，此方法必须返回 null:
 >       - 池中有大于 maximumPoolSize 个 workers 存在(通过调用 setMaximumPoolSize 进行设置)
 >    - 线程池处于 SHUTDOWN，而且 workQueue 是空的，这种不再接受新的任务
@@ -441,9 +445,7 @@ private Runnable getTask() {
 
             // 这里 break，是为了不往下执行后一个 if (compareAndDecrementWorkerCount(c))
             // 两个 if 一起看：如果当前线程数 wc > maximumPoolSize，或者超时，都返回 null
-            // 那这里的问题来了，wc > maximumPoolSize 的情况，为什么要返回 null？
-            //    换句话说，返回 null 意味着关闭线程。
-            // 那是因为有可能开发者调用了 setMaximumPoolSize() 将线程池的 maximumPoolSize 调小了，那么多余的 Worker 就需要被关闭
+            // 那这里的问题来了，wc > maximumPoolSize 的情况，返回 null 意味着关闭线程，因为有可能开发者调用了 setMaximumPoolSize() 将线程池的 maximumPoolSize 调小了，那么多余的 Worker 就需要被关闭
             if (wc <= maximumPoolSize && ! (timedOut && timed))
                 break;
             if (compareAndDecrementWorkerCount(c))
@@ -498,4 +500,19 @@ private Runnable getTask() {
 ##### step3: addWorker创建非核心worker线程
 
 
+
+
+
+##### 总结：
+
+我以前对于Worker非常晕，其实Worker本质上是个工作线程Thread + 任务Runnable。我一开始任务，Worker是个干活的，就应该只是个Thread，没有必要封装任务Runnable。 再者，由于受到之前的固化思维，以为Thread和Runnable必须在同一行代码中，`new Thread(Runnable).start()`，所以Worker作为一个Thread，已经运行过`new Thread(Runnable).start()`，这个Thread和一个Runnbale已经绑定了，怎么还能获取到其他Runnable，并且运行呢？其实，这就是对 `Thread(Runnable).start()`和 `Runnable().run()`没有理解透彻。虽然Worker已经被运行了Thread(Runnable).start()，该worker的Thread已经和自己的Runnbale已经绑定了（这个Runnable其实就是firstTask，就是submit(Runnable)的时候那个Runnable），但是该worker的Runnable.run()方法，包含了getTask()方法从而获取其他Runnable, 然后执行`Runnable().run()`，这样Runnable就运行在当前线程了，当前线程是谁呢？当然是该worker的Thread了。
+
+| 线程池pool所在的线程 | worker所在的线程                                             |
+| -------------------- | ------------------------------------------------------------ |
+| submit(Runnable)     |                                                              |
+| addWorker(Runnable)  |                                                              |
+|                      | worker.start()调用worker.run()                               |
+|                      | worker.run() 调用 ThreadPoolExecutor.runWorker(Worker this)  |
+|                      | ThreadPoolExecutor.runWorkerr(Worker this)调用getTask()获取task |
+|                      | task.run()在当前线程执行，即worker线程                       |
 
