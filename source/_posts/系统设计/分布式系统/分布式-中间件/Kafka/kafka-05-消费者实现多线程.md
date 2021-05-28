@@ -8,11 +8,11 @@ https://howtoprogram.xyz/2016/05/29/create-multi-threaded-apache-kafka-consumer/
 
 ## Why do we need multi-thread consumer model?
 
-Suppose we implement a notification module which allow users to subscribe for notifications from other users, other applications..Our module reads messages which will be written by other users, applications to a Kafka clusters. In this case, we can get all notifications of the others written to a Kafka topic and our module will create a consumer to subscribe to that topic.
+Suppose we implement a notification module which allow users to subscribe for notifications from other users, other applications.Our module reads messages which will be written by other users, applications to a Kafka clusters. In this case, we can get all notifications of the others written to a Kafka topic and our module will create a consumer to subscribe to that topic.
 
 Everything seems to be fine at the beginning. However, what will happen if the number of notifications produced by other applications, users…is [increased fast and exceed the rate that can be processed by our module（就是消费者集群）]()?
 
-Well, everything is still…not bad. All the messages/notifications that haven’t been processed by our module, are still in the Kafka topic. However, things get more danger when the number of messages is too much. Some of them will be lost when the retention policy is met (Note that Kafka retention policy can be time-based, partition size-based, key-based). And more important, when our notification module falls very far behind the income notifications/messages, it is not a true “notification” module anymore.
+Well, everything is still…not bad. All the messages/notifications that haven’t been processed by our module, are still in the Kafka topic. However, things get more danger when the number of messages is too much. Some of them will be lost when the retention policy is met (Note that Kafka retention policy can be time-based, partition size-based, key-based). And more important, when our notification module falls very far behind the income notifications/messages, it is not a true “notification” module anymore. <!--消息挤压-->
 
 It’s time to think about the multi-thread consumer model.
 
@@ -25,11 +25,11 @@ There are 2 possible models I’d like to mention in this post.
 
 Both of them have their own pros and cons
 
-### Model #1. Multiple consumers with their own threads
+### Multiple consumers with their own threads
 
 <font color="red">每个线程维护一个KafkaConsumer实例</font>
 
-> multi consumer体现在了执行多次new  KafkaConsumer<String, String>
+> multi consumer体现在了执行多次new  KafkaConsumer<String, String>，所以有多个TCP链接，一个KafkaConsumer对应一个TCP链接
 >
 > 线程池的Thread各自维护一个 KafkaConsumer<String, String>实例
 
@@ -41,11 +41,11 @@ Multiple consumers with their own threads
 | **Pros**                                                     | **Cons**                                                     |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Easy to implement                                            | [The total of consumers is limited the total partitions of the topic](). The redundant consumers may not be used. |
-| Implementing in-order processing on per-partition is easier. | [More TCP connections to the brokers]()                      |
+| Implementing in-order processing on per-partition is easier. <!--这个非常有用，有序性有很多应用场景--> | [More TCP connections to the brokers]()                      |
 
-### Model #2. Single consumer, multiple worker processing threads
+### Single consumer, multiple worker processing threads
 
-<font color="red">维护一个KafkaConsumer（可能会有多个），同时维护多个事件处理线程(worker thread)</font>
+<font color="red">维护一个KafkaConsumer即Notification Consumer <!--其实吧，有可能有多个--> ，同时维护多个事件处理线程(worker thread)</font>
 
 ![Single consumer, multiple worker processing threads](https://howtoprogram.xyz/wp-content/uploads/2016/05/model2.png)
 
@@ -65,7 +65,7 @@ Below is the implementation detail of both 2 models.
 
 ![Create Multi-threaded Apache Kafka Consumer - Source Code](https://howtoprogram.xyz/wp-content/uploads/2016/05/Source-Code.png)
 
-### Model #1：Multiple consumers with their own threads 
+### Multiple consumers with their own threads 
 
 #### Class Diagram
 
@@ -290,17 +290,23 @@ public final class MultipleConsumersMain {
 }
 ```
 
-This class is the entry point, contain the **main** method for testing our source code. In this class we will create a producer thread to produces 5 messages to the topic which has 3 partitions:***HelloKafkaTopic1***.
+This class is the entry point, contain the **main** method for testing our source code. In this class we will create a producer thread to produces [5 messages]() to the topic which has [3 partitions]():***HelloKafkaTopic1***.
 
-
-
-Then we create a group of 3 consumers on their own thread to consume the message from the ***HelloKafkaTopic1*** topic.
+Then we create a group of [3 consumers]() on their own thread to consume the message from the ***HelloKafkaTopic1*** topic.
 
 #### 验证 Run the example
 
-The output on my eclipse is as below: <!--使用100条message验证，使用3条信息很难出现效果-->
+Create a topic ***HelloKafkaTopic1*** with 3 partitions
 
-> *Produces 3 messages*
+```shell
+#cd $APACHE_KAFKA_HOME
+./bin/kafka-topics.sh --create --zookeeper localhost:2181 
+      --replication-factor 1 --partitions 3 --topic HelloKafkaTopic1
+```
+
+<!--使用100条message验证，使用5条信息很难出现效果-->
+
+> *Produces 5 messages*
 > *Sent:Message 0, Partition: 2, Offset: 21*
 > *Sent:Message 3, Partition: 2, Offset: 22*
 > *Sent:Message 1, Partition: 1, Offset: 24*
@@ -312,13 +318,21 @@ The output on my eclipse is as below: <!--使用100条message验证，使用3条
 > *Receive message: Message 0, Partition: 2, Offset: 21, by ThreadID: 15*
 > *Receive message: Message 3, Partition: 2, Offset: 22, by ThreadID: 15*
 
-Note that the ***HelloKafkaTopci1*** has 3 partitions. Kafka producer client assigned the Message 0,3 to the partition #2, the Messages 1,4 to the partition #1 and the Message 2 to the partition 0.
+Note that the ***HelloKafkaTopci1*** has 3 partitions.
 
-The consumer group which includes 3 consumers with their own threads with ThreadID(s): 13, 14, 15. All the messages of the partition #0 were consumed by the consumer thread: #13. The messages of partition #1 were consumed by the consumer thread #1. And messages of partition #2 were consumed by the consumer thread #15.
+-  Kafka producer client assigned
+  -  Message 0,3 to the partition #2,
+  -  Messages 1,4 to the partition #1 
+  -  Message 2 to the partition #0.
 
-Note that you may get the different partition numbers and ThreadIDs. However, in this case, each partition will be handled by each consumer thread.
+- Kafka consumer group which includes 3 consumers with their own threads with ThreadID(s): 13, 14, 15
+  - All  messages of partition #0 were consumed by the consumer thread: #13. 
+  - All  messages of partition #1 were consumed by the consumer thread #1. 
+  - All  messages of partition #2 were consumed by the consumer thread #15.
 
-### Model #2: Single consumer, multiple worker processing threads
+Note that you may get the different partition numbers and ThreadIDs. However, in this case, [each partition will be handled by each consumer thread]().
+
+### Single consumer, multiple worker processing threads
 
 #### Class Diagram
 
@@ -454,7 +468,7 @@ public class NotificationConsumer {
   }
  
   /**
-   * Creates a {@link ThreadPoolExecutor} with a given number of threads to consume the messages
+   * Creates a ThreadPoolExecutor with a given number of threads to consume the messages
    * from the broker.
    * 
    * @param numberOfThreads The number of threads will be used to consume the message
@@ -475,16 +489,16 @@ public class NotificationConsumer {
   }
  
   private static Properties createConsumerConfig(String brokers, String groupId) {
-    Properties props = new Properties();
-    props.put("bootstrap.servers", brokers);
-    props.put("group.id", groupId);
-    props.put("enable.auto.commit", "true");
-    props.put("auto.commit.interval.ms", "1000");
-    props.put("session.timeout.ms", "30000");
-    props.put("auto.offset.reset", "earliest");
-    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-    return props;
+        Properties props = new Properties();
+        props.put("bootstrap.servers", brokers);
+        props.put("group.id", groupId);
+        props.put("enable.auto.commit", "true");
+        props.put("auto.commit.interval.ms", "1000");
+        props.put("session.timeout.ms", "30000");
+        props.put("auto.offset.reset", "earliest");
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        return props;
   }
  
   public void shutdown() {
@@ -550,7 +564,10 @@ public final class SingleConsumerMain {
 }
 ```
 
-The entry point, contains the main method to run the example. It create a ***NotificationProducerThread*** thread which produces 5 messages to the topic: ***HelloKafkaTopic***. Then, it creates a ***NotificationConsumer*** object which will receive the message from the above topic and dispatch to the pool of 3 *ConsumerThreadHandler* thread for processing.
+The entry point, contains the main method to run the example. 
+
+- It create a ***NotificationProducerThread*** thread which produces 5 messages to the topic: ***HelloKafkaTopic***. 
+- Then, [it creates a ***NotificationConsumer*** object which will receive the message from the above]() topic and [dispatch to the pool of 3 ***ConsumerThreadHandler*** thread for processing]().
 
 #### 验证 Run the example.
 

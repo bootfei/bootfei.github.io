@@ -5,31 +5,44 @@ categories: [java,oom]
 tags:
 ---
 
-# 创建线程池
+### 类图
 
-一步一步点进去最终会执行到下面这个新构造方法：
+<img src="https://filescdn.proginn.com/292aa5449b46ffabf67614bc8a591e2a/7f30287bce035a0e74c89523eaff9816.webp" alt="img" style="zoom: 33%;" />
 
-![img](https://pic3.zhimg.com/80/v2-604453fe04b72630a22af391cf15f57a_720w.jpg)
+- ThreadPoolExecutor继承AbstractExecutorService, 提供了execute(Runnable)方法的实现
+
+- AbstractExecutorService实现ExecutorService，提供了submit(Runnable)方法和submit(Callable)方法的实现
+- ExecutorService继承了Executor接口，定义了submit(Runnable)方法和submit(Callable)方法
+- Executor接口，定义execute(Runnable)方法
+
+![img](https://filescdn.proginn.com/335ad046a09617ef5054d1336967556e/2ffc7547e74b396c2adc6cf790e4c316.webp)
+
+### 创建线程池
+
+无论哪种类型的线程池，最终都是直接或者间接通过ThreadPoolExecutor这个类来实现的。而ThreadPoolExecutor的有多个构造方法，最终都是调用含有7个参数的构造函数。
 
 在这个构造方法中：
 
-1、首先对corePoolSize（核心线程数）、maximumPoolSize（最大线程数）、keepAliveTime（线程空闲时存活的最大时间）、workQueue（线程队列）、threadFactory（线程工厂）、handler（拒绝策略）参数做了合法性校验；
+- 首先对corePoolSize（核心线程数）、maximumPoolSize（最大线程数）、keepAliveTime（核心线程以外的线程空闲时,存活的最大时间）、workQueue（线程队列）、threadFactory（线程工厂）、handler（拒绝策略）参数做了合法性校验；
+- 给线程池的属性赋值；
 
-2、给线程池的属性赋值；
+### 提交任务
 
-# 提交任务方法: submit(Runnable)
+一个线程池可以接受任务类型有Runnable和Callable，我们以Runnable为例
 
-线程池对象调用了父类（AbstractExecutorService）中的submit方法；
+#### ExecutorService.submit(Runnable)提交任务
+
+AbstractExecutorService实现了submit方法
 
 <img src="https://pic1.zhimg.com/80/v2-56cc90e0ec1c64ae28709ba2aba2dc34_720w.jpg" alt="img" style="zoom: 67%;" />
 
 > RunnableFuture是Runnable的一个子类
 
-## 补充知识：线程状态的表示
+**补充知识：线程状态的表示**
 
-Doug Lea 采用一个 32 位的整数来存放线程池的状态和当前池中的线程数，其中高 3 位用于存放线程池状态，低 29 位表示线程数（即使只有 29 位，也已经不小了，大概 5 亿多，现在还没有哪个机器能起这么多线程的吧）。我们知道，java 语言在整数编码上是统一的，都是采用补码的形式，下面是简单的移位操作和布尔操作，都是挺简单的。
+Doug Lea 采用一个 32 位的整数来存放线程池的状态和当前池中的线程数，其中高 3 位用于存放线程池状态，低 29 位表示线程数。我们知道，java 语言在整数编码上是统一的，都是采用补码的形式
 
-```text
+```java
 private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
 
 // 这里 COUNT_BITS 设置为 29(32-3)，意味着前三位用于存放线程状态，后29位用于存放线程数
@@ -78,8 +91,6 @@ private static boolean isRunning(int c) {
 }
 ```
 
-上面就是对一个整数的简单的位操作，几个操作方法将会在后面的源码中一直出现，所以读者最好把方法名字和其代表的功能记住，看源码的时候也就不需要来来回回翻了。
-
 在这里，介绍下线程池中的各个状态和状态变化的转换过程：
 
 - RUNNING：这个没什么好说的，这是最正常的状态：接受新的任务，处理等待队列中的任务
@@ -90,7 +101,7 @@ private static boolean isRunning(int c) {
 
 > RUNNING 定义为 -1，SHUTDOWN 定义为 0，其他的都比 0 大，所以等于 0 的时候不能提交任务，大于 0 的话，连正在执行的任务也需要中断。
 
-看了这几种状态的介绍，读者大体也可以猜到十之八九的状态转换了，各个状态的转换过程有以下几种：
+各个状态的转换过程有以下几种：
 
 - RUNNING -> SHUTDOWN：当调用了 shutdown() 后，会发生这个状态转换，这也是最重要的
 - (RUNNING or SHUTDOWN) -> STOP：当调用 shutdownNow() 后，会发生这个状态转换，这下要清楚 shutDown() 和 shutDownNow() 的区别了
@@ -98,9 +109,9 @@ private static boolean isRunning(int c) {
 - STOP -> TIDYING：当任务队列清空后，发生这个转换
 - TIDYING -> TERMINATED：这个前面说了，当 terminated() 方法结束后
 
-上面的几个记住核心的就可以了，尤其第一个和第二个。
+#### Executor.execute(Runnnable )执行任务
 
-# 执行任务execute(Runnnable )
+ThreadPoolExecutor实现了execute(Runnable)方法
 
 ```java
 public void execute(Runnable command) {
@@ -110,19 +121,16 @@ public void execute(Runnable command) {
     // 前面说的那个表示 “线程池状态” 和 “线程数” 的整数
     int c = ctl.get();
 
-    // 如果当前线程数少于核心线程数，那么直接添加一个 worker 来执行任务，
-    // 创建一个新的线程，并把当前任务 command 作为这个线程的第一个任务(firstTask)
+    // step1: 如果当前线程数少于核心线程数，那么直接添加一个 worker 来执行任务，
     if (workerCountOf(c) < corePoolSize) {
-        // 添加任务成功，那么就结束了。提交任务嘛，线程池已经接受了这个任务，这个方法也就可以返回了
-        // 至于执行的结果，到时候会包装到 FutureTask 中。
-        // 返回 false 代表线程池不允许提交任务
+        // 添加任务成功，那么就结束了；返回 false 代表线程池不允许提交任务
         if (addWorker(command, true))
             return;
         c = ctl.get();
     }
     // 到这里说明，要么当前线程数大于等于核心线程数，要么刚刚 addWorker 失败了
 
-    // 如果线程池处于 RUNNING 状态，把这个任务添加到任务队列 workQueue 中
+    // step2: 如果线程池处于 RUNNING 状态，把这个任务添加到任务队列 workQueue 中
     if (isRunning(c) && workQueue.offer(command)) {
         /* 这里面说的是，如果任务进入了 workQueue，我们是否需要开启新的线程
          * 因为线程数在 [0, corePoolSize) 是无条件开启新的线程
@@ -137,29 +145,21 @@ public void execute(Runnable command) {
         else if (workerCountOf(recheck) == 0)
             addWorker(null, false);
     }
-    // 如果 workQueue 队列满了，那么进入到这个分支
-    // 以 maximumPoolSize 为界创建新的 worker，
-    // 如果失败，说明当前线程数已经达到 maximumPoolSize，执行拒绝策略
+    // step3:如果 workQueue 队列满了，创建新的非核心worker
     else if (!addWorker(command, false))
-        reject(command);
+        reject(command); // addWorker失败，说明当前线程数已经达到 maximumPoolSize，执行拒绝策略
 }
 ```
 
-这块代码可以分为三块来看
+step1：当一个任务被提交时，若线程池中的工作线程 < 核心线程，调用addWorker方法创建新的线程
 
-第一块：意思是当一个任务被提交时首先会去检查线程池中的工作线程是否小于核心线程，如果是则调用addWorker方法创建新的线程；
+step2：当前线程池中核心线程已满，但是任务队列workQueue未满，则添加;
 
-第二块：当前线程池中核心线程已满，但是任务队列未满，则添加到队列中;
+step3：当前线程池中核心线程已满，任务队列也满了，就尝试调用addWorker创建新的线程（非核心），如果创建线程失败则执行拒绝策略；
 
-第三块：当前线程池中核心线程已满，任务队列也满了，就尝试调用addWorker创建新的线程（非核心），如果创建线程失败则执行拒绝策略；
+##### step1：addWorker创建核心worker线程
 
-
-
-> 总流程：
->
-> addWorker()所创建的线程Worker，会在KeepLive销毁之前，一直调用循环方法getTask()，从workQueue队列获取任务。
-
-## 第一块：addWorker()方法创建worker线程
+addWorker()所创建的线程Worker，会在KeepLive销毁之前，一直调用循环方法getTask()，从workQueue队列获取任务。
 
 ```java
 // 第一个参数是准备提交给这个线程执行的任务，之前说了，可以为 null
@@ -210,7 +210,6 @@ private boolean addWorker(Runnable firstTask, boolean core) {
 
     /*
      * 到这里，我们认为在当前这个时刻，可以开始创建线程来执行任务了，
-     * 因为该校验的都校验了，至于以后会发生什么，那是以后的事，至少当前是满足条件的
      */
 
     // worker 是否已经启动
@@ -222,11 +221,10 @@ private boolean addWorker(Runnable firstTask, boolean core) {
         final ReentrantLock mainLock = this.mainLock;
         // 把 firstTask 传给 worker 的构造方法
         w = new Worker(firstTask);
-        // 取 worker 中的线程对象，之前说了，Worker的构造方法会调用 ThreadFactory 来创建一个新的线程
+        // 取 worker 中的线程对象，Worker的构造方法会调用 ThreadFactory 来创建一个新的线程
         final Thread t = w.thread;
         if (t != null) {
-            // 这个是整个线程池的全局锁，持有这个锁才能让下面的操作“顺理成章”，
-            // 因为关闭一个线程池需要这个锁，至少我持有锁的期间，线程池不会被关闭
+            // 整个线程池的全局锁，因为关闭一个线程池需要这个锁，至少持有锁的期间，线程池不会被关闭
             mainLock.lock();
             try {
 
@@ -269,56 +267,50 @@ private boolean addWorker(Runnable firstTask, boolean core) {
 }
 ```
 
+两个关键点：
 
+- 创建一个worker对象
 
-```text
- w = new Worker(firstTask);
- final Thread t = w.thread;
-```
+  - ```
+     w = new Worker(firstTask);
+    ```
 
-这两行代码是重点，运行到这里我们发现线程池才为我们创建了线程worker；
+- 创建成功后，对线程池状态判断成功后，就去执行该worker对象的thread的启动。也就是说在这个方法里面启动了一个关联到worker的线程
 
-### Worker执行线程的启动
+  - ```
+    final Thread t = w.thread;
+    ```
 
-线程已经创建完成了，那线程又是怎么启动的呢? 顺着上面的代码继续往下看，你会看到一行很熟悉的代码
+- 线程启动
 
-```text
-t.start();
-```
+  - ```
+    t.start();
+    ```
 
-执行到这儿线程池中的线程就被启动了；线程池是怎么样重复利用线程的？想要了解这个问题恐怕我们要详细的了解下这个Worker类了
+  
 
-
-
-### Worker线程的复用
-
-#### worker：真正干活的线程
+###### **worker：真正干活的线程**
 
 内部类 Worker，因为 Doug Lea 把线程池中的线程包装成了一个个 Worker，翻译成工人，就是线程池中做任务的线程。所以到这里，我们知道任务是 Runnable（内部变量名叫 task 或 command），线程是 Worker。
 
 ```java
-private final class Worker
-    extends AbstractQueuedSynchronizer
-    implements Runnable{
+private final class Worker extends AbstractQueuedSynchronizer implements Runnable{
     private static final long serialVersionUID = 6138294804551838833L;
 
-    // 这个是真正的线程，任务靠你啦
-    final Thread thread;
+    final Thread thread; // 这个是真正的线程，任务靠你啦
 
     // 前面说了，这里的 Runnable 是任务。为什么叫 firstTask？因为在创建线程的时候，如果同时指定了
     // 这个线程起来以后需要执行的第一个任务，那么第一个任务就是存放在这里的(线程可不止执行这一个任务)
-    // 当然了，也可以为 null，这样线程起来了，自己到任务队列（BlockingQueue）中取任务（getTask 方法）就行了
+    // 当然了，也可以为 null，这样线程起来了，自己到任务队列workQueue中取任务（getTask 方法）就行了
     Runnable firstTask;
 
-    // 用于存放此线程完成的任务数，注意了，这里用了 volatile，保证可见性
-    volatile long completedTasks;
+    volatile long completedTasks; // 用于存放此线程完成的任务数，注意了，这里用了 volatile，保证可见性
 
     // Worker 只有这一个构造方法，传入 firstTask，也可以传 null
     Worker(Runnable firstTask) {
         setState(-1); // inhibit interrupts until runWorker
         this.firstTask = firstTask;
-        // 调用 ThreadFactory 来创建一个新的线程
-        this.thread = getThreadFactory().newThread(this);
+        this.thread = getThreadFactory().newThread(this); // 调用 ThreadFactory 来创建一个新的线程
     }
 
     // 这里调用了外部类的 runWorker 方法
@@ -330,8 +322,6 @@ private final class Worker
 }
 ```
 
-
-
 Worker 这里又用到了抽象类 AbstractQueuedSynchronizer。<!--题外话，AQS 在并发中真的是到处出现，而且非常容易使用，写少量的代码就能实现自己需要的同步方式-->
 
 从源码上看Worker这个类实现了Runnable接口
@@ -340,44 +330,9 @@ Worker 这里又用到了抽象类 AbstractQueuedSynchronizer。<!--题外话，
 - [addWorder]()这个方法会调用Worker的执行线程t ==> t.start(), 那么就会启动[Worker中的run()方法]() <!--废话-->
 - [Worker封装了任务Runnable和执行线程t]()！！！
 
-#### worker中的run()：委托给runWorker()方法
+###### runWorker(): 真正干活的方法
 
-```java
-private final class Worker
-    extends AbstractQueuedSynchronizer
-    implements Runnable
-{
-    /**
-     * This class will never be serialized, but we provide a
-     * serialVersionUID to suppress a javac warning.
-     */
-    private static final long serialVersionUID = 6138294804551838833L;
-
-    /** Thread this worker is running in.  Null if factory fails. */
-    final Thread thread;
-    /** Initial task to run.  Possibly null. */
-    Runnable firstTask;
-    /** Per-thread task counter */
-    volatile long completedTasks;
-
-    /**
-     * Creates with given first task and thread from ThreadFactory.
-     * @param firstTask the first task (null if none)
-     */
-    Worker(Runnable firstTask) {
-        setState(-1); // inhibit interrupts until runWorker
-        this.firstTask = firstTask;
-        this.thread = getThreadFactory().newThread(this);
-    }
-    
-    public void run() {
-        runWorker(this);
-    }
-    //......
-}
-```
-
-#### runWorker(Worker w)方法
+worker中的run()：委托给runWorker()方法
 
 ```java
 final void runWorker(Worker w) {
@@ -425,15 +380,19 @@ final void runWorker(Worker w) {
     }
 ```
 
+里面有个循环，循环的条件是
 
+```java
+ while (task != null || (task = getTask()) != null) 
+```
 
-想搞明白我们的疑惑，理解runWorker方法是关键，在这块代码里我们会发现里面有个循环，循环的条件是task != null || (task = getTask()) != null，假如task不为空，我们进入循环会发现这么一行代码：执行任务；
+假如task不为空，我们进入循环会执行任务；
 
 ```text
 task.run();
 ```
 
-继续再往下看你会发现有个finally代码块：
+继续再往下finally代码块：代码的中task被重新赋值为空，然后执行下一循环；
 
 ```java
 finally {
@@ -443,23 +402,23 @@ finally {
 }
 ```
 
-代码的中task被重新赋值为空；然后执行下一循环；不知道你是否疑惑刚才循环条件中方法getTask()，这个方法是做什么呢？我们跳进这个方法看下：
 
 
-
-#### runWorker()中的循环判断：getTask()方法 ---真正从任务队列消费任务
+###### runWorker()中的循环判断getTask(): 真正从任务队列消费任务和复用线程
 
 getTask()方法才是工作线程Worker能够不断从任务队列消费任务的原因，保证Worker不断运行。
 
+> 此方法有三种可能：
+>
+> 1. 阻塞直到获取到任务返回。默认 corePoolSize 之内的线程是不会被回收的，它们会一直等待任务
+> 2. 超时退出。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭
+> 3. 如果发生了以下条件，此方法必须返回 null:
+>       - 池中有大于 maximumPoolSize 个 workers 存在(通过调用 setMaximumPoolSize 进行设置)
+>    - 线程池处于 SHUTDOWN，而且 workQueue 是空的，这种不再接受新的任务
+>    - 线程池处于 STOP，不仅不接受新的线程，连 workQueue 中的线程也不再执行
+
 ```java
-// 此方法有三种可能：
-// 1. 阻塞直到获取到任务返回。我们知道，默认 corePoolSize 之内的线程是不会被回收的，
-//      它们会一直等待任务
-// 2. 超时退出。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭
-// 3. 如果发生了以下条件，此方法必须返回 null:
-//    - 池中有大于 maximumPoolSize 个 workers 存在(通过调用 setMaximumPoolSize 进行设置)
-//    - 线程池处于 SHUTDOWN，而且 workQueue 是空的，前面说了，这种不再接受新的任务
-//    - 线程池处于 STOP，不仅不接受新的线程，连 workQueue 中的线程也不再执行
+
 private Runnable getTask() {
     boolean timedOut = false; // Did the last poll() time out?
 
@@ -467,9 +426,7 @@ private Runnable getTask() {
     for (;;) {
         int c = ctl.get();
         int rs = runStateOf(c);
-        // 两种可能
-        // 1. rs == SHUTDOWN && workQueue.isEmpty()
-        // 2. rs >= STOP
+       
         if (rs >= SHUTDOWN && (rs >= STOP || workQueue.isEmpty())) {
             // CAS 操作，减少工作线程数
             decrementWorkerCount();
@@ -528,13 +485,17 @@ private Runnable getTask() {
                     return r;
 ```
 
-你会发现这个方法实际上是在从队列中获取任务；OK ，到这里是不是很清楚了，[循环从队列中获取任务并赋值给task,然后调用task的run方法，以此循环]()。。。。这样对于处理队列里的任务就不需要重新new 一个线程来处理了，因此实现了线程的重复利用；
+从队列中获取任务：[循环从队列中获取任务并赋值给task,然后调用task的run方法，以此循环]()。这样对于处理队列里的任务就不需要重新new 一个线程来处理了，因此实现了线程的重复利用！！！
 
 
 
-## 第二块：新的任务被提交到了队列中
+##### step2：新的任务被提交到了队列中
 
- 那么执行step2: workQueue.offer(command)
+ 执行workQueue.offer(command)
+
+
+
+##### step3: addWorker创建非核心worker线程
 
 
 
