@@ -350,7 +350,7 @@ public class TestController {
 
 
 
-## @Component，@Service等注解是如何被解析的？
+## @Component注解是如何被解析的？
 
 ### @Component解析流程
 
@@ -823,3 +823,9 @@ ClassPathScanningCandidateComponentProvider#findCandidateComponents
 AnnotationAttributesReadingVisitor#visitEnd()内部方法recursivelyCollectMetaAnnotations 递归的读取注解，与注解的元注解（读@Service，再读元注解@Component），并设置到metaAnnotationMap
 
 **4.添加到返回结果的list**
+
+
+
+
+
+## @Transaction

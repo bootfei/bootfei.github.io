@@ -4,16 +4,6 @@ date: 2021-05-21 08:07:39
 tags:
 ---
 
-# 事务流程源码分析
-
-## 获取TransactionInterceptor的BeanDefinition 
-
-找入口 
-
-AbstractBeanDefinitionParser#parse 方法：
-
-
-
 # 事务的应用
 
 ## 数据库的事务
@@ -431,9 +421,175 @@ public abstract class TransactionSynchronizationManager {
 
 比如 A->B 时，A 方法已经开启了事务，并将当前事务资源绑定在**`TransactionSynchronizationManager`，**那么执行 B 之前，会检测当前是否已经存在事务；检测方式就是从**`TransactionSynchronizationManager`**查找并检测状态，如果已经在事务内，那么就根据不同的传播行为配置来执行不同的逻辑，对于 REQUIRES_NEW 等传播行为的处理会麻烦一些，会涉及到 “挂起（suspend）” 和恢复 (resume) 的操作。
 
-### 常见问题
+# 事务失效
 
-#### 同类之间的方法调用导致事务没生效
+## Transactional注解标注的方法为非public
+
+### 案例
+
+TestServiceImpl#insertTestWrongModifier()虽然被@Transactional修饰，但是不是public访问符
+
+```java
+@Component
+public class TestServiceImpl {
+    @Transactional
+    void insertTestWrongModifier() {
+        int re = testMapper.insert(new Test(10,20,30));
+        if (re > 0) {
+            throw new NeedToInterceptException("need intercept");
+        }
+        testMapper.insert(new Test(210,20,30));
+    }
+}
+```
+
+测试用例
+
+```java
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class DemoApplicationTests {
+   @Resource
+   TestServiceImpl testService;
+
+   @Test
+   public void  testInvoke(){
+       //调用@Transactional标注的默认访问符方法
+        testService.insertTestWrongModifier();
+   }
+}
+```
+
+以上的访问方式，导致事务没开启，因此在方法抛出异常时，testMapper.insert(new Test(10,20,30));操作不会进行回滚。如果`TestServiceImpl#insertTestWrongModifier`方法改为public的话将会正常开启事务，testMapper.insert(new Test(10,20,30));将会进行回滚。
+
+### 原理分析
+
+`@Transactional`是基于动态代理实现的，在bean初始化过程中，对含有`@Transactional`标注的bean实例创建代理对象，这里就存在一个spring扫描`@Transactional`注解信息的过程，不幸的是标注`@Transactional`的方法如果修饰符不是public，那么将不会对bean进行代理对象创建或者不会对方法进行代理调用。
+
+`@Transactional`注解实现原理中，介绍了如何判定一个bean是否创建代理对象，大概逻辑是。根据spring创建好一个aop切点`BeanFactoryTransactionAttributeSourceAdvisor`实例，遍历当前bean的class的方法对象，判断方法上面的注解信息是否包含`@Transactional`，如果bean任何一个方法包含`@Transactional`注解信息，那么就是适配这个`BeanFactoryTransactionAttributeSourceAdvisor`切点。则需要创建代理对象，然后代理对象为我们管理事务开闭逻辑。
+
+spring源码中，在拦截bean的创建过程，寻找bean适配的切点时，运用到下面的方法，目的就是寻找方法上面的@Transactional信息，如果有，就表示切点BeanFactoryTransactionAttributeSourceAdvisor能够应用（canApply）到bean中，
+
+```
+AopUtils#canApply(org.springframework.aop.Pointcut, java.lang.Class<?>, boolean)
+public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
+   Assert.notNull(pc, "Pointcut must not be null");
+   if (!pc.getClassFilter().matches(targetClass)) {
+      return false;
+   }
+
+   MethodMatcher methodMatcher = pc.getMethodMatcher();
+   if (methodMatcher == MethodMatcher.TRUE) {
+      // No need to iterate the methods if we're matching any method anyway...
+      return true;
+   }
+
+   IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
+   if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
+      introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
+   }
+
+    //遍历class的方法对象
+   Set<Class<?>> classes = new LinkedHashSet<Class<?>>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
+   classes.add(targetClass);
+   for (Class<?> clazz : classes) {
+      Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
+      for (Method method : methods) {
+         if ((introductionAwareMethodMatcher != null &&
+               introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions)) ||
+             //适配查询方法上的@Transactional注解信息  
+             methodMatcher.matches(method, targetClass)) {
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+```
+
+我们可以在上面的方法打断点，一步一步调试跟踪代码，最终上面的代码还会调用如下方法来判断。在下面的方法上断点，回头看看方法调用堆栈也是不错的方式跟踪。
+
+```
+AbstractFallbackTransactionAttributeSource#getTransactionAttribute
+```
+
+- `AbstractFallbackTransactionAttributeSource#computeTransactionAttribute`
+
+```
+protected TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
+   // Don't allow no-public methods as required.
+   //非public 方法，返回@Transactional信息一律是null
+   if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+      return null;
+   }
+   //后面省略.......
+ }
+```
+
+#### 不创建代理对象
+
+所以，如果所有方法上的修饰符都是非public的时候，那么将不会创建代理对象。以一开始的测试代码为例，如果正常的修饰符的testService是下面图片中的，经过cglib创建的代理对象。
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufWFWRfYhnMbqZeQOpFticE0Axp7cJAbcFdWiackBtAejpe4iaDLb15vrtU7c62ibuvFNPVo80qLOvczQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+如果class中的方法都是非public的那么将不是代理对象。
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufWFWRfYhnMbqZeQOpFticE0oDNLPEFoUyIDeAad2EpRbgActMzE1SfRbRPqXEBJINbLLsVAnv6fYA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+#### 不进行代理调用
+
+考虑一种情况，如下面代码所示。两个方法都被@Transactional注解标注，但是一个有public修饰符一个没有，那么这种情况我们可以预见的话，一定会创建代理对象，因为至少有一个public修饰符的@Transactional注解标注方法。
+
+创建了代理对象，insertTestWrongModifier就会开启事务吗？答案是不会。
+
+```
+/**
+ * @author zhoujy
+ **/
+@Component
+public class TestServiceImpl implements TestService {
+    @Resource
+    TestMapper testMapper;
+
+    @Override
+    @Transactional
+    public void insertTest() {
+        int re = testMapper.insert(new Test(10,20,30));
+        if (re > 0) {
+            throw new NeedToInterceptException("need intercept");
+        }
+        testMapper.insert(new Test(210,20,30));
+    }
+    
+    @Transactional
+    void insertTestWrongModifier() {
+        int re = testMapper.insert(new Test(10,20,30));
+        if (re > 0) {
+            throw new NeedToInterceptException("need intercept");
+        }
+        testMapper.insert(new Test(210,20,30));
+    }
+}
+```
+
+原因是在动态代理对象进行代理逻辑调用时，在cglib创建的代理对象的拦截函数中`CglibAopProxy.DynamicAdvisedInterceptor#intercept`，有一个逻辑如下，目的是获取当前被代理对象的当前需要执行的method适配的aop逻辑。
+
+```
+List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+```
+
+而针对@Transactional注解查找aop逻辑过程，相似地，也是执行一次
+
+```
+AbstractFallbackTransactionAttributeSource#getTransactionAttribute
+```
+
+- `AbstractFallbackTransactionAttributeSource#computeTransactionAttribute`
+
+也就是说还需要找一个方法上的@Transactional注解信息，没有的话就不执行代理@Transactional对应的代理逻辑，直接执行方法。没有了@Transactional注解代理逻辑，就无法开启事务，这也是上一篇已经讲到的。
+
+## 同类之间的方法调用导致事务没生效
 
 有下列代码，入口为 test 方法，在 testTx 方法中配置了 @Transactional 注解，同时在插入数据后抛出 RuntimeException 异常，但是方法执行后插入的数据并没有回滚，竟然插入成功了
 
@@ -484,7 +640,7 @@ public xxxService{
 
    
 
-#### 异步后事务失效
+## 异步后事务失效
 
 比如在一个事务方法中，开启了子线程操作库，那么此时子线程的事务和主线程事务是不同的。
 
@@ -508,13 +664,11 @@ private static final ThreadLocal<Boolean> actualTransactionActive =
 复制代码
 ```
 
-#### 事务提交失败
+## 事务方法内部捕捉了异常，没有抛出新的异常
 
 ```
 org.springframework.transaction.UnexpectedRollbackException: 
 Transaction silently rolled back because it has been marked as rollback-only
-
-复制代码
 ```
 
 这个异常是由于在同一个事务内，多个事务方法之间调用，子方法抛出异常，但又被父方法忽略了导致的。
@@ -523,7 +677,7 @@ Transaction silently rolled back because it has been marked as rollback-only
 
 示例代码：
 
-```
+```java
 A -> B
 # A Service(@Transactional):
 public void testTx(){
@@ -543,3 +697,4 @@ public void testSubTx(){
 }
 ```
 
+Traditional默认是捕捉运行时异常的，如果程序之运行时发生的异常不是运行异常，是不会被回滚的，所以要rollbackfor exection
