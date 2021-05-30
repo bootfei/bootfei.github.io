@@ -7,11 +7,6 @@ tags:
 
 # 核心概念
 
-1. 自动装配
-2. 起步依赖
-3. 内置Tomcat
-4. 可以以jar方式去部署启动
-
 ## Spring重要接口
 
 ### BeanFactory继承体系（基础容器）
@@ -103,19 +98,6 @@ tags:
 
     
 
-### BeanDefinitions继承体系（了解）
-
-实际只用BeanDefinition
-
-### ApplicationContext继承体系（高级容器）
-
-我们自己的实现没用，源码阅读才用到
-
-## 容器
-
-- 基础容器BeanFactory：第一次被调用以后才产生
-- 高级容器ApplicationContext：在程序启动的时候就生成所有单例bean实例
-
 
 
 # Spring组件加载流程
@@ -127,40 +109,69 @@ Bean的一生从总体上来说可以分为两个阶段：
 
 ## 容器初始化阶段
 
+### 高级容器与基础容器的联系
+
 
 
 <img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FA6e85dqzfoEYKvCib6Wf8PjpiaZQiaofXlhH4Mchyfju2EzIoxVUHicwng/640" alt="图片" style="zoom:67%;" />
 
+### 高级容器ApplicationContext
+
+#### 类图
+
+
+
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FYpKCQlcsSPw5FNfAvJjNL5j7s2GPGsa8kD8P7fWXQ6FUic7Y8H5t3dA/640" alt="图片" style="zoom:67%;" />
+
+[从上图中可以看出 ApplicationContext 继承了 BeanFactory，这也说明了 Spring 容器中运行的主体对象是 Bean]()
+
+#### ApplicationContext启动：加载配置
+
+<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
+
+
+
+
+
+- java方式
+
 ```java
-//加载应用上下文的几种方式示例
 //基于xml的配置
 ClassPathXmlApplicationContext context=new ClassPathXmlApplicationContext(“classpath:spring.xml”);
 //基于java的配置
 AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationContext(“com.star.config.KnightConfig.class”); 
 ```
 
-应用上下文准备就绪之后，我们就可以调用BeanFactory的getBean()方法从Spring容器中获取bean。
+- web方式
 
-```java
-(MyUserDaoImpl)context.getBean("MyUserDaoImpl");
+```xml
+<context-param> 
+    <param-name>contextConfigLocation</param-name> 
+    <param-value>classpath:spring.xml</param-value> 
+</context-param> 
+<listener> 
+    <listener-class> org.springframework.web.context.ContextLoaderListener </listener-class> 
+</listener>
 ```
 
+应用上下文准备就绪之后，我们就可以调用BeanFactory的getBean("xxx.class")方法从Spring容器中获取bean。
 
+> 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
 
-### 高级容器ApplicationContext
-
-
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FYpKCQlcsSPw5FNfAvJjNL5j7s2GPGsa8kD8P7fWXQ6FUic7Y8H5t3dA/640" alt="图片" style="zoom:67%;" />
-
-[从上图中可以看出 ApplicationContext 继承了 BeanFactory，这也说明了 Spring 容器中运行的主体对象是 Bean]()，[另外 ApplicationContext 继承了 ResourceLoader 接口，使得 ApplicationContext 可以访问到任何外部资源]()。<!--这也充分说明了，context是高级容器，因为继承了BeanFactory, 同时也能加载各种外部资源-->
+#### AbstractApplicationContext.refresh()
 
 AbstractApplicationContext是具体的实现类，由于implements ConfigurableApplicationContext，所以Override refresh()方法
+
+> 12个步骤step
+>
+> step2和step11是基础容器的内容，其他step都是高级容器的特有功能
 
 ```java
 @Override
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
+			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
+
 			// Prepare this context for refreshing.
 			prepareRefresh();
 
@@ -168,17 +179,23 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
+            // STEP 2： 非常重要！！！
+            // a） 创建基础IoC容器（DefaultListableBeanFactory） 
+            // b） 加载解析XML文件（最终存储到Document对象中）
+            // c） 读取Document对象，并完成BeanDefinition的加载和注册工作
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
+				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
+				beanPostProcess.end();
 
 				// Initialize message source for this context.
 				initMessageSource();
@@ -193,6 +210,8 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+                // STEP 11： 实例化剩余的单例bean（非懒加载方式） 非常重要！！！
+                // 注意事项：Bean的IoC、DI和AOP都是发生在此步骤
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -219,6 +238,7 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 				// Reset common introspection caches in Spring's core, since we
 				// might not ever need metadata for singleton beans anymore...
 				resetCommonCaches();
+				contextRefresh.end();
 			}
 		}
 	}
@@ -226,7 +246,7 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 
 这段代码主要包含这样几个步骤：
 
-- 构建 BeanFactory
+- Step2: 构建 BeanFactory
 - 注册可能感兴趣的事件。
 - 创建 Bean 实例对象。
 - 触发被监听的事件。
@@ -254,19 +274,21 @@ Resource与Context如何建立联系：
 
 从上图可以看出，Context 是把资源的加载、解析和描述工作委托给了 ResourcePatternResolver 类来完成，他相当于一个接头人，他把资源的加载、解析和资源的定义整合在一起便于其他组件使用。Core 组件中还有很多类似的方式。
 
-## 容器启动阶段 - 获取BeanDefinition
+## Bean实例的创建
 
-从磁盘配置文件中，获取和解析BeanDefinition
+### 容器启动阶段 - 获取BeanDefinition
 
-### 配置元信息
+从磁盘配置文件中，获取BeanDefinition
+
+#### 配置元信息
 
 必要的信息可以是Spring过去支持最完善的xml配置文件，或者是其他形式的例如properties的磁盘文件，也可以是现在主流的注解，甚至是直接的代码硬编码。总之，这些创建对象所需要的必要信息称为配置元信息。
 
-### BeanDefinition（元信息的内存形式）
+#### BeanDefinition（元信息的内存形式）
 
 我们只是需要知道配置元信息被加载到内存之后是以BeanDefinition的形存在的即可。
 
-### BeanDefinitionReader（元信息的读取）
+#### BeanDefinitionReader（元信息的读取）
 
 <img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FtAJ3fVegLzicgADJvM2ibYFJKkuoS0ehty9TI437OtBRCE5u0Mo4VOfw/640" alt="图片" style="zoom:66%;" />
 
@@ -283,11 +305,11 @@ Spring中xml配置文件中一个个的Bean定义，但是Spring是要靠BeanDef
 
 总的来说，BeanDefinationReader的作用就是加载配置元信息，并将其转化为内存形式的BeanDefination，存在某一个地方
 
-### BeanDefinationRegistry（元信息内存形式的内存位置）
+#### BeanDefinationRegistry（元信息内存形式的内存位置）
 
 Spring通过BeanDefinationReader将配置元信息加载到内存生成相应的BeanDefination之后，就将其注册到BeanDefinationRegistry中，BeanDefinationRegistry就是一个存放BeanDefination的Map，通过特定的Bean定义的id，映射到相应的BeanDefination。
 
-### BeanFactoryPostProcessor(解析BeanDef中的占位符)
+#### BeanFactoryPostProcessor(解析BeanDef中的占位符)
 
 BeanFactoryPostProcessor是容器启动阶段Spring提供的一个扩展点，主要负责对注册到BeanDefinationRegistry中的一个个的BeanDefination进行一定程度上的修改与替换。
 
@@ -318,22 +340,22 @@ BeanFactoryPostProcessor就会对注册到BeanDefinationRegistry中的BeanDefina
 
 
 
-## Bean实例化阶段
+### Bean实例化阶段
 
 需要指出，容器启动阶段与Bean实例化阶段存在多少时间差，Spring把这个决定权交给了我们程序员
 
 - 如果选择懒汉式的方式，那么直到我们伸手向Spring要依赖对象实例之前，其都是以BeanDefinationRegistry中的一个个的BeanDefination的形式存在，也就是Spring只有在我们需要依赖对象的时候才开启相应对象的实例化阶段。
 - 如果选择饿汉式的方式，容器启动阶段完成之后，将立即启动Bean实例化阶段，通过隐式的调用所有依赖对象的getBean方法来实例化所有配置的Bean并保存起来。 <!--其实饿汉式也是通过懒汉式实现的-->
 
-### 对象创建策略
+#### 对象创建策略
 
 对象的创建采用了[策略模式]()，借助我们前面BeanDefinationRegistry中的BeanDefination,我们可以使用[反射的方式]()创建对象，也可以使用CGlib字节码生成创建对象。这个时候，内存中应该已经有一个我们想要的具体的依赖对象的实例了。
 
-### BeanWrapper——对象的外衣
+#### BeanWrapper——对象的外衣
 
 Spring中的Bean并不是单独存在的，由于Spring IOC容器中要管理多种类型的对象，因此为了统一对不同类型对象的访问，***Spring给所有创建的Bean实例穿上了一层外套***，这个外套就是BeanWrapper。BeanWrapper实际上是对反射相关API的简单封装，使得上层使用反射完成相关的业务逻辑大大的简化，我们要获取某个对象的属性，调用某个对象的方法，现在不需要在写繁杂的反射API了以及处理一堆麻烦的异常，直接通过BeanWrapper就可以完成相关操作。
 
-### 设置对象属性
+#### 设置对象属性
 
 上一步包裹在BeanWrapper中的对象，Spring需要为其设置属性以及依赖对象。
 
@@ -348,7 +370,7 @@ Spring中的Bean并不是单独存在的，由于Spring IOC容器中要管理多
 >
 > 这里简单提一下，Spring是通过三级缓存解决循环依赖，并且只能解决Setter注入的循环依赖
 
-### 检查Aware相关接口
+#### 检查Aware相关接口
 
 如果想要依赖Spring中的相关对象，使用Spring的相关API,那么可以实现相应的Aware接口，Spring IOC容器就会为我们自动注入相关依赖对象实例。
 
@@ -362,7 +384,7 @@ Spring IOC容器大体可以分为两种，BeanFactory提供IOC思想所设想�
 
 > 例如ApplicationContext继承自ResourceLoader和MessageSource，那么当我们实现ResourceLoaderAware和MessageSourceAware相关接口时，就将其自身注入到业务对象中即可。
 
-### BeanPostProcessor前置处理
+#### BeanPostProcessor前置处理
 
 > 只要记住BeanFactoryPostProcessor存在于容器启动阶段，而BeanPostProcessor存在于对象实例化阶段，BeanFactoryPostProcessor关注***对象被创建之前*** 那些配置的修改，而BeanPostProcessor阶段关注***对象已经被创建之后*** 的功能增强，替换等操作
 
@@ -372,27 +394,27 @@ BeanPostProcessor前置处理就是在要生产的Bean实例放到容器之前�
 
 前面讲到的ApplicationContext对于Aware接口的检查与自动注入就是通过BeanPostProcessor实现的，在这一步Spring将检查Bean中是否实现了相关的Aware接口，如果是的话，那么就将其自身注入Bean中即可。Spring中AOP就是在这一步实现的偷梁换柱，产生对于原生对象的代理对象，然后将对原生对象上的方法调用，转而使用代理对象的相同方法调用实现的。
 
-### 自定义初始化逻辑
+#### 自定义初始化逻辑
 
 在所有的准备工作完成之后，如果我们的Bean还有一定的初始化逻辑，那么Spring将允许我们通过两种方式配置我们的初始化逻辑：(1)InitializingBean  (2)配置init-method参数
 
 一般通过配置init-method方法比较灵活。
 
-### BeanPostProcess后置处理
+#### BeanPostProcess后置处理
 
 与前置处理类似，这里是在Bean自定义逻辑也执行完成之后，Spring又留给我们的最后一个扩展点。我们可以在这里在做一些我们想要的扩展。
 
-### 自定义销毁逻辑
+#### 自定义销毁逻辑
 
 这一步对应自定义初始化逻辑，同样有两种方式：(1)实现DisposableBean接口 (2)配置destory-method参数。
 
 这里一个比较典型的应用就是配置dataSource的时候destory-method为数据库连接的close()方法。
 
-### 使用
+#### 使用
 
 经过了以上道道工序，我们像对待平常的对象一样对待Spring为我们产生的Bean实例
 
-### 调用回调销毁接口
+#### 调用回调销毁接口
 
 Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容器关闭的时候)，这时候Spring将以回调的方式调用我们自定义的销毁逻辑，
 
@@ -409,29 +431,6 @@ Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容
 
 
 ![][手写IOC框架]
-
-
-
-## 实现1: 不用IOC
-
-```java
-//业务代码块
-{
-    //与业务无关，完全可以交给Spring创建
-    UserService userService = new UserServiceImpl();
-    UserDao dao = new UserDaoImpl();
-    BasicDataSource dataSource = new User;
-    dataSource.setDriverName("mysql.driver.class");
-    dataSource.setUser("root");
-        
-    userDao.setDataSource(dataSource);
-	userservice.setUserDao(userDao);
-    
-    User user= new User();
-    user.setUsername("王五");
-    List<User> users =  userServie.queryUsers(user);
-}
-```
 
 
 
@@ -1050,132 +1049,6 @@ AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBe
 
 
 
-
-### 高级容器ApplicationContext初始化流程
-
-注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
-
-#### 入口1: java入口
-
-<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
-
--  new ClassPathXmlApplicationContext("spring.xml"): 初始化ClassPathXmlApplicationContext;
-
-  - [AbstractRefreshableConfigApplicationContext]().setConfigLocations(configLocations): 设置xml文件路径
-
-  - [AbstractApplicationContext.]()refresh(): 这个方法内容太多，对于ClassPathXmlApplicationContext加载bean，只需了解它的obtainFreshBeanFactory方法。
-
-    - obtainFreshBeanFactory(): 获取BeanFactory
-    - 
-
-    
-
-    作者：xiaoming_he
-    链接：https://www.jianshu.com/p/d707057497af
-    来源：简书
-    著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-
-#### 入口2: web程序入口
-
-```xml
-<context-param> 
-    <param-name>contextConfigLocation</param-name> 
-    <param-value>classpath:spring.xml</param-value> 
-</context-param> 
-<listener> 
-    <listener-class> org.springframework.web.context.ContextLoaderListener </listener-class> 
-</listener>
-```
-
-#### AbstractApplicationContext的 refresh 方法
-
-> 12个步骤step
->
-> step2和step11是基础容器的内容，其他step都是高级容器的特有功能
-
-```java
-@Override
-	public void refresh() throws BeansException, IllegalStateException {
-		synchronized (this.startupShutdownMonitor) {
-			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
-
-			// Prepare this context for refreshing.
-			prepareRefresh();
-
-			// Tell the subclass to refresh the internal bean factory.
-			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
-
-			// Prepare the bean factory for use in this context.
-            // STEP 2： 非常重要！！！
-            // a） 创建基础IoC容器（DefaultListableBeanFactory） 
-            // b） 加载解析XML文件（最终存储到Document对象中）
-            // c） 读取Document对象，并完成BeanDefinition的加载和注册工作
-			prepareBeanFactory(beanFactory);
-
-			try {
-				// Allows post-processing of the bean factory in context subclasses.
-				postProcessBeanFactory(beanFactory);
-
-				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
-				// Invoke factory processors registered as beans in the context.
-				invokeBeanFactoryPostProcessors(beanFactory);
-
-				// Register bean processors that intercept bean creation.
-				registerBeanPostProcessors(beanFactory);
-				beanPostProcess.end();
-
-				// Initialize message source for this context.
-				initMessageSource();
-
-				// Initialize event multicaster for this context.
-				initApplicationEventMulticaster();
-
-				// Initialize other special beans in specific context subclasses.
-				onRefresh();
-
-				// Check for listener beans and register them.
-				registerListeners();
-
-				// Instantiate all remaining (non-lazy-init) singletons.
-                // STEP 11： 实例化剩余的单例bean（非懒加载方式） 非常重要！！！
-                // 注意事项：Bean的IoC、DI和AOP都是发生在此步骤
-				finishBeanFactoryInitialization(beanFactory);
-
-				// Last step: publish corresponding event.
-				finishRefresh();
-			}
-
-			catch (BeansException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Exception encountered during context initialization - " +
-							"cancelling refresh attempt: " + ex);
-				}
-
-				// Destroy already created singletons to avoid dangling resources.
-				destroyBeans();
-
-				// Reset 'active' flag.
-				cancelRefresh(ex);
-
-				// Propagate exception to caller.
-				throw ex;
-			}
-
-			finally {
-				// Reset common introspection caches in Spring's core, since we
-				// might not ever need metadata for singleton beans anymore...
-				resetCommonCaches();
-				contextRefresh.end();
-			}
-		}
-	}
-```
-
-
-
-### 高级容器ApplicationContext对BeanDefinition注册
-
-高级容器初始化流程中的step2
 
 
 
