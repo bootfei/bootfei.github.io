@@ -4,17 +4,11 @@ date: 2021-04-09 09:15:10
 tags:
 ---
 
-
-
-## 活动中心场景介绍 
-
-------
-
-在电商系统上线初期，往往会进行一些“拉新”活动，例如活动部门提出**新用户注册送积分、送优惠券活动**。
+## 场景介绍 
 
 基于分布式、微服务的设计理念，通常的架构设计（子系统交互）如下图所示：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640)
 
 
 其核心系统介绍如下：

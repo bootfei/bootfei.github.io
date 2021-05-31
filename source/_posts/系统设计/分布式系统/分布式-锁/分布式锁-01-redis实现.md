@@ -16,17 +16,16 @@ java.lang.IllegalMonitorStateException: attempt to unlock lock, not locked by cu
 ## 排查原因
 
 - 先检查项目中是否确保了 **redissonClient 的单例**。
-  - 定位依据：还没想到
+  - 定位依据：我还没想到，因为用spring都是单例
 
 - redissonClient 虽然是单例的静态成员变量，但初始化时未加锁，而是简单使用  （本次报错原因）
 
-  - 定位依据：不需要改代码、加日志甚至debug，只需要搜索日志里是否有两行
+  - 定位依据：不需要改代码甚至debug，只需要搜索日志里是否有两行，打印两次版本信息说明肯定初始化了两次 Redisson。
 
     ```
     13:58:07.972 [main] INFO org.redisson.Version - Redisson 2.8.2
     ```
 
-    打印两次版本信息说明肯定初始化了两次 Redisson。
 
 ```
 private static RedissonClient redisson = null;
