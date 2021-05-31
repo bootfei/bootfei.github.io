@@ -5,56 +5,6 @@ categories: [java,spring]
 tags:
 ---
 
-# 核心概念
-
-## Spring重要接口
-
-### BeanFactory继承体系（基础容器）
-
-![BeanFactory继承关系](https://upload-images.jianshu.io/upload_images/845143-c11e52d3b2159a22.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
-### 四级接口继承体系
-
-1. BeanFactory 作为一个主接口不继承任何接口，暂且称为一级接口。 
-2. AutowireCapableBeanFactory <!--相当于我们的实现2，自动注解--> 、HierarchicalBeanFactory、ListableBeanFactory 3个子接口继承了它，进行功能上的增强。这3个子接口称为二级接口。
-   - ListableBeanFactory 能返回容器中所有的Bean
-   - HierarchicalBeanFactory能返回父类容器的功能
-   - AutowireCapableBeanFactory 负责组装，各种Aware、DI、初始化。<!--就是我们的实现2-->
-3. ConfigurableBeanFactory 可以被称为三级接口，对二级接口 HierarchicalBeanFactory 进行了再次增强，它还继承了另一个外来的接口SingletonBeanRegistry 
-4. ConfigurableListableBeanFactory 是一个更强大的接口，继承了上述的所有接口，无所不包，称为四级接口。
-
-> 总结：
->
-> |-- BeanFactory 是Spring bean容器的根接口.
->
-> 提供获取bean,是否包含bean,是否单例与原型,获取bean类型,bean 别名的api.
->
-> |-- -- AutowireCapableBeanFactory 提供工厂的装配功能。
->
-> |-- -- HierarchicalBeanFactory 提供父容器的访问功能
->
-> |-- -- -- ConfigurableBeanFactory 如名,提供factory的配置功能,眼花缭乱好多api
->
-> |-- -- -- -- ConfigurableListableBeanFactory 集大成者,提供解析,修改bean定义,并初始化单例.
->
-> |-- -- ListableBeanFactory 提供容器内bean实例的枚举功能.这边不会考虑父容器内的实
->
-> 例.
->
-> 看到这边,我们是不是想起了设计模式原则里的接口隔离原则。 
-
-
-
-下面是继承关系的2个抽象类和2个实现类： 
-
-1. AbstractBeanFactory 作为一个抽象类，实现了三级接口 ConfigurableBeanFactory 大部分功能。
-
-2. AbstractAutowireCapableBeanFactory 同样是抽象类，继承自 AbstractBeanFactory ，并额外实现了二级接口 AutowireCapableBeanFactory 。 
-
-3. DefaultListableBeanFactory <!--就是实现3的Bean Factory的实现类--> 继承自 AbstractAutowireCapableBeanFactory ，实现了最强大的四级接口 ConfigurableListableBeanFactory ，并实现了一个外来接口BeanDefinitionRegistry ，它并非抽象类。
-
-4. 最后是最强大的 XmlBeanFactory ，继承自 DefaultListableBeanFactory ，重写了一些功能，使自己更强大。
-
 ### 2个接口封装数据集合的操作
 
 就是实现2中，集合singleObjects和beanDefinitions
@@ -107,7 +57,11 @@ Bean的一生从总体上来说可以分为两个阶段：
 - 容器启动阶段
 - Bean实例化阶段
 
-## 容器初始化阶段
+## 容器实例的创建
+
+以java配置方式启动为例：
+
+![Bean启动过程](https://images.effiu.cn/blog/spring/spring_lifecycle.jpg)
 
 ### 高级容器与基础容器的联系
 
@@ -121,11 +75,11 @@ Bean的一生从总体上来说可以分为两个阶段：
 
 
 
-<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FYpKCQlcsSPw5FNfAvJjNL5j7s2GPGsa8kD8P7fWXQ6FUic7Y8H5t3dA/640" alt="图片" style="zoom:67%;" />
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FYpKCQlcsSPw5FNfAvJjNL5j7s2GPGsa8kD8P7fWXQ6FUic7Y8H5t3dA/640" alt="图片" style="zoom:80%;" />
 
 [从上图中可以看出 ApplicationContext 继承了 BeanFactory，这也说明了 Spring 容器中运行的主体对象是 Bean]()
 
-#### ApplicationContext启动：加载配置
+#### ApplicationContext启动流程
 
 <img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
 
@@ -133,7 +87,7 @@ Bean的一生从总体上来说可以分为两个阶段：
 
 
 
-- java方式
+- java注解方式
 
 ```java
 //基于xml的配置
@@ -156,15 +110,13 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 
 应用上下文准备就绪之后，我们就可以调用BeanFactory的getBean("xxx.class")方法从Spring容器中获取bean。
 
-> 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。
 
-#### AbstractApplicationContext.refresh()
 
-AbstractApplicationContext是具体的实现类，由于implements ConfigurableApplicationContext，所以Override refresh()方法
+#### AbstractApplicationContext#refresh()
 
-> 12个步骤step
+> 注意：不管哪种方式，最终都会调 [AbstractApplicationContext的refresh方法]() ，而这个方法才是我们真正的入口。不论是spring mvc配置，java注解配置，xml配置，最终都是要使用这个方法。
 >
-> step2和step11是基础容器的内容，其他step都是高级容器的特有功能
+> AbstractApplicationContext是具体的实现类，由于implements ConfigurableApplicationContext，所以Override refresh()方法
 
 ```java
 @Override
@@ -244,6 +196,8 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 	}
 ```
 
+12个步骤step：step2和step11是基础容器的内容，其他step都是高级容器的特有功能
+
 这段代码主要包含这样几个步骤：
 
 - Step2: 构建 BeanFactory
@@ -251,26 +205,30 @@ AbstractApplicationContext是具体的实现类，由于implements ConfigurableA
 - 创建 Bean 实例对象。
 - 触发被监听的事件。
 
-refresh 也就是刷新配置，前面介绍了 Context 有可更新的子类，这里正是实现这个功能，当 BeanFactory 已存在是就更新，如果没有就新创建 <!--这一步非常重要，就是finishBeanFactoryInitialization(beanFactory)，高级容器Context与基础容器BeanFactory建立了联系-->
+<!--这一步非常重要，就是finishBeanFactoryInitialization(beanFactory)，高级容器Context与基础容器BeanFactory建立了联系-->
 
 ### 基础容器BeanFactory
 
 基础容器BeanFactory都是由应用上下文ApplicationContext创建的
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2Fgn875ficGpAYiczicEvaHjOyMOOd1IP6sbfzhcyj0lfDJWh9GREeAhmlg/640)
+#### 类图
 
-实现多接口是为了区分在 Spring 内部操作对象传递和转化时，对对象的数据访问所做的限制。 <!--这就是接口隔离原则-->
+![BeanFactory继承关系](https://upload-images.jianshu.io/upload_images/845143-c11e52d3b2159a22.png)
 
--  [ListableBeanFactory 接口表示这些 Bean 是可列表的]()
-- [HierarchicalBeanFactory 表示的是这些 Bean 是有继承关系的]()，也就是每个 Bean 有可能有父 Bean。
-- [AutowireCapableBeanFactory 接口定义 Bean 的自动装配规则]()。这四个接口共同定义了 Bean 的集合、Bean 之间的关系、以及 Bean 行为。
-- [最终的默认实现类是 DefaultListableBeanFactory]()
+> 实现多接口是为了区分在 Spring 内部操作对象传递和转化时，对对象的数据访问所做的限制。 <!--这就是接口隔离原则-->
+>
+> -  [ListableBeanFactory 接口表示这些 Bean 是可列表的]()
+> - [HierarchicalBeanFactory 表示的是这些 Bean 是有继承关系的]()，也就是每个 Bean 有可能有父 Bean。
+> - [AutowireCapableBeanFactory 接口定义 Bean 的自动装配规则]()。
+> - [最终的默认实现类是 DefaultListableBeanFactory]()
+
+#### BeanFactory启动流程
 
 ### 补充：Resource核心组件
 
 Resource与Context如何建立联系：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FCXZ99ns72lgF7LfvpJEqBcuDicnjeZPBd9vv8gPibx6sNWcHicgMbLLIg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FCXZ99ns72lgF7LfvpJEqBcuDicnjeZPBd9vv8gPibx6sNWcHicgMbLLIg/640)
 
 从上图可以看出，Context 是把资源的加载、解析和描述工作委托给了 ResourcePatternResolver 类来完成，他相当于一个接头人，他把资源的加载、解析和资源的定义整合在一起便于其他组件使用。Core 组件中还有很多类似的方式。
 
@@ -1128,7 +1086,7 @@ AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是
 
 AbstractApplicationContext类的 refresh 方法的step 11 ：实例化剩余的单例bean（非懒加载方式）
 
-注意事项：Bean的IoC、DI和AOP都是发生在此步骤  
+注意事项：Bean的IoC、DI和AOP都是发生在此步骤
 
 ```
 finishBeanFactoryInitialization(beanFactory);
