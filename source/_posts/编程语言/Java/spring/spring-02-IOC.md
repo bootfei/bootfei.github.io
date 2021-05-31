@@ -5,51 +5,6 @@ categories: [java,spring]
 tags:
 ---
 
-### 2个接口封装数据集合的操作
-
-就是实现2中，集合singleObjects和beanDefinitions
-
-- BeanDefinitionRegistry 封装了beanDefinitions
-
-  - ```java
-    public interface BeanDefinitionRegistry extends AliasRegistry { 
-        // 给定bean名称，注册一个新的bean定义 
-        void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException; 
-        /** 根据指定Bean名移除对应的Bean定义 */ 
-        void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 根据指定bean名得到对应的Bean定义 */ 
-        BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 查找，指定的Bean名是否包含Bean定义 */ 
-        boolean containsBeanDefinition(String beanName); 
-        String[] getBeanDefinitionNames();//返回本容器内所有注册的Bean定义名称 
-        int getBeanDefinitionCount();//返回本容器内注册的Bean定义数目 
-        boolean isBeanNameInUse(String beanName);//指定Bean名是否被注册过。 
-    }
-    ```
-
-- SingletonBeanRegistry封装了singleObjects
-
-  - ```java
-    public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
-    	// K:BeanName
-    	// V:Bean实例对象
-    	private Map<String, Object> singletonObjects = new HashMap<String, Object>();
-    
-    	@Override
-    	public Object getSingleton(String beanName) {
-    		return this.singletonObjects.get(beanName);
-    	}
-    
-    	@Override
-    	public void addSingleton(String beanName, Object bean) {
-    		this.singletonObjects.put(beanName, bean);
-    	}
-    
-    }
-    ```
-
-    
-
-
-
 # Spring组件加载流程
 
 Bean的一生从总体上来说可以分为两个阶段：
@@ -81,9 +36,37 @@ Bean的一生从总体上来说可以分为两个阶段：
 
 #### ApplicationContext启动流程
 
-<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
+SpringBoot中SpringApplication.run()是如何识别用哪种配置方式 or 哪种ApplicationContext呢？
 
+```java
+public ConfigurableApplicationContext run(String... args){
+	...
+    context = createApplicationContext(); //对ApplicationContext进行选择
+  	refreshContext(context); //这里面其实就是ApplicationContext#refresh
+  ...
+}
+```
 
+就是在这里进行选择！！！
+
+```java
+   protected ConfigurableApplicationContext createApplicationContext() {
+      ...
+                switch(this.webApplicationType) {
+                case SERVLET:
+                    contextClass = Class.forName("org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext");
+                    break;
+                case REACTIVE:
+                    contextClass = Class.forName("org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext");
+                    break;
+                default:
+                    contextClass = Class.forName("org.springframework.context.annotation.AnnotationConfigApplicationContext");
+                }
+            
+			...
+        return (ConfigurableApplicationContext)BeanUtils.instantiateClass(contextClass);
+    }
+```
 
 
 
@@ -97,6 +80,8 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 ```
 
 - web方式
+
+<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
 
 ```xml
 <context-param> 
@@ -222,7 +207,19 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 > - [AutowireCapableBeanFactory 接口定义 Bean 的自动装配规则]()。
 > - [最终的默认实现类是 DefaultListableBeanFactory]()
 
+数据集合操作：
+
+> 由于实现了AliasRegistry，所以BeanFactory可以存储BeanDefinitions
+>
+> 由于实现了SingletonBeanResgistry，所以BeanFactory可以存储SingletonObjects
+
 #### BeanFactory启动流程
+
+
+
+
+
+
 
 ### 补充：Resource核心组件
 
@@ -230,7 +227,50 @@ Resource与Context如何建立联系：
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FCXZ99ns72lgF7LfvpJEqBcuDicnjeZPBd9vv8gPibx6sNWcHicgMbLLIg/640)
 
-从上图可以看出，Context 是把资源的加载、解析和描述工作委托给了 ResourcePatternResolver 类来完成，他相当于一个接头人，他把资源的加载、解析和资源的定义整合在一起便于其他组件使用。Core 组件中还有很多类似的方式。
+从上图可以看出，Context 是把资源的加载、解析和描述工作委托给了 ResourcePatternResolver 类来完成，把资源的加载、解析和资源的定义整合在一起便于其他组件使用。Core 组件中还有很多类似的方式。
+
+
+
+### 补充：封装beanDefinitions和singleObjects数据集合
+
+- BeanDefinitionRegistry 封装了beanDefinitions
+
+  - ```java
+    public interface BeanDefinitionRegistry extends AliasRegistry { 
+        // 给定bean名称，注册一个新的bean定义 
+        void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException; 
+        /** 根据指定Bean名移除对应的Bean定义 */ 
+        void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 根据指定bean名得到对应的Bean定义 */ 
+        BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException; /** 查找，指定的Bean名是否包含Bean定义 */ 
+        boolean containsBeanDefinition(String beanName); 
+        String[] getBeanDefinitionNames();//返回本容器内所有注册的Bean定义名称 
+        int getBeanDefinitionCount();//返回本容器内注册的Bean定义数目 
+        boolean isBeanNameInUse(String beanName);//指定Bean名是否被注册过。 
+    }
+    ```
+
+- SingletonBeanRegistry封装了singleObjects
+
+  - ```java
+    public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
+    	// K:BeanName
+    	// V:Bean实例对象
+    	private Map<String, Object> singletonObjects = new HashMap<String, Object>();
+    
+    	@Override
+    	public Object getSingleton(String beanName) {
+    		return this.singletonObjects.get(beanName);
+    	}
+    
+    	@Override
+    	public void addSingleton(String beanName, Object bean) {
+    		this.singletonObjects.put(beanName, bean);
+    	}
+    
+    }
+    ```
+
+    
 
 ## Bean实例的创建
 
@@ -401,9 +441,7 @@ Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容
 ### 主函数面向过程
 
 ```java
-{
-   
-   		// 从XML中加载配置信息，先完成BeanDefinition的注册
+// 从XML中加载配置信息，先完成BeanDefinition的注册
 		registerBeanDefinitions();
 
      	//一行代码，交给IOC创建
@@ -416,7 +454,6 @@ Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容
 		// 根据用户名称查询用户信息
 		List<User> users = userService.queryUsers(param);
 		System.out.println(users);
-}
 ```
 
 
@@ -936,28 +973,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 # Spring IOC源码解析
 
-## xml配置方式
-
 ### 基础容器BeanFactory对BeanDefinition注册
 
-> 原来Spring提供了一个基础容器的实现：XMLBeanFactory
->
-> 但是后来这个类被遗弃了，使用DefaultListableBeanFactory来代替。
-
-#### 入口1：和实现2的流程一样，可惜被抛弃了
-
-XmlBeanFactory#构造方法中
-
-```java
-// 指定XML路径 String path = "spring/beans.xml"; 
-Resource resource = new ClassPathResource(path); 
-XmlBeanFactory beanFactory = new XmlBeanFactory(resource ); 
-// Bean实例创建流程 
-DataSource dataSource = (DataSource) beanFactory.getBean("dataSource"); 
-System.out.println(dataSource);
-```
-
-#### 入口2：和实现3的流程一样，专门做BeanDefinition解析
+和实现3的流程一样，专门做BeanDefinition解析
 
 ```java
 public void test1() { 
@@ -1003,12 +1021,6 @@ public void test1() {
 AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
 
 > |- AbstractAutowireCapableBeanFactory#getBean()
-
-
-
-
-
-
 
 ### 创建BeanFactory流程源码分析 
 
