@@ -18,12 +18,6 @@ Bean的一生从总体上来说可以分为两个阶段：
 
 ![Bean启动过程](https://images.effiu.cn/blog/spring/spring_lifecycle.jpg)
 
-### 高级容器与基础容器的联系
-
-
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FA6e85dqzfoEYKvCib6Wf8PjpiaZQiaofXlhH4Mchyfju2EzIoxVUHicwng/640" alt="图片" style="zoom:67%;" />
-
 ### 高级容器ApplicationContext
 
 #### 类图
@@ -215,7 +209,85 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 
 #### BeanFactory启动流程
 
+- 以xml配置启动为例
 
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FA6e85dqzfoEYKvCib6Wf8PjpiaZQiaofXlhH4Mchyfju2EzIoxVUHicwng/640" alt="图片" style="zoom:67%;" />
+
+和实现3的流程一样，专门做BeanDefinition解析
+
+```java
+public void test1() { 
+		// 指定XML路径 
+    String path = "spring/beans.xml"; 
+    // 创建DefaultListableBeanFactory工厂，这也就是Spring的基本容器 
+    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
+    // 创建BeanDefinition阅读器 
+    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); //还记得实现3吗？这里BeanFactory是BeanRegistry，暴露给reader对BeanDefinition集合的操作
+    
+    // 进行BeanDefinition注册流程 
+    reader.loadBeanDefinitions(path); 
+    // Bean实例创建流程 
+    DataSource dataSource = (DataSource) beanFactory.getBean("dataSource"); 
+    System.out.println(dataSource);
+}
+```
+
+#### BeanFactory被创建流程
+
+- AbstractApplicationContext#refresh() 方法中的obtainFreshBeanFactory()
+
+
+```java
+public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
+
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+      ....
+}
+```
+
+- AbstractApplicationContext#obtainFreshBeanFactory() 方法：用于创建一个新的 IoC容器 ，这个 IoC容器 就是DefaultListableBeanFactory对象。
+
+  ```java
+  protected ConfigurableListableBeanFactory obtainFreshBeanFactory() { 
+      // 主要是通过该方法完成IoC容器的刷新 
+      refreshBeanFactory(); 
+      ConfigurableListableBeanFactory beanFactory = getBeanFactory(); 
+      if (logger.isDebugEnabled()) { 
+          logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory); 
+      }
+      return beanFactory; 
+  }
+  ```
+
+- AbstractRefreshableApplicationContext#refreshBeanFactory() 方法：[创建BeanFactory, 加载 BeanDefinition 对象注册到IoC容器中]()
+
+  ```java
+  protected final void refreshBeanFactory() throws BeansException { 
+      // 如果之前有IoC容器，则销毁 
+      if (hasBeanFactory()) { 
+          destroyBeans(); closeBeanFactory();
+      }
+      try {
+          // 创建IoC容器，也就是DefaultListableBeanFactory 
+          DefaultListableBeanFactory beanFactory = createBeanFactory();   //其实就是new DefaultListableBeanFactory
+          beanFactory.setSerializationId(getId()); 
+          customizeBeanFactory(beanFactory); 
+          // 加载BeanDefinition对象，并注册到IoC容器中（重点!!!） 
+          loadBeanDefinitions(beanFactory); 
+          synchronized (this.beanFactoryMonitor) { 
+              this.beanFactory = beanFactory; 
+          } 
+      }catch (IOException ex) {
+          throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex); 
+      }
+  }
+  ```
 
 
 
@@ -975,25 +1047,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 ### 基础容器BeanFactory对BeanDefinition注册
 
-和实现3的流程一样，专门做BeanDefinition解析
-
-```java
-public void test1() { 
-		// 指定XML路径 
-    String path = "spring/beans.xml"; 
-    // 创建DefaultListableBeanFactory工厂，这也就是Spring的基本容器 
-    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
-    // 创建BeanDefinition阅读器 
-    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); //还记得实现3吗？这里BeanFactory是BeanRegistry，暴露给reader对BeanDefinition集合的操作
-    
-    // 进行BeanDefinition注册流程 
-    reader.loadBeanDefinitions(path); 
-    // Bean实例创建流程 
-    DataSource dataSource = (DataSource) beanFactory.getBean("dataSource"); 
-    System.out.println(dataSource);
-}
-```
-
 
 
 - 入口：[XmlBeanDefinitionReader]()#<font color="red">loadBeanDefinitions()</font>;
@@ -1022,59 +1075,7 @@ AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBe
 
 > |- AbstractAutowireCapableBeanFactory#getBean()
 
-### 创建BeanFactory流程源码分析 
 
-就是AbstractApplicationContext类的 refresh 方法中的step2
-
-```
-ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
-```
-
-- 进入AbstractApplication的 obtainFreshBeanFactory 方法：
-
-  - 用于创建一个新的 IoC容器 ，这个 IoC容器 就是DefaultListableBeanFactory对象。
-
-  - ```java
-    protected ConfigurableListableBeanFactory obtainFreshBeanFactory() { 
-        // 主要是通过该方法完成IoC容器的刷新 
-        refreshBeanFactory(); 
-        ConfigurableListableBeanFactory beanFactory = getBeanFactory(); 
-        if (logger.isDebugEnabled()) { 
-            logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory); 
-        }
-        return beanFactory; 
-    }
-    ```
-
-- 进入AbstractRefreshableApplicationContext的 refreshBeanFactory 方法：
-
-  - 销毁以前的容器
-
-  - 创建新的 IoC容器
-
-  - [加载 BeanDefinition 对象注册到IoC容器中]()
-
-  - ```java
-    protected final void refreshBeanFactory() throws BeansException { 
-        // 如果之前有IoC容器，则销毁 
-        if (hasBeanFactory()) { 
-            destroyBeans(); closeBeanFactory();
-        }
-        try {
-            // 创建IoC容器，也就是DefaultListableBeanFactory 
-            DefaultListableBeanFactory beanFactory = createBeanFactory();   //其实就是new DefaultListableBeanFactory
-            beanFactory.setSerializationId(getId()); 
-            customizeBeanFactory(beanFactory); 
-            // 加载BeanDefinition对象，并注册到IoC容器中（重点!!!） 
-            loadBeanDefinitions(beanFactory); 
-            synchronized (this.beanFactoryMonitor) { 
-                this.beanFactory = beanFactory; 
-            } 
-        }catch (IOException ex) {
-            throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex); 
-        }
-    }
-    ```
 
 ### 加载BeanDefinition流程分析
 
