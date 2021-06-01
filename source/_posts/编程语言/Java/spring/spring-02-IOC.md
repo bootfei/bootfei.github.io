@@ -9,16 +9,24 @@ tags:
 
 Bean的一生从总体上来说可以分为两个阶段：
 
-- 容器启动阶段
+- 容器启动阶段 <!--容器启动阶段其实也是BeanDifinition的创建阶段-->
 - Bean实例化阶段
 
 ## 容器实例的创建
 
-以java配置方式启动为例：
-
-![Bean启动过程](https://images.effiu.cn/blog/spring/spring_lifecycle.jpg)
-
 ### 高级容器ApplicationContext
+
+各种启动方式
+
+```
+//基于xml的配置
+ClassPathXmlApplicationContext context=new ClassPathXmlApplicationContext(“classpath:spring.xml”);
+//基于java的配置
+AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationContext(“com.star.config.KnightConfig.class”); 
+
+//SpringBoot启动方式
+SpringApplicationContext.run(xxx.class, args);
+```
 
 #### 类图
 
@@ -29,6 +37,12 @@ Bean的一生从总体上来说可以分为两个阶段：
 [从上图中可以看出 ApplicationContext 继承了 BeanFactory，这也说明了 Spring 容器中运行的主体对象是 Bean]()
 
 #### ApplicationContext启动流程
+
+![](https://images.effiu.cn/blog/spring/spring_lifecycle.jpg)
+
+
+
+- SpringBoot启动方式
 
 SpringBoot中SpringApplication.run()是如何识别用哪种配置方式 or 哪种ApplicationContext呢？
 
@@ -64,16 +78,7 @@ public ConfigurableApplicationContext run(String... args){
 
 
 
-- java注解方式
-
-```java
-//基于xml的配置
-ClassPathXmlApplicationContext context=new ClassPathXmlApplicationContext(“classpath:spring.xml”);
-//基于java的配置
-AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationContext(“com.star.config.KnightConfig.class”); 
-```
-
-- web方式
+- xml方式
 
 <img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
 
@@ -186,6 +191,281 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 
 <!--这一步非常重要，就是finishBeanFactoryInitialization(beanFactory)，高级容器Context与基础容器BeanFactory建立了联系-->
 
+#### 子类1：AnnotationConfigApplicationContext
+
+> ApplicationContext上下文，接受一个Component类做为输入参数。例如`@Configuration`注解修饰的类。即支持基于Java的配置类。
+>
+> `AnnotationConfigApplicationContext`间接实现了`ApplicationContext`接口
+
+- 持有AnnotatedBeanDefinitionReader reader和ClassPathBeanDefinitionScanner scanner两个引用
+- 4种构造函数
+
+```java
+/**
+ *  Spring Boot采用该方式实例化Application Context(通过反射调用无参构造方法)。
+ */
+public AnnotationConfigApplicationContext() {
+    // 读取器，用于支持以编程的方式注册Bean类,配置各种PostProcessor
+    this.reader = new AnnotatedBeanDefinitionReader(this);
+    // BeanDefinition扫描器,检测指定path下的可能的Bean，并将其注册到BeanFactory或者ApplicationContext中.可以用来扫描包和类,将其转换为BeanDefinition
+    // 通过AnnotationConfigApplicationContext(Class<?>... componentClasses)方式启动时，其不是真正的scanner,真正的scanner是org.springframework.context.annotation.ComponentScanAnnotationParser.parse()方法创建的scanner
+    this.scanner = new ClassPathBeanDefinitionScanner(this);
+}
+
+public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
+    //父类GenericApplicationContext无参数构造方法默认会创建DefaultListableBeanFactory
+    super(beanFactory);
+    this.reader = new AnnotatedBeanDefinitionReader(this);
+    this.scanner = new ClassPathBeanDefinitionScanner(this);
+}
+
+/**
+ * 创建AnnotationConfigApplicationContext，生成新的bean definitions并从给定的组件类且自动刷新context
+ */
+public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+    this();
+    register(componentClasses); //reader将启动类注册到BeanFactory中。
+    refresh();
+}
+
+// 传递basePackages，例如 basePackages=com.abc
+public AnnotationConfigApplicationContext(String... basePackages) {
+    this();
+    // 扫描指定的包路径，classpath*:com/abc/**/*.class下的所有class类,将符合条件的类生成BeanDefinition,
+    // 遍历并注册到BeanFactory中
+    scan(basePackages);
+    // AbstractApplicationContext.refresh()方法，是Spring启动的核心
+    refresh();
+}
+```
+
+
+
+#### 子类2：AnnotationConfigServletWebServerAC
+
+
+
+#### 子类3：AnnotationConfigReactiveWebServerAC
+
+
+
+#### AnnotatedBeanDefinitionReader
+
+> 是一个适配器，用于支持以编程的方式注册Bean类，其通过编程的方式其支持以编程的方式注册Bean类，会添加一些注解支持。例如
+>
+> - `ConfigurationClassPostProcessor`支持`@Configuration`
+> - `AutowiredAnnotationBeanPostProcessor`支持`@Autowired`、`@Value`
+> - `CommonAnnotationBeanPostProcessor`支持`@PostConstruct`、`@PreDestory`、`@Resource`等
+> - `EventListenerMethodProcessor`支持`@EventListener`
+
+- 在AnnotationConfigApplicationContext的构造函数中被调用，register(...)就是reader.register(...)
+
+```java
+public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+    this();
+    register(componentClasses); //reader将启动类注册到BeanFactory中。
+    refresh();
+}
+```
+
+- AnnotationConfigUtils.registerAnnotationConfigProcessors()方法，在构造方法中被调用；添加各种PostProcessor
+
+```java
+public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment){
+	...
+	AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
+}
+```
+
+
+
+```java
+public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
+    BeanDefinitionRegistry registry, @Nullable Object source) {
+
+    DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
+    ...
+    Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
+
+    // 添加@Configuration注解后置处理器:ConfigurationClassPostProcessor(BeanFactoryPostProcessor)
+    if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+        RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
+        def.setSource(source);
+        // 将ConfigurationClassPostProcessor以CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME做为BeanName
+        // 放入到beanDefinitionMap中，并返回一个holder
+        beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
+    }
+
+    // 添加@Autowired、@Value注解后置处理器:AutowiredAnnotationBeanPostProcessor
+    if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+        ...
+    }
+    
+    ...
+}
+```
+
+- AnnotatedBeanDefinitionReader.doRegisterBean()：
+
+> - 在reader.register(...)方法中被循环调用，注册该`componentClasses`, 启动类其实就是个`componentClasses`,因为被@Component修饰
+> - 将BeanDefinition放入到Registry抽象类的Map<String,BeanDefinition> beanDefinitionMap
+
+```java
+// 将启动类作为一个Bean加入到beanDefinitionMap中去
+private <T> void doRegisterBean(Class<T> beanClass, @Nullable String name,
+                                @Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
+                                @Nullable BeanDefinitionCustomizer[] customizers) {
+    // 根据提供的类创建一个BeanDefinition
+    AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+    // 判断该类是否跳过解析，主要是@Condition相关
+    if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+        return;
+    }
+
+    abd.setInstanceSupplier(supplier);
+    // 作用域scope
+    ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+    abd.setScope(scopeMetadata.getScopeName());
+    // beanName，根据BeanNameGenerator
+    String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+    // 处理类的通用注解,@Primary、@Lazy、@DependsOn、@Role、@Description
+    AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+    // @Qualifier注解相关,如果向容器中注册Bean时，当使用类@Qualifier注解时
+    if (qualifiers != null) {
+       ....
+    }
+  	// 自定义注解相关
+    if (customizers != null) {
+       ....
+    }
+
+    BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+    definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+    // 将beanDefinition放入到this.registry中的Map<String,BeanDefinition> beanDefinitionMap中！！！
+    BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
+}
+```
+
+
+
+#### ClassPathBeanDefinitionScanner
+
+> `ClassPathBeanDefinitionScanner`的作用是读取class后缀文件，然后包装成BeanDefinition，注册时BeanFactory中。
+
+在AnnotationConfigApplicationContext的构造函数中被调用，scanner(...)就是scanner.scan(...)
+
+```java
+public AnnotationConfigApplicationContext(String... basePackages) {
+    this();
+    scan(basePackages);
+    refresh();
+}
+```
+
+- scanner.scan()
+
+
+```java
+// 在指定的packages中执行扫描
+public int scan(String... basePackages) {
+    int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
+	// 调用的是其父类 ClassPathScanningCandidateComponentProvider
+    doScan(basePackages);
+
+    // Register annotation config processors, if necessary.
+    if (this.includeAnnotationConfig) {
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
+    }
+
+    return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
+}
+```
+
+- doScan()方法
+
+```java
+//扫描指定packages中的类，返回符合条件的BeanDefinition集合
+protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
+    Assert.notEmpty(basePackages, "At least one base package must be specified");
+    Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+    for (String basePackage : basePackages) {
+        // 扫描符合条件的候选组件
+        // 例如:AnnotationBeanNameGenerator#postProcessBeanDefinitionRegistry
+        Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+        for (BeanDefinition candidate : candidates) {
+            ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+            candidate.setScope(scopeMetadata.getScopeName());
+            String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+            if (candidate instanceof AbstractBeanDefinition) {
+                postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
+            }
+            // 解析通用注解@Lazy、@Primary、@DependsOn、@Role、@Description
+            if (candidate instanceof AnnotatedBeanDefinition) {
+                AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
+            }
+            if (checkCandidate(beanName, candidate)) {
+                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+                definitionHolder =
+                    AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+                beanDefinitions.add(definitionHolder);
+                // 将BeanDefinition添加到BeanFactory中
+                registerBeanDefinition(definitionHolder, this.registry);
+            }
+        }
+    }
+    return beanDefinitions;
+}
+
+/**
+ * 扫描指定的class path，返回符合条件的BeanDefinition集合
+ */
+public Set<BeanDefinition> findCandidateComponents(String basePackage) {
+    if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
+        return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
+    }
+    else {
+        return scanCandidateComponents(basePackage);
+    }
+}
+
+private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+    Set<BeanDefinition> candidates = new LinkedHashSet<>();
+    try {
+        // classpath*:下的**/*.class
+        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+            resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+        // 使用PathMatchingResourcePatternResolver
+        Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
+        boolean traceEnabled = logger.isTraceEnabled();
+        boolean debugEnabled = logger.isDebugEnabled();
+        for (Resource resource : resources) {
+            if (resource.isReadable()) {
+                try {
+                    MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+                    if (isCandidateComponent(metadataReader)) {
+                        ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+                        sbd.setSource(resource);
+                        // 判断当前BeanDefinition是否是符合候选条件
+                        if (isCandidateComponent(sbd)) {
+                            candidates.add(sbd);
+                        }
+                    }
+                }
+                catch (Throwable ex) {
+                    // exception
+                }
+            }
+        }
+    }
+    catch (IOException ex) {
+        throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
+    }
+    return candidates;
+}
+```
+
+
+
 ### 基础容器BeanFactory
 
 基础容器BeanFactory都是由应用上下文ApplicationContext创建的
@@ -211,26 +491,40 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 
 - 以xml配置启动为例
 
-<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FA6e85dqzfoEYKvCib6Wf8PjpiaZQiaofXlhH4Mchyfju2EzIoxVUHicwng/640" alt="图片" style="zoom:67%;" />
+![img](https://lenjor.github.io/images/posts/myBlog/2019-12-21-Spring-Boot-IOC-initialize-01.png)
 
-和实现3的流程一样，专门做BeanDefinition解析
+重点找refresh在哪里被调用
 
 ```java
-public void test1() { 
-		// 指定XML路径 
-    String path = "spring/beans.xml"; 
-    // 创建DefaultListableBeanFactory工厂，这也就是Spring的基本容器 
-    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
-    // 创建BeanDefinition阅读器 
-    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); //还记得实现3吗？这里BeanFactory是BeanRegistry，暴露给reader对BeanDefinition集合的操作
-    
-    // 进行BeanDefinition注册流程 
-    reader.loadBeanDefinitions(path); 
-    // Bean实例创建流程 
-    DataSource dataSource = (DataSource) beanFactory.getBean("dataSource"); 
-    System.out.println(dataSource);
+public ClassPathXmlApplicationContext( String[] configLocations, boolean refresh, @Nullable ApplicationContext parent) throws BeansException {
+      super(parent);
+      //设置资源加载的路径
+      setConfigLocations(configLocations);
+      if (refresh) {
+      		refresh();
+      }
 }
 ```
+
+- 以java注解配置为例
+
+重点找refresh在哪里被调用
+
+```java
+public ConfigurableApplicationContext run(String... args){
+  ...
+    refreshContext(context);
+  ...
+}
+
+
+private void refreshContext(ConfigurableApplicationContext context){
+    refresh(context);
+    ...
+}
+```
+
+
 
 #### BeanFactory被创建流程
 
@@ -412,6 +706,8 @@ BeanFactoryPostProcessor就会对注册到BeanDefinationRegistry中的BeanDefina
 
 ### Bean实例化阶段
 
+![](https://images.effiu.cn/blog/spring/spring_bean_lifecycle.jpg)
+
 需要指出，容器启动阶段与Bean实例化阶段存在多少时间差，Spring把这个决定权交给了我们程序员
 
 - 如果选择懒汉式的方式，那么直到我们伸手向Spring要依赖对象实例之前，其都是以BeanDefinationRegistry中的一个个的BeanDefination的形式存在，也就是Spring只有在我们需要依赖对象的时候才开启相应对象的实例化阶段。
@@ -443,8 +739,6 @@ Spring中的Bean并不是单独存在的，由于Spring IOC容器中要管理多
 #### 检查Aware相关接口
 
 如果想要依赖Spring中的相关对象，使用Spring的相关API,那么可以实现相应的Aware接口，Spring IOC容器就会为我们自动注入相关依赖对象实例。
-
-Spring IOC容器大体可以分为两种，BeanFactory提供IOC思想所设想所有的功能，同时也融入AOP等相关功能模块，可以说BeanFactory是Spring提供的一个基本的IOC容器。ApplicationContext构建于BeanFactory之上，同时提供了诸如容器内的时间发布、统一的资源加载策略、国际化的支持等功能，是Spring提供的更为高级的IOC容器。
 
 对于BeanFactory来说，这一步的实现是先检查相关的Aware接口，然后去Spring的对象池(也就是容器的Map结构)中去查找相关的实例(例如对于ApplicationContextAware接口，就去找ApplicationContext实例)，也就是说我们必须要在配置文件中或者使用注解的方式，将相关实例注册容器中，BeanFactory才可以为我们自动注入。
 
@@ -493,6 +787,108 @@ Spring的Bean在为我们服务完之后，马上就要消亡了(通常是在容
 ![img](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7a23065fc2124b79993b669044da8e82~tplv-k3u1fbpfcp-watermark.image)
 
 > 需要指出，容器启动阶段与Bean实例化阶段之间的桥梁就是我们可以选择自定义配置的延迟加载策略，如果我们配置了Bean的延迟加载策略，那么只有我们在真实的使用依赖对象的时候，Spring才会开始Bean的实例化阶段。而如果我们没有开启Bean的延迟加载，那么在容器启动阶段之后，就会紧接着进入Bean实例化阶段，通过隐式的调用getBean方法，来实例化相关Bean。
+
+
+
+### Bean实例化阶段源码解析
+
+#### 高级容器refresh()中finishBeanFactoryInitialization(beanFactory);
+
+注意事项：Bean的IoC、DI和AOP都是发生在此步骤
+
+#### beanFactory.preInstantiateSingletons()
+
+实例化剩余的单例bean（非懒加载方式）
+
+#### beanFactory.getBean(beanName)以及doGetBean(beanName)
+
+```java
+protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
+			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
+   ....
+            // 判断类是否是单例，prototype bean Spring是不会实例化的
+			// SpringBoot和Spring MVC中@Controller、@Service、@Component、@Repository默认都是单例
+            if (mbd.isSingleton()) {
+                sharedInstance = getSingleton(beanName, () -> {
+                    try {
+                        // 创建bean的过程,对象的创建以及代理
+                        return createBean(beanName, mbd, args);
+                    } catch (BeansException ex) {
+                        destroySingleton(beanName);
+                        throw ex;
+                    }
+                });
+                bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
+            }
+		....
+	return (T) bean;
+}
+```
+
+
+
+#### beanFactory.createBean(...)以及doCreateBean(...)
+
+```java
+protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
+			throws BeanCreationException {
+		...
+        // 判断是否需要属性注入,若需要则注入则完成注入,第五、六次调用后置处理器
+        populateBean(beanName, mbd, instanceWrapper);
+        // 初始化Spring，进行第七、八次后置处理器的调用
+        exposedObject = initializeBean(beanName, exposedObject, mbd);
+    
+		...
+    return exposedObject;
+}
+```
+
+populateBean(...)是DI部分，我会专门讲
+
+#### beanFactory.initializeBean(...)
+
+执行工厂相关回调方法、init方法等BeanPostProcessor后置处理器，具体如下:
+
+```java
+protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) {
+    if (System.getSecurityManager() != null) {
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+            invokeAwareMethods(beanName, bean);
+            return null;
+        }, getAccessControlContext());
+    } else {
+        // 执行或者回调Aware相关接口:BeanNameAware、BeanClassLoaderAware、BeanFactoryAware，只有这三个
+        invokeAwareMethods(beanName, bean);
+    }
+    Object wrappedBean = bean;
+    if (mbd == null || !mbd.isSynthetic()) {
+        // 第七次调用后置处理器
+		// 1.ApplicationContextAwareProcessor: 执行EnvironmentAware、EmbeddedValueResolverAware、ResourceLoaderAware、ApplicationEventPublisherAware、MessageSourceAware、ApplicationContextAware相关回调
+		// 2.ImportAwareBeanPostProcessor: 实现ImportAware接口的Bean
+		// 3.BeanPostProcessorChecker:没有做任何事情
+		// 4.CommonAnnotationBeanPostProcessor继承自CommonAnnotationBeanPostProcessor, 执行带@PostConstract注解的方法
+		// 5.AutowiredAnnotationBeanPostProcessor:没有做任何事情
+		// 6.ApplicationListenerDetector:将ApplicationListener添加到applicationContext中
+        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+    }
+    try {
+        // 先处理实现InitializingBean,然后处理xml的init-method方法
+        invokeInitMethods(beanName, wrappedBean, mbd);
+    } catch (Throwable ex) {
+        // 异常
+    }
+    if (mbd == null || !mbd.isSynthetic()) {
+        // 第8次调用后置处理器
+		// 1.ApplicationContextAwareProcessor、ImportAwareBeanPostProcessor、: 没有做任何事情
+		// 2.BeanPostProcessorChecker: 一些日志
+		// 3.CommonAnnotationBeanPostProcessor、AutowiredAnnotationBeanPostProcessor:没有做任何事情
+		// 4.ApplicationListenerDetector: 将符合条件的Bean放入到ApplicationContext.applicationListeners中
+		// AOP代理 AnnotationAwareAspectJAutoProxyCreator
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+    }
+    return wrappedBean;
+}
+```
 
 
 
@@ -780,6 +1176,23 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 
 ## 实现3: 面向对象，建立继承体系（结合下文的Spring重要接口仿写）
 
+```java
+public void test1() { 
+    String path = "spring/beans.xml"; 
+   
+    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
+
+    XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory); //还记得实现3吗？这里BeanFactory是BeanRegistry，暴露给reader对BeanDefinition集合的操作
+    
+    // 进行BeanDefinition注册流程 
+    reader.loadBeanDefinitions(path); 
+    // Bean实例创建流程 
+    DataSource dataSource = (DataSource) beanFactory.getBean("dataSource"); 
+}
+```
+
+
+
 1. 搞清楚BeanFactory家族的接口和类的作用
 2. 搞清楚ApplicationContext家族的接口和类的作用
 3. 搞清楚BeanDefinitionRegistry和SingletonBeanRegistry的作用
@@ -1039,36 +1452,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 
-
-
-
-
 # Spring IOC源码解析
 
-### 基础容器BeanFactory对BeanDefinition注册
 
+	
+		
 
-
-- 入口：[XmlBeanDefinitionReader]()#<font color="red">loadBeanDefinitions()</font>;
-  - AbstractBeanDefinitionReader#loadBeanDefinitions：通过ResourcePatternResolver获取指定路径的Resource对象，然后继续去加载并解析
-  - [XmlBeanDefinitionReader]()#loadBeanDefinitions：给Resource对象包装成EncodedResource，之所以封装数据，是因为要给这个数据设置一些其他的属性
-    - loadBeanDefinitions：通过EncodedResource获取InputStream
-    - doLoadBeanDefinitions：根据InputStream创建Document文档对象
-    - registerBeanDefinitions：委托[BeanDefinitionDocumentReader]()去按照Spring的语义去完成Document文档对象的解析工作
-  - [DefaultBeanDefinitionDocumentReader]()#registerBeanDefinitions
-    - doRegisterBeanDefinitions：委托给[BeanDefinitionParserDelegate]()去完成具体的BeanDefinition解析工作
-    - parseBeanDefinitions
-    - parseDefaultElement：解析默认的元素比如bean标签、import标签等不需要加前缀的标签
-    - processBeanDefinition
-  - [BeanDefinitionParserDelegate]()#parseBeanDefinitionElement
-    	
-
-	流程总结：
-		AbstractBeanDefinitionReader
-		XmlBeanDefinitionReader
-			
-		DefaultBeanDefinitionDocumentReader
-		BeanDefinitionParserDelegate：主要是用来解析默认命名空间下的标签，比如bean标签
 ### 基础容器BeanFactory对Bean实例创建
 
 AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
@@ -1095,15 +1484,7 @@ AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是
 >
 > - BeanDefinitionParserDelegate 
 
-### Bean实例化流程分析
 
-AbstractApplicationContext类的 refresh 方法的step 11 ：实例化剩余的单例bean（非懒加载方式）
-
-注意事项：Bean的IoC、DI和AOP都是发生在此步骤
-
-```
-finishBeanFactoryInitialization(beanFactory);
-```
 
 
 

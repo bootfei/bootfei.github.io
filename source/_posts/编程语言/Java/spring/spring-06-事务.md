@@ -421,7 +421,7 @@ public abstract class TransactionSynchronizationManager {
 
 比如 A->B 时，A 方法已经开启了事务，并将当前事务资源绑定在**`TransactionSynchronizationManager`，**那么执行 B 之前，会检测当前是否已经存在事务；检测方式就是从**`TransactionSynchronizationManager`**查找并检测状态，如果已经在事务内，那么就根据不同的传播行为配置来执行不同的逻辑，对于 REQUIRES_NEW 等传播行为的处理会麻烦一些，会涉及到 “挂起（suspend）” 和恢复 (resume) 的操作。
 
-# 事务失效
+# 事务失效的4种场景
 
 ## Transactional注解标注的方法为非public
 
@@ -640,13 +640,13 @@ public xxxService{
 
    
 
-## 异步后事务失效
+## 异步/跨线程后，事务失效
 
 比如在一个事务方法中，开启了子线程操作库，那么此时子线程的事务和主线程事务是不同的。
 
 因为在 Spring 的事务管理器中，事务相关的资源（连接，session，事务状态之类）都是存放在 TransactionSynchronizationManager 中的，通过 ThreadLocal 存放，如果跨线程的话就无法保证一个事务了
 
-```
+```java
 # TransactionSynchronizationManager.java
 private static final ThreadLocal<Map<Object, Object>> resources =
         new NamedThreadLocal<>("Transactional resources");
@@ -660,11 +660,9 @@ private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
         new NamedThreadLocal<>("Current transaction isolation level");
 private static final ThreadLocal<Boolean> actualTransactionActive =
         new NamedThreadLocal<>("Actual transaction active");
-
-复制代码
 ```
 
-## 事务方法内部捕捉了异常，没有抛出新的异常
+## 事务方法内部捕捉了异常，但没有throw Uncheck Exception
 
 ```
 org.springframework.transaction.UnexpectedRollbackException: 
@@ -697,4 +695,58 @@ public void testSubTx(){
 }
 ```
 
-Traditional默认是捕捉运行时异常的，如果程序之运行时发生的异常不是运行异常，是不会被回滚的，所以要rollbackfor exection
+Traditional默认是捕捉Runtime Exception和Error的，如果程序之运行时发生的异常不是运行异常，是不会被回滚的，所以要rollbackfor exception
+
+# Spring对事务异常的处理
+
+java阿里巴巴规范提示：方法【edit】需要在Transactional注解指定rollbackFor或者在方法中显示的rollback。
+
+## jdk异常分类
+
+![Image](https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfeNqRSGMQ1cElKBUq9LLCgvOedcKJ0Fb3JlqHGOicJCsJibYXbg3FcFss3j1pME8PgvZsFSzssuuSlw/640)
+
+- 运行时异常：都是 RuntimeException 类及其子类异常，如 NullPointerException (空指针异常)、IndexOutOfBoundsException(下标越界异常)等，这些异常是非检查异常，
+  - 程序中可以选择捕获处理，也可以不处理。
+  - 运行时异常的特点是 Java 编译器不会检查它，也就是说，当程序中可能出现这类异常，即使没有用 try-catch 语句捕获它，也没有用 throws 子句声明抛出它，也会编译通过。
+  - 如果不对运行时异常进行处理，那么出现运行时异常之后，要么是线程中止，要么是主程序终止。如果不想终止，则必须捕获所有的运行时异常，决不让这个处理线程退出。
+- 非运行时异常：是 RuntimeException 以外的异常，类型上都属于 Exception 类及其子类
+  - 从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过
+
+
+
+- 可查的异常（checked exceptions）:Exception下除了RuntimeException及其子类和错误（Error）外的异常
+- 不可查的异常（unchecked exceptions）:RuntimeException及其子类和错误（Error）
+
+
+
+## @Transactional 正确的写法
+
+- Spring默认对unchecked exceptions (RuntimeException及其子类和Error) 回滚。
+
+- 如果是 checked Exception，分4种情况：
+  - catch了不做任何异常抛出，Spring没有捕获到显然不用回滚；
+  - catch了又抛出RuntimeException，Spring捕获到肯定会回滚；
+  - catch了但又抛出了unchecked Exception，Spring默认不回滚；
+  - 不catch直接抛出unchecked Exception,  Spring默认也是不回滚。
+
+
+
+Spring框架的事务基础架构代码将默认地只在抛出Runtime Exception和unchecked exceptions时才标识事务回滚。从事务方法中抛出的Checked exceptions将不被标识进行事务回滚。
+
+1. 让checked例外也回滚：在整个方法前加上 `@Transactional(rollbackFor=Exception.class)`
+2. 让unchecked例外不回滚：`@Transactional(notRollbackFor=RunTimeException.class)`
+3. 不需要事务管理的(只查询的)方法：`@Transactional(propagation=Propagation.NOT_SUPPORTED)`
+
+注意：如果异常被 `try {} catch {}` 了，事务就不回滚了，如果想让事务回滚必须再往外抛 `try {} catch {throw Exception}` 。
+
+## 注意
+
+1、Spring团队的建议是你在具体的类（或类的方法）上使用 @Transactional 注解，而不要使用在类所要实现的任何接口上。
+
+你当然可以在接口上使用 @Transactional 注解，但是这将只能当你设置了基于接口的代理时它才生效。因为注解是不能继承的，这就意味着如果你正在使用基于类的代理时，那么事务的设置将不能被基于类的代理所识别，而且对象也将不会被事务代理所包装（将被确认为严重的）
+
+2、@Transactional 注解标识的方法，处理过程尽量的简单。
+
+尤其是带锁的事务方法，能不放在事务里面的最好不要放在事务里面。
+
+可以将常规的数据库查询操作放在事务前面进行，而事务内进行增、删、改、加锁查询等操作。

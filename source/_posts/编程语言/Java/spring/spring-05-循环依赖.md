@@ -7,23 +7,15 @@ tags:
 
 
 
-## 执行TransactionInterceptor流程分析 
-
-找入口 
-
-TransactionInterceptor类实现了MethodInterceptor接口，所以入口方法是 invoke 方法：
 
 
 
-
-
-# 循环依赖问题 
 
 ## 什么是循环依赖 
 
 循环依赖其实就是循环引用，也就是[两个或者两个以上的bean互相持有对方作为一个field，最终形成闭环]()。
 
-比如A依赖于B，B依赖于C，C又依赖于A。如下图：
+比如A依赖于B，B依赖于C，C又依赖于A。
 
 
 
@@ -50,7 +42,7 @@ TransactionInterceptor类实现了MethodInterceptor接口，所以入口方法�
 
 
 
-## 构造器的循环依赖
+### 构造器的循环依赖
 
 [这个Spring解决不了，只能调整配置文件，将构造函数注入方式改为属性注入方式。]()
 
@@ -91,20 +83,39 @@ Caused by: org.springframework.beans.factory.BeanCurrentlyInCreationException: E
 
 
 
-## setter方法循环依赖
+### 为什么通过构造方法注入就无法解决？
+
+当JVM接收到一条new Object（）时候会执行下面的逻辑：
+
+- 首先向内存中申请一块对象的内存区域
+- 然后初始化对象成员变量信息并赋默认值（如 int类型为0，引用类型为nul）
+- 最后执行对象的构造方法。构造方法执行完之前，这个对象的内存地址的都无法被获取。
+
+当Spring使用构造方法注入时,
+
+- Spring执行A对象的构造方法，但是构造方法属性依赖了B对象，必须先创建完B对象才能完成构造方法的执行
+- Spring调用B对象的构造方法时，发现又依赖于A对象，所以B对象的构造方法也无法执行完毕，得先创建A
+- Spring调用A对象的构造方法，....重复了第一个步骤
+
+那么此时两个对象都没法申请到一个内存地址，当对象内存都生成不了试想，又如何为其依赖的属性赋值，显然不可能赋值为null。所以这种情况的循环依赖是没办法解决的，因为始终都没办法解决谁先创建的问题。
+
+
+
+### setter方法循环依赖
 
 setter方法循环依赖问题
 
 ```java
-public class ServiceA { 
-    private ServiceB serviceB ; 
-    //setter循环依赖 
-    public void setServiceB(ServiceB serviceB) { this.serviceB = serviceB; } 
+@Service
+public class A {
+    @Autowired
+    private B b;
 }
-public class ServiceB { 
-    private ServiceA serviceA ; 
-    //setter循环依赖 
-    public void setServiceA(ServiceA serviceA) { this.serviceA = serviceA; } 
+ 
+@Service
+public class B {
+    @Autowired
+    private A a;
 }
 ```
 
@@ -128,7 +139,7 @@ public class ServiceB {
 
 
 
-## 如何检测是否有循环依赖
+## Spring是如何检测是否有循环依赖
 
 [可以 Bean在创建的时候给其打个标记，如果递归调用回来发现正在创建中的话--->即可说明正在发生循环依赖。]()
 
@@ -196,8 +207,8 @@ private final Map<String, Object> earlySingletonObjects = new HashMap<String, Ob
 三级缓存的作用：
 
 - 第一级缓存：[存储创建完全成功的单例Bean]() <!--就是走完了3个步骤：new实例化、依赖注入、初始化init-method -->。
-- 第三级缓存：[主要设计用来解决循环依赖问题的]()，它是存储只执行了实例化步骤的bean（还未依赖注入和初始化bean操作），但是该缓存的key是beanname，value是ObjectFactory，而不是你想存储的bean（将只完成实例化的bean的引用交给ObjectFactory持有）。ObjectFactory的作用：保存提前暴露的Bean的引用的同时，针对该Bean进行BeanPostProcessor操作，也就是说，在这有一个步骤下，可能针对提前暴露的Bean产生代理对象。 
-
+- 第三级缓存：[主要设计用来解决循环依赖问题的]()，它是存储只执行了实例化步骤的bean（还未依赖注入和初始化bean操作），但是该缓存的key是beanname，value是ObjectFactory，而不是你想存储的bean（将只完成实例化的bean的引用交给ObjectFactory持有）。
+- ObjectFactory的作用：保存提前暴露的Bean的引用的同时，针对该Bean进行BeanPostProcessor操作，也就是说，在这有一个步骤下，可能针对提前暴露的Bean产生代理对象。 
 - 第二级缓存：[主要设计用来解决循环依赖时，既有代理对象又有目标对象的情况下，如何保存代理对象]()。同时还要有人保存目标对象的引用，然后会在最后的部分，使用代理对象的引用去替换目标对象的引用。
 
 ### Spring循环依赖场景分析
