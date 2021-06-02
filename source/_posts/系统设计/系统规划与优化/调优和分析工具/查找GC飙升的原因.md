@@ -56,7 +56,7 @@ YGC/YGT、FGC/FGCT、GCT 则代表 YoungGc、FullGc 的耗时和次数以及总�
 
 除了 GC 太频繁之外，GC 后各分代的平均大小也需要调整。
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZffvuL0XJJboo4ouy9mNX1iaUdW1Fu9hNnP8UgA5Fy5Me51KgFxx16AQfe4tfEG2icI43eicHCn6kHH0A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)图片
+![Image](https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZffvuL0XJJboo4ouy9mNX1iaUdW1Fu9hNnP8UgA5Fy5Me51KgFxx16AQfe4tfEG2icI43eicHCn6kHH0A/640)
 
 我们知道 GC 的提升机制，每次 GC 后，JVM 存活代数大于 `MaxTenuringThreshold` 的对象提升到老年代。当然，JVM 还有动态年龄计算的规则：按照年龄从小到大对其所占用的大小进行累积，当累积的某个年龄大小超过了 survivor 区的一半时，取这个年龄和 MaxTenuringThreshold 中更小的一个值，作为新的晋升年龄阈值，但看各代总的内存大小，是达不到 survivor 区的一半的。
 

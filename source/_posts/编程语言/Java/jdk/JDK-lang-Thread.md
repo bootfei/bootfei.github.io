@@ -6,6 +6,8 @@ tags:
 
 
 
+## 线程状态
+
 ### 传统线程状态
 
 传统的进（线）程状态一般划分如下：
@@ -255,6 +257,8 @@ TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 
  
 
+## 线程方法
+
 ### sleep、yield、wait、join的区别
 
 首先sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源（因为状态非runnable状态都不消耗cpu资源）
@@ -269,4 +273,330 @@ wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait�
 
  
 
- 
+### 线程中断
+
+ 停止一个线程意味着在任务处理完任务之前停掉正在做的操作，也就是放弃当前的操作。停止一个线程可以用Thread.stop()方法，但最好不要用它。虽然它确实可以停止一个正在运行的线程，但是这个方法是不安全的，而且是已被废弃的方法。在java中有以下3种方法可以终止正在运行的线程：
+
+1. 使用退出标志，使线程正常退出，也就是当run方法完成后线程终止。
+2. 使用stop方法强行终止，但是不推荐这个方法，因为stop和suspend及resume一样都是过期作废的方法。
+3. 使用interrupt方法中断线程。
+
+#### interrupt()无法硬中断线程
+
+interrupt()方法的使用效果并不像for+break语句那样，马上就停止循环。调用interrupt方法是在当前线程中打了一个停止标志，并不是真的停止线程。
+
+```java
+public class MyThread extends Thread {
+    public void run(){
+        super.run();
+        for(int i=0; i<500000; i++){
+            System.out.println("i="+(i+1));
+        }
+    }
+}
+
+public class Run {
+    public static void main(String args[]){
+        Thread thread = new MyThread();
+        thread.start();
+        try {
+            Thread.sleep(2000);
+            thread.interrupt();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+输出结果：
+
+```
+...
+i=499994
+i=499995
+i=499996
+i=499997
+i=499998
+i=499999
+i=500000
+```
+
+#### 静态方法interrupted()判断线程是否中断状态
+
+```java
+public static boolean interrupted{
+	return currentThread().isInterrputed(true);
+}
+```
+
+interrupted(): 测试**[当前]()**线程是否已经中断，线程的中断状态由该方法清除。 换句话说，如果连续两次调用该方法，则第二次调用返回false。
+
+```java
+public class Run {
+    public static void main(String args[]){
+        Thread thread = new MyThread();
+        thread.start();
+        try {
+            Thread.sleep(2000);
+            thread.interrupt();
+
+            System.out.println("stop 1??" + thread.interrupted());
+            System.out.println("stop 2??" + thread.interrupted());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+运行结果：
+
+```
+stop 1??false
+stop 2??false
+```
+
+类Run.java中虽然是在thread对象上调用以下代码：thread.interrupt(), 后面又使用
+
+```
+System.out.println("stop 1??" + thread.interrupted());
+System.out.println("stop 2??" + thread.interrupted());
+```
+
+来判断thread对象所代表的线程是否停止，但从控制台打印的结果来看，线程并未停止，这也证明了interrupted()方法的解释，测试[当前线程]()是否已经中断。这个当前线程是main，它从未中断过，所以打印的结果是两个false.
+
+如何使main线程产生中断效果呢？
+
+```
+public class Run2 {
+    public static void main(String args[]){
+        Thread.currentThread().interrupt();
+        System.out.println("stop 1??" + Thread.interrupted());
+        System.out.println("stop 2??" + Thread.interrupted());
+
+        System.out.println("End");
+    }
+}
+```
+
+运行效果为：
+
+```
+stop 1??true
+stop 2??false
+End
+```
+
+方法interrupted()的确判断出当前线程是否是停止状态。但为什么第2个布尔值是false呢？
+
+#### 类方法isInterrupted()判断线程是否中断状态
+
+```java
+public  boolean isInterrupted{
+	return isInterrupted(false);
+}
+
+private native boolean isInterrupted(boolean ClearInterrupted)
+```
+
+isInterrupted()并不清除中断状态
+
+```java
+public class Run3 {
+    public static void main(String args[]){
+        Thread thread = new MyThread();
+        thread.start();
+        thread.interrupt();
+        System.out.println("stop 1??" + thread.isInterrupted());
+        System.out.println("stop 2??" + thread.isInterrupted());
+    }
+}
+```
+
+运行结果：
+
+```
+stop 1??true
+stop 2??true
+```
+
+
+
+#### 通过判断中断状态，停止线程
+
+在线程中用for语句来判断一下线程是否是停止状态，如果是停止状态，则后面的代码不再运行即可：
+
+```
+public class MyThread extends Thread {
+    public void run(){
+        super.run();
+        for(int i=0; i<500000; i++){
+            if(this.interrupted()) {
+                System.out.println("线程已经终止， for循环不再执行");
+                break;
+            }
+            System.out.println("i="+(i+1));
+        }
+    }
+}
+
+public class Run {
+    public static void main(String args[]){
+        Thread thread = new MyThread();
+        thread.start();
+        try {
+            Thread.sleep(2000);
+            thread.interrupt();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+上面的示例虽然停止了线程，但如果for语句下面还有语句，还是会继续运行的。
+
+##### 使用抛出异常方式停止线程
+
+```
+public class MyThread extends Thread {
+    public void run(){
+        super.run();
+        try {
+            for(int i=0; i<500000; i++){
+                if(this.interrupted()) {
+                    System.out.println("线程已经终止， for循环不再执行");
+                        throw new InterruptedException();
+                }
+                System.out.println("i="+(i+1));
+            }
+
+            System.out.println("这是for循环外面的语句，也会被执行");
+        } catch (InterruptedException e) {
+            System.out.println("进入MyThread.java类中的catch了。。。");
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+
+
+##### 使用return停止线程
+
+将方法interrupt()与return结合使用也能实现停止线程的效果：
+
+```
+public class MyThread extends Thread {
+    public void run(){
+        while (true){
+            if(this.isInterrupted()){
+                System.out.println("线程被停止了！");
+                return;
+            }
+            System.out.println("Time: " + System.currentTimeMillis());
+        }
+    }
+}
+
+public class Run {
+    public static void main(String args[]) throws InterruptedException {
+        Thread thread = new MyThread();
+        thread.start();
+        Thread.sleep(2000);
+        thread.interrupt();
+    }
+}
+```
+
+输出结果：
+
+```
+...
+Time: 1467072288503
+Time: 1467072288503
+Time: 1467072288503
+线程被停止了！
+```
+
+不过还是建议使用“抛异常”的方法来实现线程的停止，因为在catch块中还可以将异常向上抛，使线程停止事件得以传播。
+
+
+
+
+
+#### 通过捕获InterruptedException停止
+
+如果线程在sleep()状态下停止线程，会是什么效果呢？
+
+```java
+public class MyThread extends Thread {
+    public void run(){
+        super.run();
+        try {
+            System.out.println("线程开始。。。");
+            Thread.sleep(200000);
+            System.out.println("线程结束。");
+        } catch (InterruptedException e) {
+            System.out.println("在沉睡中被停止, 进入catch， 调用isInterrupted()方法的结果是：" + this.isInterrupted());
+            e.printStackTrace();
+        }
+
+    }
+}
+```
+
+使用Run.java运行的结果是：
+
+```
+线程开始。。。
+在沉睡中被停止, 进入catch， 调用isInterrupted()方法的结果是：false
+java.lang.InterruptedException: sleep interrupted
+ at java.lang.Thread.sleep(Native Method)
+ at thread.MyThread.run(MyThread.java:12)
+```
+
+从打印的结果来看， 如果在sleep状态下停止某一线程，会进入catch语句，并且清除停止状态值，使之变为false。
+
+前一个实验是先sleep然后再用interrupt()停止，与之相反的操作在学习过程中也要注意：
+
+```
+public class MyThread extends Thread {
+    public void run(){
+        super.run();
+        try {
+            System.out.println("线程开始。。。");
+            for(int i=0; i<10000; i++){
+                System.out.println("i=" + i);
+            }
+            Thread.sleep(200000);
+            System.out.println("线程结束。");
+        } catch (InterruptedException e) {
+             System.out.println("先停止，再遇到sleep，进入catch异常");
+            e.printStackTrace();
+        }
+
+    }
+}
+
+public class Run {
+    public static void main(String args[]){
+        Thread thread = new MyThread();
+        thread.start();
+        thread.interrupt();
+    }
+}
+```
+
+运行结果：
+
+```
+i=9998
+i=9999
+先停止，再遇到sleep，进入catch异常
+java.lang.InterruptedException: sleep interrupted
+ at java.lang.Thread.sleep(Native Method)
+ at thread.MyThread.run(MyThread.java:15)
+```
+
