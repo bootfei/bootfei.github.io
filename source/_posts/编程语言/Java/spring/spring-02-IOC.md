@@ -817,7 +817,7 @@ Bean的创建过程
 
 
 
-#### 高级容器refresh()中finishBeanFactoryInitialization(beanFactory);
+#### 高级容器refresh()中finishBeanFactoryInitialization(beanFactory)
 
 注意事项：Bean的IoC、DI和AOP都是发生在此步骤
 
@@ -1558,42 +1558,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 }
 
 ```
-
-
-
-# Spring IOC源码解析
-
-
-	
-		
-
-### 基础容器BeanFactory对Bean实例创建
-
-AbstractAutowireCapableBeanFactory负责createBean、populateBean、initializeBean
-
-> |- AbstractAutowireCapableBeanFactory#getBean()
-
-
-
-### 加载BeanDefinition流程分析
-
-AbstractRefreshableApplicationContext类的 refreshBeanFactory 方法 <!--就是上方代码中的loadBeanDefinitions(beanFactory)-->
-
-> 流程相关类的说明 
->
-> - AbstractRefreshableApplicationContext：主要用来对BeanFactory提供 refresh 功能。包括BeanFactory的创建和 BeanDefinition 的定义、解析、注册操作。
->
-> - AbstractXmlApplicationContext：主要提供对于 XML资源 的加载功能。包括从Resource资源对象和资源路径中加载XML文件。
->
-> - AbstractBeanDefinitionReader：主要提供对于 BeanDefinition 对象的读取功能。具体读取工作交给子类实现。
->
-> - XmlBeanDefinitionReader：主要通过 DOM4J 对于 XML资源 的读取、解析功能，并提供对于 BeanDefinition 的注册功能。
->
-> - DefaultBeanDefinitionDocumentReader 
->
-> - BeanDefinitionParserDelegate 
-
-
 
 
 

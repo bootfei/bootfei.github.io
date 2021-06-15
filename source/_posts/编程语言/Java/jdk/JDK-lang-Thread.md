@@ -119,8 +119,6 @@ RUNNABLE 状态对应了传统的 ready， running 以及部分的 waiting 状�
 
 ### java线程不同状态之间的转换
 
-![img](http://f1.babyitellyou.com/sp1/img/20201206/f4cfe1620676bfd38dbc9f78131203cb.png)
-
 
 
 ![img](http://f1.babyitellyou.com/sp1/img/20201206/1ed0ebb5d7a15469d852e640d8daa0dd.png)
@@ -203,7 +201,7 @@ java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
 
 验证如下:
 
-```
+```java
  public class AllocateServiceImpl implements AllocateService, InitializingBean{
  
      private ThreadPoolExecutor pool;
@@ -257,23 +255,24 @@ TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 
  
 
-## 线程方法
-
-### sleep、yield、wait、join的区别
+## 线程方法sleep,join和对象方法wait,notify
 
 首先sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源（因为状态非runnable状态都不消耗cpu资源）
 
-yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。
+> yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。
+>
 
 sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放资源。而wait会释放锁资源。
 
-wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，sleep是线程的方法，跟锁没关系，wait，notify，notifyall 都是Object对象的方法，是一起使用的，用于锁机制。
+- wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，
+- sleep是线程的方法，跟锁没关系，
+- wait，notify，notifyall 都是Object对象的方法，是一起使用的，用于锁机制。
 
 有个特殊的Thread.sleep(0)，操作这个动作是让出cpu，让其它线程又机会获取cpu资源执行
 
  
 
-### 线程中断
+## 线程中断
 
  停止一个线程意味着在任务处理完任务之前停掉正在做的操作，也就是放弃当前的操作。停止一个线程可以用Thread.stop()方法，但最好不要用它。虽然它确实可以停止一个正在运行的线程，但是这个方法是不安全的，而且是已被废弃的方法。在java中有以下3种方法可以终止正在运行的线程：
 
@@ -421,7 +420,7 @@ stop 1??true
 stop 2??true
 ```
 
-
+### 停止线程的方法
 
 #### 通过判断中断状态，停止线程
 

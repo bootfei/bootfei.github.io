@@ -267,13 +267,13 @@ private synchronized Socket await() {
 }
 ```
 
-当处理器线程刚刚启动时，available值为false，线程在循环体内wait，直到任意一个线程调用了notify或notifyAll方法。也就是说，调用wait方法会使线程暂定，直到连接器线程调用HttpProcessor实例的notify或notifyAll方法。
+当处理器线程刚刚启动时，available值为false，线程在循环体内wait，直到任意一个线程调用了notify或notifyAll方法。也就是说，调用wait方法会使线程暂定，直到连接器线程调用HttpProcessor实例的notify或notifyAll方法。<!--wait()是对象的方法，和锁一样，所以wait()会释放锁资源，从而其他processor线程执行await()不会block了-->
 
 当一个新socket被设置后，连接器线程调用HttpProcessor的assign方法。此时available变量的值为false，会跳过循环体，该socket对象被设置到HttpProcessor实例的socket变量中。然后连接器变量设置了available为true，调用notifyAll方法，唤醒处理器线程。此时available的值为true，跳出循环体，将socket对象赋值给局部变量，将available设置为false，调用notifyAll方法，并将给socket返回。
 
 #### 问题
 
-- 为什么await方法要使用一个局部变量保存socket对象的引用，而不返回实例的socket变量呢？是因为在当前socket被处理完之前，可能会有新的http请求过来，产生新的socket对象将其覆盖。 <!--虽然现在的processor是从线程池里面获取复用，每个processor线程都有自己的对象（比如socket,availbale），但是考虑这种线程安全的情况：如果。所以使用栈内的局部变量，保证线程独有。否则，对象的局部变量socket（句柄），可能会被重新赋值，指向堆中的新的socket对象-->
+- 为什么await方法要使用一个局部变量保存socket对象的引用，而不返回实例的socket变量呢？是因为在当前socket被处理完之前，可能会有新的http请求过来，产生新的socket对象将其覆盖。 <!--虽然现在的processor是从线程池里面获取复用，每个processor线程都有自己的对象（比如socket,availbale），但是考虑这种线程安全的情况：使用栈内的局部变量，保证线程独有。否则，对象的域socket（句柄），可能会被重新赋值，指向堆中的新的socket对象-->
 
 - 为什么await方法要调用notifyAll方法？考虑这种情况，当available变量的值还是true时，有一个新的socket达到。在这种情况下，连接器线程会在assign方法的循环体中暂停，直到处理器线程调用notifyAll方法。
 

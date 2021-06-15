@@ -505,7 +505,22 @@ private Runnable getTask() {
 
 ##### 总结：
 
-我以前对于Worker非常晕，其实Worker本质上是个工作线程Thread + 任务Runnable。我一开始任务，Worker是个干活的，就应该只是个Thread，没有必要封装任务Runnable。 再者，由于受到之前的固化思维，以为Thread和Runnable必须在同一行代码中，`new Thread(Runnable).start()`，所以Worker作为一个Thread，已经运行过`new Thread(Runnable).start()`，这个Thread和一个Runnbale已经绑定了，怎么还能获取到其他Runnable，并且运行呢？其实，这就是对 `Thread(Runnable).start()`和 `Runnable().run()`没有理解透彻。虽然Worker已经被运行了Thread(Runnable).start()，该worker的Thread已经和自己的Runnbale已经绑定了（这个Runnable其实就是firstTask，就是submit(Runnable)的时候那个Runnable），但是该worker的Runnable.run()方法，包含了getTask()方法从而获取其他Runnable, 然后执行`Runnable().run()`，这样Runnable就运行在当前线程了，当前线程是谁呢？当然是该worker的Thread了。
+|                   |                                                 |
+| ----------------- | ----------------------------------------------- |
+| execute()         | 1. coreSize未达到，addWorker(command)           |
+|                   | 2. 超过coreSize, addWorker(null)                |
+|                   | 3. 超过队列，addWorker(null)                    |
+| addWorker()       | 1. 判断线程池状态                               |
+|                   | 2. new Worker(commad); w.start()                |
+| Worker.class      | 1. 构造方法: new Thread(Worker);                |
+|                   | 2. runWorker(Worker);                           |
+| runWorker(Worker) | 1.Runnable = Worker.firstTask                   |
+|                   | 2.  While(task = getTask() != null); task.run() |
+|                   |                                                 |
+
+
+
+Worker本质上是个工作线程Thread + 任务Runnable。我一开始以为Worker是个干活的，就应该只是个Thread，没有必要封装任务Runnable。 再者，由于受到之前的固化思维，以为Thread和Runnable必须在同一行代码中，`new Thread(Runnable).start()`，所以Worker作为一个Thread，已经运行过`new Thread(Runnable).start()`，这个Thread和一个Runnbale已经绑定了，怎么还能获取到其他Runnable，并且运行呢？其实，这就是对 `Thread(Runnable).start()`和 `Runnable().run()`没有理解透彻。虽然Worker已经被运行了Thread(Runnable).start()，该worker的Thread已经和自己的Runnbale已经绑定了（这个Runnable其实就是firstTask，就是submit(Runnable)的时候那个Runnable），但是该worker的Runnable.run()方法，包含了getTask()方法从而获取其他Runnable, 然后执行`Runnable().run()`，这样Runnable就运行在当前线程了，当前线程是谁呢？当然是该worker的Thread了。
 
 | 线程池pool所在的线程 | worker所在的线程                                             |
 | -------------------- | ------------------------------------------------------------ |

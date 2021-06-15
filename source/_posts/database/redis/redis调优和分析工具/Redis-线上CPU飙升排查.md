@@ -52,10 +52,6 @@ QPS 虽然从 1000 多升到 6000，但是远远低于极限值，连接数量�
 cmdstat_XXX: calls=XXX,usec=XXX,usec_per_call=XXX
 ```
 
-
-
-------
-
 ## 总结
 
 - Redis 抖动可以先看网页监控
