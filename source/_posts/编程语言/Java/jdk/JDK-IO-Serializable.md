@@ -11,7 +11,7 @@ tags:
 
 序列化机制允许将实现序列化的Java对象转换为字节序列，这些字节序列可以保存在磁盘上，或通过网络传输，以达到以后恢复成原来的对象。序列化机制使得对象可以脱离程序的运行而独立存在。
 
-要想有序列化的能力，得实现`Serializable`接口，就像下面的这个例子一样：
+要想有序列化的能力，得实现`Serializable`接口
 
 ```
 public class SerializableTest implements Serializable {
@@ -19,12 +19,16 @@ public class SerializableTest implements Serializable {
 }
 ```
 
-这里面一个关键的点是`serialVersionUID`，JVM会在运行时判断类的`serialVersionUID`来验证版本一致性，如果传来的字节流中的serialVersionUID与本地相应类的serialVersionUID相同则认为是一致的，可以进行反序列化，否则就会出现序列化版本不一致的异常。
+JVM会在运行时判断类的`serialVersionUID`来验证版本一致性，如果传来的字节流中的serialVersionUID与本地相应类的serialVersionUID相同则认为是一致的，可以进行反序列化，否则就会出现序列化版本不一致的异常。
 
 ```java
 java.io.InvalidClassException:com.taobao.query.TestSerializable;
  local class incompatible: stream classdesc serialVersionUID = -7165097063094245447,local class    serialVersionUID = 6678378625230229450
 ```
+
+## Jackson序列化
+
+
 
 ## Dubbo与序列化
 
@@ -45,7 +49,7 @@ java.io.InvalidClassException:com.taobao.query.TestSerializable;
 
 
 
-### 类实现了`Serializable`接口，但是却没有指定`serialVersionUID`
+### 类实现`Serializable`接口但没有指定`serialVersionUID`
 
 如果实现了`Serializable`的类没有指定`serialVersionUID`，编译器编译的时候会根据类名、接口名、成员方法及属性等来生成一个64位的哈希字段，这就决定了这个类在序列化上一定不是向前兼容的
 
@@ -119,7 +123,7 @@ java.io.InvalidClassException: com.idealism.base.Student; local class incompatib
 
 根因是RPC的参数实现了`Serializable`接口，但是没有指定`serialVersionUID`，编译器会根据类名、接口名、成员方法及属性等来生成一个64位的哈希字段，当服务端类升级之后导致了服务端发送给客户端的字节流中的`serialVersionUID`发生了改变，因此当客户端反序列化去检查`serialVersionUID`字段的时候发现发生了变化被判定了异常。
 
-### 父类实现了`Serializable`接口，并且指定了`serialVersionUID`但是子类没有指定`serialVersionUID`
+### 父类实现`Serializable`接口，并且指定了`serialVersionUID`但是子类没有指定`serialVersionUID`
 
 我们对前面的例子中的`Student`类稍微改一下
 
