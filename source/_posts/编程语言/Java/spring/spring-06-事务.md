@@ -423,7 +423,7 @@ public abstract class TransactionSynchronizationManager {
 
 # 事务失效的4种场景
 
-## Transactional注解标注的方法为非public
+## Transactional注解的方法为非public
 
 ### 案例
 
@@ -464,14 +464,15 @@ public class DemoApplicationTests {
 
 ### 原理分析
 
-`@Transactional`是基于动态代理实现的，在bean初始化过程中，对含有`@Transactional`标注的bean实例创建代理对象，这里就存在一个spring扫描`@Transactional`注解信息的过程，不幸的是标注`@Transactional`的方法如果修饰符不是public，那么将不会对bean进行代理对象创建或者不会对方法进行代理调用。
+`@Transactional`是基于动态代理实现的，在bean初始化过程中，对含有`@Transactional`标注的bean实例创建代理对象，标注`@Transactional`的方法如果修饰符不是public，那么将不会对bean进行代理对象创建或者不会对方法进行代理调用。
 
-`@Transactional`注解实现原理中，介绍了如何判定一个bean是否创建代理对象，大概逻辑是。根据spring创建好一个aop切点`BeanFactoryTransactionAttributeSourceAdvisor`实例，遍历当前bean的class的方法对象，判断方法上面的注解信息是否包含`@Transactional`，如果bean任何一个方法包含`@Transactional`注解信息，那么就是适配这个`BeanFactoryTransactionAttributeSourceAdvisor`切点。则需要创建代理对象，然后代理对象为我们管理事务开闭逻辑。
+`@Transactional`注解实现原理中，介绍了如何判定一个bean是否创建代理对象，大概逻辑是：
 
-spring源码中，在拦截bean的创建过程，寻找bean适配的切点时，运用到下面的方法，目的就是寻找方法上面的@Transactional信息，如果有，就表示切点BeanFactoryTransactionAttributeSourceAdvisor能够应用（canApply）到bean中，
+> 根据spring创建的一个aop切点`BeanFactoryTransactionAttributeSourceAdvisor`实例，遍历当前bean的class的方法对象，判断方法上面的注解信息是否包含`@Transactional`，如果当前bean的任何一个方法包含`@Transactional`注解信息，那么就是适配这个`BeanFactoryTransactionAttributeSourceAdvisor`切点。则当前bean需要创建代理对象，然后代理对象为我们管理事务开闭逻辑。
 
-```
-AopUtils#canApply(org.springframework.aop.Pointcut, java.lang.Class<?>, boolean)
+spring源码中，在拦截bean的创建过程，寻找bean适配的切点时，运用到`AopUtils#canApply(org.springframework.aop.Pointcut, java.lang.Class<?>, boolean)`的方法，目的就是寻找方法上面的@Transactional信息，如果有，就表示切点BeanFactoryTransactionAttributeSourceAdvisor能够应用（canApply）到bean中，
+
+```java
 public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
    Assert.notNull(pc, "Pointcut must not be null");
    if (!pc.getClassFilter().matches(targetClass)) {
@@ -508,7 +509,7 @@ public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasInt
 }
 ```
 
-我们可以在上面的方法打断点，一步一步调试跟踪代码，最终上面的代码还会调用如下方法来判断。在下面的方法上断点，回头看看方法调用堆栈也是不错的方式跟踪。
+我们可以在上面的方法打断点，最终上面的代码还会调用如下方法来判断。在下面的方法上断点，回头看看方法调用堆栈也是不错的方式跟踪。
 
 ```
 AbstractFallbackTransactionAttributeSource#getTransactionAttribute
@@ -516,7 +517,7 @@ AbstractFallbackTransactionAttributeSource#getTransactionAttribute
 
 - `AbstractFallbackTransactionAttributeSource#computeTransactionAttribute`
 
-```
+```java
 protected TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
    // Don't allow no-public methods as required.
    //非public 方法，返回@Transactional信息一律是null
@@ -527,26 +528,27 @@ protected TransactionAttribute computeTransactionAttribute(Method method, Class<
  }
 ```
 
-#### 不创建代理对象
 
-所以，如果所有方法上的修饰符都是非public的时候，那么将不会创建代理对象。以一开始的测试代码为例，如果正常的修饰符的testService是下面图片中的，经过cglib创建的代理对象。
+
+- 以一开始的测试代码为例，如果正常的修饰符的testService是经过cglib创建的代理对象
+
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufWFWRfYhnMbqZeQOpFticE0Axp7cJAbcFdWiackBtAejpe4iaDLb15vrtU7c62ibuvFNPVo80qLOvczQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
-如果class中的方法都是非public的那么将不是代理对象。
+- 如果class中的方法都是非public的那么将不是代理对象
+
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufWFWRfYhnMbqZeQOpFticE0oDNLPEFoUyIDeAad2EpRbgActMzE1SfRbRPqXEBJINbLLsVAnv6fYA/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
-#### 不进行代理调用
 
-考虑一种情况，如下面代码所示。两个方法都被@Transactional注解标注，但是一个有public修饰符一个没有，那么这种情况我们可以预见的话，一定会创建代理对象，因为至少有一个public修饰符的@Transactional注解标注方法。
+
+### 举一反三
+
+考虑一种情况，如下面代码所示。两个方法都被@Transactional注解标注，但是一个有public修饰符一个没有，那么这种情况一定会创建代理对象，因为至少有一个public修饰符的@Transactional注解标注方法。
 
 创建了代理对象，insertTestWrongModifier就会开启事务吗？答案是不会。
 
-```
-/**
- * @author zhoujy
- **/
+```java
 @Component
 public class TestServiceImpl implements TestService {
     @Resource
@@ -589,13 +591,14 @@ AbstractFallbackTransactionAttributeSource#getTransactionAttribute
 
 也就是说还需要找一个方法上的@Transactional注解信息，没有的话就不执行代理@Transactional对应的代理逻辑，直接执行方法。没有了@Transactional注解代理逻辑，就无法开启事务，这也是上一篇已经讲到的。
 
-## 同类之间的方法调用导致事务没生效
+## 在类内部调用调用类内部@Transactional标注的方法
 
-有下列代码，入口为 test 方法，在 testTx 方法中配置了 @Transactional 注解，同时在插入数据后抛出 RuntimeException 异常，但是方法执行后插入的数据并没有回滚，竟然插入成功了
+入口为 main 方法，在 testTx 方法中配置了 @Transactional 注解，同时在插入数据后抛出 RuntimeException 异常，但是方法执行后插入的数据并没有回滚，竟然插入成功了
 
 ```java
 public xxxService{
-    public void test(){
+    public void main(){
+       //内部调用事务方法
         testTx();
     }
 
@@ -612,7 +615,7 @@ public xxxService{
 }
 ```
 
-这里不生效的原因是因为入口的方法 / 类没有增加 @Transaction 注解，由于 Spring 的事务管理器也是基于 AOP 实现的，不管是 Cglib(ASM) 还是 Jdk 的动态代理，本质上也都是子类机制；在同类之间的方法调用会直接调用本类代码，不会执行动态代理曾的代码；由于入口方法`test`没有增加代理注解，所以`textTx`方法上增加的事务注解并不会生效
+这里不生效的原因是因为入口的方法 / 类没有增加 @Transaction 注解，由于 Spring 的事务管理器也是基于 AOP 实现的，不管是 Cglib(ASM) 还是 Jdk 的动态代理，本质上也都是子类机制；在同类之间的方法调用会直接调用本类代码，不会执行动态代理曾的代码；由于入口方法`main`没有增加代理注解，所以`textTx`方法上增加的事务注解并不会生效
 
 解决方法：
 
@@ -625,20 +628,30 @@ public xxxService{
    - 方法test内部获取代理对象调用方法
 
      ```java
-     public void test(){
+     public void main(){
      		xxxServiceImpl proxyObj = (xxxServiceImpl) AopContext.currentProxy();
          proxyObj.testTx();
      }
      ```
 
-3. xxxService维护一个自己的xxxService，注意使用延迟加载避免循环依赖
+3. xxxService维护一个自己的xxxService，这样就有代理对象了。<!--注意使用延迟加载避免循环依赖-->
 
    ```
    @Autowire
    private xxxService service;
-   ```
-
    
+   public void main(){
+       //内部调用事务方法
+       service.testTx();
+   }
+   ```
+   
+
+
+
+### 原理分析
+
+既然事务管理是基于动态代理对象的代理逻辑实现的，那么如果在类内部调用类内部的事务方法，这个调用事务方法的过程并不是通过代理对象来调用的，而是直接通过this对象来调用方法，绕过的代理对象，肯定就是没有代理逻辑了。
 
 ## 异步/跨线程后，事务失效
 

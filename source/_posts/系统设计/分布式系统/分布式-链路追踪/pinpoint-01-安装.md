@@ -15,6 +15,8 @@ $ cd hbase-x.x.x/
 $ ./bin/start-hbase.sh
 ```
 
+> 如果启动之后，使用`jps`命令可以看到hbase进程，并且可以打开http://localhost:16010查看Hbase的Web UI
+
 *通过$HBASE_HOME/conf/hbase-env.sh文件设置一些环境变量：*
 
 ```bash

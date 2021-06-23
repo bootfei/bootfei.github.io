@@ -8,13 +8,10 @@ tags: virtual machine
 
 # jdk
 
-## yum安装
-
 ```shell
+yum search java
 yum install -y java-1.8.0-openjdk-devel.x86_64
 ```
-
-## 验证
 
 ```shell
 java -version #
@@ -26,7 +23,7 @@ java -version #
 
 # ifconfig网络工具
 
-## yum安装
+
 
 ```
 yum search ifconfig
@@ -45,8 +42,6 @@ yum search ifconfig
 ```
 yum install net-tools.x86_64
 ```
-
-## 验证
 
 ```shell
 ifconfig
