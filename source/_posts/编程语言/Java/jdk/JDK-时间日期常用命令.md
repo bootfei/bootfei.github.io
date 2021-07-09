@@ -6,7 +6,7 @@ tags:
 
 
 
-# JAVA
+# JDK
 
 ## 获取当前时间
 
@@ -15,6 +15,7 @@ tags:
     public static void main(String[] args){
        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			 Date date = new Date(System.currentTimeMillis());
+      formatter.format(date);
     } 
 
 ```
@@ -30,7 +31,7 @@ public static void addDays(Date d, int days){
 }
 ```
 
-### 时间比较
+## 时间比较
 
 ```java
 			Date d1 = sdformat.parse("2019-04-15");
@@ -49,8 +50,8 @@ public static void addDays(Date d, int days){
 
 ## string与java.util.Date互转
 
-```
-//string->date	
+```java
+//string->date	无时区
 	public static void testStringConvertToDate(){
         String stringDate = "2008-10-05";
         /*yyyy-MM-dd格式一定要与stringDate的格式一致*/
@@ -61,12 +62,14 @@ public static void addDays(Date d, int days){
         }
 	}
 
+
 //date->string    
    public static void testDateConvertToString(){
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
         String stringDate = sdf.format(date);
    }
+
     
 //将给定的日期格式的字符串转化为想要的格式字符串显示，中间通过Date类型转换
     public static void stringToString(){
@@ -88,6 +91,14 @@ public static void addDays(Date d, int days){
 ```
 
 ## timestamp与java.util.Date互转
+
+```java
+//有时区
+String dateTime = "2019-05-28T14:55:58.000+0800";
+SimpleDateFormat format   =     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
+Date date   =   format.parse(dateTime);
+System.out.println(date + "," + date.getTime());
+```
 
 
 

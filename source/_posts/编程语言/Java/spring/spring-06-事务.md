@@ -423,7 +423,7 @@ public abstract class TransactionSynchronizationManager {
 
 # 事务失效的4种场景
 
-## Transactional注解的方法为非public
+## @Transactional注解的方法为非public
 
 ### 案例
 
@@ -591,7 +591,7 @@ AbstractFallbackTransactionAttributeSource#getTransactionAttribute
 
 也就是说还需要找一个方法上的@Transactional注解信息，没有的话就不执行代理@Transactional对应的代理逻辑，直接执行方法。没有了@Transactional注解代理逻辑，就无法开启事务，这也是上一篇已经讲到的。
 
-## 在类内部调用调用类内部@Transactional标注的方法
+## 在类内部调用内部@Transactional标注的方法
 
 入口为 main 方法，在 testTx 方法中配置了 @Transactional 注解，同时在插入数据后抛出 RuntimeException 异常，但是方法执行后插入的数据并没有回滚，竟然插入成功了
 
@@ -675,7 +675,7 @@ private static final ThreadLocal<Boolean> actualTransactionActive =
         new NamedThreadLocal<>("Actual transaction active");
 ```
 
-## 事务方法内部捕捉了异常，但没有throw Uncheck Exception
+## 事务方法内部捕捉了异常，但没有throw Runtime Exception或者Error
 
 ```
 org.springframework.transaction.UnexpectedRollbackException: 
@@ -686,7 +686,7 @@ Transaction silently rolled back because it has been marked as rollback-only
 
 因为子方法抛出了异常，Spring 事务管理器会将当前事务标为失败状态，准备进行回滚，可是当子方法执行完毕出栈后，父方法又忽略了此异常，待方法执行完毕后正常提交时，事务管理器会检查回滚状态，若有回滚标示则抛出此异常。具体可以参考`org.springframework.transaction.support.AbstractPlatformTransactionManager#processCommit`
 
-示例代码：
+### 案例分析
 
 ```java
 A -> B
@@ -696,6 +696,7 @@ public void testTx(){
     try{
         txSubService.testSubTx();
     }catch (Exception e){
+      	//捕获异常，但是没有抛出
         e.printStackTrace();
     }
 }
@@ -708,7 +709,9 @@ public void testSubTx(){
 }
 ```
 
-Traditional默认是捕捉Runtime Exception和Error的，如果程序之运行时发生的异常不是运行异常，是不会被回滚的，所以要rollbackfor exception
+### 原理分析
+
+Traditional默认是捕捉Runtime Exception和Error的，如果程序之运行时发生的异常不是Runtime Exception或者Error，是不会被回滚的，所以要rollbackfor exception
 
 # Spring对事务异常的处理
 
