@@ -10,7 +10,7 @@ tags:
 
 在`Java 7`中`HashMap`实现有1000多行，到了`Java 8`中增长为2000多行，虽然代码行数不多，但代码中有比较多的位运算，以及其他的一些细枝末节，导致这部分代码看起来很复杂，理解起来比较困难。但是如果我们跳出来看，`HashMap`这个数据结构是非常基础的，我们大脑中首先要有这样一幅图：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdibMJVazadOLIHm8dB5Us2Nq4WlibbqZL4NMBNIMsRP3NibcOYT3uU7wNrw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdibMJVazadOLIHm8dB5Us2Nq4WlibbqZL4NMBNIMsRP3NibcOYT3uU7wNrw/640)
 
 
 

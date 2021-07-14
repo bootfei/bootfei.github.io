@@ -4,10 +4,6 @@ date: 2021-05-26 14:44:16
 tags:
 ---
 
-CRM系统需要分布式的任务调度框架，统一解决问题，Java可以使用的任务调度框架有Quartz，Jcrontab，cron4j，我们选择了Quartz。
-
-Quartz是Java领域最著名的开源任务调度工具。Quartz提供了极为广泛的特性如持久化任务，集群和分布式任务等，其特点如下：
-
 ## Quartz集群部署实践
 
 CRM中Quartz与Spring结合使用，Spring通过提供org.springframework.scheduling.quartz下的封装类对Quartz支持。
@@ -89,7 +85,6 @@ org.quartz.jobStore.isClustered属性为true，通知Scheduler实例要它参与
 
 org.quartz.jobStore.clusterCheckinInterval属性定义了Scheduler实例检入到数据库中的频率(单位：毫秒)。Scheduler检查是否其他的实例到了它们应当检入的时候未检入；这能指出一个失败的Scheduler实例，且当前 Scheduler会以此来接管任何执行失败并可恢复的Job。通过检入操作，Scheduler 也会更新自身的状态记录。clusterChedkinInterval越小，Scheduler节点检查失败的Scheduler实例就越频繁。默认值是 15000 (即15 秒)。
 
-其余参数在后文将会详细介绍。
 ```
 
 

@@ -136,7 +136,7 @@ lock函数-自旋获取锁
 
 - **执行`tryLock`函数，返回`true`停止，否则一直循环**
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640)
 
 从上图可以看出，只有`tryLock`成功的线程（**把`lockValue`更新为`0`**），才会执行代码块，其他线程个`tryLock`自旋等待`lockValue`被更新成`1`，`tryLock`成功的线程执行`unLock`（**把`lockValue`更新为`1`**），自旋的线程才会`tryLock`成功。
 
