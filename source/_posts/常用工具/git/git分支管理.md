@@ -1,39 +1,41 @@
 ---
-title: git常见命令
+title: git分支管理
 date: 2020-10-03 09:46:30
 tags: git
 ---
 
-1. 远程分支
+### 分支查看
 
-   a.  查看远程分支 
+#### 远程分支
 
-   ``` bash
-   git branch -r
-   ```
-   
-   b. 拉取远程分支并创建本地分支
-   ``` bash
-   git checkout -b 本地分支名x origin/远程分支名x
-   ```
-   ​    使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
-   
-2. 远程仓库
+a.  查看远程分支 
 
-   a. 查看远程分支
+``` bash
+git branch -r
+```
 
-   ```
-   git remote -v
-   ```
+b. 拉取远程分支并创建本地分支
+``` bash
+git checkout -b 本地分支名x origin/远程分支名x
+```
+​    使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
 
-   b. 从HTTPs切换到SSH，或者反过来
+#### 远程仓库
 
-   ```shell
-   #见官网https://docs.github.com/en/github/using-git/changing-a-remotes-url
-   git remote set-url origin git@github.com:USERNAME/REPOSITORY.git
-   ```
+a. 查看远程分支
 
-   
+```
+git remote -v
+```
+
+b. 从HTTPs切换到SSH，或者反过来
+
+```shell
+#见官网https://docs.github.com/en/github/using-git/changing-a-remotes-url
+git remote set-url origin git@github.com:USERNAME/REPOSITORY.git
+```
+
+
 
 ### 版本回退
 
@@ -74,10 +76,9 @@ git reset --hard HEAD^ #回退到上一版本
 
 #### merge
 
-merge是最常用的合并命令，它可以将某个分支或者某个节点的代码合并至当前分支。具体命令如下：
-
 ```
-git merge 分支名/节点哈希值
+#将某个分支合并至当前分支
+git merge 分支名
 ```
 
 如果需要合并的分支完全领先于当前分支，如图3所示：
@@ -86,19 +87,25 @@ git merge 分支名/节点哈希值
 
 由于分支ft-1完全领先分支ft-2即ft-1完全包含ft-2，所以ft-2执行了“git merge ft-1”后会触发fast forward(快速合并)，此时两个分支指向同一节点，这是最理想的状态。
 
+```
+#禁用fast forward，这样就会生成一个新的commit
+git merge --no-ff
+
+#因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+git merge --no-ff -m "do merge with no-ff" release
+```
+
 但是实际开发中我们往往碰到的是下面这种情况：如图4（左）。
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/A1HKVXsfHNluW6taqv3LemRM5sq6GFejLuN05oovuOzTRatAVOf1bSkNpFqnyIRx3ibiaIUYNHbeBx6r4aicmbfSg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
 
 这种情况就不能直接合了，当ft-2执行了“git merge ft-1”后Git会将节点C3、C4合并随后生成一个新节点C5，最后将ft-2指向C5 如图4（右）。
 
-注意点：如果C3、C4同时修改了同一个文件中的同一句代码，这个时候合并会出错，因为Git不知道该以哪个节点为标准，所以这个时候需要我们自己手动合并代码。
+注意点：如果C3、C4同时修改了同一个文件中的同一句代码，这个时候合并conflict, 所以这个时候需要我们自己手动合并代码。
 
 
 
 #### rebase
-
-rebase也是一种合并指令，命令行如下：
 
 ```
 git rebase 分支名/节点哈希值
@@ -110,7 +117,7 @@ git rebase 分支名/节点哈希值
 
 当左边示意图的ft-1.0执行了git rebase master后会将C4节点复制一份到C3后面，也就是C4'，C4与C4'相对应，但是哈希值却不一样。
 
-rebase相比于merge提交历史更加线性、干净，使并行的开发流程看起来像串行，更符合我们的直觉。既然rebase这么好用是不是可以抛弃merge了？其实也不是了，下面我罗列一些merge和rebase的优缺点：
+rebase相比于merge提交历史更加线性、干净，使并行的开发流程看起来像串行，更符合我们的直觉。既然rebase这么好用是不是可以抛弃merge了？
 
 merge优缺点：
 

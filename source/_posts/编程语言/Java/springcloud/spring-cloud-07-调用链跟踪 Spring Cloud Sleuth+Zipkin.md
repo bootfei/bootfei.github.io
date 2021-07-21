@@ -8,21 +8,11 @@ tags:
 
 Google—Dapper 
 
-淘宝-鹰眼-Eagleeye 
-
-京东-Hydra 
-
-大众点评-cat 
-
-新浪-watchman 
-
-唯品会-microscope 
-
 Twitter-Zipkin
 
 # 跟踪日志的生产者 **Sleuth**
 
-Spring Cloud Sleuth可以实现)针对Spring Cloud应用程序的分布式跟踪，兼容Zipkin、 HTrace 和基于日志的(如 Elk)跟踪。
+Spring Cloud Sleuth可以实现针对Spring Cloud应用程序的分布式跟踪，兼容Zipkin、 HTrace 和基于日志的(如 Elk)跟踪。
 
 Spring Cloud Sleuth 为 Spring Cloud 实现了一个分布式跟踪解决方案，大量借鉴了 Dapper、Zipkin 和 HTrace。对于大多数用户来说，Sleuth 是不可见的，并且你的当前应用与外部系统的所有交互都是自动检测的。你可以简单地在日志中捕获数据，或者将其发送到远程收集器中。
 

@@ -6,10 +6,6 @@ tags:
 
 集群中每一台主机的配置文件都是相同的，对配置文件的更新维护就成为了一个棘手的 问题，Spring Cloud Config 是负责 Spring Cloud 中配置文件维护管理的配置中心。
 
-# 概述
-
-Spring Cloud Config 为分布式系统中的[外部化配置]()提供服务器和客户端支持。使用 Config 服务器，可以在[中心位置]()管理所有环境中应用程序的外部属性。
-
 
 
 # 原理
@@ -28,9 +24,9 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
 > -  在启动类上添加@EnableConfigServer注解
 > - 在配置文件中指定要连接的git远程库地址等信息
 
-## config server
+## config server（可以集群）
 
-- 添加依赖
+- 添加依赖，只保留config-server依赖和spring-cloud依赖，因为这只是个config-server，不是业务的web服务
 
   - ```xml
     <dependency>
@@ -64,8 +60,12 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
 
 > 测试：
 >
-> - gitee中的master目录下有application.yml(有dev,test配置),application-eureka-config.yml
-> - 访问[localhost:9999/application-dev]() or [localhost:9999/master/application-dev]()成功，说明config server不是简简单单从git上拉取文件，而且会进一步的解析和组装配置文件
+> - gitee中的master目录下有application.yml(有dev,test配置， active是test),application-eureka-config.yml
+> - 访问config-server的配置地址：
+>   - [localhost:9999/application-dev]() （访问配置文件中dev配置） 成功
+>   - or [localhost:9999/master/application-dev]()（github的分支为mater）成功，
+>   - 但是[localhost:9999/application.yml]()(直接下载文件uri)失败，
+>   - 说明config server不是简简单单从git上拉取文件，而且会进一步的解析和组装配置文件，所以我们访问url能看到解析后的配置页面
 
 ## config client(消费者,Eureka, 生产者)
 
@@ -74,7 +74,7 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
 > 总步骤：
 >
 > - 导入config的客户端依赖
-> - 定义bootstrap.yml配置文件，在其中指定要连接的config server地址
+> - 创建bootstrap.yml配置文件，在其中指定要连接的config server地址
 > - 删除之前的application.yml文件
 
 - 添加依赖
@@ -89,15 +89,15 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
 
 - 定义 **bootstrap.yml**
 
-  - bootstrap.yml中配置的是应用启动时所必须的配置信息。
+  - bootstrap.yml中配置的是应用启动时所必须的配置信息。即若没有这些配置，则应用无法启动
 
-  - application.yml中配置的是应用运行过程中所必须的配置信息 
+  - application.yml中配置的是应用运行过程中所必须的配置信息 。即若没有这些配置，则应用无法运行
 
   - bootstrap.yml优先于application.yml进行加载。
 
-  - ```yaml
-    # bootstrap.yml：在启用启动时加载，用于配置应用启动过程中所需要的数据，即若没有这些配置，则应用无法启动
-    # application.yml：在启用启动时加载，用于配置应用运行过程中所需要的数据，即若没有这些配置，则应用无法运行
+  - 
+  
+    ```yaml
     spring:
       cloud:
         config:
@@ -108,7 +108,7 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
           label: master
           # 指定要从git远程库读取的配置文件名称，注意无需扩展名
           name: application-eureka-config
-          # 环境选择
+          # 环境选择（因为配置文件中有dev,test配置，默认test，所以这里指明用dev）
           profile: dev
     ```
 
@@ -152,6 +152,10 @@ Spring Cloud Config 就是对微服务的配置文件进行统一管理的。其
 
 # 配置自动更新 
 
+比如,github上的master分支上由eureka, consumer, provider的配置文件，如果改变了config server的配置文件，那么client端能不能自动接收到更新？
+
+## webHooks方式
+
 GitHub 中提供了 Webhooks 功能来确保远程库中的配置文件更新后，客户端中的配置信 息也可以实时更新。具体实现方式可参考如下一篇博文:
 
 https://blog.csdn.net/qq_32423845/article/details/79579341
@@ -163,17 +167,23 @@ webhooks 存在的弊端:
 
 这种方式存在很大的弊端，并不适合生产环境下的使用，而 Spring Cloud Bus 消息总线 系统解决了这些问题。所以，生产环境下一般使用的是 Spring Cloud Bus 完成配置文件的自 动更新。
 
-## **Spring Cloud Bus** 概述
+## **Spring Cloud Bus** 方式
 
 用于将服务和服务实例与分布式消息系统链接在一起的事件总线。在集群中传播状态更改很有用(例如配置更改事件)。
 
 ### 工作原理
 
- 消费总结系统整合了 Java 的事件处理机制和消费中间件。
+ 消费总结系统整合了 Java 的事件处理机制和消费中间件。比如给一个config client（比如provider）发送了一个更新，那么这个更新就以消息的形式，通知给在消息总线上的其他client或者server。消息总线可以用kafka实现。
+
+- config client监听配置信息的变量@Refresh
+
+- config server 更改配置信息中的变量
+- 程序员手动发送请求给任意一个config client
+- 其他bus上的config client也接收到更新通知了，更新监听的变量
 
 ![][Spring cloud config自动更新原理图]
 
-### 实现
+### config client实现
 
 对consumer和provider实现是一样的。
 
@@ -223,7 +233,7 @@ webhooks 存在的弊端:
             include: bus-refresh
     ```
 
-- 在需要自动更新的类上添加@RefreshScope注解
+- 在需要自动更新的类上添加@RefreshScope注解，对flag变量进行监听
 
   - ```java
     @RefreshScope
@@ -240,9 +250,10 @@ webhooks 存在的弊端:
 
 测试：发送post请求进行更新
 
-- 向任意一个config client发送更新都可以
+- 在config server改变flag变量的值
 
-- [localhost:xxx/actuator/bus-refresh]()
+- 向任意一个config client发送更新，发送[localhost:xxx/actuator/bus-refresh]()
+- 这样其他config client也接收到消息，进行更新了
 
 
 

@@ -6,7 +6,7 @@ tags:
 
 # 文件传输
 
-## scp
+
 
 ```shell
 scp [-1246BCpqrv] [-c cipher] [-F ssh_config] [-i identity_file]
@@ -21,6 +21,7 @@ scp [可选参数] file_source file_target
 - -r： 递归复制整个目录。
 - -v：详细方式显示输出。scp和ssh(1)会显示出整个过程的调试信息。这些信息用于调试连接，验证和配置问题。
 - -P port：注意是大写的P, port是指定数据传输用到的端口号
+- -F: 使用指定的配置文件
 
 
 
@@ -35,6 +36,35 @@ scp [可选参数] file_source file_target
 8、*.rar 用 unrar e解压 
 9、*.zip 用 unzip 解压
 ```
+
+
+
+```shell
+1、从本地将文件传输到服务器
+scp【本地文件的路径】【服务器用户名】@【服务器地址】：【服务器上存放文件的路径】
+scp /Users/mac_pc/Desktop/test.png root@192.168.1.1:/root
+
+2、从本地将文件夹传输到服务器
+scp -r【本地文件的路径】【服务器用户名】@【服务器地址】：【服务器上存放文件的路径】
+sup -r /Users/mac_pc/Desktop/test root@192.168.1.1:/root
+
+
+3、将服务器上的文件传输到本地
+scp 【服务器用户名】@【服务器地址】：【服务器上存放文件的路径】【本地文件的路径】
+scp root@192.168.1.1:/data/wwwroot/default/111.png /Users/mac_pc/Desktop
+
+4、将服务器上的文件夹传输到本地
+scp -r 【服务器用户名】@【服务器地址】：【服务器上存放文件的路径】【本地文件的路径】
+scp -r root@192.168.1.1:/data/wwwroot/default/test /Users/mac_pc/Desktop
+
+
+5.使用ssh配置文件
+ scp -F ~/.ssh/ssh_config www@172.17.47.235:/tmp/core_cronjob_jstack ~/Downloads
+```
+
+
+
+# 文件压缩解压命令
 
 ## unzip解压zip文件
 
@@ -88,7 +118,7 @@ mkdir -p /data/qifei/{data,work,plugins,scripts}
 
 
 
-# 文件查看
+# 日志查看
 
 ## 查看压缩日志文件命令zcat 
 
