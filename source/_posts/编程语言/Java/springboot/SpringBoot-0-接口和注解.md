@@ -12,6 +12,14 @@ tags:
 
 ## 注解
 
+### @ComponentScan
+
+配置"扫描指令"，扫描该包及其类下的@Configuration类，<!--具体看源代码中的注解-->
+
+### @EnableXXX
+
+
+
 ### @Conditional
 
 #### 使用

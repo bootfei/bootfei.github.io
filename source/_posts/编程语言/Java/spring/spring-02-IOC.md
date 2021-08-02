@@ -1035,7 +1035,7 @@ populateBean(...)是DI部分，我放到另外一篇专门讲
 
 
 
-### 主函数缓存Bean实例、缓存BeanDefinitions以及getBean()获取Bean实例
+> 主函数缓存Bean实例、缓存BeanDefinitions以及getBean()获取Bean实例
 
 ```java
 //k:BeanName v:Bean实例对象
@@ -1283,7 +1283,7 @@ private void invokeMethod(Object beanInstance, String initMethod) {
 
 
 
-## 实现3: 面向对象，建立继承体系（结合下文的Spring重要接口仿写）
+## 实现3: 面向对象，建立继承体系
 
 ```java
 public void test1() { 
@@ -1301,13 +1301,6 @@ public void test1() {
 ```
 
 
-
-1. 搞清楚BeanFactory家族的接口和类的作用
-2. 搞清楚ApplicationContext家族的接口和类的作用
-3. 搞清楚BeanDefinitionRegistry和SingletonBeanRegistry的作用
-4. 搞清楚注册BeanDefinition流程中各个类的作用
-5. 搞清楚创建Bean实例流程中各个类的作用
-6. 通过以上接口和类的理解，我们写出IoC模块
 
 ### 主函数面向对象
 
