@@ -1,5 +1,5 @@
 ---
-title: slate环境按照
+title: slate环境安装
 date: 2021-07-23 18:14:44
 tags:
 ---

@@ -6,19 +6,19 @@ tags:
 
 # [为什么同样是分布式架构的Kafka需要Leader而Redis不需要](https://mp.weixin.qq.com/s/u6w0jVqHqQlWborfZbw8Uw)
 
-Redis不需要Leader这个观点其实有歧义，是不准确的，这个**问题本质其实是涉及数据分片、数据副本一致性
+Redis不需要Leader这个观点其实有歧义，是不准确的，这个问题本质其实是涉及数据分片、数据副本一致性
 
 ## Redis Cluster 架构
 
 在Redis3.0版本开始，Redis引入了一种去中心化的集群架构，采用预分片的模式，一个集群中所有节点总共对应16384个槽位(2^32)，在对一个key进行写入时，首先对key取hashcode，然后求模来映射到具体的某一个节点，其部署架构如下图所示：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFsTOohXaWk3gSlDiaD0rkuiccOzN5WTRaFU7NzMxCwxavZNP0wKTkRL4cwaib8QSvbuzl7AOswBCf4EQ/640)
+![Image](/Users/qifei/Documents/blog/source/_posts/database/redis/redis3.0-预分片模式.png)
 
 上述每一个节点中存储的数据都不一样，即每一个节点存储整体数据的一部分，**并且为了实现去中心化**每一个节点需要存储集群中所有key所对应存档的节点信息(即Key的路由信息)，这样当客户端将查询key1的请求发送到redisA节点，但该key1实际存储在redisB节点，此时A节点需将该节点路由到实际存储该key的节点，内部实现一个重定向，从而实现访问任意一个节点都能查询到存储的值。
 
 在**上述架构中是不需要存在Leader的，这也是所谓的集群去中心化设计思想的关键**，但问题来了，如果集群中任意一个节点宕机不可用，存储在该节点中的数据就会丢失，为了解决这个问题，通常会引入主从架构，架构图如下所示：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFsTOohXaWk3gSlDiaD0rkuicc23SRo2tzzb1ZcxRbqXm2yelybpYyy57FgflaRnDVWjCia1zibqLKpr4A/640)
+![Image](/Users/qifei/Documents/blog/source/_posts/database/redis/redis预分片的主从模式.png)
 
 具体的做法是为每一个主节点引入一个或多个从节点，用来拷贝主节点的数据，上**图中的每一个虚线框表示一个复制组，也称之为副本，副本之间的数据期望完全一致。**
 
@@ -33,10 +33,17 @@ Redis不需要Leader这个观点其实有歧义，是不准确的，这个**问�
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFsTOohXaWk3gSlDiaD0rkuiccgucT7nj8ENpdBvju1Uw9enQ5SiavazGvuldEoVt3dcj9cFvC5N1icHTA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
 
+客户端只有在master,slave同步写入成功后才会收到响应，乍一看，能提供一致性，其实不然
 
-客户端只有在master,slave同步写入成功后才会收到响应，乍一看，能提供一致性，其实不然，试想一下，例如将key1的数据先写入到Master节点，在写入从节点的过程中出现错误，客户端会收到写入失败，但此时去master中查询key1的数据，却能查询出上一次请求失败的数据，即客户端虽然收到了写入失败，但主节点却写入成功，造成了**数据语义上的不一致性**。
+1. 例如将key1的数据先写入到Master节点
+2. 在写入从节点的过程中出现错误，客户端会收到写入失败
+3. 但此时去master中查询key1的数据，却能查询出上一次请求失败的数据，即客户端虽然收到了写入失败，但主节点却写入成功，造成了**数据语义上的不一致性**。
 
+<aside class="notice">
 即主从同步这种架构，主从节点、客户端的确认机制存在天然的不足，为了解决该问题，Raft等分布式副本数据强一致性协议就闪亮登场了。
+</aside>
+
+
 
 ## 副本之间强一致性协议
 
@@ -44,10 +51,13 @@ Redis不需要Leader这个观点其实有歧义，是不准确的，这个**问�
 
 Raft协议的数据复制说明图如下：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFsTOohXaWk3gSlDiaD0rkuicc7rd65MmyMvoneOpwXsWM7icP02MfQqRYmyt8rYhMxyvibEtWB1EYAXtA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](/Users/qifei/Documents/blog/source/_posts/database/redis/Raft协议的数据复制.png)
 
+图中客户端向Raft协议集群发起一个写请求，集群中的 **Leader 节点**来处理写请求
 
-图中客户端向Raft协议集群发起一个写请求，集群中的 **Leader 节点**来处理写请求，首先数据先存入 Leader 节点，然后需要广播给它的所有从节点，从节点接收到 Leader 节点的数据推送对数据进行存储，然后向主节点汇报存储的结果，**Leader 节点会对该日志的存储结果进行仲裁，如果超过集群数量的一半都成功存储了该数据**，主节点则向客户端返回写入成功，否则向客户端写入写入失败。
+1. 首先数据先存入 Leader 节点，然后需要广播给它的所有从节点
+2. 从节点接收到 Leader 节点的数据推送对数据进行存储，然后向主节点汇报存储的结果
+3. **Leader 节点会对该日志的存储结果进行仲裁，如果超过集群数量的一半都成功存储了该数据**，主节点则向客户端返回写入成功，否则向客户端写入写入失败。
 
 **如果只有主节点写入成功，但其他从节点没有写入成功，就算数据被写入到Leader节点，但这部分数据对客户端来说是不可见的。**
 
@@ -59,7 +69,7 @@ Raft协议主要分为两个部分：**Leader节点选举与日志复制**。
 
 本文只从**设计层面剖析为什么Raft协议能实现数据的一致性**。
 
-**笔者认为Raft协议能确保数据的一致性，主要是引入了全局日志序号与已提交指针。**
+**笔者认为Raft协议能确保数据的一致性，主要是引入了全局日志序号与已提交指针。** <!--还有一点，我认为是因为Follower不再响应客户端，而是Leader响应客户端-->
 
 ###  引入了全局日志序号
 
