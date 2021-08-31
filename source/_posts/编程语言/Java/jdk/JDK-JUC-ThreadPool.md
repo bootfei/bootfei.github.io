@@ -7,8 +7,6 @@ tags:
 
 ### 类图
 
-<img src="https://filescdn.proginn.com/292aa5449b46ffabf67614bc8a591e2a/7f30287bce035a0e74c89523eaff9816.webp" alt="img" style="zoom: 33%;" />
-
 - ThreadPoolExecutor继承AbstractExecutorService, 提供了execute(Runnable)方法的实现
 
 - AbstractExecutorService实现ExecutorService，提供了submit(Runnable)方法和submit(Callable)方法的实现

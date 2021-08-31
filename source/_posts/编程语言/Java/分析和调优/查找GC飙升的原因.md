@@ -6,7 +6,7 @@ tags: [java, jstack]
 
 
 
-## 第一步：找到目标进程pid
+
 
 ps 命令找到对应进程的 pid(10进制) <!--nid是16进制-->
 
@@ -16,10 +16,8 @@ ps -ef | grep "进程名称pid"
 
 
 
-## 第二步：找到目标进程pid的gc情况
-
 ```
-jstat -gc pid 1000
+jstat -gc [pid] 1000
 ```
 
 命令来对 gc 分代变化情况进行观察，1000 表示采样间隔(ms)，
@@ -30,13 +28,13 @@ YGC/YGT、FGC/FGCT、GCT 则代表 YoungGc、FullGc 的耗时和次数以及总�
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/WwPkUCFX4x4q4SxZeO5N1RicXwYTjxYs9MKs9HzKAziao22GmRcTGHArZ0vdmRianvicN58y2sM2Ne3mhZfb3Vg0oA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
 
-## 第三步：对症下药
-
-- 如果YoungGC频率很高，因为大多数对象都是朝生夕死，所以要让他们在YongGC之前就死亡，那么应该增加Eden区的容量，减少YongGC发生的时间间隔
 
 
+> 如果YoungGC频率很高，因为大多数对象都是朝生夕死，所以要让他们在YongGC之前就死亡，那么应该增加Eden区的容量，减少YongGC发生的时间间隔
 
-## 实际应用
+
+
+
 
 ### [YGC 频繁](https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect)
 
@@ -49,8 +47,6 @@ YGC/YGT、FGC/FGCT、GCT 则代表 YoungGc、FullGc 的耗时和次数以及总�
 而后者虽然改一下配置就行，但以我们对 GC 最直观的印象来说，增大 young 区，YGC 的时长也会迅速增大。
 
 其实这点不必太过担心，我们知道 YGC 的耗时是由 `GC 标记 + GC 复制` 组成的，相对于 GC 复制，GC 标记是非常快的。而 young 区内大多数对象的生命周期都非常短，如果将 young 区增大一倍，GC 标记的时长会提升一倍，但到 GC 发生时被标记的对象大部分已经死亡， GC 复制的时长肯定不会提升一倍，所以我们可以放心增大 young 区大小。
-
-由于低内存旧机器都被换掉了，我把堆大小调整到了 12G，young 区保留为 8G。
 
 ### [分代调整](https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect)
 
