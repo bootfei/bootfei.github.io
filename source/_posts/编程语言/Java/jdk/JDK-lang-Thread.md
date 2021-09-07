@@ -217,7 +217,13 @@ java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
  }
 ```
 
-启动后使用jstack pid验证截图如下
+启动后使用
+
+```
+jstack pid
+```
+
+验证截图如下
 
 ![img](http://f1.babyitellyou.com/sp1/img/20201206/8484f37a0899c7617f7fc4e9db310e82.png)
 
@@ -260,7 +266,6 @@ TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 首先sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源（因为状态非runnable状态都不消耗cpu资源）
 
 > yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。
->
 
 sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放资源。而wait会释放锁资源。
 

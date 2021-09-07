@@ -95,3 +95,5 @@ public test{
 ### 用法2：只使用此REST框架
 
 [OpenFeign调用下游第三方接口](http://www.yanzuoguang.com/article/740.html)
+
+[OpenFeign请求动态url](http://www.yanzuoguang.com/article/739)

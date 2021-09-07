@@ -12,10 +12,6 @@ tags:
 
 # Kafka的多副本冗余设计
 
-不管是传统的基于关系型数据库设计的系统，还是分布式的如`zookeeper`、`redis`、`Kafka`、`HDFS`等等，实现高可用的办法通常是采用冗余设计，通过冗余来解决节点宕机不可用问题。
-
-首先简单了解Kafka的几个概念：
-
 - **物理模型**
 
 ![img](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f5d9831010e641d9a296a0277255f9f3~tplv-k3u1fbpfcp-zoom-1.image)
