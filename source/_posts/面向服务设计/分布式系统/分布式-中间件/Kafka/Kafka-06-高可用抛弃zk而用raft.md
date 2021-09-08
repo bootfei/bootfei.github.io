@@ -1,22 +1,24 @@
 ---
-title: Kafka-06-高可用抛弃zk
+title: Kafka-06-高可用抛弃zk而用raft
 date: 2021-09-07 18:39:48
 tags:
 ---
 
 
 
-## Zookeeper的经典使用场景
+## Zookeeper使用场景
 
 使用Zookeeper提供的临时顺序节点与事件监听机制，能非常轻松的实现Leader选举。
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFv5bvEeVf3VA9XJvdAvDTmibpuJPBnuUW0mcdicEkwfJPKr6o7hRicC86YvLFlBceVdZ6AULJS0iaEh4g/640)
 
-正如上图所示，**客户端集群**的多个成员t1和t2，能提供相同的服务，但为了实现冷备效果(即同一时间只有一个成员对外提供服务，我们称之为Leader，当Leader宕机或停止服务后，该组织中的其他成名重新竞争Leader，然后继续对外提供服务)。
+正如上图所示，
 
-正如上图所示，**Zookeeper是注册中心，以集群部署的，能有效避免单点故障，并且集群内部提供了对数据的强一致性**。
+- **客户端集群**的多个成员t1和t2，能提供相同的服务，但为了实现冷备效果(即同一时间只有一个成员对外提供服务，我们称之为Leader，当Leader宕机或停止服务后，该组织中的其他成名重新竞争Leader，然后继续对外提供服务)。
 
-成为leader的步骤
+- **Zookeeper是注册中心，以集群部署的，能有效避免单点故障，并且集群内部提供了对数据的强一致性**。
+
+[成为leader的步骤]()
 
 ```text
 - 当客户端集群的成员需要竞争Leader时，借助Zookeeper的实现套路是向zookeeper中的一个数据节点(示例中为/app/order-service/leader)节点创建两个子节点，并且是**顺序的临时节点**。
@@ -38,28 +40,26 @@ zk的选举机制特点
 
   
 
-## Kafka对Zookeeper的迫切需求
+## Kafka对Zookeeper的使用
 
-Kafka中存在众多的Leader选举，熟悉Kafka的朋友应该知道，一个主题可以拥有多个分区(数据分片)，每一个数据分片可以配置多个副本，如何保证一个分区的数据在多个副本之间的一致性成为一个迫切的需求。
+Kafka中存在众多的Leader选举，一个topic可以拥有多个patition，每一个partition可以配置多个replica，**如何保证一个patition的数据在此patition的多个replica之间的一致性？**。
 
-Kafka的实现套路就是一个分区的多个副本，从中选举出一个Leader用来承担客户端的读写请求，从节点从主节点处拷贝内容，Leader节点根据数据在副本中成功写入情况，进行抉择来确定是否写入成功。
+Kafka的实现就是一个partition有多个冗余(多个副本)，从中选举出一个Leader用来承担客户端的读写请求，从节点从主节点处拷贝内容，Leader节点根据数据在副本中成功写入情况，进行抉择来确定是否写入成功。<!--主备，不是主从-->
 
-Kafka中topic的分区分布示意图：
+**故此处需要进行Leader选举**,而基于Zookeeper能轻松实现。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFv5bvEeVf3VA9XJvdAvDTmibibhkQer6jUc8DicsRqxop6iacOIzoYekhVTD67a84wzouFqjqYdOzbibhA/640)
+[![img](https://colobu.com/2017/11/02/kafka-replication/kafka_replication_diagram.png)](https://colobu.com/2017/11/02/kafka-replication/kafka_replication_diagram.png)
+
+kafka的复制是针对分区的。比如上图中有4个broker, 1个topic, 2个分区，复制因子是3。当producer发送一个消息的时候，它会选择一个分区，比如`topic1-part1`分区，将消息发送给这个分区的leader， broker2、broker3会拉取这个消息，一旦消息被拉取过来，slave会发送ack给master，这时候master才commit这个log。
 
 
-**故此处需要进行Leader选举**,而基于Zookeeper能轻松实现，从此一拍即合，开启了一段“蜜月之旅”。
 
-## 3、Zookeeper的致命弱点
 
-------
+## Zookeeper的致命弱点
 
-Zookeeper是集群部署，只要集群中超过半数节点存活，即可提供服务，例如一个由3个节点的Zookeeper，允许1个Zookeeper节点宕机，集群仍然能提供服务；一个由５个节点的Zookeeper，允许2个节点宕机。
+Zookeeper是集群部署，只要集群中超过半数节点存活，即可提供服务
 
-但Zookeeper的设计是CP模型，即要保证数据的强一致性，必然在可用性方面做出牺牲。
-
-Zookeeper集群中也存在所谓的Leader节点和从节点，Leader节点负责写，Leader与从节点可用接受读请求，但在Zookeeper内部节点在选举时整个Zookeeper无法对外提供服务。当然正常情况下选举会非常快，但在异常情况下就不好说了，例如Zookeeper节点发生full Gc，此时造成的影响将是毁灭性的。
+但Zookeeper的设计是CP模型。Zookeeper集群中也存在所谓的Leader节点和从节点，Leader节点负责写，Leader与从节点可用接受读请求，但在Zookeeper内部节点在选举时整个Zookeeper无法对外提供服务。当然正常情况下选举会非常快，但在异常情况下就不好说了，例如Zookeeper节点发生full Gc，此时造成的影响将是毁灭性的。
 
 Zookeeper节点如果频繁发生Full Gc，此时与客户端的会话将超时，由于此时无法响应客户端的心跳请求(Stop World)，从而与会话相关联的临时节点将被删除，注意，此时是所有的临时节点会被删除，Zookeeper依赖的事件通知机制将失效，整个集群的选举服务将失效。
 
@@ -73,4 +73,4 @@ Raft协议的两个重要组成部分：Leader选举、日志复制，而日志�
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFv5bvEeVf3VA9XJvdAvDTmibaH526cQCXlKkCHf9zf6wVOBIjic6vFjYYVZ7lEpHVPxv8kic2tbbRicMw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
 
-关于Raft协议，本文并不打算深入进行探讨，但为选主提供了另外一种可行方案，而且还无需依赖第三方组件，何乐而不为呢？故最终Kafka在2.8版本中正式废弃了Zookeeper，拥抱Raft。
+选主提供了另外一种可行方案，而且还无需依赖第三方组件，故最终Kafka在2.8版本中正式废弃了Zookeeper，拥抱Raft。

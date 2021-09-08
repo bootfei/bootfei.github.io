@@ -1,6 +1,11 @@
+---
 title: kafka-01-原理
-date: 2021-02-13 17:05:46
+date: 2021-02-13 17:06:11
 tags:
+
+---
+
+
 
 # **Kafka** 概述
 
@@ -15,18 +20,14 @@ Apache Kafka 是一个快速、可扩展的、高吞吐的、可容错的分布�
 用户在网站的不同活动消息发布到不同的主题中心，然后可以对这些消息进行实时监测实时处理。当然，也可加载到 Hadoop 或离线处理数据仓库，对用户进行画像。像淘宝、京东这些大型的电商平台，用户的所有活动都是要进行追踪的。
 
 - 日志聚合
-  ![img](https://img-blog.csdnimg.cn/20201025100208271.png)
-
+  
 - 限流削峰
-  ![img](https://img-blog.csdnimg.cn/20201025100319668.png)
 
 ## **kafka** 高吞吐率实现
 
-Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加存储能力，Kafka 将所有 的消息都写入到了低速大容的硬盘。按理说，这将导致性能损失，但实际上，kafka 仍可保 持超高的吞吐率，性能并未受到影响。其主要采用了如下的方式实现了高吞吐率。
+Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加存储能力，Kafka 将所有的消息都写入到了低速大容的硬盘。主要采用了如下的方式实现了高吞吐率。
 
-- 顺序读写:Kafka将消息写入到了分区partition中，而分区中消息是顺序读写的。顺序
-
-  读写要远快于随机读写。
+- 顺序读写:Kafka将消息写入到了分区partition中，而分区中消息是顺序读写的。顺序读写要远快于随机读写。
 
 - 零拷贝:生产者、消费者对于kafka中消息的操作是采用零拷贝实现的，即不经过操作系统的ALU，不经过用户空间，消息直接写入内核。<!--见Ngnix中对零拷贝的讲解-->
 
@@ -36,7 +37,7 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 
 
-# **Kafka** 工作原理与工作过程
+# **Kafka** 工作原理
 
 > 思考：
 >
@@ -68,11 +69,9 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 <img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqkujUna87NNp1I5TjqcmoiceC6jqOkYFjtPoeOAo1wvsbFtDel2RHtibficibBLdAia9N7kXOGBibtKb6g/640" alt="图片" style="zoom:33%;" />
 
-主题。在 Kafka 中，使用一个类别属性来划分消息的所属类，划分消息的这个类称为 topic。 topic 相当于消息的分类标签，是一个逻辑概念。<!--其他MQ也有-->
+主题。在 Kafka 中，使用一个类别属性来划分消息的所属类，划分消息的这个类称为 topic。 是一个逻辑概念。<!--其他MQ也有-->
 
-这条消息会发送给消费者、不允许被改动、一直呆在队列中。
-
-（消息在队列中能呆多久，可以修改 Kafka 的配置）
+这条消息会发送给消费者、不允许被改动、一直呆在队列中。（消息在队列中能呆多久，可以修改 Kafka 的配置）
 
 位置：[tmp/kafka-logs/[topic]-[partition]]()
 
@@ -102,11 +101,11 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 ### **segment**
 
-段。将 partition 进一步细分为了若干的 segment，每个 segment 文件的最大大小相等。两部分组成，“. Index” file 和 “.log” file, 分别对应的是segment index file and data file.
+段。将 partition 进一步细分为了若干的 segment，每个 segment 文件的最大大小相等。两部分组成，[. Index file]() 和 [.log file](), 分别对应的是[segment index file]() 和 [data file]().
 
-- .log file从 000.0000.log开始，数据满了，增加另一个log file。
+> [.log file]()从 [000.0000.log]()开始，数据满了，增加另一个log file。
 
-位置：[tmp/kafka-logs/[topic]-[partition]]()目录下的[xxx（20位bit）.log]()文件和[xxx（20位bit）.index
+位置：[tmp/kafka-logs/[topic]-[partition]]()目录下的[xxx（20位bit）.log]()文件和[xxx（20位bit）.index]()
 
 <!--kafka顺序写，指的是partition有序-->
 
@@ -122,7 +121,7 @@ Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。为了增加�
 
 ### **Broker**
 
-Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 一个 topic 中设置 partition 的数量是 broker 数量的整数倍。
+Kafka 集群中每个服务器节点称为一个 broker。 一个 topic 中设置 partition 的数量是 broker 数量的整数倍。
 
 ### **Producer**
 
@@ -134,9 +133,10 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 也可以配置 Topic，让同类型的消息都在同一个 Partition。
 
-例如，处理用户消息，可以让某一个用户所有消息都在一个 Partition。
-
-例如，用户1发送了3条消息：A、B、C，默认情况下，这3条消息是在不同的 Partition 中（如 P1、P2、P3）。
+> 例如，处理用户消息，可以让某一个用户所有消息都在一个 Partition。
+>
+> 例如，发送了3条消息：A、B、C，默认情况下，这3条消息是在不同的 Partition 中（如 P1、P2、P3）。
+>
 
 在配置之后，可以确保用户1的所有消息都发到同一个分区中（如 P1）。
 
@@ -186,10 +186,8 @@ Kafka 集群包含多个服务器，每个服务器节点称为一个 broker。 
 
 ### **Partition Leader** 与 Partition Follower
 
-- 每个 partition 有多个副本replicas，<!--这块我经常混淆，以为topic-partition-0、topic-partition-1....互为副本 --> 其中有且仅有一个作为 Leader，Leader 是当前负责消息读写 的 partition。[即所有读写操作只能发生于 Leader 分区上。](http://dpurl.cn/HxIrgGcz)
-- 所有 Follower 都需要从 Leader 同步消息，Follower 与 Leader 始终保持消息同步。 partition leader 与 partition follower 是主备关系，不是主从。
-  - 主备：主干活，从不干活。除非主挂了
-  - 主从：主干活，从业干活，但是一般读写分离
+- 每个 partition - xxx 有多个副本replicas，<!--这块我经常混淆，以为topic-partition-0、topic-partition-1....互为副本 --> 其中有且仅有一个作为 Leader，Leader 是当前负责消息读写 的 partition。[即所有读写操作只能发生于 Leader 分区上。](http://dpurl.cn/HxIrgGcz)
+- 所有 Follower 都需要从 Leader 同步消息，Follower 与 Leader 始终保持消息同步。 partition leader 与 partition follower 是**主备关系，不是主从**。
 
 ### **ISR**
 

@@ -85,7 +85,7 @@ public class DelayTaskSortItem implements Serializable {
 
 
 
-#### 回调队列
+#### 回调队列 RedisDelayQueue
 
 ```java
 public interface RedisQueue<T> {
@@ -119,9 +119,6 @@ public class RedisDelayQueue implements RedisQueue<DelayTaskSortItem> {
     public DelayTaskSortItem pop() {
         synchronized (mutex) {
             Set<Tuple> rangeSet = redisService.zRangeWithScores(redisDelayQueueKey, 0, 1);
-            if (CollectionUtils.isEmpty(rangeSet)) {
-                return null;
-            }
             for (Tuple tuple : rangeSet) {
                 long currentTimeMillis = System.currentTimeMillis();
                 double expireTime = tuple.getScore();
@@ -150,7 +147,7 @@ public class RedisDelayQueue implements RedisQueue<DelayTaskSortItem> {
 
 
 
-#### 回调线程
+#### 回调线程 RedisDelayQueueHandler
 
 将回调队列中的元素转换到就绪队列的专门处理线程：
 
@@ -210,7 +207,7 @@ public class RedisDelayQueueHandler implements Runnable {
 
 
 
-#### 就绪队列
+#### 就绪队列 RedisReadyQueue
 
 ```java
 @Component("redisReadyQueue")
@@ -223,10 +220,7 @@ public class RedisReadyQueue implements RedisQueue<DelayTaskInfo> {
     @Override
     public DelayTaskInfo pop() {
         String item = redisService.rpop(REDIS_READY_QUEUE_KEY);
-        if(item != null) {
-            return JSON.parseObject(item,DelayTaskInfo.class);
-        }
-        return null;
+        return JSON.parseObject(item,DelayTaskInfo.class);
     }
 
     @Override
@@ -245,7 +239,7 @@ public class RedisReadyQueue implements RedisQueue<DelayTaskInfo> {
 
 
 
-#### 就绪线程
+#### 就绪线程 RedisReadyQueueHandler
 
 ```java
 @Component
@@ -261,9 +255,6 @@ public class RedisReadyQueueHandler implements Runnable {
     public void run() {
         while (true) {
             DelayTaskInfo delayTaskInfo = redisReadyQueue.pop();
-            if (delayTaskInfo == null) {
-                continue;
-            }
             log.info("弹出任务：delayTaskInfo is {}",delayTaskInfo);
             ResponseEntity<String> responseEntity = null;
             try {
@@ -279,14 +270,10 @@ public class RedisReadyQueueHandler implements Runnable {
     }
    
     /**
-     * 进入重试
+     * 进入重试，放入回调队列
      */
     public void retryAgain(DelayTaskInfo delayTaskInfo){
-        //进入支付重试环节
-        delayTaskInfo.setExecuteTime(System.currentTimeMillis() + RETRY_TIMES[retryTime] * 1000 );
-        delayTaskInfo.setExecuteTimeout(delayTaskInfo.getExecuteTimeout() + DEFAULT_TIME_OUT);
-        delayTaskInfo.setRetryTimes(retryTime+1);
-      
+        //进入重试环节，放入回调队列
         DelayTaskSortItem delayTaskSortItem = new DelayTaskSortItem(delayTaskInfo.getTaskId(),PAY_TOPIC,delayTaskInfo.getExecuteTime());
       
         redisDelayQueue.put(delayTaskSortItem);
