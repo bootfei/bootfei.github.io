@@ -280,7 +280,9 @@ docker rmi $(docker images -q)
 
 ## 创建并运行容器
 
-创建容器命令：**docker run**
+```
+docker run [OPTIONS] IMAGE[:TAG|@DIGEST] [COMMAND] [ARG...]
+```
 
 创建容器常用的参数说明：
 
@@ -378,7 +380,7 @@ docker rm ‘docker ps -a -q’*
 ## 复制文件
 
 ```
-docker cp 源文件 目标文件
+ docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
 ```
 
 *比如：*
@@ -396,8 +398,6 @@ docker cp /root/boot.war my-centos:/usr/local/
 /usr/local/是容器内的路径
 
 注意：源文件可以是宿主机器也可以是容器中的文件，同样，目标文件可以是容器也可以是宿主机器的文件。 
-
-![avatar][Docker复制文件命令示意图]
 
 
 

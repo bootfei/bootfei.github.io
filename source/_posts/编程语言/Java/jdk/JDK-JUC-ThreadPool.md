@@ -520,12 +520,12 @@ private Runnable getTask() {
 
 Worker本质上是个工作线程Thread + 任务Runnable。我一开始以为Worker是个干活的，就应该只是个Thread，没有必要封装任务Runnable。 再者，由于受到之前的固化思维，以为Thread和Runnable必须在同一行代码中，`new Thread(Runnable).start()`，所以Worker作为一个Thread，已经运行过`new Thread(Runnable).start()`，这个Thread和一个Runnbale已经绑定了，怎么还能获取到其他Runnable，并且运行呢？其实，这就是对 `Thread(Runnable).start()`和 `Runnable().run()`没有理解透彻。虽然Worker已经被运行了Thread(Runnable).start()，该worker的Thread已经和自己的Runnbale已经绑定了（这个Runnable其实就是firstTask，就是submit(Runnable)的时候那个Runnable），但是该worker的Runnable.run()方法，包含了getTask()方法从而获取其他Runnable, 然后执行`Runnable().run()`，这样Runnable就运行在当前线程了，当前线程是谁呢？当然是该worker的Thread了。
 
-| 线程池pool所在的线程 | worker所在的线程                                             |
-| -------------------- | ------------------------------------------------------------ |
-| submit(Runnable)     |                                                              |
-| addWorker(Runnable)  |                                                              |
-|                      | worker.start()调用worker.run()                               |
-|                      | worker.run() 调用 ThreadPoolExecutor.runWorker(Worker this)  |
-|                      | ThreadPoolExecutor.runWorkerr(Worker this)调用getTask()获取task |
-|                      | task.run()在当前线程执行，即worker线程                       |
+| 线程池pool所在的主线程 | worker所在的子线程                                           |
+| ---------------------- | ------------------------------------------------------------ |
+| submit(Runnable)       |                                                              |
+| addWorker(Runnable)    |                                                              |
+|                        | worker.start()调用worker.run()                               |
+|                        | worker.run() 调用 ThreadPoolExecutor.runWorker(Worker this)  |
+|                        | ThreadPoolExecutor.runWorkerr(Worker this)调用getTask()获取task |
+|                        | task.run()在当前线程执行，即worker线程                       |
 

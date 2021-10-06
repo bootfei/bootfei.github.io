@@ -4,7 +4,7 @@ date: 2020-10-03 09:46:30
 tags: git
 ---
 
-### 分支查看
+
 
 #### 远程分支
 
@@ -16,7 +16,8 @@ git branch -r
 
 b. 拉取远程分支并创建本地分支
 ``` bash
-git checkout -b 本地分支名x origin/远程分支名x
+git checkout -b 本地分支名x 
+git chekcout -b origin/远程分支名x
 ```
 ​    使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
 
@@ -72,20 +73,24 @@ git reset --hard HEAD^ #回退到上一版本
 
 
 
-### **合并相关**
-
-#### merge
+### 分支合并
 
 ```
 #将某个分支合并至当前分支
-git merge 分支名
+git merge 某个分支名
 ```
+
+
+
+#### fast forward merge
 
 如果需要合并的分支完全领先于当前分支，如图3所示：
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/A1HKVXsfHNluW6taqv3LemRM5sq6GFejXjGic5hcsmiaJBwbpWyjRcrsqqIQ0nn42czhloUicqldA5B6iawSLtsz7g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
 
 由于分支ft-1完全领先分支ft-2即ft-1完全包含ft-2，所以ft-2执行了“git merge ft-1”后会触发fast forward(快速合并)，此时两个分支指向同一节点，这是最理想的状态。
+
+#### 禁用fast forward merge
 
 ```
 #禁用fast forward，这样就会生成一个新的commit
@@ -95,17 +100,19 @@ git merge --no-ff
 git merge --no-ff -m "do merge with no-ff" release
 ```
 
-但是实际开发中我们往往碰到的是下面这种情况：如图4（左）。
+#### 常用 merge
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/A1HKVXsfHNluW6taqv3LemRM5sq6GFejLuN05oovuOzTRatAVOf1bSkNpFqnyIRx3ibiaIUYNHbeBx6r4aicmbfSg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
 
 这种情况就不能直接合了，当ft-2执行了“git merge ft-1”后Git会将节点C3、C4合并随后生成一个新节点C5，最后将ft-2指向C5 如图4（右）。
 
-注意点：如果C3、C4同时修改了同一个文件中的同一句代码，这个时候合并conflict, 所以这个时候需要我们自己手动合并代码。
+> 注意点：
+>
+> 如果C3、C4同时修改了同一个文件中的同一句代码，这个时候合并conflict, 所以这个时候需要我们自己手动合并代码。
 
 
 
-#### rebase
+#### 线下记录rebase
 
 ```
 git rebase 分支名/节点哈希值
@@ -116,8 +123,6 @@ git rebase 分支名/节点哈希值
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/A1HKVXsfHNluW6taqv3LemRM5sq6GFejYqzToG8tUbvFKtquRVZA0xguWERGL1yeV1kuB7NVEEGwEwnBThlE1g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
 
 当左边示意图的ft-1.0执行了git rebase master后会将C4节点复制一份到C3后面，也就是C4'，C4与C4'相对应，但是哈希值却不一样。
-
-rebase相比于merge提交历史更加线性、干净，使并行的开发流程看起来像串行，更符合我们的直觉。既然rebase这么好用是不是可以抛弃merge了？
 
 merge优缺点：
 
@@ -131,25 +136,15 @@ rebase优缺点：
 
 
 
-对于网络上一些只用rebase的观点，作者表示不太认同，如果不同分支的合并使用rebase可能需要重复解决冲突，这样就得不偿失了。但如果是本地推到远程并对应的是同一条分支可以优先考虑rebase。所以我的观点是 根据不同场景合理搭配使用merge和rebase，如果觉得都行那优先使用rebase。
+#### 选择节点cherry-pick
 
-
-
-#### cherry-pick
-
-cherry-pick的合并不同于merge和rebase，它可以选择某几个节点进行合并，如图6。
-
-命令行：
+cherry-pick的合并不同于merge和rebase，它可以选择某几个节点进行合并
 
 ```
 git cherry-pick 节点哈希值
 ```
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_jpg/A1HKVXsfHNluW6taqv3LemRM5sq6GFejt1bVibO8aVypicn3Y3hDqdVSTVFvBA1TOU5fYZnYJnib6PIMQP5GOmuUA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
-
-图6
-
-
 
 假设当前分支是master，执行了git cherry-pick C3(哈希值)，C4(哈希值)命令后会直接将C3、C4节点抓过来放在后面，对应C3'和C4'。
 
@@ -222,8 +217,6 @@ git clone 仓库地址
 
 
 fetch：
-
-
 
 说的通俗一点，fetch命令就是一次下载操作，它会将远程新增加的节点以及引用(分支/HEAD)的状态下载到本地，具体命令如下：
 

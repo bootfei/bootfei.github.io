@@ -8,7 +8,7 @@ tags:
 
 ## 线程状态
 
-### 传统线程状态
+### 操作系统中线程状态
 
 传统的进（线）程状态一般划分如下：
 
@@ -16,27 +16,21 @@ tags:
 
 ### jdk中线程状态
 
-
-
 #### Runnable
 
-##### 底层ready和running状态
+##### 包含OS的ready和running状态
 
-runnable 状态实质上是包括了 ready 状态的。
+runnable 状态实质上是包括了 ready 状态和running 状态。
 
 > A thread in the runnable state is executing in the Java virtual machine but it may be waiting for other resources from the operating system such as processor.
-
-runnable 状态包含了 running 状态。
 
 通常，Java的线程状态是服务于监控的，如果线程切换得是如此之快，那么区分 ready 与 running 就没什么太大意义了。
 
 现今主流的 JVM 实现都把 Java 线程一一映射到操作系统底层的线程上，把调度委托给了操作系统，我们在虚拟机层面看到的状态实质是对底层状态的映射及包装。JVM 本身没有做什么实质的调度，把底层的 ready 及 running 状态映射上来也没多大意义，因此，统一成为runnable 状态是不错的选择。
 
-##### 底层部分wait状态
+##### 包含OS中由于IO引起的wait状态
 
-一旦线程中执行到 I/O 有关的代码，相应线程立马被切走，然后调度 ready 队列中另一个线程来运行。这时执行了 I/O 的线程就不再运行，即所谓的被阻塞了。它也不会被放到调度队列中去，因为很可能再次调度到它时，I/O 可能仍没有完成。线程会被放到所谓的等待队列中，处于上图中的 waiting 状态：
-
-> 当然了，我们所谓阻塞只是指这段时间 cpu 暂时不会理它了，但另一个部件比如硬盘则在努力地为它服务。cpu 与硬盘间是并发的。当在 cpu 上是 waiting 时，在硬盘上却处于 running，只是我们在操作系统层面讨论线程状态时通常是围绕着 cpu 这一中心去述说的。
+一旦线程中执行到 I/O 有关的代码，相应线程立马被切走，然后调度 ready 队列中另一个线程来运行。这时执行了 I/O 的线程就不再运行，处于上图中的 waiting 状态。
 
 而当 I/O 完成时，则用一种叫中断 （interrupt）的机制来通知 cpu：
 
@@ -50,17 +44,13 @@ cpu 会收到一个比如说来自硬盘的Interrput信号，并进入中断处�
 
 > 至少我们看到了，进行传统上的 IO 操作时，口语上我们也会说“阻塞”，但这个“阻塞”与线程的 BLOCKED 状态是两码事！
 
-##### 如何看待RUNNABLE状态？
+##### 总结
 
 首先还是前面说的，注意分清两个层面：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPG7DdVnRNwzSkACPL9OfV4vEhFSB6s7ecJVTNgkJt0MuJxrzTLibvW0A/640)
+- JVM层面：当进行阻塞式的 IO 操作时，或许底层的操作系统线程确实处在阻塞状态，但我们关心的是 JVM 的线程状态。JVM 把那些都视作资源，cpu 也好，硬盘，网卡也罢，有东西在为线程服务，它就认为线程在“执行”。
 
-当进行阻塞式的 IO 操作时，或许底层的操作系统线程确实处在阻塞状态，但我们关心的是 JVM 的线程状态。
-
-JVM 把那些都视作资源，cpu 也好，硬盘，网卡也罢，有东西在为线程服务，它就认为线程在“执行”。
-
-处于 IO 阻塞，只是说 cpu 不执行线程了，但网卡可能还在监听呀，虽然可能暂时没有收到数据：所以 JVM 认为线程还在执行。而操作系统的线程状态是围绕着 cpu 这一核心去述说的，这与 JVM 的侧重点是有所不同的。
+- 操作系统：操作系统的线程状态是围绕着 cpu 这一核心去述说的，这与 JVM 的侧重点是有所不同的。
 
 前面我们也强调了“Java 线程状态的改变通常只与自身显式引入的机制有关”，如果 JVM 中的线程状态发生改变了，通常是自身机制引发的。
 
@@ -78,15 +68,13 @@ RUNNABLE 状态对应了传统的 ready， running 以及部分的 waiting 状�
 
 等待锁的释放，比如线程A进入了一个synchronized方法，线程B也想进入这个方法，但是这个方法的锁已经被线程A获取了，这个时候线程B就处于BLOCKED状态
 
-> 比如线程处于BLOCKED状态，这个时候可以分析一下是不是lock加锁的时候忘记释放了，或者释放的时机不对。导致另外的线程一直处于BLOCKED状态。
-
 #### WAITING: 等待状态
 
 处于等待状态的线程是由于执行了3个方法中的任意方法。 
 
 1. Object.wait() with no timeout
 2. Thread.join() with no timeout
-3. LockSupport.part()
+3. LockSupport.park()
 
 处于waiting状态的线程会等待另外一个线程处理特殊的行为。 
 
@@ -113,10 +101,6 @@ RUNNABLE 状态对应了传统的 ready， running 以及部分的 waiting 状�
 
 
 
-
-
-
-
 ### java线程不同状态之间的转换
 
 
@@ -129,11 +113,11 @@ RUNNABLE 状态对应了传统的 ready， running 以及部分的 waiting 状�
 
 代码执行到synchronized代码块和synchronized方法 时候要获取到锁，就变成BLOCKED状态。
 
-但是有个问题，**比如调用阻塞IO操作，比如磁盘io java.io.FileInputStream.read(byte[])，网络阻塞io java.net.SocketInputStream.read(byte[])时候线程状态还是RUNNABLE** ，并非会转移到BLOCKED状态。虽然在操作系统层面，此时的动作是阻塞的(操作系统线程会转移到阻塞状态)，但是JVM层面并不关心操作系统调度相关的状态，因为在 JVM 看来，等待 CPU 使用权（操作系统层面此时处于可执行状态）与等待 I/O（操作系统层面此时处于休眠状态）没有区别，都是在等待某个资源，所以都归入了 RUNNABLE 状态。**我们平时所谓的 Java 在调用阻塞式 API 时，线程会阻塞，指的是操作系统线程的状态，并不是 Java 线程的状态。**
+> **我们平时所谓的 Java 在调用阻塞式 API 时，线程会阻塞，指的是操作系统线程的状态，并不是 Java 线程的状态。**
 
 #### RUNNABLE -> WAITING状态
 
-根据定义，线程执行到代码Object#wait()，Thread.join，LockSupport#park()时候线程会转移到该前状态。
+根据官方文档，线程执行到代码Object#wait()，Thread.join，LockSupport#park()时候线程会转移到该前状态。
 
 #### RUNNABLE -> TIMED_WAITING状态
 
@@ -163,25 +147,27 @@ Thread.sleep(long millis)，休眠millis时间后线程自动唤醒，或者线�
 
 
 
+## jstack显示的java线程状态
+
+```
+jstack PID(10进制)
+```
+
+生成线程堆栈文件
+
+> java.lang.Thread.State: BLOCKED 线程处于阻塞状态，遇到了synchronized处于阻塞状态
+>
+> java.lang.Thread.State: RUNNABLE 线程处于正运行状态，或者阻塞在IO状态 
+>
+> java.lang.Thread.State: TIMED_WAITING (on object monitor) Object.wait(long)加超时时间操作 java.lang.Thread.State: TIMED_WAITING (parking) 通过LockSupport.parkXXX加超时时间操作 java.lang.Thread.State: TIMED_WAITING (sleeping) 通过Thread.sleep加休眠时间操作 
+>
+> java.lang.Thread.State: WAITING (on object monitor) Object.wait()无超时时间操作 
+>
+> java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
 
 
-#### jstack显示的java线程状态
 
-通过通过jstack PID生成线程堆栈文件，里面的线程状态以及解释如下如下
-
-java.lang.Thread.State: BLOCKED 线程处于阻塞状态，遇到了synchronized处于阻塞状态
-
-java.lang.Thread.State: RUNNABLE 线程处于正运行状态，或者阻塞在IO状态 
-
-java.lang.Thread.State: TIMED_WAITING (on object monitor) Object.wait(long)加超时时间操作 java.lang.Thread.State: TIMED_WAITING (parking) 通过LockSupport.parkXXX加超时时间操作 java.lang.Thread.State: TIMED_WAITING (sleeping) 通过Thread.sleep加休眠时间操作 
-
-java.lang.Thread.State: WAITING (on object monitor) Object.wait()无超时时间操作 
-
-java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
-
-
-
-#### 线程中断
+### 线程中断
 
 除了Object.nofity()，nofityAll()，LockSupport.unPark(Thread)操作唤醒线程或者超时自动唤醒线程，工作中也经常使用到interrupt() 方法对阻塞中的线程(WAITING、TIMED_WAITING 状态)进行中断，以便使线程从阻塞(WAITING、TIMED_WAITING 状态)中被唤醒。interrupt()操作是给正在处于阻塞状态的线程发个中断通知，以便线程从阻塞中唤醒过来。
 
@@ -189,7 +175,7 @@ java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作
 
 当RUNNABLE状态线程在阻塞到IO操作时候，此时线程状态还是RUNNABLE ，但是实际在linux线程模型中是阻塞状态，比如线程A阻塞在 java.nio.channels.Selector.select() 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 的 java.nio.channels.Selector 会立即返回。
 
-### 线程池内线程的状态
+## 线程池内线程的状态
 
 - 预热阶段，线程状态也是从NEW->RUNNABLE-BLOCKED/WAITING/TIMED_WAITING状态
 
@@ -229,21 +215,19 @@ jstack pid
 
  
 
-### java线程状态对应使用cpu
+## JVM线程状态与cpu关系
 
-NEW 这个好理解，线程刚创建，还未执行，并不使用cpu 
+> NEW 这线程刚创建，还未执行, CPU=0%
+>
+> RUNNABLE 线程处于可运行状态，但是实际可能是正在运行或者等待io资源，因此不能完全确定是否在使用cpu资源。 
+>
+> BLOCKED 线程阻塞状态，肯定不会使用cpu资源 
+>
+> WAITING 线程休眠状态，肯定不会使用cpu资源 
+>
+> TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 
-RUNNABLE 线程处于可运行状态，但是实际可能是正在运行或者等待io资源，因此不能完全确定是否在使用cpu资源。 
-
-BLOCKED 线程阻塞状态，肯定不会使用cpu资源 
-
-WAITING 线程休眠状态，肯定不会使用cpu资源 
-
-TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
-
- 
-
-通过上面分析，在分析cpu100%问题时候，jstack PID 后，只需要查看dump结果中处于RUNNABLE状态的线程即可，但是处于RUNNABLE状态的线程，不代表就一定正在使用cpu资源，因此要特定分析（通过代码分析）。通常是通过top -Hp PID确定使用cpu资源高的线程后，再通过多次jstack操作，查看哪些线程堆栈一直处于RUNNABLE。
+通过上面分析，在分析cpu100%问题时候，`jstack PID` 后，只需要查看dump结果中处于RUNNABLE状态的线程即可，但是处于RUNNABLE状态的线程，不代表就一定正在使用cpu资源，因此要特定分析（通过代码分析）。通常是通过top -Hp PID确定使用cpu资源高的线程后，再通过多次jstack操作，查看哪些线程堆栈一直处于RUNNABLE。
 
 举例如下：
 
@@ -261,13 +245,13 @@ TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源
 
  
 
-## 线程方法sleep,join和对象方法wait,notify
+## JVM线程状态与锁的关系
 
-首先sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源（因为状态非runnable状态都不消耗cpu资源）
+A. sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源
 
 > yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。
 
-sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放资源。而wait会释放锁资源。
+B. sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放锁。<!--真不要脸，自己不用CPU，还阻塞其他使用该锁的线程使用CPU-->而wait会释放锁。
 
 - wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，
 - sleep是线程的方法，跟锁没关系，
@@ -279,15 +263,24 @@ sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法
 
 ## 线程中断
 
- 停止一个线程意味着在任务处理完任务之前停掉正在做的操作，也就是放弃当前的操作。停止一个线程可以用Thread.stop()方法，但最好不要用它。虽然它确实可以停止一个正在运行的线程，但是这个方法是不安全的，而且是已被废弃的方法。在java中有以下3种方法可以终止正在运行的线程：
+### 3个中断相关的方法
+
+ 停止一个线程意味着在任务处理完任务之前停掉正在做的操作，也就是放弃当前的操作。
+
+在java中有以下3种方法可以终止正在运行的线程：
 
 1. 使用退出标志，使线程正常退出，也就是当run方法完成后线程终止。
 2. 使用stop方法强行终止，但是不推荐这个方法，因为stop和suspend及resume一样都是过期作废的方法。
 3. 使用interrupt方法中断线程。
 
-#### interrupt()无法硬中断线程
+#### Method1: interrupt()中断线程(软中断)
 
-interrupt()方法的使用效果并不像for+break语句那样，马上就停止循环。调用interrupt方法是在当前线程中打了一个停止标志，并不是真的停止线程。
+> Interrupts this thread.
+> Unless the current thread is interrupting itself, which is always permitted, the checkAccess method of this thread is invoked, which may cause a SecurityException to be thrown.
+>
+> If this thread is blocked in an invocation of the wait(), wait(long), or wait(long, int) methods of the Object class, or of the join(), join(long), join(long, int), sleep(long), or sleep(long, int), methods of this class, then its interrupt status will be cleared and it will receive an InterruptedException.
+
+调用interrupt方法是在当前线程中打了一个停止标志，并不是真的停止线程，无法硬中断线程
 
 ```java
 public class MyThread extends Thread {
@@ -299,7 +292,7 @@ public class MyThread extends Thread {
     }
 }
 
-public class Run {
+public class SpringBootApplication {
     public static void main(String args[]){
         Thread thread = new MyThread();
         thread.start();
@@ -313,20 +306,21 @@ public class Run {
 }
 ```
 
-输出结果：
+输出结果：可以看到线程继续运行，并没有中断
 
 ```
 ...
-i=499994
-i=499995
-i=499996
-i=499997
 i=499998
 i=499999
 i=500000
 ```
 
-#### 静态方法interrupted()判断线程是否中断状态
+#### Method2: 静态方法interrupted()判断当前线程是否中断状态
+
+> Tests whether the current thread has been interrupted. <font color='red'>The interrupted status of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false</font>> (unless the current thread were interrupted again, after the first call had cleared its interrupted status and before the second call had examined it).
+> A thread interruption ignored because a thread was not alive at the time of the interrupt will be reflected by this method returning false.
+> Returns:
+> true if the current thread has been interrupted; false otherwise.
 
 ```java
 public static boolean interrupted{
@@ -334,7 +328,7 @@ public static boolean interrupted{
 }
 ```
 
-interrupted(): 测试**[当前]()**线程是否已经中断，线程的中断状态由该方法清除。 换句话说，如果连续两次调用该方法，则第二次调用返回false。
+interrupted(): 测试<font color='red'>当前线程</font>是否已经中断，线程的中断状态由该方法清除。 换句话说，如果连续两次调用该方法，则第二次调用返回false。
 
 ```java
 public class Run {
@@ -368,17 +362,16 @@ System.out.println("stop 1??" + thread.interrupted());
 System.out.println("stop 2??" + thread.interrupted());
 ```
 
-来判断thread对象所代表的线程是否停止，但从控制台打印的结果来看，线程并未停止，这也证明了interrupted()方法的解释，测试[当前线程]()是否已经中断。这个当前线程是main，它从未中断过，所以打印的结果是两个false.
+来判断thread对象所代表的线程是否停止，但从控制台打印的结果来看，线程并未停止，这也证明了interrupted()方法的解释，测试[当前线程]()是否已经中断。这个当前线程是main主线程，它从未中断过，而是子线程thread中断了，所以打印的结果是两个false.
 
-如何使main线程产生中断效果呢？
+如何使main线程产生中断效果呢？就是把thread.interrupt改为main线程interrupt <!--Thread.currentThread()获取当前main线程-->
 
-```
+```java
 public class Run2 {
     public static void main(String args[]){
         Thread.currentThread().interrupt();
         System.out.println("stop 1??" + Thread.interrupted());
         System.out.println("stop 2??" + Thread.interrupted());
-
         System.out.println("End");
     }
 }
@@ -392,19 +385,24 @@ stop 2??false
 End
 ```
 
-方法interrupted()的确判断出当前线程是否是停止状态。但为什么第2个布尔值是false呢？
+方法interrupted()的确判断出当前线程是否是停止状态。
 
-#### 类方法isInterrupted()判断线程是否中断状态
+#### Method3: isInterrupted()判断线程是否中断状态
+
+> Tests whether this thread has been interrupted. <font color='red'>The interrupted status of the thread is unaffected by this method.</font>
+> A thread interruption ignored because a thread was not alive at the time of the interrupt will be reflected by this method returning false.
+> Returns:
+> true if this thread has been interrupted; false otherwise.
 
 ```java
-public  boolean isInterrupted{
+public boolean isInterrupted{
 	return isInterrupted(false);
 }
 
 private native boolean isInterrupted(boolean ClearInterrupted)
 ```
 
-isInterrupted()并不清除中断状态
+isInterrupted()并<font color='red'>不清除中断状态</font>,所有连续2次调用并不清除中断状态
 
 ```java
 public class Run3 {
@@ -425,45 +423,13 @@ stop 1??true
 stop 2??true
 ```
 
-### 停止线程的方法
+### 捕获中断状态
 
-#### 通过判断中断状态，停止线程
+#### 通过判断中断状态，抛出异常，停止线程
 
-在线程中用for语句来判断一下线程是否是停止状态，如果是停止状态，则后面的代码不再运行即可：
+在线程中用for语句来判断一下线程是否是停止状态，如果是停止状态，则后面的代码不再运行即可
 
-```
-public class MyThread extends Thread {
-    public void run(){
-        super.run();
-        for(int i=0; i<500000; i++){
-            if(this.interrupted()) {
-                System.out.println("线程已经终止， for循环不再执行");
-                break;
-            }
-            System.out.println("i="+(i+1));
-        }
-    }
-}
-
-public class Run {
-    public static void main(String args[]){
-        Thread thread = new MyThread();
-        thread.start();
-        try {
-            Thread.sleep(2000);
-            thread.interrupt();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-上面的示例虽然停止了线程，但如果for语句下面还有语句，还是会继续运行的。
-
-##### 使用抛出异常方式停止线程
-
-```
+```java
 public class MyThread extends Thread {
     public void run(){
         super.run();
@@ -487,44 +453,8 @@ public class MyThread extends Thread {
 
 
 
-##### 使用return停止线程
-
-将方法interrupt()与return结合使用也能实现停止线程的效果：
-
-```
-public class MyThread extends Thread {
-    public void run(){
-        while (true){
-            if(this.isInterrupted()){
-                System.out.println("线程被停止了！");
-                return;
-            }
-            System.out.println("Time: " + System.currentTimeMillis());
-        }
-    }
-}
-
-public class Run {
-    public static void main(String args[]) throws InterruptedException {
-        Thread thread = new MyThread();
-        thread.start();
-        Thread.sleep(2000);
-        thread.interrupt();
-    }
-}
-```
-
-输出结果：
-
-```
-...
-Time: 1467072288503
-Time: 1467072288503
-Time: 1467072288503
-线程被停止了！
-```
-
-不过还是建议使用“抛异常”的方法来实现线程的停止，因为在catch块中还可以将异常向上抛，使线程停止事件得以传播。
+> 建议使用“抛异常”的方法来实现线程的停止，因为在catch块中还可以将异常向上抛，使线程停止事件得以传播。
+>
 
 
 
@@ -565,7 +495,7 @@ java.lang.InterruptedException: sleep interrupted
 
 前一个实验是先sleep然后再用interrupt()停止，与之相反的操作在学习过程中也要注意：
 
-```
+```java
 public class MyThread extends Thread {
     public void run(){
         super.run();
@@ -584,7 +514,7 @@ public class MyThread extends Thread {
     }
 }
 
-public class Run {
+public class Demo {
     public static void main(String args[]){
         Thread thread = new MyThread();
         thread.start();

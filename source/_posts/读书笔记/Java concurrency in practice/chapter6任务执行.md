@@ -8,7 +8,7 @@ tags: [并发]
 
 通过把应用程序的工作分解到多个任务中，可以简化程序的组织结构，提供一种**「自然的事务边界」**来优化错误的恢复过程，以及提供一种自然的**「并行工作结构」**来提升并发性。<!--有了使用场景和构造方法，如何解决构造过程中出现的问题，这里巨人们也给出了方案-->
 
-### 6.1 在线程中执行任务
+### 在线程中执行任务
 
 当围绕 **「任务执行」** 来设计应用程序结构时，第一部就是要找出**清晰**的**「任务边界」**。在理想的情况下，各个任务之间是独立的：任务并不依赖于其他任务的状态，结果或边界效应。
 
@@ -24,9 +24,9 @@ Web 服务器，邮件服务器，文件服务器，EJB 容器以及数据库服
 
 例如：在向邮件服务器提交一个消息后得到的结果，并不受其他正在处理的消息的影响，而且在处理单个消息时通常只需要服务器总处理能力的很小一部分。
 
-#### 6.1.1 串行地执行任务
+#### 串行地执行任务
 
-在应用程序中可以通过多种策略来调度任务，而其中一些策略能够更好地利用潜在的并发性。最简单的策略就是在单个线程中**「串行」**地执行各项任务。 **<---【也就是不使用多线程技术，所有业务逻辑都在一个线程中完成】**
+在应用程序中可以通过多种策略来调度任务，而其中一些策略能够更好地利用潜在的并发性。最简单的策略就是在单个线程中**「串行」**地执行各项任务。 <!--- 也就是不使用多线程技术，所有业务逻辑都在一个线程中完成 -->
 
 **程序清单 6-1** 中的 `SingleThreadWebServer` 将串行地处理它的任务（通过 80 端口接收到的 HTTP 请求）。 至于如何处理任务的细节问题，在这里并不重要，我们感兴趣的是**「如何表征不同调度策略的同步特性」**。
 
@@ -61,7 +61,7 @@ public class SingleThreadWebServer {
 
 <!--【在某些情况中，串行处理方式能带来「简单性」和 「安全性」。大多数 GUI 框架都通过单一的线程来串行地处理任务。 第9章 将再次减少串行模型】-->
 
-#### 6.1.2 显示地为任务创建线程
+#### 显示地为任务创建线程
 
 ##### a. 通过无限制创建线程的方式
 
@@ -110,7 +110,7 @@ public class ThreadPerTaskWebServer {
 
 
 
-### 6.2 Executor 框架
+### Executor 框架
 
 **「任务」**是一组**「逻辑工作」**单元，而线程则是使「任务」**异步执行**的机制。<!--看看巨人们总结的，任务和线程之间的关系-->
 
@@ -359,7 +359,7 @@ public class LifecycleWebServer {
 
 `DelayQueue` 管理着一组 `Delayed` 对象。每个 `Delayed` 对象都有一个相应的延迟时间：在 `DelayQueue` 中，只有某个元素「逾期」后，才能从 `DelayQueue` 中执行 `take` 操作，从 `DelayQueue` 中返回的对象将根据它们的 「延迟时间」 进行排序。
 
-### 6.3 找出可利用的并行性
+### 找出可利用的并行性
 
 `Executor` 框架使确定执行策略更加容易，但如果要使用 `Executor`，必须将任务表述为一个 `Runnable`。在大多数服务器应用程序中都存在一个「明显的任务边界」：单个用户请求。
 
@@ -393,7 +393,7 @@ public class OutOfTime {
 
 该示例组件实现浏览器程序中的 页面渲染（Page-Rendering）功能，它的作用是将 HTML 页面绘制到图像缓存中。为了简便，假设 HTML 页面只包含「标签文本」，以及预定义大小的「图片」和 URL。
 
-#### 6.3.1 示例：串行的页面渲染器
+#### 示例1：渲染文本、下载、渲染页面都是串行
 
 最简单的方法就是对 `HTML` 文档进行「串行处理」。当遇到文本标签时，将其绘制到「图像缓存」中。 当遇到图像引用时，先通过网络获取它，然后再将其绘制到图像缓存中。
 
@@ -402,12 +402,6 @@ public class OutOfTime {
 另一种「串行」执行的方法更好一些，它先绘制文本元素，同时为图像预留出矩形的占位空间，在处理完了第一遍文本后，程序再开始下载图像，并将他们绘制到相应的占位空间中。
 
 在 **程序清单 6-10** 的 `SingleThreadRenderer`中给出了上述这种方法的实现。
-
-图像下载过程的大部分时间都是在 「等待 I/O」 操作执行完成。 在这期间 CPU 几乎没有任何工作。
-
-因此，这种串行执行方法没有充分地利用 CPU，使得用户看到最终页面之前要等待过长的时间。
-
-通过将问题「分解」为多个独立的任务「并发执行」，能够获得更高的 「CPU 利用率」和「响应灵敏度」。
 
 > 程序清单 6-10 串行地渲染页面元素：
 
@@ -421,7 +415,7 @@ public abstract class SingleThreadRenderer {
         List<ImageData> imageData = new ArrayList<>();
         // 通过source分析出其包含的图像信息 并将其添加到之前定义的 imageData 中
         for (ImageInfo imageInfo : scanForImageInfo(source)) {
-            imageData.add(imageInfo.downloadImage());
+            imageData.add(imageInfo.downloadImage() //网络IO阻塞);
         }
         // 渲染页面图片
         for (ImageData data : imageData) {
@@ -432,7 +426,17 @@ public abstract class SingleThreadRenderer {
 }
 ```
 
-#### 6.3.2 携带结果的任务 Callable 与Future
+**缺点：**
+
+> 图像下载过程的大部分时间都是在 「等待 I/O」 操作执行完成。 在这期间 CPU 几乎没有任何工作。
+>
+> 因此，这种串行执行方法没有充分地利用 CPU，使得用户看到最终页面之前要等待过长的时间。
+>
+> 通过将问题「分解」为多个独立的任务「并发执行」，能够获得更高的 「CPU 利用率」和「响应灵敏度」。
+
+
+
+#### 携带结果的任务 Callable 与Future
 
 `Executor` 框架使用 `Runnable` 作为其「基本的任务表示形式」。 `Runnable` 是一种有很大局限性的抽象，虽然 `run` 能写入到日志文件或者将结果放入某个 「共享的数据结构」，但它**不能** 「返回一个值」 或 「抛出一个受检查的异常」。
 
@@ -508,11 +512,11 @@ public interface Future<V> {
     }
 ```
 
-实际上 `newTaskFor` 这个方法不再 `ThreadPoolExecutor.java` 中，而是在 ``AbstractExecutorService.java`中，但是 `ThreadPoolExecutor` 继承 该类，说是默认实现也没问题。】
+<!--实际上 `newTaskFor` 这个方法不再 `ThreadPoolExecutor.java` 中，而是在 ``AbstractExecutorService.java`中，但是 `ThreadPoolExecutor` 继承 该类，说是默认实现也没问题。-->
 
 将 `Runnable` 或 `Callbale` 提交到 `Executor` 的过程中，包含了一个 「安全发布」的过程（参见3.5） —— 将 `Runnable` 或 `Callable` 从「提交线程」 发布到最终 「执行任务的线程」。 类似地，在设置 `Future` 结果的过程中也包含了一个安全发布，将这个结果从计算它的线程发布到任何通过 `get` 获得它的线程。
 
-#### 6.3.3 示例： 使用 Future 实现页面的渲染器
+#### 示例2： 使用 Future 实现下载图片和渲染文本并行
 
 为了使页面渲染器实现更高的「并发性」，我们将渲染过程分解为「两个任务」：
 
@@ -534,7 +538,7 @@ public abstract class FutureRenderer {
 
     void renderPage(CharSequence source) {
         final List<ImageInfo> imageInfos = scanForImageInfo(source);
-        // 创建一个 Callable 开启一个线程专门下载图片
+        // 创建一个 Callable 开启一个线程专门下载图片；直到所有图片IO下载完成，这个任务结束
         Callable<List<ImageData>> task = () -> {
             final List<ImageData> result = new ArrayList<>();
             for (ImageInfo imageInfo : imageInfos) {
@@ -575,7 +579,7 @@ public abstract class FutureRenderer {
 
 `FutureRenderer` 使得渲染文本任务与下载图像数据的任务「并发」 地执行。 当所有图像下载完成后，会显示到页面上。 这将提升「用户体验」，不仅使用户更快地看到结果，还有效地利用了「并行性」，但我们还可以做的更好：**「用户不必等待所有图像都下载完成，而是希望每下载完成一个就显示出一个」**。
 
-#### 6.3.4 在异构任务并行化中存在的局限
+#### 在异构任务并行化中存在的局限
 
 上个例子中，我们尝试并行地执行两个**「不同类型」**的任务 —— 「下载图像」与 「渲染页面」。然而，通过对 **「异构任务」** 进行并行化来获得重大的性能提升是很困难的。<!--异构，这个词语，记住了啊-->
 
@@ -593,9 +597,9 @@ public abstract class FutureRenderer {
 
 只有当大量「相互独立」 且 「同构」（相同类型工作）的任务可以进行并发处理时，才能体现出将程序的工作负载分配到「多个任务」 中带来的真正性能提升。
 
-#### 6.3.5 CompletionService：Executor 与 BlockingQueue
+#### CompletionService：Executor 与 BlockingQueue
 
-如果向 `Executor` 提交了一组计算任务，并且希望在计算完成后获得结果，那么可以保留与任务关联的 `Future`，然后反复使用 `get`方法，同时将参数 `timeout` 指定为 0，从而通过轮询来判断任务是否完成。<!--好繁琐，真的希望有一个阻塞方法，until an available result, 哈哈，下文就有这个阻塞方法-->
+如果向 `Executor` 提交了一组计算任务，并且希望在计算完成后获得结果，那么可以保留与任务关联的 `Future`，然后反复使用 `get`方法，同时将参数 `timeout` 指定为 0 <!--立即查看任务状态-->，从而通过轮询来判断任务是否完成，从而仅仅获得已完成的结果。
 
 这种方法虽然可行，却有些「繁琐」。还有一种更好的方法：**「完成服务」**（`CompletionService`）
 
@@ -603,7 +607,7 @@ public abstract class FutureRenderer {
 
 `ExecutorCompletionService` 实现了 `CompletionService`，并将**「计算部分」**委托给了一个 `Executor`。<!--其实这块的设计，需要仔细想一下设计模式的概念，如果你想为一个类开发一个全新的功能，你会怎么做呢？JAVA的设计师使用了组合方法，计算部分仍然交给Executor，全新的功能交给CompletionService,那么CompletionService持有一个Exectuor对象即可-->
 
-`ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。<!--Executor有工作队列，现在ExcutorCompletionService多了个结果队列-->
+`ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。<!--Executor有任务队列，现在ExcutorCompletionService多了个结果队列-->
 
 当计算完成时，调用 `FutureTask` 中的 `done` 方法。
 
@@ -633,14 +637,14 @@ public abstract class FutureRenderer {
 
 可以看到随着 `JDK` 的演化，底层的实现还是有些许不同的地方的。
 
-#### 6.3.6 示例：使用 CompletionService 实现页面渲染器
+#### 示例3：使用 CompletionService 实现页面渲染器
 
 可以通过 `CompletionService` 从两个方面来提高页面渲染器的性能：
 
 - 缩短总运行时间
 - 提高响应性
 
-为每一个图像的下载都创建一个「独立任务」，并在线程中执行它们，从而将「串行」的下载过程转变为「并行」过程。
+为每一个图像的「下载」都创建一个「独立任务」，并在线程中执行它们，从而将「串行」的下载过程转变为「并行」过程。
 
 此外，通过从 `CompletionService` 中获取结果以及使每张图片在下载完成后「立刻」 显示出来，能使用户获得一个更加「动态」和「更高响应性」 的用户界面，如下面的代码所示：
 
@@ -661,9 +665,9 @@ public abstract class Renderer {
         // 初始化 ExecutorCompletionService
         final ExecutorCompletionService<ImageData> completionService =
                 new ExecutorCompletionService<>(executor);
-        // 为每个图片分配一个线程进行下载
+        // 为每个图片分配一个Callable线程进行下载
         for (final ImageInfo imageInfo : info) {
-            completionService.submit(imageInfo::downloadIamge);
+            completionService.submit(imageInfo::downloadIamge); //不会阻塞
         }
         // 渲染页面文字
         renderText(source);
@@ -693,7 +697,7 @@ public abstract class Renderer {
 
 多个 `ExecutorCompletionService` 可以 「共享」 一个 `Executor`。 因此可以创建一个对于「特定计算」私有，又能「共享」一个公共 `Executor` 的 `ExecutorCompletionService` 。因此，`CompletionService` 的作用就相当于一组**「计算句柄」**，这与 `Future` 作为单个计算句柄是非常类似的。 通过记录提交给 `CompletionService` 的任务数量，并计算出已经获得的已完成结果的数量，即使使用一个 「共享的」 `Executor`，也能知道已经获得了所有任务结果的「时间」。
 
-#### 6.3.7 为任务设置时限
+#### 为任务设置超时时间
 
 有时候，如果某个任务无法在指定时间内完成，那么将不再需要它结果，此时可以放弃这个任务。<!--非常常见的业务场景，具有强时效性的任务-->
 
@@ -755,7 +759,7 @@ public class RederWithTimeBudget {
 }
 ```
 
-#### 6.3.8 示例：旅行预订门户网站
+#### 示例：旅行预订门户网站
 
 「预定时间」 方法可以很容易地 「扩展」 到任意数量的任务上。
 
