@@ -14,7 +14,7 @@ tags:
 
 <font color="red">在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现</font>
 
-- 首先项目有能力进行扫描，所以Application有@ComponentScan，对类所在的包进行扫描
+- 首先项目有能力进行扫描，所以Application有@ComponentScan，对被注解的类所在的包进行扫描
 - 然后只有被标记的类，才能在扫描中被Spring容器管理，所以有类有@Component，表明此类交给Spring容器管理
 - 自动加载功能由@EnableAutoConfiguration标记，表明此类需要加载其他的相关类
   - @EnableAutoConfiguration表明此类需要加载哪些类呢？由Meta-Info/spring.factories中的key=EnableAutoConfiguration表明，value都是xxxxAutoConfiguration.class类
@@ -25,9 +25,9 @@ tags:
 - @SpringBootApplication包含了@EnalbeAutoConfiguration表明启动自动加载
 - 自动加载会
 
-### 自动配置源码解析
 
-#### 解析**@SpringBootApplication**
+
+### 解析**@SpringBootApplication**
 
 @SpringBootApplication 注解其实就是一个组合注解。包含有
 
@@ -59,37 +59,31 @@ tags:
 
 @EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注 解，就会自动导入某些类。所以该类注解是组合注解，一般都会包含一个@Import 注解，用 于导入指定的多个类，而被导入的类一般分为三种:[配置类、选择器与注册器](https://www.hangge.com/blog/cache/detail_2807.html)。
 
-- 配置类
+配置类：@Import 中指定的类一般以 Configuration 结尾，且该类上会注解@Configuration，表示当前类为配置类。
 
-  - @Import 中指定的类一般以 Configuration 结尾，且该类上会注解@Configuration，表示当前类为配置类。
+```java
+  @Import(SchedulingConfiguration.class)
+```
 
-  - ```java
-    @Import(SchedulingConfiguration.class)
-    ```
+  
 
-    
+选择器：@Import 中指定的类一般以 Selector 结尾，且该类实现了 ImportSelector 接口，表示当前类会根据条件选择导入不同的类。
 
-- 选择器
+```java
+  @Import(AutoConfigurationImportSelector.class)
+```
 
-  - @Import 中指定的类一般以 Selector 结尾，且该类实现了 ImportSelector 接口，表示当前类会根据条件选择导入不同的类。
+  
 
-  - ```java
-    @Import(AutoConfigurationImportSelector.class)
-    ```
+注册器：@Import 指定的类一般以 Registrar 结尾，且该类实现了 ImportBeanDefinitionRegistrar接口，用于导入注册器，该类可以在代码运行时动态注册指定类的实例。
 
-    
+```java
+  @Import(AspectJAutoProxyRegistrar.class)
+```
 
-- 注册器
+  
 
-  - @Import 指定的类一般以 Registrar 结尾，且该类实现了 ImportBeanDefinitionRegistrar接口，用于导入注册器，该类可以在代码运行时动态注册指定类的实例。
-
-  - ```java
-    @Import(AspectJAutoProxyRegistrar.class)
-    ```
-
-    
-
-#### 解析**@EnableAutoConfiguration**
+### 解析**@EnableAutoConfiguration**
 
 该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的starter以及用于自定义的类，然后交给 Spring 容器完成这些类的装配。
 
@@ -102,7 +96,12 @@ tags:
 @Import(AutoConfigurationImportSelector.class)
 ```
 
-> 它扫描的相关类有2种：一种是系统内部定义好的,如starter, 另外一种是自定义的,如controller,service
+属于@EnableXXX的[Selctor]()类，因为@import中是selector
+
+> @EnableAutoConfiguration扫描的自动配置类有2种：
+>
+> - 一种是系统外部的类,如starter,
+> - 另外一种是用户内部自定义的,如程序员自己写的controller,service
 
 ["META-INFO/spring.factories"非常重要的文件, 里面有个key = EnableAutoConfiguratin, value是众多自动配置类，如Redis配置类, Mongo配置类]()
 
@@ -308,7 +307,6 @@ application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重
     - ```
       org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.abc.config.WrapAutoConfiguration
       ```
-  
 
 ### 使用starter
 

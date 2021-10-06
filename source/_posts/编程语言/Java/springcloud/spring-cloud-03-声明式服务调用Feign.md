@@ -92,8 +92,23 @@ public test{
 
 
 
-### 用法2：只使用此REST框架
+### 用法2：只使用此REST HTTP框架
 
 [OpenFeign调用下游第三方接口](http://www.yanzuoguang.com/article/740.html)
 
 [OpenFeign请求动态url](http://www.yanzuoguang.com/article/739)
+
+
+
+## 工程使用
+
+### 拦截Feign请求的RequestInterceptor
+
+微服务之间的Feign调用，也需要在请求头添加身份认证，那么使用此方法对所有Feign请求添加身份认证
+
+https://blog.csdn.net/jiahao1186/article/details/102747166
+
+```
+
+```
+

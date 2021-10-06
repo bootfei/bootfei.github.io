@@ -14,7 +14,7 @@ public class StringBuilderDemo {
     public static void main(String[] args) throws InterruptedException {  
         StringBuilder stringBuilder = new StringBuilder();  
         for (int i = 0; i < 10; i++){  
-            new Thread(()-{
+            new Thread(()->{
               for (int j = 0; j < 1000; j++){  
                 stringBuilder.append("a");  
               }   
@@ -30,15 +30,12 @@ public class StringBuilderDemo {
 
 我们看到输出了“9326”，小于预期的10000，并且还抛出了一个ArrayIndexOutOfBoundsException异常（异常不是必现）。
 
-### 从类结构入手分析
+### 分析
 
-StringBuilder和StringBuffer的内部实现跟String类一样，都是通过一个char数组存储字符串的，不同的是String类里面的char数组是final修饰的，是不可变的，而StringBuilder和StringBuffer的char数组是可变的。
-
-
-
-#### 父类AbstractStringBuilder
+StringBuilder和StringBuffer的内部实现跟String类一样，都是通过一个char数组存储字符串的，不同的是String类里面的char数组是final修饰的，是不可变的 <!--线程安全-->；而StringBuilder和StringBuffer的char数组是可变的。
 
 ```java
+//父类AbstractStringBuilder
 abstract class AbstractStringBuilder implements Appendable, CharSequence {
    
     char[] value;
@@ -59,7 +56,7 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
 
 #### 返回结果小于预期的原因
 
-<font color="red">注意：count +=len不是一个原子操作！！！线程不安全，线程读取的是失效数据，属于“先读取，后更新”的错误</font>
+<font color="red">注意：count +=len不是一个原子操作！！！线程不安全，线程读取的count是失效数据，属于“先读取count，后更新count”的错误</font>
 
 这就是为什么["我们看到输出了“9326”，小于预期的10000"]()
 
@@ -79,6 +76,8 @@ private void ensureCapacityInternal(int minimumCapacity) {
 }  
 ```
 
+##### expandCapacity()方法
+
 扩容的逻辑就是new一个2倍容量的新char数组，再通过System.arryCopy()函数将原数组的内容复制到新数组，最后将指针指向新的char数组。
 
 ```java
@@ -91,7 +90,7 @@ void expandCapacity(int minimumCapacity) {
 }  
 ```
 
-Arrys.copyOf()方法
+##### Arrys.copyOf()方法
 
 ```java
 public static char[] copyOf(char[] original, int newLength) {  
@@ -110,7 +109,7 @@ public static char[] copyOf(char[] original, int newLength) {
 str.getChars(0, len, value, count);  
 ```
 
-getChars()方法
+##### getChars()方法
 
 ```java
 public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {  
@@ -126,11 +125,7 @@ public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
 
 假设现在有两个线程同时执行了StringBuilder的append()方法，两个线程都执行完了第五行的ensureCapacityInternal()方法，此刻count=5。
 
-<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbueq8rlWFnejuWibbkDsLW8SfpC8jY6vIae2mn71v3LgR2nriavOj2aH8mueIibv2pRN3DbZ5zz6MrzOA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
-
 这个时候线程1的cpu时间片用完了，线程2继续执行。线程2执行完整个append()方法后count变成6了
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbueq8rlWFnejuWibbkDsLW8Sfh5uSy474qdNlYw4GwotlRoAqgsPOgHAicYlLOPZLeXtdWvJtMUfp5VA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
 
 线程1继续执行第六行的str.getChars()方法的时候拿到的count值就是6了，执行char数组拷贝的时候就会抛出ArrayIndexOutOfBoundsException异常。
 
@@ -138,9 +133,29 @@ public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
 
 ### 改造为线程安全
 
-那么StringBuffer用什么手段保证线程安全的？StringBuffer的append()方法都使用synchronized关键词修饰了，阻塞其他线程。
+StringBuffer的append()方法都使用synchronized关键词修饰了，阻塞其他线程。
 
+<!--提问：是否可以对类的count变量进行volatile修饰，从而保障线程安全呢？-->
 
+回答：不可以。volatile只是保障每个线程拿到的count都是互相可见的，但是count+=使用了中间变量，中间变量是过期的
+
+```java
+    public static volatile Integer i = new Integer(0);
+    public static void main(String[] args) throws InterruptedException {
+
+        final Integer[] a = {i};
+        for (int i = 0; i < 10; i++){
+            new Thread(()->{
+                for (int j = 0; j < 10000; j++){
+                    a[0]++;
+                }
+            }).start();
+        }
+
+        Thread.sleep(100);
+        System.out.println(a[0]);
+    }
+```
 
 
 
@@ -148,7 +163,7 @@ public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
 
 ### 不安全的使用
 
-### 从类结构入手
+### 分析
 
 #### resize方法扩容 
 
@@ -173,17 +188,19 @@ Entry<K,V> e = table[bucketIndex];
   
        Entry[] newTable = new Entry[newCapacity];  
        transfer(newTable);  
-       table = newTable;  
+       this.table = newTable;  
        threshold = (int)(newCapacity * loadFactor);  
    }  
 ```
+
+<!--我在看到resize()中的newTable是在方法中被new的，那么就是说newTable的句柄是当前线程私有的，但是newTable却赋予了线程共有的this.table，所以我怀疑各个线程在执行resize过程中会交替赋值给this.table，有线程安全问题-->
 
 #### transfer方法复制
 
 ```java
 void transfer(Entry[] newTable, boolean rehash) {
         int newCapacity = newTable.length;
-        for (Entry<K,V> e : table) {
+        for (Entry<K,V> e : this.table) {
  
             while(null != e) {
                 Entry<K,V> next = e.next;            ---------------------(1)
@@ -200,9 +217,9 @@ void transfer(Entry[] newTable, boolean rehash) {
     }
 ```
 
+<!--我看到for循环这更怀疑了，一个可能被交替赋值的table变量可以被无阻塞遍历，肯定会有问题-->
 
-
-#### 复现
+### 复现
 
 ```
 Map<Integer> map = new HashMap<Integer>(2); 
@@ -220,12 +237,7 @@ Map<Integer> map = new HashMap<Integer>(2);
 
 ##### 执行一：
 
- 线程A执行到transfer函数中（1）处挂起（transfer函数代码中有标注）。此时在线程A的栈中
-
-```
-e = 3
-next = 7
-```
+ 线程A执行到transfer函数中（1）处挂起（transfer函数代码中有标注）。此时在线程A的栈中, 当前的 e = 3, next = 7
 
 ##### 执行二：
 
@@ -237,7 +249,7 @@ next = 7
 
 线程A解挂，接着执行（看到的仍是旧表），即从transfer代码（1）处接着执行，当前的 e = 3, next = 7, 上面已经描述。
 
-处理元素 3 ， 将 3 放入 线程A自己栈的newtable中（newtable是处于线程A自己栈中，是线程私有的，不被线程2的影响），处理3后的图如下：
+处理元素 3 ， 将 3 放入 线程A自己栈的newtable中，处理3后的图如下：
 
 <img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhpORt79k2Xjw9lfLfpaEMyakr99ePzoWDjVjPmPBRliawVx9iaUsRk701RpYOs7zN3B6YRLzNLVEXFA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
 
