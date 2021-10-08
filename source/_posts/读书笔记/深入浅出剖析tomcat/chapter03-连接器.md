@@ -13,7 +13,7 @@ tags:
 
 
 
-## 3.3 Application
+
 
 从本章开始，每章的应用程序都会按照模块进行划分。本章的应用程序可分为3个模块：connector、startup、core。
 
@@ -27,10 +27,6 @@ tags:
 - core模块包括ServletProcessor类和StaticResourceProcessor类。
 
 ![img](https://www.programmersought.com/images/667/a2fa48bccff98a27f6d8df02278f4dab.png)
-
-
-
-
 
 ![img](https://www.programmersought.com/images/968/2da5e3f2b2b3ac6ff7712ad78013cc60.png)  
 
@@ -49,28 +45,51 @@ tags:
   l     调用HttpProcessor对象的process方法。
 
 ```java
+package ex03.pyrmont.connector.http;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 public class HttpConnector implements Runnable {
 
-		public void run(){
-  		  while(){
-          	...
-            
-            // Initialize the processor, handle the socket
+  boolean stopped;
+  private String scheme = "http";
 
-            HttpProcessor httpProcessor = new HttpProcessor(this);
+  public String getScheme() {
+    return scheme;
+  }
 
-            httpProcessor.process(socket);
-        }
+  public void run() {
+    ServerSocket serverSocket = null;
+    int port = 8080;
+    try {
+      serverSocket =  new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"));
     }
-  
-    public void start() {
-
-        Thread thread = new Thread(this);
-
-        thread.start();
-
+    catch (IOException e) {
+      e.printStackTrace();
+      System.exit(1);
     }
+    while (!stopped) {
+      // Accept the next incoming connection from the server socket
+      Socket socket = null;
+      try {
+        socket = serverSocket.accept();
+      }
+      catch (Exception e) {
+        continue;
+      }
+      // Hand this socket off to an HttpProcessor
+      HttpProcessor processor = new HttpProcessor(this);
+      processor.process(socket);
+    }
+  }
 
+  public void start() {
+    Thread thread = new Thread(this);
+    thread.start();
+  }
 }
 ```
 
@@ -78,13 +97,15 @@ public class HttpConnector implements Runnable {
 
 ### HttpProcessor类的process(socket)方法
 
--  HttpProcessor类的process方法从http请求中获取socket。对每个http请求，它要做一下三件事：
+每一个HttpProcessor内部持有一个Request和一个Response，因为要解析http请求，填充到Request里。构造HttpProcessor的时候，调用HttpConnector的createRequest/createResponse创建这两个对象。
 
-  l     创建一个HttpRequest对象和一个HttpResponse对象；
+HttpProcessor类的process方法从http请求中获取socket。对每个http请求，它要做一下三件事：
 
-  l     处理请求行（request line）和请求头（request headers），填充HttpRequest对象；
+l     创建一个HttpRequest对象和一个HttpResponse对象；
 
-  l     将HttpRequest对象和HttpRespons
+l     处理请求行（request line）和请求头（request headers），填充HttpRequest对象；
+
+l     将HttpRequest对象和HttpRespons
 
 ```java
 public class HttpProcessor {
