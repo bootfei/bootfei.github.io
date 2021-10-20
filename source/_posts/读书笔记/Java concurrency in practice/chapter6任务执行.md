@@ -470,11 +470,12 @@ public interface Callable<V> {
 
 `Future` 规范中包含的**「隐含意义」** 是：任务的生命周期「只能前进」，不能后退，就像 `ExecutorService` 的生命周期一样，当某个任务完成后，它就只能永远停留在「完成」状态上。<!--生命周期只能前进，合理！！！-->
 
-`get`方法的行为「取决于任务的状态」（尚未开始、正在运行、已完成）。 如果任务已经完成，那么 `get` 会立即返回或者抛出一个 `Exception` ，如果任务没有完成，那么 `get` 将阻塞并直到任务完成。如果任务抛出了异常，那么 `get` 将该异常封装为 `ExecutionException`并重新抛出。 如果任务被取消，那么 `get` 将抛出 `CancellationException`。如果 `get` 抛出了 `ExecutionException`，那么可以通过 `getCause` 来获得被封装的「初始异常」。
+`get`方法的行为「取决于任务的状态」（尚未开始、正在运行、已完成）。 
 
-
-
-【看了一下源码，更加实际的体会上述可能抛出异常的多种情况】
+- 如果任务已经完成，那么 `get` 会立即返回或者抛出一个 `Exception` ，
+- 如果任务没有完成，那么 `get` 将阻塞并直到任务完成。
+- 如果任务抛出了异常，那么 `get` 将该异常封装为 `ExecutionException`并重新抛出。 
+- 如果任务被取消，那么 `get` 将抛出 `CancellationException`。如果 `get` 抛出了 `ExecutionException`，那么可以通过 `getCause` 来获得被封装的「初始异常」。
 
 > **程序清单 6-11** `Callable` 与 `Future` 接口
 
