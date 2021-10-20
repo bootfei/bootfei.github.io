@@ -6,7 +6,7 @@ tags:
 
 https://blog.csdn.net/lovejavaydj/category_9267782.html
 
-
+<!--socket转化为request和response这项工作已经被httpConnector和httpProcessor解决了，那么如何处理请求交给servlet容器，比如日志、添加请求头、业务..-->
 
 servelet容器是用来处理请求servlet资源，为web client端填充response对象的模块。servlet容器是org.apache.catalina.Container接口的实现。
 
@@ -77,6 +77,16 @@ public interface Container {
 
 本章节介绍当connector 调用容器(container)的 invoke() 方法会发生什么。后续子章节中讨论org.apache.catalina 中4个相关接口：Pipeline, Valve, ValveContext和Contained。
 
+这里是 Container 接口中 invoke() 方法在org.apache.catalina.core.ContainerBase 的实现：
+
+```java
+public void invoke(Request request, Response response) throws IOException, ServletException {
+    pipeline.invoke(request, response); //这里pipeline是容器中 Pipeline 接口的一个实例。
+}
+```
+
+
+
 一个管道(pipeline)中包含了该容器要调用的所有任务。每一个阀门(valve)表示着一特定任务。一个容器的管道中有一个<font color="red">基本的阀门</font>，但是我们可以添加任意想要添加的阀门。阀门的数目定义为添加的阀门的个数（不包括基本阀门）。有趣的是，阀门可以通过编辑 Tomcat 的配置文件 server.xml 来动态地添加。
 
 一个管道线就像一个过滤链，每一个阀门像一个过滤器。跟过滤器一样，一个阀门可以操作处理传递给它的 request 和 response 对象。一个阀门完成处理后，它则进一步调用管道中的下一个阀门，基本阀门总是在最后才被调用。
@@ -97,16 +107,18 @@ basicValve.invoke( ... );
 
 [容器不会硬编码它的invoke()方法被调用时应该做什么。反而，容器调用的是管道的 invoke()方法]()。管道接口的 invoke() 方法跟容器接口的invoke() 方法签名相同，方法签名如下：
 
-```
+```java
 public void invoke(Request request, Response response) throws IOException, ServletException;
 ```
 
-这里是 Container 接口中 invoke() 方法在org.apache.catalina.core.ContainerBase 的实现：
+一个Pipeline的 invoke() 方法可以如下实现：
 
 ```java
-public void invoke(Request request, Response response) throws IOException, ServletException {
-    pipeline.invoke(request, response); //这里pipeline是容器中 Pipeline 接口的一个实例。
-}
+ public void invoke(Request request, Response response)
+    throws IOException, ServletException {
+    // Invoke the first Valve in this pipeline for this request
+    (new SimplePipelineValveContext()).invokeNext(request, response);
+  }
 ```
 
 
@@ -114,7 +126,9 @@ public void invoke(Request request, Response response) throws IOException, Servl
 [现在，管道必须保证添加给它的阀门必须如基本阀门一样被调用一次。]()**管道通过创建一**
 **个 ValveContext 接口的实例来实现**。ValveContext 是管道的内部类，这样 ValveContext 就可以访问管道中所有成员。ValveContext 中最重要的方法是 invokeNext() 方法：
 
-在创建一个 ValveContext 实例之后，管道调用 ValveContext 的 invokeNext()方法。ValveContext 会先唤起管道中的第一个阀门，然后第一个阀门会在完成它的任务之前继续唤起下一个阀门。ValveContext 将它自己传递给每一个阀门，那么该阀门就可以调用 ValveContext 的 invokeNext() 方法。Valve 接口的 invoke()签名如下：
+在创建一个 ValveContext 实例之后，管道调用 ValveContext 的 invokeNext()方法。ValveContext 会先唤起管道中的第一个阀门，然后第一个阀门会在完成它的任务之前继续唤起下一个阀门。ValveContext 将它自己传递给每一个阀门，那么该阀门就可以调用 ValveContext 的 invokeNext() 方法。
+
+Valve 接口的 invoke()签名如下：
 
 ```java
 public void  invoke(Request request, Response response,
@@ -128,12 +142,14 @@ public void invoke(Request request, Response response,
     ValveContext valveContext) throws IOException, ServletException {
     // Pass the request and response on to the next valve in our pipeline
     valveContext.invokeNext(request, response);
-    // now perform what this valve is supposed to do
-    ...
+    // now perform what this valve is supposed to do，
+    ...比如下文的HeaderLoggerValve的逻辑
 }
 ```
 
 org.apache.catalina.core.StandardPipeline 类是所有容器中Pipeline的实现。在Tomcat4 中，这个类中有一个[内部类 StandardPipelineValveContext]() 实现了ValveContext 接口，
+
+> 仔细推敲会发现，每个Valve都是先调用ValveContext的invokeNext，然后才做自己的工作，所以“第一个”被 pipeline调用的Valve，实际却是最后一个完成自己工作的，有点类似“压栈”操作，第一个Valve最先被压进去，却是最后一个从堆栈中弹出来 的。如果不信，可以做个试验，眼见为实。
 
 Listing 5.1: Tomcat 4中的StandardPipelineValveContext 类
 
@@ -200,7 +216,7 @@ public interface Valve {
     public String getInfo();
     public void invoke(Request request, Response response,
         ValveContext context) throws IOException, ServletException;
-}123456789
+}
 ```
 
 ### **5.2.3 ValveContext接口**
@@ -216,7 +232,7 @@ public interface ValveContext {
     public String getInfo();
     public void invokeNext(Request request, Response response)
         throws IOException, ServletException;
-}123456789
+}
 ```
 
 ### **5.2.4 Contained接口**
@@ -264,7 +280,7 @@ Servlet allocate() throws ServletException;
 
 包装器包装的是前面章节已经使用过的 ModernServlet类。这个应用程序表示一个 servlet 容器可以只有一单一的包装器构成。这些类都没有完整的实现，只是实现了必要方法。接下来看程序的具体实现。
 
-#### **5.5.1 core.SimpleLoader**
+#### **core.SimpleLoader**
 
 容器中加载 servlet 的任务分配给了 Loader 实现。在该程序中 SimpleLoader就是一个 Loader 实现。它知道如何定位一个 servlet，并且通过 getClassLoader()获得一个 java.lang.ClassLoader 实例用来查找 servlet 类位置。
 
@@ -301,17 +317,17 @@ public SimpleLoader() {
 
 注意：加载器将在第8章详细讨论。
 
-#### **5.5.2 core.SimplePipeline**
+#### **core.SimplePipeline**
 
 SimplePipeline 实现了 org.apache.catalina.Pipeline 接口。该类中最重要的方法是 invoke() 方法，其中包括了一个内部类 SimplePipelineValveContext。SimplePipelineValveContext 实现了 org.apache.catalina.ValveContext 接口如上面章节所介绍。
 
-#### **5.5.3 core. SimpleWrapper**
+#### **core. SimpleWrapper**
 
 该类实现了 org.apache.catalina.Wrapper 接口并且实现了 allocate() 方法和load() 方法，并声明了如下变量：
 
 ```
 private Loader loader;
-protected Container parent = null;12
+protected Container parent = null;
 ```
 
 loader 变量用于加载一个 servlet 类。parent 变量表示该包装器的父容器。这意味着，该容器可以是其它容器的子容器，例如 Context。
@@ -325,7 +341,7 @@ public Loader getLoader() {
     if (parent != null)
         return (parent.getLoader());
     return (null);
-}1234567
+}
 ```
 
 getLoader()方法用于返回一个 Loader 对象用于加载一个 servlet 类。如果一个包装器跟一个加载器相关联，会返回该加载器。否则返回其父容器的加载器，如果没有父容器，则返回 null。
@@ -334,25 +350,24 @@ SimpleWrapper 类有一个管道和该管道的基本阀门。这些工作在Sim
 
 Listing 5.8:
 
-```
+```java
+//其中，pipeline是 SimplePipeline 类的一个实例：
+private SimplePipeline pipeline = new SimplePipeline(this);
+
 public SimpleWrapper() {
     pipeline.setBasic(new SimpleWrapperValve());
 }
 ```
 
-其中，pipeline是 SimplePipeline 类的一个实例：
 
-```
-private SimplePipeline pipeline = new SimplePipeline(this);
-```
 
-#### **5.5.4 core. SimpleWrapperValve**
+#### **core. SimpleWrapperValve**
 
-SimpleWrapperValve 类是一个给 SimpleWrapper 类专门处理请求的基本阀门。它实现了 org.apache.catalina.Valve 接口和org.apache.catalina.Contained接口。最重要的方法是 invoke() 方法，如 Listing5.9 所示：
+SimpleWrapperValve 类是一个给 SimpleWrapper 类专门处理请求的[基本阀门]()。它实现了 org.apache.catalina.Valve 接口和org.apache.catalina.Contained接口。最重要的方法是 invoke() 方法，如 Listing5.9 所示：
 
 Listing 5.9: SimpleWrapperValve类的invoke()方法：
 
-```
+```java
 public void invoke(Request request, Response response, ValveContext valveContext)
     throws IOException, ServletException {
 
@@ -379,18 +394,20 @@ public void invoke(Request request, Response response, ValveContext valveContext
     }
     catch (ServletException e) {
     }
-  }123456789101112131415161718192021222324252627
+  }
 ```
 
-由于 SimpleWrapperValve 被当做一基本阀门来使用，所以它的 invoke() 方法不需要invokeNext()方法。invoke()方法调用SimpleWrapper的allocate()方法获得servlet的实例。然后调用 servlet 的 service() 方法。注意包装器管道的基本阀门唤醒的是 servlet 的 service ()方法，而不是 wrapper自己。
+<font color="red">由于 SimpleWrapperValve 被当做一基本阀门来使用，所以它的 invoke() 方法不需要invokeNext()方法。</font>
 
-#### **5.5.5 ex05.pyrmont. valves. ClientIPLoggerValve**
+invoke()方法调用SimpleWrapper的allocate()方法获得servlet的实例。然后调用 servlet 的 service() 方法。注意包装器管道的基本阀门唤醒的是 servlet 的 service ()方法，而不是 wrapper自己。
+
+#### **ex05.pyrmont. valves. ClientIPLoggerValve**
 
 ClientIPLoggerValve 是一个阀门，它打印客户端的 IP 地址到控制台。该类如 Listing5.10:
 
 Listing 5.10: ClientIPLoggerValve类
 
-```
+```java
 package ex05.pyrmont.valves;
 
 import java.io.IOException;
@@ -430,19 +447,20 @@ public class ClientIPLoggerValve implements Valve, Contained {
   public void setContainer(Container container) {
     this.container = container;
   }
-}12345678910111213141516171819202122232425262728293031323334353637383940
+}
 ```
 
-注意 invoke() 方法，它的第一件事情是调用阀门上下文 invokeNext ()方法来唤醒下
-一个阀门，然后它会打印出请求对象的 getRemoteAddr() 方法的输出。
+> 注意：
+>
+>  invoke() 方法，它的第一件事情是调用阀门上下文 invokeNext ()方法来唤醒下一个阀门，然后它会打印出请求对象的 getRemoteAddr() 方法的输出。
 
-#### **5.5.6 ex05.pyrmont. valves. HeaderLoggerValve**
+#### **ex05.pyrmont. valves. HeaderLoggerValve**
 
 该类跟 ClientIPLoggerValve 类非常相似。HeaderLoggerValve 是一个阀门打印请求头部信息到控制台上。该类如 Listing5.11：
 
 Listing 5.11: HeaderLoggerValve 类
 
-```
+```java
 package ex05.pyrmont.valves;
 
 import java.io.IOException;
@@ -497,12 +515,14 @@ public class HeaderLoggerValve implements Valve, Contained {
   public void setContainer(Container container) {
     this.container = container;
   }
-}12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455
+}
 ```
 
-注意其 invoke() 方法，该方法首先调用阀门的 invokeNext()方法唤醒下一个阀门。然后打印出头部的值。
+> 注意：
+>
+> 其 invoke() 方法，该方法首先调用阀门的 invokeNext()方法唤醒下一个阀门。然后打印出头部的值。
 
-#### **5.5.7 pyrmont.startup.Bootstrap1**
+#### **pyrmont.startup.Bootstrap1**
 
 Bootstrap1 用于启动这个应用程序。
 
@@ -529,15 +549,18 @@ public final class Bootstrap1 {
 
     HttpConnector connector = new HttpConnector();
     Wrapper wrapper = new SimpleWrapper();
+    //创建 HttpConnector 和 SimpleWrapper 类的实例后，分配ModernServlet 给 SimpleWrapper 的 setServletClass() 方法，告诉包装器要加载的类的名字以便于加载。
     wrapper.setServletClass("ModernServlet");
+    //然后创建了加载器和两个阀门，然后将其加载器赋给包装器：
     Loader loader = new SimpleLoader();
     Valve valve1 = new HeaderLoggerValve();
     Valve valve2 = new ClientIPLoggerValve();
-
     wrapper.setLoader(loader);
+     //然后把两个阀门添加到包装器管道中：
     ((Pipeline) wrapper).addValve(valve1);
     ((Pipeline) wrapper).addValve(valve2);
 
+    //最后，把包装器当做容器添加到连接器中，然后初始化并启动连接器：
     connector.setContainer(wrapper);
 
     try {
@@ -554,51 +577,7 @@ public final class Bootstrap1 {
 }
 ```
 
-创建 HttpConnector 和 SimpleWrapper 类的实例后，分配ModernServlet 给 SimpleWrapper 的 setServletClass() 方法，告诉包装器要加载的类的名字以便于加载。
-
-```
-wrapper.setServletClass("ModernServlet");1
-```
-
-然后创建了加载器和两个阀门，然后将其加载器赋给包装器：
-
-```
-Loader loader = new SimpleLoader();
-Valve valve1 = new HeaderLoggerValve();
-Valve valve2 = new ClientIPLoggerValve();
-wrapper.setLoader(loader);1234
-```
-
-然后把两个阀门添加到包装器管道中：
-
-```
-((Pipeline) wrapper).addValve(valve1);
-((Pipeline) wrapper).addValve(valve2);12
-```
-
-最后，把包装器当做容器添加到连接器中，然后初始化并启动连接器：
-
-```
-connector.setContainer(wrapper);
-try {
-    connector.initialize();
-    connector.start();1234
-```
-
-下一行允许用户在控制台键入回车键以停止程序。
-
-```
-// make the application wait until we press Enter.
-System.in.read();12
-```
-
 #### **5.5.8 运行Demo**
-
-在 windows 下，可以在工作目录下面如下运行该程序：
-
-```
-java -classpath ./lib/servlet.jar;./ ex05.pyrmont.startup.Bootstrap11
-```
 
 在 Linux 下，使用冒号分开两个库：
 
@@ -629,6 +608,10 @@ connection:keep-alive
 upgrade-insecure-requests:1
 ------------------------------------
 ```
+
+<!--果然最先添加的valve，是最后执行的，递归操作，类似stack-->
+
+
 
 ## **5.6 Context应用Demo**
 
