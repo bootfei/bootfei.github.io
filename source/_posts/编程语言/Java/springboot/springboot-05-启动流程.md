@@ -1,14 +1,14 @@
 ---
 title: springboot-04-父子容器
 date: 2021-04-16 09:30:13
-tags:
+tags: [java, springboot]
 ---
 
 由于该系统是底层系统，以微服务形式对外暴露dubbo服务，所以本流程中SpringBoot不基于jetty或者tomcat等容器启动方式发布服务，而是以执行程序方式启动来发布
 
 # SpringBoot 启动过程
 
-![img](https://upload-images.jianshu.io/upload_images/6912735-51aa162747fcdc3d.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+![img](https://upload-images.jianshu.io/upload_images/6912735-51aa162747fcdc3d.png)
 
 启动流程主要分为三个部分，
 
@@ -24,26 +24,30 @@ tags:
 
 ## 第一部分：初始化
 
+### @SpringApplication注解
+
+ 每个SpringBoot程序都有一个主入口，也就是main方法，main里面调用SpringApplication.run()启动整个spring-boot程序。SpringBoot要求该main方法所在类必须使用@SpringBootApplication注解，以及@ImportResource注解(if need)
+
+@SpringBootApplication包括三个注解：
+
+| 注解                     | 功能                                                         |
+| ------------------------ | ------------------------------------------------------------ |
+| @EnableAutoConfiguration | 自动配置：从 `classpath` 中搜寻所有的 `META-INF/spring.factories` 配置文件，并将其中 `org.springframework.boot.autoconfigure.EnableutoConfiguration` 对应的配置项通过**反射实例化**为对应的标注了 `@Configuration` 的 `JavaConfig` 形式的 IoC 容器配置类，然后汇总为一个并加载到 IoC 容器。 |
+| @SpringBootConfiguration | 源码内部其实是`@Configuration`：被标注的类等于在spring的XML配置文件中`applicationContext.xml`，装配所有bean事务，提供了一个spring的上下文环境Context |
+| @ComponentScan           | 组件扫描，可自动发现和装配Bean，默认扫描SpringApplication的run(xxx.class)中, xxx.class所在的包路径下文件，所以最好将该启动类放到根包路径下。`@ComponentScan`通常与`@Configuration`一起配合使用，相当于xml里面的`<context:component-scan>`，用来告诉Spring需要扫描哪些包或类。如果不设值的话默认扫描@ComponentScan注解所在类的同级类和同级目录下的所有类  , *所以对于一个Spring Boot项目，一般会把入口类放在顶层目录中，这样就能够保证源码目录下的所有类都能够被扫描到*。 |
 
 
-### @SpringApplication
 
-   每个SpringBoot程序都有一个主入口，也就是main方法，main里面调用SpringApplication.run()启动整个spring-boot程序，该方法所在类需要使用@SpringBootApplication注解，以及@ImportResource注解(if need)，@SpringBootApplication包括三个注解，功能如下
-
-> @EnableAutoConfiguration自动配置：从 `classpath` 中搜寻所有的 `META-INF/spring.factories` 配置文件，并将其中 `org.springframework.boot.autoconfigure.EnableutoConfiguration` 对应的配置项通过**反射实例化**为对应的标注了 `@Configuration` 的 `JavaConfig` 形式的 IoC 容器配置类，然后汇总为一个并加载到 IoC 容器。
->
-> @SpringBootConfiguration(内部为@Configuration)：被标注的类等于在spring的XML配置文件中(applicationContext.xml)，装配所有bean事务，提供了一个spring的上下文环境
->
-> @ComponentScan：组件扫描，可自动发现和装配Bean，默认扫描SpringApplication的run(xxx.class)中, xxx.class所在的包路径下文件，所以最好将该启动类放到根包路径下。@ComponentScan通常与@Configuration一起配合使用，相当于xml里面的`<context:component-scan>`，用来告诉Spring需要扫描哪些包或类。如果不设值的话默认扫描@ComponentScan注解所在类的同级类和同级目录下的所有类，所以对于一个Spring Boot项目，一般会把入口类放在顶层目录中，这样就能够保证源码目录下的所有类都能够被扫描到。
-
-### Application#run()方法
+### SpringApplication#run(xxx.class, args)方法
 
 ```java
-// 构造实例
+// SpringApplication.class
+// 构造实例，在2nd step中被调用
 public SpringApplication(Object... sources) {
     initialize(sources);
 }
 
+//在构造函数中被调用
 private void initialize(Object[] sources) {
     if (sources != null && sources.length > 0) {
         this.sources.addAll(Arrays.asList(sources));
@@ -58,25 +62,77 @@ private void initialize(Object[] sources) {
     // 推断应用入口类
     this.mainApplicationClass = deduceMainApplicationClass();
 }
+
+//1st step
+public static ConfigurableApplicationContext run(Class<?> primarySource, String... args) {
+  return run(new Class[]{primarySource}, args);
+}
+
+//2nd step
+public static ConfigurableApplicationContext run(Class<?>[] primarySources, String[] args) {
+  //我们可以发现其构造方法在这，其实调用了一个初始化的initialize方法
+  return (new SpringApplication(primarySources)).run(args);
+}
+
+//3rd step
+public ConfigurableApplicationContext run(String... args) {
+  StopWatch stopWatch = new StopWatch();
+  stopWatch.start();
+  ConfigurableApplicationContext context = null;
+  Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList();
+  this.configureHeadlessProperty();
+  //1.创建了应用的监听器SpringApplicationRunListeners并开始监听
+  SpringApplicationRunListeners listeners = this.getRunListeners(args);
+  listeners.starting();
+
+  Collection exceptionReporters;
+  try {
+    ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+    //2.加载SpringBoot配置环境(ConfigurableEnvironment)
+    ConfigurableEnvironment environment = this.prepareEnvironment(listeners, applicationArguments);
+    this.configureIgnoreBeanInfo(environment);
+    Banner printedBanner = this.printBanner(environment);
+    context = this.createApplicationContext();
+    exceptionReporters = this.getSpringFactoriesInstances(SpringBootExceptionReporter.class, new Class[]{ConfigurableApplicationContext.class}, context);
+    //5.prepareContext()方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
+    this.prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+    this.refreshContext(context);
+    this.afterRefresh(context, applicationArguments);
+    stopWatch.stop();
+    if (this.logStartupInfo) {
+      (new StartupInfoLogger(this.mainApplicationClass)).logStarted(this.getApplicationLog(), stopWatch);
+    }
+
+    listeners.started(context);
+    this.callRunners(context, applicationArguments);
+  } catch (Throwable var10) {
+    this.handleRunFailure(context, var10, exceptionReporters, listeners);
+    throw new IllegalStateException(var10);
+  }
+
+  try {
+    listeners.running(context);
+    return context;
+  } catch (Throwable var9) {
+    this.handleRunFailure(context, var9, exceptionReporters, (SpringApplicationRunListeners)null);
+    throw new IllegalStateException(var9);
+  }
+}
 ```
 
-> SpringApplication .run(xxx.class, args) 
->
-> ​		new SpringApplication(source).run(): 其中构造方法内，我们可以发现其调用了一个初始化的initialize方法；run()方法
 
-<img src="https://upload-images.jianshu.io/upload_images/6912735-b1512831c3402b11.png?imageMogr2/auto-orient/strip|imageView2/2/w/983/format/webp" alt="img" style="zoom:80%;" />
 
 run() 方法中实现了如下几个关键步骤：
 
-1.创建了应用的监听器SpringApplicationRunListeners并开始监听
+1.创建了应用的监听器`SpringApplicationRunListeners`并开始监听
 
-2.加载SpringBoot配置环境(ConfigurableEnvironment)，如果是通过web容器发布，会加载StandardEnvironment，其最终也是继承了ConfigurableEnvironment，Environment最终都实现了PropertyResolver接口，我们平时通过environment对象获取配置文件中指定Key对应的value方法时，就是调用了propertyResolver接口的getProperty方法
+2.加载SpringBoot配置环境(ConfigurableEnvironment)，如果是通过web容器发布，会加载`StandardEnvironment`，其最终也是继承了`ConfigurableEnvironment`，`变量environment对象`最终都实现了`PropertyResolver`接口，所以我们平时通过`变量environment对象`获取配置文件中指定Key对应的value时，就是调用了`propertyResolver`接口的`getProperty()`方法
 
-3.配置环境(Environment)加入到监听器对象中(SpringApplicationRunListeners)
+3.配置`变量environment对象`加入到监听器对象中`SpringApplicationRunListeners`
 
 4.创建run方法的返回对象：ConfigurableApplicationContext(应用配置上下文)，方法会先获取显式设置的应用上下文(applicationContextClass)，如果不存在，再加载默认的环境配置（通过是否是web environment判断），默认选择AnnotationConfigApplicationContext注解上下文（通过扫描所有注解类来加载bean），最后通过BeanUtils实例化上下文对象，并返回，ConfigurableApplicationContext类图如下：
 
-![img](https:////upload-images.jianshu.io/upload_images/6912735-797f3d2c57b625bc.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+![img](https:////upload-images.jianshu.io/upload_images/6912735-797f3d2c57b625bc.png)
 
 主要看其继承的两个方向：
 
@@ -84,7 +140,7 @@ LifeCycle：生命周期类，定义了start启动、stop结束、isRunning是�
 
 ApplicationContext：应用上下文类，其主要继承了beanFactory(bean的工厂类)
 
-5.回到run方法内，prepareContext方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
+5.回到run方法内，`prepareContext()`方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
 
 6.接下来的refreshContext(context)方法(初始化方法如下)将是实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作。
 
