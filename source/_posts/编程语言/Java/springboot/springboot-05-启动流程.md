@@ -20,8 +20,6 @@ tags: [java, springboot]
 
 
 
-
-
 ## 第一部分：初始化
 
 ### @SpringApplication注解
@@ -32,7 +30,7 @@ tags: [java, springboot]
 
 | 注解                     | 功能                                                         |
 | ------------------------ | ------------------------------------------------------------ |
-| @EnableAutoConfiguration | 自动配置：从 `classpath` 中搜寻所有的 `META-INF/spring.factories` 配置文件，并将其中 `org.springframework.boot.autoconfigure.EnableutoConfiguration` 对应的配置项通过**反射实例化**为对应的标注了 `@Configuration` 的 `JavaConfig` 形式的 IoC 容器配置类，然后汇总为一个并加载到 IoC 容器。 |
+| @EnableAutoConfiguration | 自动配置：从 `classpath` 中搜寻所有的 `META-INF/spring.factories` 配置文件，并将其中 `org.springframework.boot.autoconfigure.EnableAutoConfiguration` 对应的配置项通过**反射实例化**为对应的标注了 `@Configuration` 的 `JavaConfig` 形式的 IoC 容器配置类，然后汇总为一个并加载到 IoC 容器。 |
 | @SpringBootConfiguration | 源码内部其实是`@Configuration`：被标注的类等于在spring的XML配置文件中`applicationContext.xml`，装配所有bean事务，提供了一个spring的上下文环境Context |
 | @ComponentScan           | 组件扫描，可自动发现和装配Bean，默认扫描SpringApplication的run(xxx.class)中, xxx.class所在的包路径下文件，所以最好将该启动类放到根包路径下。`@ComponentScan`通常与`@Configuration`一起配合使用，相当于xml里面的`<context:component-scan>`，用来告诉Spring需要扫描哪些包或类。如果不设值的话默认扫描@ComponentScan注解所在类的同级类和同级目录下的所有类  , *所以对于一个Spring Boot项目，一般会把入口类放在顶层目录中，这样就能够保证源码目录下的所有类都能够被扫描到*。 |
 
@@ -81,7 +79,7 @@ public ConfigurableApplicationContext run(String... args) {
   ConfigurableApplicationContext context = null;
   Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList();
   this.configureHeadlessProperty();
-  //1.创建了应用的监听器SpringApplicationRunListeners并开始监听
+  //1.创建了应用的监听器SpringApplicationRunListeners并开始监听(其实是在构造函数中完成的)
   SpringApplicationRunListeners listeners = this.getRunListeners(args);
   listeners.starting();
 
@@ -96,6 +94,7 @@ public ConfigurableApplicationContext run(String... args) {
     exceptionReporters = this.getSpringFactoriesInstances(SpringBootExceptionReporter.class, new Class[]{ConfigurableApplicationContext.class}, context);
     //5.prepareContext()方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
     this.prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+    //6.实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作
     this.refreshContext(context);
     this.afterRefresh(context, applicationArguments);
     stopWatch.stop();
@@ -130,7 +129,7 @@ run() 方法中实现了如下几个关键步骤：
 
 3.配置`变量environment对象`加入到监听器对象中`SpringApplicationRunListeners`
 
-4.创建run方法的返回对象：ConfigurableApplicationContext(应用配置上下文)，方法会先获取显式设置的应用上下文(applicationContextClass)，如果不存在，再加载默认的环境配置（通过是否是web environment判断），默认选择AnnotationConfigApplicationContext注解上下文（通过扫描所有注解类来加载bean），最后通过BeanUtils实例化上下文对象，并返回，ConfigurableApplicationContext类图如下：
+4.创建`应用配置上下文ConfigurableApplicationContext`(即run方法的返回对象)，方法会先获取显式设置的应用上下文(applicationContextClass)，如果不存在，再加载默认的环境配置（通过是否是web environment判断），默认选择AnnotationConfigApplicationContext注解上下文（通过扫描所有注解类来加载bean），最后通过BeanUtils实例化上下文对象，并返回，ConfigurableApplicationContext类图如下：
 
 ![img](https:////upload-images.jianshu.io/upload_images/6912735-797f3d2c57b625bc.png)
 
