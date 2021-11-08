@@ -22,7 +22,7 @@ tags: [java, springboot]
 
 ## 第一部分：初始化
 
-### @SpringApplication注解
+### @SpringApplication
 
  每个SpringBoot程序都有一个主入口，也就是main方法，main里面调用SpringApplication.run()启动整个spring-boot程序。SpringBoot要求该main方法所在类必须使用@SpringBootApplication注解，以及@ImportResource注解(if need)
 
@@ -36,7 +36,7 @@ tags: [java, springboot]
 
 
 
-### SpringApplication#run(xxx.class, args)方法
+### SBApp#run(x.class, args)
 
 ```java
 // SpringApplication.class
@@ -117,6 +117,22 @@ public ConfigurableApplicationContext run(String... args) {
     throw new IllegalStateException(var9);
   }
 }
+
+
+
+private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments) {
+  ConfigurableEnvironment environment = this.getOrCreateEnvironment();
+  this.configureEnvironment((ConfigurableEnvironment)environment, applicationArguments.getSourceArgs());
+  //3. 配置`变量environment对象`加入到监听器对象中`SpringApplicationRunListeners`
+  listeners.environmentPrepared((ConfigurableEnvironment)environment);
+  this.bindToSpringApplication((ConfigurableEnvironment)environment);
+  if (this.webApplicationType == WebApplicationType.NONE) {
+    environment = (new EnvironmentConverter(this.getClassLoader())).convertToStandardEnvironmentIfNecessary((ConfigurableEnvironment)environment);
+  }
+
+  ConfigurationPropertySources.attach((Environment)environment);
+  return (ConfigurableEnvironment)environment;
+}
 ```
 
 
@@ -125,7 +141,7 @@ run() 方法中实现了如下几个关键步骤：
 
 1.创建了应用的监听器`SpringApplicationRunListeners`并开始监听
 
-2.加载SpringBoot配置环境(ConfigurableEnvironment)，如果是通过web容器发布，会加载`StandardEnvironment`，其最终也是继承了`ConfigurableEnvironment`，`变量environment对象`最终都实现了`PropertyResolver`接口，所以我们平时通过`变量environment对象`获取配置文件中指定Key对应的value时，就是调用了`propertyResolver`接口的`getProperty()`方法
+2.加载SpringBoot配置环境`ConfigurableEnvironment`，如果是通过web容器发布，会加载`StandardEnvironment`，其最终也是继承了`ConfigurableEnvironment`，`变量environment对象`最终都实现了`PropertyResolver`接口，所以我们平时通过`变量environment对象`获取配置文件中指定Key对应的value时，就是调用了`propertyResolver`接口的`getProperty()`方法
 
 3.配置`变量environment对象`加入到监听器对象中`SpringApplicationRunListeners`
 
@@ -133,15 +149,16 @@ run() 方法中实现了如下几个关键步骤：
 
 ![img](https:////upload-images.jianshu.io/upload_images/6912735-797f3d2c57b625bc.png)
 
-主要看其继承的两个方向：
+> 主要看其继承的两个方向：
+>
+> LifeCycle：生命周期类，定义了start启动、stop结束、isRunning是否运行中等生命周期空值方法
+>
+> ApplicationContext：应用上下文类，其主要继承了beanFactory(bean的工厂类)
+>
 
-LifeCycle：生命周期类，定义了start启动、stop结束、isRunning是否运行中等生命周期空值方法
+5.`prepareContext()`方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
 
-ApplicationContext：应用上下文类，其主要继承了beanFactory(bean的工厂类)
-
-5.回到run方法内，`prepareContext()`方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联
-
-6.接下来的refreshContext(context)方法(初始化方法如下)将是实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作。
+6.`refreshContext(context)`方法(初始化方法如下)将是实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作。
 
 
 
