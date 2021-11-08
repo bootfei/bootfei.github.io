@@ -401,8 +401,15 @@ public class OutOfTime {
 
 另一种「串行」执行的方法更好一些，它先绘制文本元素，同时为图像预留出矩形的占位空间，在处理完了第一遍文本后，程序再开始下载图像，并将他们绘制到相应的占位空间中。
 
+> --->renderText(source)   ---> 下载图片1 ---> 下载图片2  .......---> 下载图片n ---> renderImage(图片)
+
+<<<<<<< HEAD
+=======
+
+
 在 **程序清单 6-10** 的 `SingleThreadRenderer`中给出了上述这种方法的实现。
 
+>>>>>>> fdb26db843d2d64440296f4c32d43af5a613f48f
 > 程序清单 6-10 串行地渲染页面元素：
 
 ```java
@@ -530,6 +537,12 @@ public interface Future<V> {
 
 如果幸运的话，当开始请求时所有图像就已经下载完成了，即使没有，下载图像的任务也已经提前开始了。
 
+> ---> renderText(source)   
+>
+> ---> 下载图片1 ---> 下载图片2 ... ---> 下载图片n   ---> renderImage(图片)
+
+
+
 > 程序清单 6-13 使用 `Future` 等待图像下载：
 
 ```java
@@ -608,7 +621,11 @@ public abstract class FutureRenderer {
 
 `ExecutorCompletionService` 实现了 `CompletionService`，并将**「计算部分」**委托给了一个 `Executor`。<!--其实这块的设计，需要仔细想一下设计模式的概念，如果你想为一个类开发一个全新的功能，你会怎么做呢？JAVA的设计师使用了组合方法，计算部分仍然交给Executor，全新的功能交给CompletionService,那么CompletionService持有一个Exectuor对象即可-->
 
+<<<<<<< HEAD
 `ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。<!--Executor有任务队列，现在ExcutorCompletionService多了个结果队列-->
+=======
+`ExecutorCompletionService` 的实现非常简单。 在构造函数中创建一个 `BlockingQueue` 来保存计算完成的结果。<!--Executor有任务队列，ExcutorCompletionService比Exectutor多了一个结果队列-->
+>>>>>>> fdb26db843d2d64440296f4c32d43af5a613f48f
 
 当计算完成时，调用 `FutureTask` 中的 `done` 方法。
 
@@ -648,6 +665,18 @@ public abstract class FutureRenderer {
 为每一个图像的「下载」都创建一个「独立任务」，并在线程中执行它们，从而将「串行」的下载过程转变为「并行」过程。
 
 此外，通过从 `CompletionService` 中获取结果以及使每张图片在下载完成后「立刻」 显示出来，能使用户获得一个更加「动态」和「更高响应性」 的用户界面，如下面的代码所示：
+
+> ---> renderText(source)   
+>
+> ---> 下载图片1  ---> renderImage(图片)
+>
+> ---------> 下载图片2  ---> renderImage(图片)
+>
+> ... 
+>
+> ------------------------------------> 下载图片n   ---> renderImage(图片)
+
+
 
 > **程序清单 6-15** 使用 `CompletionService` 使页面元素在下载完成后立即显示出来：
 
@@ -760,7 +789,11 @@ public class RederWithTimeBudget {
 }
 ```
 
+<<<<<<< HEAD
 #### 示例：旅行预订门户网站
+=======
+#### 示例4：旅行预订门户网站
+>>>>>>> fdb26db843d2d64440296f4c32d43af5a613f48f
 
 「预定时间」 方法可以很容易地 「扩展」 到任意数量的任务上。
 
