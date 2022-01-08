@@ -1,0 +1,510 @@
+---
+title: 'mysql:哪些因素会导致慢查询'
+date: 2020-11-21 09:58:49
+tags: [mysql]
+---
+
+它山之石可以攻玉
+
+### ref links:
+
+1. 从底层硬件、操作系统、mysql软件层面分析
+   https://mp.weixin.qq.com/s/Edn_gPwcAHo5sYIzLJghzA
+
+
+
+### Explain命令原理
+
+#### id列原理
+
+这一列总是包含一个编号，标示select所属的行。数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的就表示这是一个结果集，不需要使用它来进行查询。
+
+#### rows 计算原理
+
+```mysql
+select
+    c.*
+from
+    hotel_info_original c 
+left join
+    hotel_info_collection h 
+on
+    c.hotel_type=h.hotel_type 
+and
+    c.hotel_id =h.hotel_id 
+where
+    h.hotel_id is null
+```
+
+这个sql是用来查询出 c 表中有 h 表中无的记录，所以想到了用 left join 的特性（返回左边全部记录，右表不满足匹配条件的记录对应行返回 null）来满足需求，不料这个查询非常慢。先来看查询计划：
+
+**![img](https://images2015.cnblogs.com/blog/544496/201707/544496-20170711162211978-591320154.jpg)**
+
+　　rows代表这个步骤相对上一步结果的每一行需要扫描的行数，可以看到这个sql需要扫描的行数为35773*8134，非常大的一个数字。
+
+　　**在EXPLAIN结果中，第一行出现的表就是驱动表。**
+
+> **rows (JSON name: rows)**
+>
+> The rows column indicates the number of rows MySQL believes it must examine to execute the query.
+>
+> For [InnoDB] tables, this number is an estimate, and may not always be exact.
+
+http://dev.mysql.com/doc/refman/5.7/en/explain-output.html#explain_rows
+
+查找 MYSQL 源码来看看：
+
+```
+文件1：sql/opt_explain_traditional.cc   关键部分：push(&items, column_buffer.col_rows, nil)
+
+文件2：sql/opt_explain.cc   关键部分：select->quick->records
+
+文件3：sql/opt_range.cc   关键部分：check_quick_select
+```
+
+而 check_quick_select 的功能，在 MySQL 源码中的注释为：
+
+> Calculate estimate of number records that will be retrieved by a range scan on given index using given SEL_ARG intervals tree.
+
+
+
+MySQL Explain 里的 rows 这个值
+
+- 是 MySQL 认为它要检查的行数（仅做参考），而不是结果集里的行数；
+- 同时 SQL 里的 LIMIT 和这个也是没有直接关系的。
+
+另外，很多优化手段，例如关联缓冲区和查询缓存，都无法影响到 rows 的显示。MySQL 可能不必真的读所有它估计到的行，它也不知道任何关于操作系统或硬件缓存的信息。
+
+
+
+
+
+### 慢查询优化基本步骤
+
+0.先运行看看是否真的很慢，注意设置SQL_NO_CACHE
+
+1.where条件单表查，锁定最小返回记录表。这句话的意思是把查询语句的where都应用到表中返回的记录数最小的表开始查起，单表每个字段分别查询，看哪个字段的区分度最高
+
+2.explain查看执行计划，是否与1预期一致（从锁定记录较少的表开始查询）
+
+3.order by limit 形式的sql语句让排序的表优先查
+
+4.了解业务方使用场景
+
+5.加索引时参照建索引的几大原则
+
+6.观察结果，不符合预期继续从0分析
+
+### [慢查询案例](https://tech.meituan.com/2014/06/30/mysql-index.html)
+
+#### 复杂语句写法
+
+很多情况下，我们写SQL只是为了实现功能，这只是第一步，不同的语句书写方式对于效率往往有本质的差别，这要求我们对mysql的执行计划和索引原则有非常清楚的认识，请看下面的语句：
+
+```sql
+select
+   distinct cert.emp_id 
+from
+   cm_log cl 
+inner join
+   (
+      select
+         emp.id as emp_id,
+         emp_cert.id as cert_id 
+      from
+         employee emp 
+      left join
+         emp_certificate emp_cert 
+            on emp.id = emp_cert.emp_id 
+      where
+         emp.is_deleted=0
+   ) cert 
+      on (
+         cl.ref_table='Employee' 
+         and cl.ref_oid= cert.emp_id
+      ) 
+      or (
+         cl.ref_table='EmpCertificate' 
+         and cl.ref_oid= cert.cert_id
+      ) 
+where
+   cl.last_upd_date >='2013-11-07 15:03:00' 
+   and cl.last_upd_date<='2013-11-08 16:00:00';
+```
+
+0.先运行一下，53条记录 1.87秒，又没有用聚合语句，比较慢
+
+```sql
+53 rows in set (1.87 sec)
+```
+
+1.explain
+
+```sql
+<font size=1>
++----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+
+| id | select_type | table      | type  | possible_keys                   | key                   | key_len | ref               | rows  | Extra                          |
++----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+
+|  1 | PRIMARY     | cl         | range | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date     | 8       | NULL              |   379 | Using where; Using temporary   |
+|  1 | PRIMARY     | <derived2> | ALL   | NULL                            | NULL                  | NULL    | NULL              | 63727 | Using where; Using join buffer |
+|  2 | DERIVED     | emp        | ALL   | NULL                            | NULL                  | NULL    | NULL              | 13317 | Using where                    |
+|  2 | DERIVED     | emp_cert   | ref   | emp_certificate_empid           | emp_certificate_empid | 4       | meituanorg.emp.id |     1 | Using index                    |
++----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+
+</font>
+```
+
+简述一下执行计划，
+
+首先mysql根据idx_last_upd_date索引扫描cm_log表获得379条记录；然后查表扫描了63727条记录，分为两部分，derived表示构造表，也就是不存在的表，可以简单理解成是一个语句形成的结果集，后面的数字表示语句的ID。derived2表示的是ID = 2的查询构造了虚拟表，并且返回了63727条记录。我们再来看看ID = 2的语句究竟做了写什么返回了这么大量的数据，首先全表扫描employee表13317条记录 <!--第1个derive-->，然后根据索引emp_certificate_empid关联emp_certificate表 <!--第2个derive-->，rows = 1表示，每个关联都只锁定了一条记录，效率比较高。获得后，再和cm_log的379条记录根据规则关联 <!--379 * 63727，最后只有53条记录满足要求-->。从执行过程上可以看出返回了太多的数据，返回的数据绝大部分cm_log都用不到，因为cm_log只锁定了379条记录。
+
+如何优化呢？
+
+可以看到我们在运行完后还是要和cm_log做join,那么我们能不能之前和cm_log做join呢？仔细分析语句不难发现，其基本思想是如果cm_log的ref_table是EmpCertificate就关联emp_certificate表，如果ref_table是Employee就关联employee表。我们完全可以拆成两部分，并用union连接起来。
+
+> 注意这里用union，而不用union all是因为原语句有“distinct”来得到唯一的记录，而union恰好具备了这种功能。如果原语句中没有distinct不需要去重，我们就可以直接使用union all了，因为使用union需要去重的动作，会影响SQL性能。
+
+优化过的语句如下：
+
+```sql
+select
+   emp.id 
+from
+   cm_log cl 
+inner join
+   employee emp 
+      on cl.ref_table = 'Employee' 
+      and cl.ref_oid = emp.id  
+where
+   cl.last_upd_date >='2013-11-07 15:03:00' 
+   and cl.last_upd_date<='2013-11-08 16:00:00' 
+   and emp.is_deleted = 0  
+union
+select
+   emp.id 
+from
+   cm_log cl 
+inner join
+   emp_certificate ec 
+      on cl.ref_table = 'EmpCertificate' 
+      and cl.ref_oid = ec.id  
+inner join
+   employee emp 
+      on emp.id = ec.emp_id  
+where
+   cl.last_upd_date >='2013-11-07 15:03:00' 
+   and cl.last_upd_date<='2013-11-08 16:00:00' 
+   and emp.is_deleted = 0
+```
+
+4.不需要了解业务场景，只需要改造的语句和改造之前的语句保持结果一致
+
+5.现有索引可以满足，不需要建索引
+
+6.用改造后的语句实验一下，只需要10ms 降低了近200倍！
+
+```sql
++----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+
+| id | select_type  | table      | type   | possible_keys                   | key               | key_len | ref                   | rows | Extra       |
++----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+
+|  1 | PRIMARY      | cl         | range  | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date | 8       | NULL                  |  379 | Using where |
+|  1 | PRIMARY      | emp        | eq_ref | PRIMARY                         | PRIMARY           | 4       | meituanorg.cl.ref_oid |    1 | Using where |
+|  2 | UNION        | cl         | range  | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date | 8       | NULL                  |  379 | Using where |
+|  2 | UNION        | ec         | eq_ref | PRIMARY,emp_certificate_empid   | PRIMARY           | 4       | meituanorg.cl.ref_oid |    1 |             |
+|  2 | UNION        | emp        | eq_ref | PRIMARY                         | PRIMARY           | 4       | meituanorg.ec.emp_id  |    1 | Using where |
+| NULL | UNION RESULT | <union1,2> | ALL    | NULL                            | NULL              | NULL    | NULL                  | NULL |             |
++----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+
+53 rows in set (0.01 sec)
+```
+
+#### 明确应用场景
+
+举这个例子的目的在于颠覆我们对列的区分度的认知，一般上我们认为区分度越高的列，越容易锁定更少的记录，但在一些特殊的情况下，这种理论是有局限性的。
+
+```sql
+select
+   * 
+from
+   stage_poi sp 
+where
+   sp.accurate_result=1 
+   and (
+      sp.sync_status=0 
+      or sp.sync_status=2 
+      or sp.sync_status=4
+   );
+```
+
+0.先看看运行多长时间,951条数据6.22秒，真的很慢。
+
+```sql
+951 rows in set (6.22 sec)
+```
+
+1.先explain，rows达到了361万，type = ALL表明是全表扫描。
+
+```sql
++----+-------------+-------+------+---------------+------+---------+------+---------+-------------+
+| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows    | Extra       |
++----+-------------+-------+------+---------------+------+---------+------+---------+-------------+
+|  1 | SIMPLE      | sp    | ALL  | NULL          | NULL | NULL    | NULL | 3613155 | Using where |
++----+-------------+-------+------+---------------+------+---------+------+---------+-------------+
+```
+
+2.所有字段都应用查询返回记录数，因为是单表查询 0已经做过了951条。
+
+3.让explain的rows 尽量逼近951。
+
+看一下accurate_result = 1的记录数：
+
+```sql
+select count(*),accurate_result from stage_poi  group by accurate_result;
++----------+-----------------+
+| count(*) | accurate_result |
++----------+-----------------+
+|     1023 |              -1 |
+|  2114655 |               0 |
+|   972815 |               1 |
++----------+-----------------+
+```
+
+我们看到accurate_result这个字段的区分度非常低，整个表只有-1,0,1三个值，加上索引也无法锁定特别少量的数据。
+
+再看一下sync_status字段的情况：
+
+```sql
+select count(*),sync_status from stage_poi  group by sync_status;
++----------+-------------+
+| count(*) | sync_status |
++----------+-------------+
+|     3080 |           0 |
+|  3085413 |           3 |
++----------+-------------+
+```
+
+同样的区分度也很低，根据理论，也不适合建立索引。
+
+问题分析到这，好像得出了这个表无法优化的结论，两个列的区分度都很低，即便加上索引也只能适应这种情况，很难做普遍性的优化，比如当sync_status 0、3分布的很平均，那么锁定记录也是百万级别的。
+
+4.找业务方去沟通，看看使用场景。业务方是这么来使用这个SQL语句的，每隔五分钟会扫描符合条件的数据，处理完成后把sync_status这个字段变成1,五分钟符合条件的记录数并不会太多，1000个左右。了解了业务方的使用场景后，优化这个SQL就变得简单了，因为业务方保证了数据的不平衡，如果加上索引可以过滤掉绝大部分不需要的数据。
+
+5.根据建立索引规则，使用如下语句建立索引
+
+```sql
+alter table stage_poi add index idx_acc_status(accurate_result,sync_status);
+```
+
+6.观察预期结果,发现只需要200ms，快了30多倍。
+
+```sql
+952 rows in set (0.20 sec)
+```
+
+我们再来回顾一下分析问题的过程，单表查询相对来说比较好优化，大部分时候只需要把where条件里面的字段依照规则加上索引就好，如果只是这种“无脑”优化的话，显然一些区分度非常低的列，不应该加索引的列也会被加上索引，这样会对插入、更新性能造成严重的影响，同时也有可能影响其它的查询语句。所以我们第4步调差SQL的使用场景非常关键，我们只有知道这个业务场景，才能更好地辅助我们更好的分析和优化查询语句。
+
+#### 无法优化的语句
+
+```sql
+select
+   c.id,
+   c.name,
+   c.position,
+   c.sex,
+   c.phone,
+   c.office_phone,
+   c.feature_info,
+   c.birthday,
+   c.creator_id,
+   c.is_keyperson,
+   c.giveup_reason,
+   c.status,
+   c.data_source,
+   from_unixtime(c.created_time) as created_time,
+   from_unixtime(c.last_modified) as last_modified,
+   c.last_modified_user_id  
+from
+   contact c  
+inner join
+   contact_branch cb 
+      on  c.id = cb.contact_id  
+inner join
+   branch_user bu 
+      on  cb.branch_id = bu.branch_id 
+      and bu.status in (
+         1,
+      2)  
+   inner join
+      org_emp_info oei 
+         on  oei.data_id = bu.user_id 
+         and oei.node_left >= 2875 
+         and oei.node_right <= 10802 
+         and oei.org_category = - 1  
+   order by
+      c.created_time desc  limit 0 ,
+      10;
+```
+
+还是几个步骤。
+
+0.先看语句运行多长时间，10条记录用了13秒，已经不可忍受。
+
+```sql
+10 rows in set (13.06 sec)
+```
+
+1.explain
+
+```sql
++----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+
+| id | select_type | table | type   | possible_keys                       | key                     | key_len | ref                      | rows | Extra                                        |
++----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+
+|  1 | SIMPLE      | oei   | ref    | idx_category_left_right,idx_data_id | idx_category_left_right | 5       | const                    | 8849 | Using where; Using temporary; Using filesort |
+|  1 | SIMPLE      | bu    | ref    | PRIMARY,idx_userid_status           | idx_userid_status       | 4       | meituancrm.oei.data_id   |   76 | Using where; Using index                     |
+|  1 | SIMPLE      | cb    | ref    | idx_branch_id,idx_contact_branch_id | idx_branch_id           | 4       | meituancrm.bu.branch_id  |    1 |                                              |
+|  1 | SIMPLE      | c     | eq_ref | PRIMARY                             | PRIMARY                 | 108     | meituancrm.cb.contact_id |    1 |                                              |
++----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+
+```
+
+从执行计划上看，mysql先查org_emp_info表扫描8849记录，再用索引idx_userid_status关联branch_user表，再用索引idx_branch_id关联contact_branch表，最后主键关联contact表。
+
+rows返回的都非常少，看不到有什么异常情况。我们在看一下语句，发现后面有order by + limit组合，会不会是排序量太大搞的？于是我们简化SQL，去掉后面的order by 和 limit，看看到底用了多少记录来排序。
+
+```sql
+select
+  count(*)
+from
+   contact c  
+inner join
+   contact_branch cb 
+      on  c.id = cb.contact_id  
+inner join
+   branch_user bu 
+      on  cb.branch_id = bu.branch_id 
+      and bu.status in (
+         1,
+      2)  
+   inner join
+      org_emp_info oei 
+         on  oei.data_id = bu.user_id 
+         and oei.node_left >= 2875 
+         and oei.node_right <= 10802 
+         and oei.org_category = - 1  
++----------+
+| count(*) |
++----------+
+|   778878 |
++----------+
+1 row in set (5.19 sec)
+```
+
+发现排序之前居然锁定了778878条记录，如果针对70万的结果集排序，将是灾难性的，怪不得这么慢，那我们能不能换个思路，先根据contact的created_time排序，再来join会不会比较快呢？
+
+于是改造成下面的语句，也可以用straight_join来优化：
+
+```
+select
+   c.id,
+   c.name,
+   c.position,
+   c.sex,
+   c.phone,
+   c.office_phone,
+   c.feature_info,
+   c.birthday,
+   c.creator_id,
+   c.is_keyperson,
+   c.giveup_reason,
+   c.status,
+   c.data_source,
+   from_unixtime(c.created_time) as created_time,
+   from_unixtime(c.last_modified) as last_modified,
+   c.last_modified_user_id   
+from
+   contact c  
+where
+   exists (
+      select
+         1 
+      from
+         contact_branch cb  
+      inner join
+         branch_user bu        
+            on  cb.branch_id = bu.branch_id        
+            and bu.status in (
+               1,
+            2)      
+         inner join
+            org_emp_info oei           
+               on  oei.data_id = bu.user_id           
+               and oei.node_left >= 2875           
+               and oei.node_right <= 10802           
+               and oei.org_category = - 1      
+         where
+            c.id = cb.contact_id    
+      )    
+   order by
+      c.created_time desc  limit 0 ,
+      10;
+```
+
+验证一下效果 预计在1ms内，提升了13000多倍！
+
+```sql
+10 rows in set (0.00 sec)
+```
+
+本以为至此大工告成，但我们在前面的分析中漏了一个细节，先排序再join和先join再排序理论上开销是一样的，为何提升这么多是因为有一个limit！大致执行过程是：mysql先按索引排序得到前10条记录，然后再去join过滤，当发现不够10条的时候，再次去10条，再次join，这显然在内层join过滤的数据非常多的时候，将是灾难的，极端情况，内层一条数据都找不到，mysql还傻乎乎的每次取10条，几乎遍历了这个数据表！
+
+用不同参数的SQL试验下：
+
+```sql
+select
+   sql_no_cache   c.id,
+   c.name,
+   c.position,
+   c.sex,
+   c.phone,
+   c.office_phone,
+   c.feature_info,
+   c.birthday,
+   c.creator_id,
+   c.is_keyperson,
+   c.giveup_reason,
+   c.status,
+   c.data_source,
+   from_unixtime(c.created_time) as created_time,
+   from_unixtime(c.last_modified) as last_modified,
+   c.last_modified_user_id    
+from
+   contact c   
+where
+   exists (
+      select
+         1        
+      from
+         contact_branch cb         
+      inner join
+         branch_user bu                     
+            on  cb.branch_id = bu.branch_id                     
+            and bu.status in (
+               1,
+            2)                
+         inner join
+            org_emp_info oei                           
+               on  oei.data_id = bu.user_id                           
+               and oei.node_left >= 2875                           
+               and oei.node_right <= 2875                           
+               and oei.org_category = - 1                
+         where
+            c.id = cb.contact_id           
+      )        
+   order by
+      c.created_time desc  limit 0 ,
+      10;
+Empty set (2 min 18.99 sec)
+```
+
+2 min 18.99 sec！比之前的情况还糟糕很多。由于mysql的nested loop机制，遇到这种情况，基本是无法优化的。这条语句最终也只能交给应用系统去优化自己的逻辑了。
+
+通过这个例子我们可以看到，并不是所有语句都能优化，而往往我们优化时，由于SQL用例回归时落掉一些极端情况，会造成比原来还严重的后果。所以，第一：不要指望所有语句都能通过SQL优化，第二：不要过于自信，只针对具体case来优化，而忽略了更复杂的情况。
+
+慢查询的案例就分析到这儿，以上只是一些比较典型的案例。我们在优化过程中遇到过超过1000行，涉及到16个表join的“垃圾SQL”，也遇到过线上线下数据库差异导致应用直接被慢查询拖死，也遇到过varchar等值比较没有写单引号，还遇到过笛卡尔积查询直接把从库搞死。再多的案例其实也只是一些经验的积累，如果我们熟悉查询优化器、索引的内部原理，那么分析这些案例就变得特别简单了。
