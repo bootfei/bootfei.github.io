@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="随堂笔记12345678910111213141516171819202122232425262728293031323334353637381.分库分表理论篇		* 什么是分库分表?        * 垂直分库            * 把数据库按照业务分库        * 垂直分表            * 将表按照列进行拆解        * 水平分表		* 为什么要搞分库分表?">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql-6-MySQL分库分表篇">
+<meta property="og:url" content="http://example.com/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="随堂笔记12345678910111213141516171819202122232425262728293031323334353637381.分库分表理论篇		* 什么是分库分表?        * 垂直分库            * 把数据库按照业务分库        * 垂直分表            * 将表按照列进行拆解        * 水平分表		* 为什么要搞分库分表?">
+<meta property="og:locale">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-236291af82c97c09e79e1ff7ab22731c_1440w.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-8a0a1169329d6d0313215a64f3a41fd3_1440w.jpg">
+<meta property="article:published_time" content="2021-02-13T08:26:49.000Z">
+<meta property="article:modified_time" content="2021-02-13T08:50:53.723Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic1.zhimg.com/80/v2-236291af82c97c09e79e1ff7ab22731c_1440w.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>mysql-6-MySQL分库分表篇 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9A%8F%E5%A0%82%E7%AC%94%E8%AE%B0"><span class="nav-number">1.</span> <span class="nav-text">随堂笔记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">分库分表介绍</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql-6-MySQL分库分表篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-02-13 16:26:49 / Modified: 16:50:53" itemprop="dateCreated datePublished" datetime="2021-02-13T16:26:49+08:00">2021-02-13</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="随堂笔记"><a href="#随堂笔记" class="headerlink" title="随堂笔记"></a>随堂笔记</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">1.分库分表理论篇</span><br><span class="line">		* 什么是分库分表?</span><br><span class="line">        * 垂直分库</span><br><span class="line">            * 把数据库按照业务分库</span><br><span class="line">        * 垂直分表</span><br><span class="line">            * 将表按照列进行拆解</span><br><span class="line">        * 水平分表</span><br><span class="line">		* 为什么要搞分库分表?</span><br><span class="line">        * 数据库中的表太多----分库----微服务(应用和数据库都是单独的，比如说用户模块， 用户相关的表在单独的数据库上)</span><br><span class="line">            * 分业务库是为了减少数据库的访问压力，根据业务模块进行分库(一般为了体现分库 的好处，都是单独讲一个库进行部署到Linux)</span><br><span class="line">            * 记住:不要使用docker技术来部署数据库。</span><br><span class="line">            * 还有一种分库，主要是为了更好的去优化数据库的性能。 </span><br><span class="line">        * 数据库中的表记录太多</span><br><span class="line">            * 水平拆表&#x2F;水平分表</span><br><span class="line">            * 电商系统:增量表、订单、用户 * 不是什么表都要拆分</span><br><span class="line">		* 如何分库分表?</span><br><span class="line">				* 分库分表的方式</span><br><span class="line">						* 分库不分表 </span><br><span class="line">						* 库内分表</span><br><span class="line">            * 分库分表</span><br><span class="line">        * 水平分表</span><br><span class="line">            * 取模&#x2F;取余：表中的id主键 % 要拆分的表的数量(3),真实表( t_user_0 t_user_1 t_user_2)</span><br><span class="line">            * 范围 【表中的id主键在0-10000，分到t_user_0 10001-20000 t_user_1 20001-30000 t_user_2</span><br><span class="line">            * 日期 【表中的日期列进行拆表】</span><br><span class="line">						</span><br><span class="line">    * 分库分表存在的问题 </span><br><span class="line">    		* 跨库join问题</span><br><span class="line">    				* ER分片(订单表和订单明细表、订单表和用户表) </span><br><span class="line">    						* Mycat ER分片</span><br><span class="line">		   					* Sharding JDBC 绑定表</span><br><span class="line">    				* 业务层将join拆分为多个持久层的调用。</span><br><span class="line">        * 全局唯一主键问题</span><br><span class="line">        * 分布式事务问题</span><br><span class="line">        * 跨库count、order by 、group by</span><br><span class="line">    * 分库分表的产品有哪些?</span><br><span class="line">        - 阿里的TDDL、Cobar</span><br><span class="line">        - 基于阿里Cobar开发的Mycat</span><br><span class="line">        - 当当网的sharding-jdbc Apache(最主流)</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="分库分表介绍"><a href="#分库分表介绍" class="headerlink" title="分库分表介绍"></a><strong>分库分表介绍</strong></h1><ul>
+<li><strong>使用背景</strong></li>
+</ul>
+<p>当【表的数量】达到了几百上千张表时，众多的业务模块都访问这个数据库，压力会比较大，考虑 对其进行分库。 当【表的数据】达到了几千万级别，在做很多操作都比较吃力,所以，考虑对其进行分库或者分表</p>
+<ul>
+<li><p>数据切分(sharding)方案数据的切分(Sharding)根据其切分规则的类型，可以分为两种切分模式:</p>
+<ul>
+<li>**垂直切分:**按照业务模块进行切分，将不同模块的表切分到不同的数据库中。<br><img src="https://pic1.zhimg.com/80/v2-236291af82c97c09e79e1ff7ab22731c_1440w.jpg" alt="img"></li>
+<li>**水平切分:**将一张大表按照一定的切分规则，按照行切分成不同的表或者切分到不同的库中。<br><img src="https://pic4.zhimg.com/80/v2-8a0a1169329d6d0313215a64f3a41fd3_1440w.jpg" alt="img"></li>
+</ul>
+</li>
+<li><p><strong>切分规则</strong></p>
+<ul>
+<li>**按照ID取模:**对ID进行取模，余数决定该行数据切分到哪个表或者库中</li>
+<li>**按照日期:**按照年月日，将数据切分到不同的表或者库中</li>
+<li>**按照范围:**可以对某一列按照范围进行切分，不同的范围切分到不同的表或者数据库中。</li>
+</ul>
+</li>
+<li><p><strong>切分原则</strong></p>
+<ul>
+<li>**第一原则:**能不切分尽量不要切分。</li>
+<li>**第二原则:**如果要切分一定要选择合适的切分规则，提前规划好。 </li>
+<li><strong>第三原则:**数据切分尽量通过数据冗余或表分组(Table Group)来</strong>降低跨库** <strong>Join</strong> 的可能。 </li>
+<li>**第四原则:**由于数据库中间件对数据 Join 实现的优劣难以把握，而且实现高性能难度极大，业务 读取尽量少使用多表 Join。</li>
+</ul>
+</li>
+<li><p><strong>分库分表需要解决的问题</strong> <strong>分布式事务问题</strong></p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">强一致性事务(同步)</span><br><span class="line">最终一致性事务(异步思想)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>分布式主键</strong>ID问题</p>
+<ul>
+<li>redis incr命令</li>
+<li>数据库(生成主键)</li>
+<li>UUID snowflake算法(<a target="_blank" rel="noopener" href="https://www.sohu.com/a/232008315_453160">https://www.sohu.com/a/232008315_453160</a>)</li>
+</ul>
+</li>
+<li><p><strong>跨库</strong>join问题</p>
+</li>
+</ul>
+<p>通过业务分析，将不同库的join查询拆分成多个select 建立全局表(每个库都有一个相同的表) 冗余字段(不符合数据库三范式) E-R分片(将有ER关系的记录都存储到一个库中)</p>
+<p>最多支持跨两张表跨库的join <strong>跨库**</strong>count**<strong>、**</strong>order by**<strong>、**</strong>group by**<strong>问题</strong></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/13/database/mysql/mysql-5-MySQL%E9%9B%86%E7%BE%A4%E7%AF%87/" rel="prev" title="mysql-5-MySQL集群篇">
+                  <i class="fa fa-chevron-left"></i> mysql-5-MySQL集群篇
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-%E5%AE%89%E8%A3%85/" rel="next" title="kafka-安装">
+                  kafka-安装 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

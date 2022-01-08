@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="熔断机制是服务雪崩的一种有效解决方案。常见的熔断有两种:   预熔断 即时熔断  服务降级是请求发生问题后的一种增强用户体验的方式。  发生服务熔断，一定会发生服务降级。 但发生服务降级，并不意味着一定是发生了服务熔断。   Spring Cloud 是通过 Hystrix 来实现服务熔断与降级的。  Hystrix 是一种开关装置，类似于熔断保险丝。在消费者端安装一个 Hystrix 熔断器，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring-cloud-4-Hystrix服务熔断与服务降级">
+<meta property="og:url" content="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04-Hystrix%20%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E4%B8%8E%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="熔断机制是服务雪崩的一种有效解决方案。常见的熔断有两种:   预熔断 即时熔断  服务降级是请求发生问题后的一种增强用户体验的方式。  发生服务熔断，一定会发生服务降级。 但发生服务降级，并不意味着一定是发生了服务熔断。   Spring Cloud 是通过 Hystrix 来实现服务熔断与降级的。  Hystrix 是一种开关装置，类似于熔断保险丝。在消费者端安装一个 Hystrix 熔断器，">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-12-12T07:40:07.000Z">
+<meta property="article:modified_time" content="2021-02-08T01:29:00.466Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04-Hystrix%20%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E4%B8%8E%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>spring-cloud-4-Hystrix服务熔断与服务降级 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#fallbackMethod%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7"><span class="nav-number">1.</span> <span class="nav-text">fallbackMethod服务降级</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#consumer-module"><span class="nav-number">1.1.</span> <span class="nav-text">consumer module</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">1.2.</span> <span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#fallbackFactory%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7"><span class="nav-number">2.</span> <span class="nav-text">fallbackFactory服务降级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Turbine-server"><span class="nav-number">2.0.1.</span> <span class="nav-text">Turbine server</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">3.</span> <span class="nav-text">附录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HystrixCommandProperties-%E7%B1%BB%E7%9A%84%E6%9E%84%E9%80%A0%E5%99%A8"><span class="nav-number">3.1.</span> <span class="nav-text">HystrixCommandProperties 类的构造器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%94%E7%A6%BB%E7%AD%96%E7%95%A5"><span class="nav-number">3.2.</span> <span class="nav-text">隔离策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Turbin%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7%E6%9E%B6%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">Turbin集群监控架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Turbin%E9%9B%86%E7%BE%A4%E5%88%86%E7%BB%84%E7%9B%91%E6%8E%A7%E6%9E%B6%E6%9E%84"><span class="nav-number">3.4.</span> <span class="nav-text">Turbin集群分组监控架构</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04-Hystrix%20%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E4%B8%8E%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          spring-cloud-4-Hystrix服务熔断与服务降级
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-12 15:40:07" itemprop="dateCreated datePublished" datetime="2020-12-12T15:40:07+08:00">2020-12-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-02-08 09:29:00" itemprop="dateModified" datetime="2021-02-08T09:29:00+08:00">2021-02-08</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>熔断机制是服务雪崩的一种有效解决方案。常见的熔断有两种: </p>
+<ul>
+<li>预熔断</li>
+<li>即时熔断</li>
+</ul>
+<p>服务降级是请求发生问题后的一种增强用户体验的方式。</p>
+<ul>
+<li>发生服务熔断，一定会发生服务降级。</li>
+<li>但发生服务降级，并不意味着一定是发生了服务熔断。</li>
+</ul>
+</blockquote>
+<p>Spring Cloud 是通过 Hystrix 来实现服务熔断与降级的。</p>
+<blockquote>
+<p>Hystrix 是一种开关装置，类似于熔断保险丝。在消费者端安装一个 Hystrix 熔断器，当 Hystrix 监控到某个服务发生故障后熔断器会开启，将此服务访问链路断开。不过 Hystrix 并不会将该服务的消费者阻塞，或向消费者抛出异常，而是向消费者返回一个符合预期的备选 响应(FallBack)。通过 Hystrix 的熔断与降级功能，避免了服务雪崩的发生，同时也考虑到了 用户体验。故 Hystrix 是系统的一种防御机制。</p>
+</blockquote>
+<p>Hystrix 对于服务降级的实现方式有两种:fallbackMethod 服务降级，与 fallbackFactory服务降级。</p>
+<h1 id="fallbackMethod服务降级"><a href="#fallbackMethod服务降级" class="headerlink" title="fallbackMethod服务降级"></a>fallbackMethod服务降级</h1><blockquote>
+<p>总步骤：</p>
+<ul>
+<li>添加Hystrix依赖</li>
+<li>修改处理器方法。在处理器方法上添加@HystrixCommond注解</li>
+<li>在处理器中定义服务降级方法</li>
+<li>在启动类上添加@EnableCircuitBreaker注解(或将@SpringBootApplication注解替@SpringCloudApplication 注解)</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>此降级方法的实现，表明hystrix 本身与 feign 是没有关系的。但是一般情况下hystrix和feign联合使用。</p>
+</blockquote>
+<h2 id="consumer-module"><a href="#consumer-module" class="headerlink" title="consumer module"></a>consumer module</h2><ul>
+<li><p>依赖</p>
+<ul>
+<li><pre><code class="xml">&lt;!--hystrix 依赖--&gt; 
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt; 
+  &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;/artifactId&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改处理器方法</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    		@HystrixCommand(fallbackMethod &#x3D; &quot;getHystrixHandler&quot;)</span><br><span class="line">        @GetMapping(&quot;&#x2F;get&#x2F;&#123;id&#125;&quot;)</span><br><span class="line">    public Depart getByIdHandler(@PathVariable(&quot;id&quot;) int id) &#123;</span><br><span class="line">            String url &#x3D; SERVICE_PROVIDER + &quot;&#x2F;provider&#x2F;depart&#x2F;get&#x2F;&quot; + id;</span><br><span class="line">            return restTemplate.getForObject(url, Depart.class);</span><br><span class="line">        &#125;</span><br><span class="line">    </span><br><span class="line">        &#x2F;&#x2F; 定义服务降级方法，即响应给客户端的备选方案</span><br><span class="line">        public Depart getHystrixHandler(@PathVariable(&quot;id&quot;) int id) &#123;</span><br><span class="line">            Depart depart &#x3D; new Depart();</span><br><span class="line">            depart.setId(id);</span><br><span class="line">            depart.setName(&quot;no this depart&quot;);</span><br><span class="line">            return depart;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>修改启动类</p>
+<ul>
+<li>在启动类添加注解**@EnableCircuitBreaker**，或者使用@SpringCloudApplication</li>
+</ul>
+</li>
+</ul>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>把provider关掉，或者provider的方法设置为超时，测试consumer返回值</p>
+<h1 id="fallbackFactory服务降级"><a href="#fallbackFactory服务降级" class="headerlink" title="fallbackFactory服务降级"></a>fallbackFactory服务降级</h1><p>当一个服务同时存在类级别与方法级别的降级时，方法级别的降级优先级高。</p>
+<blockquote>
+<p>总步骤：都是针对consumer</p>
+<ul>
+<li><p>添加Hystrix依赖</p>
+</li>
+<li><p>定义服务降级类</p>
+</li>
+<li><p>在Feign接口中指定服务降级类</p>
+</li>
+<li><p>修改配置文件，开启Feign对Hystrix的支持</p>
+</li>
+<li><p>在启动类上添加@EnableCircuitBreaker注解(或将@SpringBootApplication注解替换为</p>
+<p>@SpringCloudApplication 注解)</p>
+</li>
+</ul>
+</blockquote>
+<ul>
+<li><p>定义服务降级类</p>
+<ul>
+<li><pre><code class="java">/**
+ * 服务降级类
+ */
+@Component
+public class DepartFallbackFactory implements FallbackFactory&lt;DepartService&gt; &#123;
+    @Override
+    public DepartService create(Throwable throwable) &#123;
+        return new DepartService() &#123;
+            @Override
+            public boolean saveDepart(Depart depart) &#123;
+                System.out.println(&quot;执行saveDepart()的服务降级处理方法&quot;);
+                return false;
+            &#125;
+
+            @Override
+            public Depart getDepartById(Integer id) &#123;
+                Depart depart = new Depart();
+                depart.setId(id);
+                depart.setName(&quot;no this depart -- class&quot;);
+                return depart;
+            &#125;
+
+            @Override
+            public List&lt;Depart&gt; listAllDeparts() &#123;
+                System.out.println(&quot;执行listAllDeparts()的服务降级处理方法&quot;);
+                return null;
+            &#125;
+        &#125;;
+    &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 在Feign接口中指定服务降级类</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @FeignClient(value &#x3D; &quot;abcmsc-provider-depart&quot;, fallbackFactory &#x3D; DepartFallbackFactory.class)</span><br><span class="line">    @RequestMapping(&quot;&#x2F;provider&#x2F;depart&quot;)</span><br><span class="line">    public interface DepartService &#123;...&#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件，开启Feign对Hystrix的支持</p>
+<ul>
+<li><pre><code class="yaml">feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000   # 指定Feign客户端连接提供者的超时时限
+        readTimeout: 5000      
+  # 开启Feign对Hystrix的支持
+  hystrix:
+    enabled: true
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># **Hystrix** 高级属性配置</span><br><span class="line"></span><br><span class="line">实用技巧：查看Hystrix的内置高级属性</span><br><span class="line"></span><br><span class="line">![][HystrixCommandProperties 类的构造器]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 执行隔离策略</span><br><span class="line"></span><br><span class="line">![][隔离策略]</span><br><span class="line"></span><br><span class="line">&gt; 结合代码和实际演示进行说明，Hystrix默认使用线程隔离，默认线程执行超时时间&#x3D;1s</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 如果provider停掉，那么Network Read&#x2F;Connect Timeouts，则服务降级；</span><br><span class="line">&gt; - 如果provider运行，但是provider执行中有Thread.sleep(4), 即使Feign的Read Timout设置而为4s, 但是因为线程执行超时&#x3D;1s，所以发生了Thread Timeouts, 则服务降级; </span><br><span class="line"></span><br><span class="line">### 类型</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">隔离请求的方式有两种类型:</span><br><span class="line"></span><br><span class="line">- 线程隔离:Hystrix的默认隔离策略。系统会创建一个依赖线程池，为每个依赖请求分配一个独立的线程，而每个依赖所拥有的线程数量是有上限的。当对该依赖的调用请求数 量达到上限后再有请求，则直接拒绝该请求，并对该请求做降级处理。所以对某依赖的 并发量取决于为该依赖线程池所分配的线程数量。</span><br><span class="line">- 信号量隔离:对依赖的调用所使用的线程仍为请求线程，即不会为依赖请求再新创建新 的线程。但系统会为每种依赖分配一定数量的信号量，而每个依赖请求分配一个信号。 当对该依赖的调用请求数量达到上限后再有请求，则直接拒绝该请求，并直接对该请求 做降级处理。所以对某依赖的并发量取决于为该依赖所分配的信号量数量。</span><br><span class="line"></span><br><span class="line">### 对比</span><br><span class="line"></span><br><span class="line">- 线程是进程的一个执行体，其具有独立运行的特性，而信号量却不是，其仅仅是线程执 行的条件。</span><br><span class="line">- 线程隔离中请求线程与提供者调用线程不是同一个线程，而信号量隔离中请求线程与调 用线程是同一个线程。</span><br><span class="line">- 线程隔离的执行效率要高于信号量隔离的，因为线程隔离的执行体数量是信号量隔离的2倍。</span><br><span class="line">- 线程隔离使每台主机处理请求的数量是有限制的，因为主机线程数量是有上限的。而信 号量隔离不同，其没有上限，因为所谓信号量就是一个计数器，是一个数值，其不存在 上限。</span><br><span class="line">- 在服务器少而请求并发量大的情况下不建议使用线程隔离，否则可能会使系统对请求的并发能力下降。</span><br><span class="line">- 线程隔离便于控制反馈给客户端的降级时间。</span><br><span class="line"></span><br><span class="line">### 修改策略</span><br><span class="line"></span><br><span class="line">[若是在配置文件中，则可以通过以下设置修改:]()</span><br><span class="line"></span><br><span class="line">- hystrix.command.default.execution.isolation.strategy&#x3D;thread</span><br><span class="line"></span><br><span class="line">- hystrix.command.default.execution.isolation.strategy&#x3D;semaphore</span><br><span class="line"></span><br><span class="line">[若是在代码中，则可通过以下语句修改：]()</span><br><span class="line"></span><br><span class="line">- HystrixCommandProperties.Setter().withExecutionIsolationStrategy(ExecutionIsolationStrate gy.THREAD)</span><br><span class="line">- HystrixCommandProperties.Setter().withExecutionIsolationStrategy(ExecutionIsolationStrate gy.SEMAPHORE)</span><br><span class="line"></span><br><span class="line">### 默认值</span><br><span class="line"></span><br><span class="line">在 HystrixCommandProperties 类的构造器中设置有这些高级属性的默认值。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 线程执行超时时限</span><br><span class="line"></span><br><span class="line">在默认的线程执行隔离策略中，关于线程的执行时间，可以为其设置超时时限。当然， 首先通过下面的属性开启该超时时限，该属性默认是开启的，即默认值为 true。若要关闭， 则可以配置文件中设置该属性的值为 false。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+hystrix.command.default.execution.timeout.enabled
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在开启了执行线程超时时限后，可以通过以下属性设置时限长度。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">其默认值为 1000 毫秒。这就是前面引入时为什么 sleep(4)是也报超时异常的原因，只要 超过了 1 秒就会超时。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- 全局设置：对所有降级服务都生效</span><br><span class="line"></span><br><span class="line">  - 修改配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    hystrix:</span><br><span class="line">      command:  #全局设置</span><br><span class="line">        default:</span><br><span class="line">          execution:</span><br><span class="line">            isolation:</span><br><span class="line">              thread:</span><br><span class="line">                timeoutInMilliseconds: 4000</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>细粒度设置</p>
+<ul>
+<li><p>添加处理方法的注解：@HystrixProperty(name=”execution.isolation.thread.timeoutInMilliseconds”, value=”2000”)注解，这是更加细粒度的控制</p>
+</li>
+<li><pre><code class="java">@HystrixCommand(fallbackMethod = &quot;getHystrixHandler&quot;,
+            commandProperties = @HystrixProperty(name=&quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;2000&quot;))
+    @GetMapping(&quot;/get/&#123;id&#125;&quot;)
+    public Depart getByIdHandler(@PathVariable(&quot;id&quot;) int id) &#123;
+        return service.getDepartById(id);
+    &#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 超时中断</span><br><span class="line"></span><br><span class="line">当线程执行超时时，是否中断provider线程的执行。默认为 true，即超时即中断。通过以下属性进行设置。</span><br><span class="line"></span><br><span class="line">hystrix.command.default.execution.isolation.thread.interruptOnTimeout</span><br><span class="line"></span><br><span class="line">## 取消中断</span><br><span class="line"></span><br><span class="line">在线程执行过程中，若请求取消了，当前provider执行线程是否结束呢?由该值设置。默认为 false， 即取消后不中断。通过以下属性进行设置。</span><br><span class="line"></span><br><span class="line">hystrix.command.default.execution.isolation.thread.interruptOnCancel</span><br><span class="line"></span><br><span class="line">## 服务降级属性</span><br><span class="line"></span><br><span class="line">- 降级请求最大数量</span><br><span class="line"></span><br><span class="line">该属性仅限于信号量隔离。当信号量已用完后再有请求到达，并不是所有请求都会进行 降级处理，而是在该属性设置值范围内的请求才会发生降级，其它请求将直接拒绝。 hystrix.command.default.fallback.isolation.semaphore.maxConcurrentRequests</span><br><span class="line"></span><br><span class="line">- 服务降级开关</span><br><span class="line"></span><br><span class="line">无论是线程隔离还是信号量隔离，当请求数量到达其设置的上限后再有请求到达是否会 对请求进行降级处理，取决于该属性值的设置。若该属性值设置为 false，则不进行降级， 而是直接拒绝请求。</span><br><span class="line"> hystrix.command.default.fallback.enabled</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 服务熔断属性(略，见官网)</span><br><span class="line"></span><br><span class="line">https:&#x2F;&#x2F;github.com&#x2F;Netflix&#x2F;Hystrix&#x2F;wiki&#x2F;Configuration#execution.isolation.strategy</span><br><span class="line"></span><br><span class="line">## 线程池相关属性(略，见官网)</span><br><span class="line"></span><br><span class="line">https:&#x2F;&#x2F;github.com&#x2F;Netflix&#x2F;Hystrix&#x2F;wiki&#x2F;Configuration#execution.isolation.strategy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># **Dashboard** 监控仪表盘</span><br><span class="line"></span><br><span class="line">Hystrix Dashboard 仪表盘用于以 GUI 的形式展示消费者的执行情况，包括其处理器方法 与 Service 方法的调用执行情况，及熔断器 CircuitBreaker 的状态等。当然，这些显示出的数 据都是在指定时间窗内的执行情况及状态信息。</span><br><span class="line"></span><br><span class="line">Hystrix-dashboard 用于监控 Hystrix 服务降级情况，所以应添加在消费者工程中。</span><br><span class="line"></span><br><span class="line">## consumer module</span><br><span class="line"></span><br><span class="line">&gt; 总步骤</span><br><span class="line">&gt;</span><br><span class="line">&gt; - 添加hystrix-dashboard与actuator依赖</span><br><span class="line">&gt; - 配置文件中开启actuator的hystrix.stream监控终端 </span><br><span class="line">&gt; - 在启动类上添加@EnableHystrixDashboard注解</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!-- hystrix-dashboard 依赖 --&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;&#x2F;artifactId&gt; &lt;&#x2F;dependency&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;!--actuator 依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    	&lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt; </span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-actuator&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml"># 开启 actuator 的相关监控终端 management:
+endpoints: 
+    web:
+        exposure:
+            include: hystrix.stream
+# 设置服务熔断时限 
+hystrix:
+  command: 
+      default:
+      execution: 
+          isolation:
+              thread: 
+                  timeoutInMilliseconds: 3000
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改启动类</span><br><span class="line"></span><br><span class="line">  - 添加@EnableHystrixDashboard注解</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># **Turbine** 聚合监控**--**监控默认组集群</span><br><span class="line"></span><br><span class="line">## 整体架构</span><br><span class="line"></span><br><span class="line">![][Turbin集群监控架构]</span><br><span class="line"></span><br><span class="line">## 总步骤</span><br><span class="line"></span><br><span class="line">(**1**) **Turbine Client**</span><br><span class="line"></span><br><span class="line">- 至少要有actuator与neflix-hystrix依赖</span><br><span class="line">- 在配置文件中必须开启acturator的hystrix.stream监控终端</span><br><span class="line"></span><br><span class="line">(**2**) **Turbine Server**</span><br><span class="line"></span><br><span class="line">- 至少要有如下依赖:</span><br><span class="line">  - netflix-turbine依赖</span><br><span class="line">  - netflix -hystrix-dashboard 依赖 </span><br><span class="line">  -  netflix -hystrix 依赖</span><br><span class="line">  -  actuator依赖</span><br><span class="line">  -  eureka client 依赖</span><br><span class="line">- 在配置文件中要配置turbine:指定要监控的group及相应的微服务名称</span><br><span class="line"></span><br><span class="line">## 具体步骤</span><br><span class="line"></span><br><span class="line">### Consumer（Turbine Client）</span><br><span class="line"></span><br><span class="line">- 修改依赖</span><br><span class="line"></span><br><span class="line">  - 由于当前应用无需使用 Dashboard，所以可以将 Dashboard 依赖去掉。但必须要保证。Turbine 所监控的应用中具有 actuator 与 hystrix 依赖。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!-- hystrix-dashboard 依赖 --&gt; &lt;!--&lt;dependency&gt;--&gt;</span><br><span class="line">        &lt;!--&lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;--&gt;</span><br><span class="line">    &lt;!--&lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;&#x2F;artifactId&gt;--&gt; &lt;!--&lt;&#x2F;dependency&gt;--&gt;</span><br><span class="line">    &lt;!--actuator 依赖--&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-actuator&lt;&#x2F;artifactId&gt; </span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">    &lt;!--hystrix 依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt; </span><br><span class="line">      &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml"># 开启actuator的hystrix.stream监控终端
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改启动类</span><br><span class="line"></span><br><span class="line">  - 因为consumer不使用Dashboard, 所以没有@EnableHystrixDashboard注解</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">###  **Turbine** server</span><br><span class="line"></span><br><span class="line">&gt; 作为服务器，里面不需要代码。</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - 由于这是一个 Eureka Client，所以将原来的 Eureka Server 依赖删除，添加 Eureka Client依赖。</span><br><span class="line"></span><br><span class="line">    - netflix-turbine依赖</span><br><span class="line">    - netflix-hystrix-dashboard依赖</span><br><span class="line">    - netflix-hystrix依赖</span><br><span class="line">    - actuator依赖</span><br><span class="line">    - eureka client依赖</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!-- hystrix-turbine 依赖 --&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-netflix-turbine&lt;&#x2F;artifactId&gt; </span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;!-- hystrix-dashboard 依赖 --&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix-dashboard&lt;&#x2F;artifactId&gt; &lt;&#x2F;dependency&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;!--hystrix 依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-netflix-hystrix&lt;&#x2F;artifactId&gt; </span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;!--actuator 依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-actuator&lt;&#x2F;artifactId&gt; </span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;!--eureka 客户端依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.cloud&lt;&#x2F;groupId&gt; </span><br><span class="line">    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改启动类</p>
+<ul>
+<li>添加@EnableTurbine， 开启Turbine聚合功能</li>
+<li>添加@EnableHystrixDashboard，开启Hystrix仪表盘功能</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8000/eureka
+spring:
+  application:
+    name: hystrix-turbine
+
+# 配置turbine
+turbine:
+  # 指定要监控的微服务名称
+  app-config: consumer-8180,consumer-8280
+  aggregator:
+    # 指定要监控的微服务组，default指定要监控默认组为
+    cluster-config: default
+  # 指定要监控抽微服务组名称，默认组名称为&#39;default&#39;
+  cluster-name-expression: &quot;&#39;default&#39;&quot;
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># **Turbine** 聚合监控**--**监控多个组集群</span><br><span class="line"></span><br><span class="line">为了更加方便对集群的运行状态的监控，Turbine 将集群进行了分组。前面我们监控了两个集群，这两个集群默认被分为了一个组，是默认组。我们也可以将集群划分到多个组中 使用同一个 Turbine 进行分别监控。</span><br><span class="line"></span><br><span class="line">## 整体架构</span><br><span class="line"></span><br><span class="line">![][Turbin集群分组监控架构]</span><br><span class="line"></span><br><span class="line">## 分组监控原理</span><br><span class="line"></span><br><span class="line">Turbine 对于集群分组进行监控的原理是，在集群之上再添加一种分类:组。为每个集 群中的 Sever 都添加一个 groupId，而 Turbine 是基于 groupId 进行监控的。</span><br><span class="line"></span><br><span class="line">这个 groupId 是基于自定义的 Eureka 元数据实现的。</span><br><span class="line"></span><br><span class="line">Eureka 元数据是指，Eureka Client 向 Eureka Server 注册时的描述信息，注册数据。其有 两种类型:</span><br><span class="line"></span><br><span class="line">- 标准元数据:Eureka 中已经定义好的客户端描述信息。</span><br><span class="line">- 自定义元数据:在客户端配置文件中自己指定的 key-value 数据。</span><br><span class="line"></span><br><span class="line">## 具体步骤</span><br><span class="line"></span><br><span class="line">### Consumer</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - 添加groupId</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    spring:</span><br><span class="line">      application:</span><br><span class="line">        name: consumer-8480</span><br><span class="line">    </span><br><span class="line">    eureka:</span><br><span class="line">      client:</span><br><span class="line">        service-url:</span><br><span class="line">          defaultZone: http:&#x2F;&#x2F;localhost:8000&#x2F;eureka</span><br><span class="line">      instance:</span><br><span class="line">        metadata-map:</span><br><span class="line">          cluster: group1   # 自定义Eureka元数据</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Turbine-server"><a href="#Turbine-server" class="headerlink" title="Turbine server"></a>Turbine server</h3><ul>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8000/eureka
+spring:
+  application:
+    name: hystrix-turbine
+
+# 配置turbine
+turbine:
+  # 指定要监控的微服务名称
+  app-config: consumer-8380,consumer-8480,consumer-8580,consumer-8680
+  aggregator:
+    # 指定要监控的微服务组
+    cluster-config: group1,group2
+  # 指定要监控抽微服务组名称来自于Eureka元数据cluster
+  cluster-name-expression: metadata[&#39;cluster&#39;]
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"># 服务降级报警机制</span><br><span class="line"></span><br><span class="line">无论哪种原因启用了服务降级，系统都应该向管理员发出警报通知管理员，例如向管理员发送短信。这种发生服务降级后向管理员发出警报的机制称为服务降级报警机制。</span><br><span class="line"></span><br><span class="line">同时，如果相同的警报只应该报警一次，而且要通过有效时间来进行要多次报警，所以最好使用Redis。</span><br><span class="line"></span><br><span class="line">但是Redis在高并发下有3个问题：</span><br><span class="line"></span><br><span class="line">- 缓存穿透：对db中的空值，进行特使赋值，存储到Redis中</span><br><span class="line">- 缓存雪崩：尽量设置缓存有效时间不一样</span><br><span class="line">- 热点缓存：双重检查锁, 但是有线程安全的问题，对于现在的情景，因为value是局部变量，没有线程安全问题。</span><br><span class="line"></span><br><span class="line">同时，又因为服务降级，发送短信不要使用同步方式，要使用异步，所以最好使用线程池。</span><br><span class="line"></span><br><span class="line">## **consumer**</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - Redis依赖</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!--Spring Boot 与 Redis 整合依赖--&gt; </span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt; </span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-data-redis&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><p>Redis配置</p>
+</li>
+<li><pre><code class="yaml">Redis:
+    host:
+    port:
+    password:</code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改Controller</p>
+<ul>
+<li>修改服务降级Hystrix中的fallbackMethod，增加报警机制，如key = IP + Method + 异步发送短信</li>
+</ul>
+</li>
+</ul>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="HystrixCommandProperties-类的构造器"><a href="#HystrixCommandProperties-类的构造器" class="headerlink" title="HystrixCommandProperties 类的构造器"></a>HystrixCommandProperties 类的构造器</h2><h2 id="隔离策略"><a href="#隔离策略" class="headerlink" title="隔离策略"></a>隔离策略</h2><h2 id="Turbin集群监控架构"><a href="#Turbin集群监控架构" class="headerlink" title="Turbin集群监控架构"></a>Turbin集群监控架构</h2><h2 id="Turbin集群分组监控架构"><a href="#Turbin集群分组监控架构" class="headerlink" title="Turbin集群分组监控架构"></a>Turbin集群分组监控架构</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-02-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/" rel="prev" title="springboot-02-自动配置">
+                  <i class="fa fa-chevron-left"></i> springboot-02-自动配置
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-07-%E8%B0%83%E7%94%A8%E9%93%BE%E8%B7%9F%E8%B8%AA%20Spring%20Cloud%20Sleuth+Zipkin/" rel="next" title="spring-cloud-7调用链跟踪 Spring Cloud Sleuth+Zipkin">
+                  spring-cloud-7调用链跟踪 Spring Cloud Sleuth+Zipkin <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

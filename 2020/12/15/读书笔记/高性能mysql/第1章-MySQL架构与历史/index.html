@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="前言: MySQL最重要、最与众不同的是他的存储引擎架构 ，这种设计将查询处理（Query Processing）以及其他系统任务（Server Task），与数据的存储&#x2F;提取相分离。这种处理和存储互相分离的设计，可以根据业务的性能和特性要求，来选择数据的存储方式。 本书中，MySQL服务器与存储引擎是两个很重要的独立概念，他们分别是MySQL的3层架构中的上层和底层，但是确实是独立的概念。 1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第1章:MySQL架构与历史">
+<meta property="og:url" content="http://example.com/2020/12/15/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E9%AB%98%E6%80%A7%E8%83%BDmysql/%E7%AC%AC1%E7%AB%A0-MySQL%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8E%86%E5%8F%B2/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="前言: MySQL最重要、最与众不同的是他的存储引擎架构 ，这种设计将查询处理（Query Processing）以及其他系统任务（Server Task），与数据的存储&#x2F;提取相分离。这种处理和存储互相分离的设计，可以根据业务的性能和特性要求，来选择数据的存储方式。 本书中，MySQL服务器与存储引擎是两个很重要的独立概念，他们分别是MySQL的3层架构中的上层和底层，但是确实是独立的概念。 1.">
+<meta property="og:locale">
+<meta property="og:image" content="https://static.oschina.net/uploads/space/2017/0602/150012_BQzd_581386.png">
+<meta property="article:published_time" content="2020-12-15T01:28:13.000Z">
+<meta property="article:modified_time" content="2021-01-21T00:06:11.634Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="db">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.oschina.net/uploads/space/2017/0602/150012_BQzd_581386.png">
+
+
+<link rel="canonical" href="http://example.com/2020/12/15/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E9%AB%98%E6%80%A7%E8%83%BDmysql/%E7%AC%AC1%E7%AB%A0-MySQL%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8E%86%E5%8F%B2/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>第1章:MySQL架构与历史 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-1-MySQL%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">1.1 MySQL逻辑架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-1-%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%89%E5%85%A8%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">1.1.1 连接管理与安全性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-2-%E4%BC%98%E5%8C%96%E4%B8%8E%E6%89%A7%E8%A1%8C"><span class="nav-number">1.2.</span> <span class="nav-text">1.1.2 优化与执行</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-2-%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">1.2 并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-1-%E8%AF%BB%E5%86%99%E9%94%81"><span class="nav-number">2.1.</span> <span class="nav-text">1.2.1 读写锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-2-%E9%94%81%E7%B2%92%E5%BA%A6"><span class="nav-number">2.2.</span> <span class="nav-text">1.2.2 锁粒度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E9%94%81%EF%BC%88table-lock%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">表锁（table lock）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%8C%E9%94%81%EF%BC%88row-lock%EF%BC%89"><span class="nav-number">2.2.2.</span> <span class="nav-text">行锁（row lock）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-3-%E4%BA%8B%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">1.3 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-1-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">3.1.</span> <span class="nav-text">1.3.1 隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-2-%E6%AD%BB%E9%94%81"><span class="nav-number">3.2.</span> <span class="nav-text">1.3.2 死锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-3-%E4%BA%8B%E5%8A%A1%E6%97%A5%E5%BF%97"><span class="nav-number">3.3.</span> <span class="nav-text">1.3.3 事务日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-4-MySQL%E4%B8%AD%E7%9A%84%E4%BA%8B%E5%8A%A1"><span class="nav-number">3.4.</span> <span class="nav-text">1.3.4 MySQL中的事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="nav-number">3.4.1.</span> <span class="nav-text">自动提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E4%BA%8B%E5%8A%A1%E4%B8%AD%E6%B7%B7%E5%90%88%E4%BD%BF%E7%94%A8%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">3.4.2.</span> <span class="nav-text">在事务中混合使用存储引擎</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%BC%8F%E5%92%8C%E6%98%BE%E5%BC%8F%E9%94%81%E5%AE%9A"><span class="nav-number">3.4.3.</span> <span class="nav-text">隐式和显式锁定</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-4-%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">1.4 多版本并发控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELECT"><span class="nav-number">4.0.0.1.</span> <span class="nav-text">SELECT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#INSERT"><span class="nav-number">4.0.0.2.</span> <span class="nav-text">INSERT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DELETE"><span class="nav-number">4.0.0.3.</span> <span class="nav-text">DELETE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UPDATE"><span class="nav-number">4.0.0.4.</span> <span class="nav-text">UPDATE</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-5-MySQL%E7%9A%84%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">5.</span> <span class="nav-text">1.5 MySQL的存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB"><span class="nav-number">5.0.1.</span> <span class="nav-text">InnoDB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MyISAM"><span class="nav-number">5.0.2.</span> <span class="nav-text">MyISAM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">5.1.</span> <span class="nav-text">1.5.1 InnoDB存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-2-MyISAM%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">5.2.</span> <span class="nav-text">1.5.2 MyISAM存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-3-Mysql%E5%86%85%E5%BB%BA%E7%9A%84%E5%85%B6%E4%BB%96%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">5.3.</span> <span class="nav-text">1.5.3 Mysql内建的其他存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-4%E7%AC%AC%E4%B8%89%E6%96%B9%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">5.4.</span> <span class="nav-text">1.5.4第三方存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-5-%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E5%BC%95%E6%93%8E"><span class="nav-number">5.5.</span> <span class="nav-text">1.5.5 选择合适的引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-6-%E8%BD%AC%E6%8D%A2%E8%A1%A8%E7%9A%84%E5%BC%95%E6%93%8E"><span class="nav-number">5.6.</span> <span class="nav-text">1.5.6 转换表的引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ALTER-TABLE"><span class="nav-number">5.6.1.</span> <span class="nav-text">ALTER TABLE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E4%B8%8E%E5%AF%BC%E5%85%A5"><span class="nav-number">5.6.2.</span> <span class="nav-text">导出与导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%92%8C%E6%9F%A5%E8%AF%A2%EF%BC%88CREATE%E5%92%8CSELECT%EF%BC%89"><span class="nav-number">5.6.3.</span> <span class="nav-text">创建和查询（CREATE和SELECT）</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/15/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E9%AB%98%E6%80%A7%E8%83%BDmysql/%E7%AC%AC1%E7%AB%A0-MySQL%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8E%86%E5%8F%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第1章:MySQL架构与历史
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-15 09:28:13" itemprop="dateCreated datePublished" datetime="2020-12-15T09:28:13+08:00">2020-12-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-01-21 08:06:11" itemprop="dateModified" datetime="2021-01-21T08:06:11+08:00">2021-01-21</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>前言: MySQL最重要、最与众不同的是他的<strong>存储引擎架构</strong> ，这种设计将查询处理（Query Processing）以及其他系统任务（Server Task），与数据的存储/提取相分离。这种处理和存储互相分离的设计，可以根据业务的性能和特性要求，来选择数据的存储方式。</p>
+<p>本书中，MySQL服务器与存储引擎是两个很重要的独立概念，他们分别是MySQL的3层架构中的上层和底层，但是确实是独立的概念。</p>
+<h1 id="1-1-MySQL逻辑架构"><a href="#1-1-MySQL逻辑架构" class="headerlink" title="1.1 MySQL逻辑架构"></a>1.1 MySQL逻辑架构</h1><p><img src="https://static.oschina.net/uploads/space/2017/0602/150012_BQzd_581386.png" style="zoom: 50%;"                  />      MySQL服务器逻辑架构图</p>
+<p>最上层的服务并非MySQL所独有，大多数基于网络的客户端/服务器的工具或者服务都有类似的架构。诸如：连接处理、授权认证、安全等。</p>
+<p>大多数MySQL核心服务均在中间这一层，包括查询解析、分析、优化、缓存、内置函数(比如：时间、数学、加密等函数)。所有的跨存储引擎的功能也在这一层实现：存储过程、触发器、视图等。</p>
+<p>最下层为存储引擎，其负责MySQL中的数据存储和提取。和Linux下的文件系统类似，每种存储引擎都有其优势和劣势。中间的服务层通过API与存储引擎通信，这些API接口屏蔽了不同存储引擎间的差异。  存储引擎API包含了几十个底层函数，用于执行诸如”开始一个事务”或者”根据主键提取一行记录”等操作。但存储引擎不回去解析SQL。</p>
+<h2 id="1-1-1-连接管理与安全性"><a href="#1-1-1-连接管理与安全性" class="headerlink" title="1.1.1 连接管理与安全性"></a>1.1.1 连接管理与安全性</h2><p>每个客户端连接在服务器进程中拥有一个线程，这个连接的查询只会在这个单独的线程中执行，这个线程智能轮流在某个CPU核心或者CPU中运行。服务器会负责缓存线程，所以不需要为每一个新建的连接创建或者销毁线程。注意：Mysql5.5以后，提供了API，支持线程池插件，使用少量线程，服务大量链接。</p>
+<p>当客户端（应用）连接到服务器后，服务器需要对其进行验证。</p>
+<h2 id="1-1-2-优化与执行"><a href="#1-1-2-优化与执行" class="headerlink" title="1.1.2 优化与执行"></a>1.1.2 优化与执行</h2><p>MySQL会解析查询，并生成内部数据结构（解析树），然后对其各种优化，包括选择合适的索引、决定表的读取顺序等。具体查看第6章内容。</p>
+<p>优化器并不关心使用的存储引擎，但存储引擎对于优化有影响。关于索引和schema的优化，具体查看第4、5章。</p>
+<p>对于Select语句，在查询之前，服务器会先检查查询缓存(Query Cache). 具体查看第7章内容。</p>
+<h1 id="1-2-并发控制"><a href="#1-2-并发控制" class="headerlink" title="1.2 并发控制"></a>1.2 并发控制</h1><p>无论何时，只要同一时间有多个查询修改同一个数据，就会产生并发问题。</p>
+<p>以Unix的email box为例，良好的邮箱投递系统会通过lock防止并发。如果客户试图投递邮件，而邮箱被其他客户锁住，那就必须等待，直到lock释放才行。但是，这种锁方案有其利弊:</p>
+<p>pros: 在实际应用环境中工作良好</p>
+<p>cons: 并不支持并发处理，因为在任意一个时刻，只有一个时刻，只有一个进程可以修改邮箱的数据，这在大容量的邮箱系统中是个问题。</p>
+<h2 id="1-2-1-读写锁"><a href="#1-2-1-读写锁" class="headerlink" title="1.2.1 读写锁"></a>1.2.1 读写锁</h2><p>为了解决上述方案的弊端，可以通过实现两种类型的锁组成的锁系统来解决。共享锁和排它锁，又称为读锁和写锁。</p>
+<ul>
+<li>读锁：共享，或者说是不阻塞的，多个查询在同一时刻可以同时读取同一数据。但是会阻塞写操作</li>
+<li>写锁：排他，或者说是一个写锁会阻塞其他读锁和写锁。</li>
+</ul>
+<h2 id="1-2-2-锁粒度"><a href="#1-2-2-锁粒度" class="headerlink" title="1.2.2 锁粒度"></a>1.2.2 锁粒度</h2><p>一种提高共享资源并发性的方式就是让锁的锁定对象更加有针对性。尽量只锁定需要修改的数据，而不是所有的资源。任何时候，在给定的资源上，锁定的数据量越少，则系统的并发程度越高。</p>
+<p>问题是加锁也是消耗资源的。</p>
+<p>所以说，所谓的锁策略，就是在数据安全与锁的开销之间寻求平衡。这种平衡也会影响到性能，大多数都是在表上施加行级锁（row-level lock）</p>
+<h3 id="表锁（table-lock）"><a href="#表锁（table-lock）" class="headerlink" title="表锁（table lock）"></a>表锁（table lock）</h3><p>表锁是**<em>MySQL服务器**</em>中最基本的锁策略。也是开销最小的锁策略。表锁意思很明确，就是锁定整张表。</p>
+<p>一个用户在对表进行写操作时，会先获取写锁，这会阻塞其他用户的所有读写操作。只有没有写锁时，其他读取的用户才能获取读锁，读锁之间不会阻塞。</p>
+<p>另外，读锁比写锁有更高的优先级，一个写锁的请求可能会被插入到读锁队列的前面。</p>
+<p>尽管存储引擎可以管理自己的锁，MySQL服务器本身也是会使用各种有效的表锁来实现不同的目的。例如，MySQL服务器会为诸如ALTER TABLE之类的语句使用表锁，而忽略存储引擎的锁机制。</p>
+<h3 id="行锁（row-lock）"><a href="#行锁（row-lock）" class="headerlink" title="行锁（row lock）"></a>行锁（row lock）</h3><p>行锁只在*<strong>存储引擎**<em>实现，而</em></strong>MySQL服务器层***没有实现，服务层完全不了解存储引擎中的锁机制。行锁最大程度的支持并发，但也是开销最大的锁策略。</p>
+<h1 id="1-3-事务"><a href="#1-3-事务" class="headerlink" title="1.3 事务"></a>1.3 事务</h1><p>事务就是一组原子性的SQL语句。如果数据库引擎能够全部成功执行该组语句，那么就执行该组语句。如果其中有任何一条语句因为崩溃或其他原因无法执行，那么所有语句都不会执行。也就是说事务内的语句，要么全部执行成功，要么全部执行失败。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">start transaction;</span><br><span class="line">select balance from checking where customer_id &#x3D; 10233;</span><br><span class="line">update checking set balance &#x3D; balance - 200 where customer_id &#x3D; 10233;</span><br><span class="line">update savings  set balance &#x3D; balance + 200 where customer_id &#x3D; 10233;</span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
+
+<p><strong>事务的四大特性</strong></p>
+<ul>
+<li><p>原子性（atomicity）：一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，要么全部失败回滚。</p>
+</li>
+<li><p>一致性（consistency）：数据库总是从一个一致性状态转换成另外一个一致性状态。如上面的例子，一致性确保了，即使系统在第三条和第四条语句之间时系统崩溃了，支票账号也不会损失200元，因为事务没有提交，所以事务中的修改不会保存到数据库中。</p>
+</li>
+<li><p>隔离性（isolation）：通常来说，一个事务所作的修改在最终提交之前，对其他事务是不可见的。如上面的例子，当执行完第三条语句、第四条语句未执行时，此时另一个账户汇总程序开始运行，则其看到的支票账户的余额并没有减去200元。后面我们再讨论“<strong>隔离级别</strong>”时，会发现为什么会说“通常来说”是不可见的。</p>
+</li>
+<li><p>持久性（durability）：一旦事务提交，则其所作的修改就会永久保存到数据库中。即使系统崩溃，修改的数据也不会丢失。持久性也分很多级别，而且不可能做到100%的持久性保证的侧脸，否则备份有什么用呢？</p>
+</li>
+</ul>
+<p>就像锁粒度会增加系统开销一样，事务也会增加额外的安全性。有些存储引擎支持事务，有些不支持，所以需要根据业务需求是否需要事务去选择存储引擎。</p>
+<h2 id="1-3-1-隔离级别"><a href="#1-3-1-隔离级别" class="headerlink" title="1.3.1 隔离级别"></a>1.3.1 隔离级别</h2><p>SQL标准中，定义了4种隔离级别，每一种级别都规定了一个事务中所作的修改，哪些是在事务内和事务见可见的，哪些是不可见的。较低级别的隔离通常可以执行更高的并发，系统的开销也更低。</p>
+<p><strong>Read Uncommitted（未提交读）</strong><br>在该隔离级别，事务中的修改，即使没有提交，对其他事务也是可见的。事务可以读取未提交的数据，也被称之为脏读（Dirty Read）。从性能上来说，<strong>Read Uncommitted</strong>不会比其他级别好很多，但是缺乏更多的好处，所以实际生产中该级别用的很少。</p>
+<p><strong>Read Committed（提交读）</strong><br>这是大多数数据库系统的默认隔离级别（但不是MySQL默认的）。它满足了前面提到的<strong>隔离性(isolation)**的简单定义：一个事务开始时，只能”**看见</strong>“已经提交的事务所做的修改。换句话说，就是事务从开始到提交之前，所做的任何修改，对其余事务都是不可见。这种隔离级有时候也叫<strong>不可重复读</strong>（Nonrepeatable Read），因为执行两次同样的查询，可能会得到不同的结果。</p>
+<p><strong>Repeatable Read（可重复读）</strong><br>它确保同一事务的多次读取同样的记录的结果是一致的。不过理论上，这会导致另一个棘手的问题：幻读 （Phantom Read）。简单的说，幻读指当用户读取某一范围内的记录时，另一个事务又在该范围内插入了新的记录，当用户再读取该范围的记录时，会发现有新的幻行。<!--其实MySQL通过MVCC解决了其他事务插入新数据引起的幻读，但是删除引起的幻读依然没有解决-->  InnoDB和XtraDB存储引擎通过多版本并发控制（MVCC，Multiversion Concurrency Control）机制解决了该问题。本章稍后继续讨论。</p>
+<p>这是MySQL的默认事务隔离级别。</p>
+<p><strong>Serializable（可串行化）</strong><br>这是最高的隔离级别，它强制事务都是串行执行的，解决前面所说的幻读问题。换言之，它是在读取的每一行数据上都加上锁，所以可能导致大量的超时和锁争用的问题。</p>
+<table>
+<thead>
+<tr>
+<th>事务隔离级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读可能性</th>
+<th align="left">加锁读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Read Uncommitted</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td align="left">No</td>
+</tr>
+<tr>
+<td><strong>Read Committed</strong></td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td align="left">No</td>
+</tr>
+<tr>
+<td><strong>Repeatable Read</strong></td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td align="left">No</td>
+</tr>
+<tr>
+<td><strong>Serializable</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td align="left">Yes</td>
+</tr>
+</tbody></table>
+<h2 id="1-3-2-死锁"><a href="#1-3-2-死锁" class="headerlink" title="1.3.2 死锁"></a>1.3.2 死锁</h2><p>死锁是多个事务在同一资源上相互占用，并请求锁定对方占用的资源，从而导致的恶性循环。当多个事务试图以不同的顺序锁定资源时，就可能产生死锁。多个事务同时锁定同一个资源时，也可能会导致死锁。比如，</p>
+<p>事务1:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">start transaction;</span><br><span class="line">update stockPrice set close &#x3D; 45.50 where stock_id &#x3D; 4 and date &#x3D; &#39;2002-05-01&#39;;</span><br><span class="line">update stockPrice set close &#x3D; 19.80 where stock_id &#x3D; 3 and date &#x3D; &#39;2002-05-02&#39;;</span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
+
+<p>事务2:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">start transaction;</span><br><span class="line">update stockPrice set high &#x3D; 20.12 where stock_id &#x3D; 3 and date &#x3D; &#39;2002-05-02&#39;;</span><br><span class="line">update stockPrice set high &#x3D; 47.20 where stock_id &#x3D; 4 and date &#x3D; &#39;2002-05-01&#39;;</span><br><span class="line">commit;</span><br></pre></td></tr></table></figure>
+
+<p>如果凑巧，两个事务都执行了第一条update语句，更新了一行数据，同时也锁定了该行数据，然后，两个事务都尝试去执行第二条update语句，却发现该行都被对方锁住了，导致双方都在等待对方释放锁，同时又持有对方的锁。</p>
+<p>为了解决这个问题，数据库问题实现了各种死锁检测机制和死锁超时机制。比如InnoDB存储引擎，能检测到死锁的循环依赖。InnoDB处理死锁的办法是，将持有最少排它锁（写锁）的事务进行回滚。另外，也可以使用锁等待超时，就放弃锁请求的方式，这种方式通常来说不太好。</p>
+<p>大多数处理死锁的方式都是重新执行因死锁回滚的事务即可。</p>
+<h2 id="1-3-3-事务日志"><a href="#1-3-3-事务日志" class="headerlink" title="1.3.3 事务日志"></a>1.3.3 事务日志</h2><p>事务日志可以帮助提高事务的效率。</p>
+<p>使用事务日志，存储引擎在修改表的数据时，只需要修改其内存拷贝，再把该修改行为记录到持久在硬盘上的事务日志中，而不用每次都将修改的数据本身持久到磁盘。</p>
+<p>事务日志采用的是追加的方式，因此写日志的操作是磁盘上一小块区域内的顺序I/O，而不像随机I/O需要在磁盘的多个地方移动磁头，所以采用事务日志的方式相对来说要快得多。</p>
+<p>事务日志持久以后，内存中被修改的数据在后台可以慢慢地刷回到磁盘。目前大多数存储引擎都是这样实现的，我们通常称之为预写式日志（Write-Ahead Logging），<strong>修改数据需要写两次磁盘</strong><!--写事务日志一次，写数据一次-->。</p>
+<p>如果数据的修改已经记录到事务日志并持久化，但数据本身还没有写回磁盘，此时系统崩溃，存储引擎在重启时能够自动恢复这部分修改的数据。具体的恢复方式则视存储引擎而定。</p>
+<h2 id="1-3-4-MySQL中的事务"><a href="#1-3-4-MySQL中的事务" class="headerlink" title="1.3.4 MySQL中的事务"></a>1.3.4 MySQL中的事务</h2><p>MySQL提供了两种事务型的存储引擎: InnoDB和NDB Cluster</p>
+<h3 id="自动提交"><a href="#自动提交" class="headerlink" title="自动提交"></a>自动提交</h3><p>MySQL默认采用自动提交（AUTOCOMMIT）模式。</p>
+<p>MySQL可以通过执行SET TRANSACTION ISOLATION LEVEL命令来设置隔离级别。新的隔离级别会在下一个事务开始的时候生效。可以在配置文件中设置整个数据库的隔离级别，也可以只改变当前绘画的隔离级别：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;</span><br></pre></td></tr></table></figure>
+
+<h3 id="在事务中混合使用存储引擎"><a href="#在事务中混合使用存储引擎" class="headerlink" title="在事务中混合使用存储引擎"></a>在事务中混合使用存储引擎</h3><p>MySQL服务器层不管理事务，事务是由下层的存储引擎实现的。所以在同一个事务中，使用多种存储引擎是不可靠的。</p>
+<p>如果在事务中混合使用了事务型和非事务型的表（例如InnoDB和MyISAM表），在正常提交的情况下不会有什么问题。</p>
+<p>但如果该事务需要回滚，非事务型的表上的变更就无法撤销，这会导致数据库出于不一致的状态，这种状况很难修复，事务的最终结果将无法确定。<strong>所以，为每张表选择合适的存储引擎非常重要。</strong></p>
+<p>在非事务型的表上执行事务相关操作的时候，MySQL通常不会发出提醒，也不会报错。有时候只有回滚的时候才会发出一个警告：“某些非事务型的表上的变更不能被回滚”。但大多数情况下，对非事务型表的操作都不会有提示。</p>
+<h3 id="隐式和显式锁定"><a href="#隐式和显式锁定" class="headerlink" title="隐式和显式锁定"></a>隐式和显式锁定</h3><p>InnoDB采用的是两阶段锁定协议（two-phase locking protocol）。在事务执行过程中，随时都可以执行锁定，锁只有在执行COMMIT或者ROLLBACK的时候才会释放，并且所有的锁是在同一时刻被释放。前面描述的锁定都是隐式锁定，InnoDB会根据隔离级别在需要的时候自动加锁。</p>
+<p>另外，InnoDB也支持通过特定的语句进行显式锁定，这些语句不属于SQL规范：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT ... LOCK IN SHARE MODE</span><br><span class="line">SELECT ... FOR UPDATE</span><br></pre></td></tr></table></figure>
+
+<p>MySQL也支持LOCK TABLES和UNLOCK TABLES语句，这是在服务器层实现的，和存储引擎无关。他们有自己的用途，但并不能替代事务处理。如果应用需要用到事务，还是应该选择事务型存储引擎。</p>
+<p><strong>tips：LOCK TABLES和事务之间相互影响的话，情况会变得非常复杂，在某些MySQL版本中甚至会产生无法预料的结果。因此，本书建议，除了事务中禁用了AUTOCOMMIT，可以使用LOCK TABLES之外，其他任何时候都不要显式地执行LOCK TABLES，不管使用的是什么存储引擎。</strong></p>
+<h1 id="1-4-多版本并发控制"><a href="#1-4-多版本并发控制" class="headerlink" title="1.4 多版本并发控制"></a>1.4 多版本并发控制</h1><p>MySQL的大多数事务型存储引擎实现的都不是简单的行级锁。基于提升并发性能的考虑，它们一般都同时实现了多版本并发控制（MVCC）。</p>
+<p>可以认为MVCC是行级锁的一个变种，但是它在很多情况下避免了加锁操作，因此开销更低。虽然实现机制有所不同，但大都实现了<strong>非阻塞</strong><!--就是不互斥-->的读操作，写操作也只锁定必要的行。</p>
+<p>MVCC的实现，是通过保存数据在某个时间点的快照来实现的。也就是说，不管需要执行多长时间，每个事务看到的数据都是一致的。根据事务开始的时间不同，每个事务对同一张表，同一时刻看到的数据可能是不一样的。</p>
+<p>InnoDB的MVCC，是通过在每行记录后面保存两个隐藏的列来实现的。这两个列，一个保存了行的创建时间，一个保存行的过期时间（或删除时间）。当然存储的并不是实际的时间值，而是系统版本号。每开始一个新的事务，系统版本号都会自动递增。事务开始是时刻的系统版本号会作为事务的版本号，用来和查询到的每行记录的版本号进行比较。</p>
+<h4 id="SELECT"><a href="#SELECT" class="headerlink" title="SELECT"></a>SELECT</h4><p>InnoDB会根据以下两个条件检查每行记录：</p>
+<ul>
+<li><p>InnoDB只查询版本早于当前事务版本的数据行（也就是，行的系统版本号&lt;=事务的系统版本号）。这样保证事务读取到的行，要么在事务开始前就已经存在，要么是事务自身插入或者修改过的。</p>
+</li>
+<li><p>行的删除版本要么未定义，要么大于当前事务版本号。这样保证事务读取到的行，在事务开始之前未被删除。</p>
+<!--只有符合上述两个条件的记录，才能返回作为查询结果。-->
+
+</li>
+</ul>
+<h4 id="INSERT"><a href="#INSERT" class="headerlink" title="INSERT"></a>INSERT</h4><p>InnoDB为新插入的每一行保存当前系统版本号作为行版本号。</p>
+<h4 id="DELETE"><a href="#DELETE" class="headerlink" title="DELETE"></a>DELETE</h4><p>InnoDB为删除的每一行保存当前系统版本号作为行删除标识。</p>
+<h4 id="UPDATE"><a href="#UPDATE" class="headerlink" title="UPDATE"></a>UPDATE</h4><p>InnoDB为插入一行新数据，保存当前系统版本号作为行版本号，同时保存当前系统版本号到原来的行作为行删除标识。</p>
+<blockquote>
+<p>好处：保存这两个额外的版本号，使大多数的读操作都可以不加锁。</p>
+<p>坏处：额外的存储空间。</p>
+</blockquote>
+<p>MVCC只在REPEATABLE READ和READ COMMITTED两个隔离级别下工作。其他两个隔离级别都和MVCC不兼容，因为READ UNCOMMITTED总数读取最新的数据行，而不是符合当前事务版本的数据行。而SERIALIZABLE则会对所有读取的行都加锁。</p>
+<h1 id="1-5-MySQL的存储引擎"><a href="#1-5-MySQL的存储引擎" class="headerlink" title="1.5 MySQL的存储引擎"></a>1.5 MySQL的存储引擎</h1><p>在文件系统中，MySQL将每个数据库（也可以称之为schema）保存为数据目录下的一个子目录。创建表时，MySQL会在数据库子目录下创建一个和表同名的.frm文件保存表的定义。</p>
+<p>不同的存储引擎保存数据和索引的方式是不同的；但表的定义则是在MySQL服务层统一处理的。</p>
+<p>可以使用SHOW TABLE STATUS命令（在MySQL5.0以后的版本中，也可以查询INFORMATION_SCHEMA中对应的表）显式表的相关信息。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW TABLE STATUS LIKE &#39;user&#39; \G</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>name：表名</li>
+<li>Engine：表的存储引擎类型。在旧版本中，该列的名字叫Type，而不是Engine</li>
+<li>Row_format：行的格式。</li>
+<li>ROWS：表中的行数。对于MyISAM和其他的一些存储引擎，该值是精确的，但对于InnoDB该值是估计值。</li>
+<li>Avg_row_length：平均每行包含的字节数。</li>
+<li>Data_length：表数据的大小（以字节为单位）。</li>
+<li>Max_data_length：表数据的最大容量，该值和存储引擎有关。</li>
+<li>Index_length：索引的大小（以字节为单位）。</li>
+<li>Data_free：对于MyISAM表，表示已分配但目前没有使用的空间。这部书空间包括了之前删除的行，以及后续可以被INSERT利用到的空间。</li>
+<li>Auto_increment：下一个AUTO_INCREMENT的值。</li>
+<li>Create_time：表的创建时间。</li>
+<li>Update_time：表数据的最后修改时间。</li>
+<li>Check_time：使用CHECK TABLE命令或者myisamchk工具最后一次检查表的时间。</li>
+<li>Collation：表的默认字符集和字符列排序规则。</li>
+<li>Checksum：如果启动，保存的时候整个表的实时校验和。</li>
+<li>Create_options：创建表时指定的其他选项。</li>
+<li>Comment：该列包含了一些其他的额外信息。对于MyISAM表，保存的是表在创建时带的注释。对于InnoDB表，则保存的是InnoDB表空间的剩余空间信息。如果是一个视图，则该列包含“VIEW”的文本字样。</li>
+</ul>
+<h3 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h3><p>InnoDB采用MVCC来支持高并发，并且实现了四个标准的隔离级别。</p>
+<h3 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h3><p>在MySQL5.1及之前的版本，MyISAM是默认的存储引擎。MyISAM提供了大量的特性，包括全文索引、压缩、空间函数（GIS）等，但MyISAM不支持事务和行级锁，而且有一个毫无疑问的缺陷就是崩溃后无法安全恢复。</p>
+<h2 id="1-5-1-InnoDB存储引擎"><a href="#1-5-1-InnoDB存储引擎" class="headerlink" title="1.5.1 InnoDB存储引擎"></a>1.5.1 InnoDB存储引擎</h2><p>InnoDB的数据存储在表空间(tablespace)中，表空间是由InnoDB管理的一个黑盒子，由一系列的数据文件组成。InnoDB可以将每个表的数据和索引放在单独的文件中。</p>
+<p>InnoDB采用mvcc来支持高并发，实现了四个标准的隔离级别，默认级别是REPEATABLE READ（可重复读），通过间隙锁（next-key locking）策略防止幻读的出现<!--前面不是说通过MVCC防止幻读吗？-->。间隙锁使得InnoDB不仅仅锁定查询涉及的行，还会对索引中的间隙进行锁定，防止幻影行的插入.</p>
+<p>InnoDB表是通过<strong>聚簇索引</strong>建立的，InnoDB的索引结构和其他存储引擎有很大的不同，<strong>聚簇索引对主键查询有很高的性能</strong>，但二级索引（secondary index, 非主键索引）必须包含主键列，如果主键列很大的话，其他的所有索引都会很大。因此，若表上的索引较多的话，主键应当尽可能的小。InnoDB的存储格式是平台独立的，可以将数据和索引文件从Intel平台复制到PowerPC或者Sun SPARC.</p>
+<p>InnoDB 内部做了很多优化，包括从磁盘读取数据时采用的可预测性预读，能够自动在内存中创建hash索引以加速读操作的自适应哈希索引，以及能够加速插入操作的插入缓冲区(insert buffer)等</p>
+<p>Mysql的其他存储引擎不支持热备份，要获取一致性视图需要停止对所有表的写入。</p>
+<h2 id="1-5-2-MyISAM存储引擎"><a href="#1-5-2-MyISAM存储引擎" class="headerlink" title="1.5.2 MyISAM存储引擎"></a>1.5.2 MyISAM存储引擎</h2><h2 id="1-5-3-Mysql内建的其他存储引擎"><a href="#1-5-3-Mysql内建的其他存储引擎" class="headerlink" title="1.5.3 Mysql内建的其他存储引擎"></a>1.5.3 Mysql内建的其他存储引擎</h2><h2 id="1-5-4第三方存储引擎"><a href="#1-5-4第三方存储引擎" class="headerlink" title="1.5.4第三方存储引擎"></a>1.5.4第三方存储引擎</h2><h2 id="1-5-5-选择合适的引擎"><a href="#1-5-5-选择合适的引擎" class="headerlink" title="1.5.5 选择合适的引擎"></a>1.5.5 选择合适的引擎</h2><p>大部分情况下，都选择InnoDB</p>
+<h2 id="1-5-6-转换表的引擎"><a href="#1-5-6-转换表的引擎" class="headerlink" title="1.5.6 转换表的引擎"></a>1.5.6 转换表的引擎</h2><h3 id="ALTER-TABLE"><a href="#ALTER-TABLE" class="headerlink" title="ALTER TABLE"></a>ALTER TABLE</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE mytable ENGINE &#x3D; InnoDB;</span><br></pre></td></tr></table></figure>
+
+<p>上述语法可以适用任何存储引擎。但有一个问题：需要执行很长时间。MySQL会按行将数据从原表复制到一张新的表中，在复制期间可能会消耗系统所有的I/O能力，同时原表上会加上读锁。所以，在繁忙的表上执行此操作要特别小心。</p>
+<p>如果转换表的存储引擎，将会失去原引擎相关的所有特性。例如，如果将一张InnoDB表转换为MyISAM，然后再转换回InnoDB，原InnoDB表上所有外键将丢失。</p>
+<h3 id="导出与导入"><a href="#导出与导入" class="headerlink" title="导出与导入"></a>导出与导入</h3><p>为了更好地控制转换的过程，可以使用mysqldump工具将数据到处到文件，然后修改文件中CREATE TABLE语句的存储引擎选项，注意同时修改表名，因为同一个数据库中不能存在相同的表名，即使它们使用的是不同的存储引擎。同时要注意mysqldump默认会自动在CREATE TABLE语句前加上DROP TABLE语句，不注意这一点可能会导致数据丢失。</p>
+<h3 id="创建和查询（CREATE和SELECT）"><a href="#创建和查询（CREATE和SELECT）" class="headerlink" title="创建和查询（CREATE和SELECT）"></a>创建和查询（CREATE和SELECT）</h3><p>第三种转换的技术综合了第一种方法的高效和第二种方法的安全。不需要导出整个表的数据，而是先创建一个新的存储引擎的表，然后利用INSERT……SELECT语法来导入数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE innodb_table LIKE myisam_table;</span><br><span class="line">ALTER TABLE innodb_table ENGINE&#x3D;InnoDB;</span><br><span class="line">INSERT INTO innodb_table SELECT * FROM myisam_table;</span><br></pre></td></tr></table></figure>
+
+<p>数据量不大的话，这样做工作得很好。如果数据量很大，则可以考虑做分批处理，针对每一段数据执行事务提交操作，以避免大事务产生过多的undo。假设有主键字段id，重复运行以下语句（最小值x和最大值y进行相应的替换）将数据导入到新表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">START TRANSACTION;</span><br><span class="line">INSERT INTO innodb_table SELECT * FROM myisam_table WHERE id BETWEEN x AND y;</span><br><span class="line">COMMIT;</span><br></pre></td></tr></table></figure>
+
+<p>这样操作完成以后，新表是原表的一个全量复制，原表还在，如果需要可以删除原表，如果有必要，可以在执行的过程中对原表加锁，以确保新表和原表数据一致。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/db/" rel="tag"># db</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-02-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83Eureka/" rel="prev" title="spring cloud 02 服务中心Eureka">
+                  <i class="fa fa-chevron-left"></i> spring cloud 02 服务中心Eureka
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/17/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter4%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/" rel="next" title="chapter4对象的组合">
+                  chapter4对象的组合 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

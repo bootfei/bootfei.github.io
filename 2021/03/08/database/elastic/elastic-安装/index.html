@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="Elasticsearch 单机安装下载安装包1wget https:&#x2F;&#x2F;artifacts.elastic.co&#x2F;downloads&#x2F;elasticsearch&#x2F;elasticsearch-6.6.2.tar.gz  解压缩并且修改配置文件12345tar -zxf elasticsearch-6.6.2.tar.gzcd elasticsear">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elastic-安装">
+<meta property="og:url" content="http://example.com/2021/03/08/database/elastic/elastic-%E5%AE%89%E8%A3%85/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="Elasticsearch 单机安装下载安装包1wget https:&#x2F;&#x2F;artifacts.elastic.co&#x2F;downloads&#x2F;elasticsearch&#x2F;elasticsearch-6.6.2.tar.gz  解压缩并且修改配置文件12345tar -zxf elasticsearch-6.6.2.tar.gzcd elasticsear">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-03-08T09:05:46.000Z">
+<meta property="article:modified_time" content="2021-03-14T02:22:17.613Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/03/08/database/elastic/elastic-%E5%AE%89%E8%A3%85/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>elastic-安装 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticsearch-%E5%8D%95%E6%9C%BA%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">Elasticsearch 单机安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">1.1.</span> <span class="nav-text">下载安装包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8B%E7%BC%A9%E5%B9%B6%E4%B8%94%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">解压缩并且修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9Linux%E9%85%8D%E7%BD%AE"><span class="nav-number">1.3.</span> <span class="nav-text">修改Linux配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#max-file-descriptors-4096-for-elasticsearch-process-is-too-low-increase-to-at-least-65536"><span class="nav-number">1.3.1.</span> <span class="nav-text">max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#max-number-of-threads-3818-for-user-qf-is-too-low-increase-to-at-least-4096"><span class="nav-number">1.3.2.</span> <span class="nav-text">max number of threads [3818] for user [qf] is too low, increase to at least [4096]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#max-virtual-memory-areas-vm-max-map-count-65530-is-too-low-increase-to-at-least-262144"><span class="nav-number">1.3.3.</span> <span class="nav-text">max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9ES%E9%85%8D%E7%BD%AE"><span class="nav-number">1.4.</span> <span class="nav-text">修改ES配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%97%A5%E5%BF%97%E3%80%81%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E7%9B%AE%E5%BD%95%EF%BC%9A%EF%BC%88%E7%95%99%E4%BD%9C%E5%A4%87%E7%94%A8%EF%BC%8C%E5%88%9D%E6%AC%A1%E5%85%88%E5%88%9B%E5%BB%BA%EF%BC%89"><span class="nav-number">1.4.1.</span> <span class="nav-text">创建日志、数据存储目录：（留作备用，初次先创建）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7"><span class="nav-number">1.4.2.</span> <span class="nav-text">创建用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E6%8D%A2%E7%94%A8%E6%88%B7"><span class="nav-number">1.4.3.</span> <span class="nav-text">切换用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%88%E6%9D%83"><span class="nav-number">1.4.4.</span> <span class="nav-text">授权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%81%E8%AE%B8%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AE"><span class="nav-number">1.4.5.</span> <span class="nav-text">允许外网访问</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9ES%E7%9A%84JVM%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.4.6.</span> <span class="nav-text">修改ES的JVM大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="nav-number">1.4.7.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83"><span class="nav-number">1.4.8.</span> <span class="nav-text">验证环境</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E8%AF%8D%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">分词器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ik%E5%88%86%E8%AF%8D%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">ik分词器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pinyin%E5%88%86%E8%AF%8D%E5%99%A8"><span class="nav-number">2.2.</span> <span class="nav-text">pinyin分词器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kibana"><span class="nav-number">3.</span> <span class="nav-text">Kibana</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">下载安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8-1"><span class="nav-number">3.3.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83-1"><span class="nav-number">3.4.</span> <span class="nav-text">验证环境</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HeadNode%E5%AE%89%E8%A3%85"><span class="nav-number">4.</span> <span class="nav-text">HeadNode安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#head%E6%8F%92%E4%BB%B6%E4%B8%BB%E8%A6%81%E7%94%A8%E9%80%94"><span class="nav-number">5.</span> <span class="nav-text">head插件主要用途</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">5.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">5.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C"><span class="nav-number">5.3.</span> <span class="nav-text">运行</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/08/database/elastic/elastic-%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          elastic-安装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-03-08 17:05:46" itemprop="dateCreated datePublished" datetime="2021-03-08T17:05:46+08:00">2021-03-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-14 10:22:17" itemprop="dateModified" datetime="2021-03-14T10:22:17+08:00">2021-03-14</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Elasticsearch-单机安装"><a href="#Elasticsearch-单机安装" class="headerlink" title="Elasticsearch 单机安装"></a><strong>Elasticsearch</strong> 单机安装</h1><h2 id="下载安装包"><a href="#下载安装包" class="headerlink" title="下载安装包"></a>下载安装包</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;artifacts.elastic.co&#x2F;downloads&#x2F;elasticsearch&#x2F;elasticsearch-6.6.2.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h2 id="解压缩并且修改配置文件"><a href="#解压缩并且修改配置文件" class="headerlink" title="解压缩并且修改配置文件"></a>解压缩并且修改配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar -zxf elasticsearch-6.6.2.tar.gz</span><br><span class="line"></span><br><span class="line">cd elasticsearch-6.6.2</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><font color='red'>注意：把elasticsearch软件必须放入/home/es（es是新建用户）的目录下，并把elasticsearch设置为es用户所属</font></p>
+<h2 id="修改Linux配置"><a href="#修改Linux配置" class="headerlink" title="修改Linux配置"></a>修改Linux配置</h2><h3 id="max-file-descriptors-4096-for-elasticsearch-process-is-too-low-increase-to-at-least-65536"><a href="#max-file-descriptors-4096-for-elasticsearch-process-is-too-low-increase-to-at-least-65536" class="headerlink" title="max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]"></a>max file descriptors [4096] for elasticsearch process is too low, increase to at least [65536]</h3><p>每个进程最大同时打开文件数太小，可通过下面2个命令查看当前数量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ulimit -Hn</span><br><span class="line"></span><br><span class="line">ulimit -Sn</span><br></pre></td></tr></table></figure>
+
+<p>修改/etc/security/limits.conf文件，增加配置，用户退出后重新登录生效</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* soft nofile 65536</span><br><span class="line"></span><br><span class="line">* hard nofile 65536</span><br></pre></td></tr></table></figure>
+
+<h3 id="max-number-of-threads-3818-for-user-qf-is-too-low-increase-to-at-least-4096"><a href="#max-number-of-threads-3818-for-user-qf-is-too-low-increase-to-at-least-4096" class="headerlink" title="max number of threads [3818] for user [qf] is too low, increase to at least [4096]"></a>max number of threads [3818] for user [qf] is too low, increase to at least [4096]</h3><p>可通过命令查看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ulimit -Hu</span><br><span class="line"></span><br><span class="line">ulimit -Su</span><br></pre></td></tr></table></figure>
+
+<p>问题同上，最大线程个数太低。修改配置文件/etc/security/limits.conf，增加配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* soft nproc 4096</span><br><span class="line"></span><br><span class="line">* hard nproc 4096</span><br></pre></td></tr></table></figure>
+
+<h3 id="max-virtual-memory-areas-vm-max-map-count-65530-is-too-low-increase-to-at-least-262144"><a href="#max-virtual-memory-areas-vm-max-map-count-65530-is-too-low-increase-to-at-least-262144" class="headerlink" title="max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]"></a>max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]</h3><p>修改/etc/sysctl.conf文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vi &#x2F;etc&#x2F;sysctl.conf</span><br><span class="line"></span><br><span class="line">sysctl -p #执行命令sysctl -p生效</span><br></pre></td></tr></table></figure>
+
+<p>增加配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.max_map_count&#x3D;262144</span><br></pre></td></tr></table></figure>
+
+<p>错误解决完毕：重新启动</p>
+<h2 id="修改ES配置"><a href="#修改ES配置" class="headerlink" title="修改ES配置"></a>修改ES配置</h2><h3 id="创建日志、数据存储目录：（留作备用，初次先创建）"><a href="#创建日志、数据存储目录：（留作备用，初次先创建）" class="headerlink" title="创建日志、数据存储目录：（留作备用，初次先创建）"></a><strong>创建日志、数据存储目录：（留作备用，初次先创建）</strong></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p &#x2F;data&#x2F;logs&#x2F;es</span><br><span class="line">mkdir -p &#x2F;data&#x2F;es&#x2F;&#123;data,work,plugins,scripts&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a><strong>创建用户</strong></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd es -s &#x2F;bin&#x2F;bash #es不能在root用户下启动，必须创建新的用户，用来启动es</span><br></pre></td></tr></table></figure>
+
+<p>注意：es不能在root用户下启动，必须创建新的用户，用来启动es</p>
+<h3 id="切换用户"><a href="#切换用户" class="headerlink" title="切换用户"></a><strong>切换用户</strong></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">su es</span><br></pre></td></tr></table></figure>
+
+<p>再次启动，发现还是报错，原因：当前用户没有执行权限</p>
+<h3 id="授权"><a href="#授权" class="headerlink" title="授权"></a>授权</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R es &#x2F;home&#x2F;qifei&#x2F;elasticsearch-6.2.4</span><br></pre></td></tr></table></figure>
+
+<h3 id="允许外网访问"><a href="#允许外网访问" class="headerlink" title="允许外网访问"></a>允许外网访问</h3><p>授权成功，发现elasticsearch已经在es用户下面了，可以启动了，但是启动成功，浏览器不能访问，因此还需要做如下配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vi confifig&#x2F;Elasticsearch.yml</span><br><span class="line"></span><br><span class="line">network.host: 0.0.0.0 #设置外网访问，默认禁止外网访问</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="修改ES的JVM大小"><a href="#修改ES的JVM大小" class="headerlink" title="修改ES的JVM大小"></a>修改ES的JVM大小</h3><p>vi config/jvm.options</p>
+<p>-Xms1g</p>
+<p>-Xmx1g</p>
+<p>必须保持一样大</p>
+<blockquote>
+<p>* soft nofile 65536</p>
+<p>* hard nofile 65536</p>
+<p>* soft nproc 4096</p>
+<p>* hard nproc 4096</p>
+</blockquote>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>不要root启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">useradd qf</span><br><span class="line">echo &quot;Password&quot; | passwd qf --stdin</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bin&#x2F;elasticsearch</span><br><span class="line"></span><br><span class="line">bin&#x2F;elasticsearch -d #后台启动（守护模式）</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="验证环境"><a href="#验证环境" class="headerlink" title="验证环境"></a>验证环境</h3><p>not run elasticsearch as root </p>
+<p>curl <a target="_blank" rel="noopener" href="http://localhost:9200/?pretty">http://localhost:9200/?pretty</a></p>
+<h1 id="分词器"><a href="#分词器" class="headerlink" title="分词器"></a>分词器</h1><p>下载后解压到elasticsearch的plugins目录下</p>
+<p>POST /_analyze { “analyzer”: “simple”, “text”: “ 我是中国人” }</p>
+<h2 id="ik分词器"><a href="#ik分词器" class="headerlink" title="ik分词器"></a>ik分词器</h2><p>wget <a target="_blank" rel="noopener" href="https://github.com/medcl/elasticsearch-analysis-ik/releases/tag/v6.6.2">https://github.com/medcl/elasticsearch-analysis-ik/releases/tag/v6.6.2</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">POST &#x2F;_analyze </span><br><span class="line">&#123; </span><br><span class="line">    &quot;analyzer&quot;: &quot;ik_smart&quot;, </span><br><span class="line">    &quot;text&quot;: &quot;我是中国人 &quot; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="pinyin分词器"><a href="#pinyin分词器" class="headerlink" title="pinyin分词器"></a>pinyin分词器</h2><p>wget <a target="_blank" rel="noopener" href="https://github.com/medcl/elasticsearch-analysis-pinyin/releases/tag/v6.6.2">https://github.com/medcl/elasticsearch-analysis-pinyin/releases/tag/v6.6.2</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GET &#x2F;medcl&#x2F;_analyze</span><br><span class="line">&#123;</span><br><span class="line">    &quot;text&quot;:[&quot;河南濮阳&quot;],</span><br><span class="line">    &quot;analyzer&quot;: &quot;pinyin_analyzer&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h1><h2 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h2><p>wget <a target="_blank" rel="noopener" href="https://artifacts.elastic.co/downloads/kibana/kibana-6.6.2-linux-x86_64.tar.gz">https://artifacts.elastic.co/downloads/kibana/kibana-6.6.2-linux-x86_64.tar.gz</a></p>
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vi kibana-6.4.2-linux-x86_64&#x2F;config&#x2F;kibana.yml</span><br><span class="line"></span><br><span class="line">server.port: 5601 ## Kibana服务端口</span><br><span class="line"></span><br><span class="line">server.host: &quot;0.0.0.0&quot; ## Kibana服务地址</span><br><span class="line"></span><br><span class="line">elasticsearch.url: &quot;http:&#x2F;&#x2F;localhost:9200&quot; ##elasticsearch服务地址</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动-1"><a href="#启动-1" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./bin/kibana</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">后台启动</span></span><br><span class="line">./bin/kibana &amp; disown </span><br></pre></td></tr></table></figure>
+
+<h2 id="验证环境-1"><a href="#验证环境-1" class="headerlink" title="验证环境"></a>验证环境</h2><p>访问<a target="_blank" rel="noopener" href="http://192.168.199.216:5601/app/kibana">http://192.168.199.216:5601/app/kibana</a></p>
+<p>如果失败，关闭防火墙</p>
+<h1 id="HeadNode安装"><a href="#HeadNode安装" class="headerlink" title="HeadNode安装"></a>HeadNode安装</h1><h1 id="head插件主要用途"><a href="#head插件主要用途" class="headerlink" title="head插件主要用途"></a><strong>head</strong>插件主要用途</h1><p>elasticsearch-head是一个用来浏览、与Elastic Search簇进行交互的web前端展示插件。</p>
+<p>elasticsearch-head是一个用来监控Elastic Search状态的客户端插件。</p>
+<p>elasticsearch主要有以下三个主要操作——</p>
+<p>1）簇浏览，显示簇的拓扑并允许你执行索引（index)和节点层面的操作。</p>
+<p>2）查询接口，允许你查询簇并以原始json格式或表格的形式显示检索结果。</p>
+<p>3）显示簇状态，有许多快速访问的tabs用来显示簇的状态。 </p>
+<p>4）支持RestfulAPI接口，包含了许多选项产生感兴趣的结果，包括： </p>
+<p>第一，请求方式:get,put,post,delete;json请求数据，节点node， 路径path。 </p>
+<p>第二，JSON验证器。 </p>
+<p>第三，定时请求的能力。</p>
+<p>第四，用javascript表达式传输结果的能力。 </p>
+<p>第五，统计一段时间的结果或该段时间结果比对的能力。</p>
+<p>第六，以简单图标的形式绘制传输结果</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a><strong>安装</strong></h2><p>安装步骤：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#下载nodejs,head插件运行依赖node</span><br><span class="line">wget https:&#x2F;&#x2F;nodejs.org&#x2F;dist&#x2F;v9.9.0&#x2F;node-v9.9.0-linux-x64.tar.xz</span><br><span class="line"></span><br><span class="line">#解压</span><br><span class="line">tar -xf node-v9.9.0-linux-x64.tar.xz</span><br><span class="line"></span><br><span class="line">#重命名</span><br><span class="line">mv node-v9.9.0-linux-x64 nodeJs</span><br><span class="line"></span><br><span class="line">#配置文件</span><br><span class="line">vim &#x2F;etc&#x2F;profile</span><br><span class="line">export NODE_HOME&#x3D;&#x2F;home&#x2F;coder&#x2F;server&#x2F;node- v8.12.0-linux-x64 </span><br><span class="line">export PATH&#x3D;$PATH:$NODE_HOME&#x2F;bin</span><br><span class="line"></span><br><span class="line">#刷新配置</span><br><span class="line">source &#x2F;etc&#x2F;profile</span><br><span class="line"></span><br><span class="line">#查询node版本，同时查看是否安装成功</span><br><span class="line">node -v</span><br><span class="line"></span><br><span class="line">#下载head插件</span><br><span class="line">wget https:&#x2F;&#x2F;github.com&#x2F;mobz&#x2F;elasticsearch-head&#x2F;archive&#x2F;master.zip</span><br><span class="line"></span><br><span class="line">#解压</span><br><span class="line">unzip master.zip</span><br><span class="line"></span><br><span class="line">#使用淘宝的镜像库进行下载，速度很快</span><br><span class="line"></span><br><span class="line">npm install -g cnpm --registry&#x3D;https:&#x2F;&#x2F;registry.npm.taobao.org</span><br><span class="line"></span><br><span class="line">#进入head插件解压目录，执行安装命令</span><br><span class="line">cnpm install</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>此时未连接，需要配置才能连接：<br>修改 Gruntfile.js文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>修改_site/app.js：<br>修改IP地址，连接elasticsearch</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">启用CORS: 当head插件访问es时，您必须在elasticsearch中启用CORS，否则您的浏览器将拒绝跨域。</span><br><span class="line">在elasticsearch配置中：</span><br><span class="line">http.cors.enabled: true</span><br><span class="line">您还必须设置，http.cors.allow-origin因为默认情况下不允许跨域。http.cors.allow-origin: &quot;*&quot;</span><br><span class="line">是允许配置的，但由于这样配置的任何地方都可以访问，所以有安全风险。</span><br><span class="line">我在集群安装的时候已经配好了、如果你刚配置、需要重启ElasticSearch服务</span><br><span class="line">http.cors.enabled: true</span><br><span class="line">http.cors.allow-origin: &quot;*&quot;</span><br><span class="line">访问head插件</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a><strong>运行</strong></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm start #启动head插件</span><br></pre></td></tr></table></figure>
+
+<p>启动运行端口为：9100</p>
+<p>访问：</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/07/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" rel="prev" title="Linux常用命令集合">
+                  <i class="fa fa-chevron-left"></i> Linux常用命令集合
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/12/database/elastic/Lucene-%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84/" rel="next" title="Lucene-底层结构">
+                  Lucene-底层结构 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

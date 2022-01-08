@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="业务场景近日在公司领到一个小需求，需要对之前已有的试用用户申请规则进行拓展。我们的场景大概如下所示: 123456789101112131415if (是否海外用户) &amp;#123; return false;&amp;#125;if (刷单用户) &amp;#123;  return false;&amp;#125;if (未付费用户 &amp;&amp; 不再服务时段) &amp;#123;  return false&amp;#12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多条件判断场景中规则执行器的设计">
+<meta property="og:url" content="http://example.com/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/%E5%A4%9A%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%9C%BA%E6%99%AF%E4%B8%AD%E8%A7%84%E5%88%99%E6%89%A7%E8%A1%8C%E5%99%A8%E7%9A%84%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="业务场景近日在公司领到一个小需求，需要对之前已有的试用用户申请规则进行拓展。我们的场景大概如下所示: 123456789101112131415if (是否海外用户) &amp;#123; return false;&amp;#125;if (刷单用户) &amp;#123;  return false;&amp;#125;if (未付费用户 &amp;&amp; 不再服务时段) &amp;#123;  return false&amp;#12">
+<meta property="og:locale">
+<meta property="og:image" content="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4c6560fb2f5f445d8716438974f165db~tplv-k3u1fbpfcp-watermark.image">
+<meta property="article:published_time" content="2021-04-20T04:55:44.000Z">
+<meta property="article:modified_time" content="2021-04-20T05:30:25.386Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4c6560fb2f5f445d8716438974f165db~tplv-k3u1fbpfcp-watermark.image">
+
+
+<link rel="canonical" href="http://example.com/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/%E5%A4%9A%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%9C%BA%E6%99%AF%E4%B8%AD%E8%A7%84%E5%88%99%E6%89%A7%E8%A1%8C%E5%99%A8%E7%9A%84%E8%AE%BE%E8%AE%A1/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>多条件判断场景中规则执行器的设计 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">业务场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%84%E5%88%99%E6%89%A7%E8%A1%8C%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">规则执行器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%9B%BE"><span class="nav-number">2.1.</span> <span class="nav-text">设计图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E4%BA%A4%E4%BA%92%E5%AF%B9%E8%B1%A1RuleDto"><span class="nav-number">2.2.</span> <span class="nav-text">操作交互对象RuleDto</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E5%88%99BaseRule"><span class="nav-number">2.3.</span> <span class="nav-text">规则BaseRule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%99%A8RuleService"><span class="nav-number">2.4.</span> <span class="nav-text">执行器RuleService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">2.5.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">优点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="nav-number">3.2.</span> <span class="nav-text">缺点：</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/%E5%A4%9A%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%9C%BA%E6%99%AF%E4%B8%AD%E8%A7%84%E5%88%99%E6%89%A7%E8%A1%8C%E5%99%A8%E7%9A%84%E8%AE%BE%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多条件判断场景中规则执行器的设计
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-04-20 12:55:44 / Modified: 13:30:25" itemprop="dateCreated datePublished" datetime="2021-04-20T12:55:44+08:00">2021-04-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="业务场景"><a href="#业务场景" class="headerlink" title="业务场景"></a><a href="juejin.cn/post/6951764927958745124">业务场景</a></h2><p>近日在公司领到一个小需求，需要对之前已有的试用用户申请规则进行拓展。我们的场景大概如下所示:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">if (是否海外用户) &#123;</span><br><span class="line"> return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (刷单用户) &#123;</span><br><span class="line">  return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (未付费用户 &amp;&amp; 不再服务时段) &#123;</span><br><span class="line">  return false</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (转介绍用户 || 付费用户 || 内推用户) &#123;</span><br><span class="line">  return true;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照上述的条件我们可以得出的结论是：</p>
+<ul>
+<li>咱们的的主要流程主要是基于 and 或者 or 的关系。</li>
+<li>如果有一个不匹配的话，其实咱们后续的流程是不用执行的，就是需要具备一个短路的功能。</li>
+<li>对于目前的现状来说，我如果在原有的基础上来改，只要稍微注意一下解决需求不是很大的问题，但是说后面可维护性非常差。</li>
+</ul>
+<p>后面进过权衡过后，我还是决定将这个部分进行重构一下。</p>
+<h2 id="规则执行器"><a href="#规则执行器" class="headerlink" title="规则执行器"></a>规则执行器</h2><p>针对这个需求，我首先梳理了一下咱们规则执行器大概的设计， 然后我设计了一个 V1 版本和大家一起分享一下，如果大家也有这样的 case 可以给我分享留言，下面部分主要是<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247487450&idx=1&sn=de3de5a8e5ac476935f2e02706125549&chksm=ebd630f6dca1b9e0ac044234ecb72d54a2d9c46bc3b84dd3b56dbca59b6ba79e56a3434d4c4d&scene=21#wechat_redirect">设计和实现</a>的流程和 code.</p>
+<h3 id="设计图"><a href="#设计图" class="headerlink" title="设计图"></a>设计图</h3><p><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4c6560fb2f5f445d8716438974f165db~tplv-k3u1fbpfcp-watermark.image" alt="规则处理逻辑优化.png"></p>
+<h3 id="操作交互对象RuleDto"><a href="#操作交互对象RuleDto" class="headerlink" title="操作交互对象RuleDto"></a>操作交互对象RuleDto</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 业务数据</span><br><span class="line">@Data</span><br><span class="line">public class RuleDto &#123;</span><br><span class="line">  private String address;</span><br><span class="line"> private int age;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="规则BaseRule"><a href="#规则BaseRule" class="headerlink" title="规则BaseRule"></a>规则BaseRule</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 规则抽象</span><br><span class="line">public interface BaseRule &#123;</span><br><span class="line">    boolean execute(RuleDto dto);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 规则模板</span><br><span class="line">public abstract class AbstractRule implements BaseRule &#123;</span><br><span class="line">    protected &lt;T&gt; T convert(RuleDto dto) &#123;</span><br><span class="line">        return (T) dto;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean execute(RuleDto dto) &#123;</span><br><span class="line">        return executeRule(convert(dto));</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    protected &lt;T&gt; boolean executeRule(T t) &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 具体规则- 例子1</span><br><span class="line">public class AddressRule extends AbstractRule &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean execute(RuleDto dto) &#123;</span><br><span class="line">        System.out.println(&quot;AddressRule invoke!&quot;);</span><br><span class="line">        if (dto.getAddress().startsWith(MATCH_ADDRESS_START)) &#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 具体规则- 例子2</span><br><span class="line">public class NationalityRule extends AbstractRule &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected &lt;T&gt; T convert(RuleDto dto) &#123;</span><br><span class="line">        NationalityRuleDto nationalityRuleDto &#x3D; new NationalityRuleDto();</span><br><span class="line">        if (dto.getAddress().startsWith(MATCH_ADDRESS_START)) &#123;</span><br><span class="line">            nationalityRuleDto.setNationality(MATCH_NATIONALITY_START);</span><br><span class="line">        &#125;</span><br><span class="line">        return (T) nationalityRuleDto;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected &lt;T&gt; boolean executeRule(T t) &#123;</span><br><span class="line">        System.out.println(&quot;NationalityRule invoke!&quot;);</span><br><span class="line">        NationalityRuleDto nationalityRuleDto &#x3D; (NationalityRuleDto) t;</span><br><span class="line">        if (nationalityRuleDto.getNationality().startsWith(MATCH_NATIONALITY_START)) &#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 常量定义</span><br><span class="line">public class RuleConstant &#123;</span><br><span class="line">    public static final String MATCH_ADDRESS_START&#x3D; &quot;北京&quot;;</span><br><span class="line">    public static final String MATCH_NATIONALITY_START&#x3D; &quot;中国&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行器RuleService"><a href="#执行器RuleService" class="headerlink" title="执行器RuleService"></a>执行器RuleService</h3><ul>
+<li>存储需要的BaseRule</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">public class RuleService &#123;</span><br><span class="line"></span><br><span class="line">    private Map&lt;Integer, List&lt;BaseRule&gt;&gt; hashMap &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">    private static final int AND &#x3D; 1;</span><br><span class="line">    private static final int OR &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    public static RuleService create() &#123;</span><br><span class="line">        return new RuleService();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public RuleService and(List&lt;BaseRule&gt; ruleList) &#123;</span><br><span class="line">        hashMap.put(AND, ruleList);</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public RuleService or(List&lt;BaseRule&gt; ruleList) &#123;</span><br><span class="line">        hashMap.put(OR, ruleList);</span><br><span class="line">        return this;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public boolean execute(RuleDto dto) &#123;</span><br><span class="line">        for (Map.Entry&lt;Integer, List&lt;BaseRule&gt;&gt; item : hashMap.entrySet()) &#123;</span><br><span class="line">            List&lt;BaseRule&gt; ruleList &#x3D; item.getValue();</span><br><span class="line">            switch (item.getKey()) &#123;</span><br><span class="line">                case AND:</span><br><span class="line">                    &#x2F;&#x2F; 如果是 and 关系，同步执行</span><br><span class="line">                    System.out.println(&quot;execute key &#x3D; &quot; + 1);</span><br><span class="line">                    if (!and(dto, ruleList)) &#123;</span><br><span class="line">                        return false;</span><br><span class="line">                    &#125;</span><br><span class="line">                    break;</span><br><span class="line">                case OR:</span><br><span class="line">                    &#x2F;&#x2F; 如果是 or 关系，并行执行</span><br><span class="line">                    System.out.println(&quot;execute key &#x3D; &quot; + 0);</span><br><span class="line">                    if (!or(dto, ruleList)) &#123;</span><br><span class="line">                        return false;</span><br><span class="line">                    &#125;</span><br><span class="line">                    break;</span><br><span class="line">                default:</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private boolean and(RuleDto dto, List&lt;BaseRule&gt; ruleList) &#123;</span><br><span class="line">        for (BaseRule rule : ruleList) &#123;</span><br><span class="line">            boolean execute &#x3D; rule.execute(dto);</span><br><span class="line">            if (!execute) &#123;</span><br><span class="line">                &#x2F;&#x2F; and 关系匹配失败一次就返回 false</span><br><span class="line">                return false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F; and 关系全部匹配成功，返回 true</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private boolean or(RuleDto dto, List&lt;BaseRule&gt; ruleList) &#123;</span><br><span class="line">        for (BaseRule rule : ruleList) &#123;</span><br><span class="line">            boolean execute &#x3D; rule.execute(dto);</span><br><span class="line">            if (execute) &#123;</span><br><span class="line">                &#x2F;&#x2F; or 关系匹配到一个就返回 true</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F; or 关系一个都匹配不到就返回 false</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">public class RuleServiceTest &#123;</span><br><span class="line"></span><br><span class="line">    @org.junit.Test</span><br><span class="line">    public void execute() &#123;</span><br><span class="line">        &#x2F;&#x2F;规则执行器</span><br><span class="line">        &#x2F;&#x2F;优点：比较简单，每个规则可以独立，将规则，数据，执行器拆分出来，调用方比较规整</span><br><span class="line">        &#x2F;&#x2F;缺点：数据依赖公共传输对象 dto</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;1. 定义规则  init rule</span><br><span class="line">        AgeRule ageRule &#x3D; new AgeRule();</span><br><span class="line">        NameRule nameRule &#x3D; new NameRule();</span><br><span class="line">        NationalityRule nationalityRule &#x3D; new NationalityRule();</span><br><span class="line">        AddressRule addressRule &#x3D; new AddressRule();</span><br><span class="line">        SubjectRule subjectRule &#x3D; new SubjectRule();</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;2. 构造需要的数据 create dto</span><br><span class="line">        RuleDto dto &#x3D; new RuleDto();</span><br><span class="line">        dto.setAge(5);</span><br><span class="line">        dto.setName(&quot;张三&quot;);</span><br><span class="line">        dto.setAddress(&quot;北京&quot;);</span><br><span class="line">        dto.setSubject(&quot;数学&quot;);;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;3. 通过以链式调用构建和执行 rule execute</span><br><span class="line">        boolean ruleResult &#x3D; RuleService</span><br><span class="line">                .create()</span><br><span class="line">                .and(Arrays.asList(nationalityRule, nameRule, addressRule))</span><br><span class="line">                .or(Arrays.asList(ageRule, subjectRule))</span><br><span class="line">                .execute(dto);</span><br><span class="line">        System.out.println(&quot;this student rule execute result :&quot; + ruleResult);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>规则执行器的优点和缺点</p>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>比较简单，每个规则可以独立，将规则，数据，执行器拆分出来，调用方比较规整；</li>
+<li>我在 Rule 模板类中定义 convert 方法做参数的转换这样可以能够，为特定 rule 需要的场景数据提供拓展。</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>上下 rule 有数据依赖性，如果直接修改公共传输对象 dto 这样设计不是很合理，建议提前构建数据。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/Nginx/nginx-02-%E6%90%AD%E5%BB%BA%E5%9B%BE%E7%89%87%E6%9C%8D%E5%8A%A1%E5%99%A8/" rel="prev" title="nginx-02-搭建图片服务器">
+                  <i class="fa fa-chevron-left"></i> nginx-02-搭建图片服务器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE-drool%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/" rel="next" title="开源项目-drool规则引擎">
+                  开源项目-drool规则引擎 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

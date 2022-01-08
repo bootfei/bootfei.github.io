@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="首先在kafka命令行创建一个名称为 cities 的主题，并创建该主题的订阅者。 123$ bin&#x2F;kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 partitions 1 --topic cities #创建cities topic$ bin&#x2F;kafka-topics.sh --list --bootstrap-s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kafka-03-API">
+<meta property="og:url" content="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-02-Java%20API%E5%92%8C%E6%8F%90%E4%BA%A4%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="首先在kafka命令行创建一个名称为 cities 的主题，并创建该主题的订阅者。 123$ bin&#x2F;kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 partitions 1 --topic cities #创建cities topic$ bin&#x2F;kafka-topics.sh --list --bootstrap-s">
+<meta property="og:locale">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-27ed316eb692a347dbcabacf09779d96_720w.jpg">
+<meta property="article:published_time" content="2021-02-13T09:06:11.000Z">
+<meta property="article:modified_time" content="2021-04-16T05:57:06.358Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic3.zhimg.com/80/v2-27ed316eb692a347dbcabacf09779d96_720w.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-02-Java%20API%E5%92%8C%E6%8F%90%E4%BA%A4%E6%96%B9%E5%BC%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>kafka-03-API | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E5%9C%A8kafka%E5%91%BD%E4%BB%A4%E8%A1%8C"><span class="nav-number">1.</span> <span class="nav-text">首先在kafka命令行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-kafka-%E5%8E%9F%E7%94%9F-API"><span class="nav-number">2.</span> <span class="nav-text">使用 kafka 原生 API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E4%BE%9D%E8%B5%96"><span class="nav-number">2.1.</span> <span class="nav-text">导入依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">2.1.0.1.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E5%9B%9E%E8%B0%83"><span class="nav-number">2.1.1.</span> <span class="nav-text">支持回调</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-1"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E5%8F%91%E9%80%81%E5%92%8C%E5%AE%9A%E6%97%B6%E5%8F%91%E9%80%81"><span class="nav-number">2.1.2.</span> <span class="nav-text">批量发送和定时发送</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-2"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">验证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAConsumer"><span class="nav-number">2.2.</span> <span class="nav-text">创建Consumer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84-%E8%87%AA%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="nav-number">2.2.1.</span> <span class="nav-text">创建消费者组 + 自动提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E7%BE%A4%E4%BD%93"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">消费者群体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E5%B9%B3%E8%A1%A1%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">重新平衡消费者</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-3"><span class="nav-number">2.2.1.4.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E6%89%8B%E5%8A%A8%E5%90%8C%E6%AD%A5%E6%8F%90%E4%BA%A4"><span class="nav-number">2.2.2.</span> <span class="nav-text">消费者手动同步提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E5%BC%82%E6%AD%A5%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="nav-number">2.2.3.</span> <span class="nav-text">消费者异步手动提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E5%90%8C%E5%BC%82%E6%AD%A5%E7%BB%84%E5%90%88%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4"><span class="nav-number">2.2.4.</span> <span class="nav-text">消费者同异步组合手动提交</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-4"><span class="nav-number">2.3.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Spring-Boot-Kafka"><span class="nav-number">3.</span> <span class="nav-text">使用Spring Boot Kafka</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E4%BE%9D%E8%B5%96-1"><span class="nav-number">3.1.</span> <span class="nav-text">导入依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Producer"><span class="nav-number">3.3.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Consumer"><span class="nav-number">3.4.</span> <span class="nav-text">Consumer</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-02-Java%20API%E5%92%8C%E6%8F%90%E4%BA%A4%E6%96%B9%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          kafka-03-API
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-02-13 17:06:11" itemprop="dateCreated datePublished" datetime="2021-02-13T17:06:11+08:00">2021-02-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-04-16 13:57:06" itemprop="dateModified" datetime="2021-04-16T13:57:06+08:00">2021-04-16</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="首先在kafka命令行"><a href="#首先在kafka命令行" class="headerlink" title="首先在kafka命令行"></a>首先在kafka命令行</h1><p>创建一个名称为 cities 的主题，并创建该主题的订阅者。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> bin/kafka-topics.sh --create --bootstrap-server 192.168.59.152:9092 partitions 1 --topic cities <span class="comment">#创建cities topic</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> bin/kafka-topics.sh --list --bootstrap-server 192.168.59.153:9092 <span class="comment">##检查是否创建成功</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="使用-kafka-原生-API"><a href="#使用-kafka-原生-API" class="headerlink" title="使用 kafka 原生 API"></a>使用 <strong>kafka</strong> 原生 <strong>API</strong></h1><p>创建一个 Maven 的 Java 工程</p>
+<h2 id="导入依赖"><a href="#导入依赖" class="headerlink" title="导入依赖"></a>导入依赖</h2><ul>
+<li><pre><code class="xml">&lt;!-- kafka 依赖 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;org.apache.kafka&lt;/groupId&gt;
+  &lt;artifactId&gt;kafka_2.12&lt;/artifactId&gt;
+  &lt;version&gt;1.1.1&lt;/version&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## 创建Producer</span><br><span class="line"></span><br><span class="line">- 创建Producer</span><br><span class="line">- 如果不指定partiton，api方式中的key会被kafka取模，key%kafka的数量 &#x3D; 发送到的partition；如果不指定key，那么采用轮训的方式</span><br><span class="line"></span><br><span class="line">### 单次发送</span><br><span class="line"></span><br><span class="line">#### 代码</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;java</span><br><span class="line">import org.apache.kafka.clients.producer.KafkaProducer;</span><br><span class="line">import org.apache.kafka.clients.producer.ProducerRecord;</span><br><span class="line">import java.util.Properties;</span><br><span class="line">public class OneProducer &#123;</span><br><span class="line">    &#x2F;&#x2F; 第一个泛型：当前生产者所生产消息的key</span><br><span class="line">    &#x2F;&#x2F; 第二个泛型：当前生产者所生产的消息本身</span><br><span class="line">    private KafkaProducer&lt;Integer, String&gt; producer;</span><br><span class="line"></span><br><span class="line">    public OneProducer() &#123;</span><br><span class="line">        Properties properties &#x3D; new Properties();</span><br><span class="line">        &#x2F;&#x2F; 指定kafka集群</span><br><span class="line">        properties.put(&quot;bootstrap.servers&quot;, &quot;kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092&quot;);</span><br><span class="line">        &#x2F;&#x2F; 指定key与value的序列化器</span><br><span class="line">        properties.put(&quot;key.serializer&quot;, &quot;org.apache.kafka.common.serialization.IntegerSerializer&quot;);</span><br><span class="line">        properties.put(&quot;value.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);</span><br><span class="line"></span><br><span class="line">        this.producer &#x3D; new KafkaProducer&lt;Integer, String&gt;(properties);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void sendMsg() &#123;</span><br><span class="line">        &#x2F;&#x2F; 创建消息记录（包含主题、消息本身）  (String topic, V value) 不指定partition和key，采用轮训方式</span><br><span class="line">        ProducerRecord&lt;Integer, String&gt; record &#x3D; new ProducerRecord&lt;&gt;(&quot;cities&quot;, &quot;tianjin&quot;);</span><br><span class="line">        </span><br><span class="line">        &#x2F;&#x2F; 创建消息记录（包含主题、key、消息本身）  (String topic, K key, V value) 指定key，采用key取模指定partition</span><br><span class="line">        ProducerRecord&lt;Integer, String&gt; record &#x3D; new ProducerRecord&lt;&gt;(&quot;cities&quot;, 1, &quot;tianjin&quot;);</span><br><span class="line">        </span><br><span class="line">        &#x2F;&#x2F; 创建消息记录（包含主题、partition、key、消息本身）  (String topic, Integer partition, K key, V value)</span><br><span class="line">        ProducerRecord&lt;Integer, String&gt; record &#x3D; new ProducerRecord&lt;&gt;(&quot;cities&quot;, 0, 1, &quot;tianjin&quot;);</span><br><span class="line">        producer.send(record);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>使用kafka tools工具，并且把key和value设置成String，即可查看具体的消息</p>
+<ul>
+<li><p>不指定partition和key （<a href="">实验结果本应该是轮询，但是没有复现出来，反而都是在一个partition上</a>）</p>
+<table>
+<thead>
+<tr>
+<th>partition</th>
+<th>消息id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>partition0（位于broker0上）</td>
+<td>record1</td>
+</tr>
+<tr>
+<td>partition1（位于broker1上）</td>
+<td>record2</td>
+</tr>
+<tr>
+<td>partition2（位于broker2上）</td>
+<td>record3</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>不指定partition，但是指定key = 1，则1%3 = 1，即第一个partition</p>
+<table>
+<thead>
+<tr>
+<th>partition</th>
+<th>消息id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>partition0（位于broker0上）</td>
+<td>record1,record2,record3</td>
+</tr>
+<tr>
+<td>partition1（位于broker1上）</td>
+<td>null</td>
+</tr>
+<tr>
+<td>partition2（位于broker2上）</td>
+<td>null</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>指定partition=1，那么key失效</p>
+<table>
+<thead>
+<tr>
+<th>partition</th>
+<th>消息id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>partition0（位于broker0上）</td>
+<td>null</td>
+</tr>
+<tr>
+<td>partition1（位于broker1上）</td>
+<td>record1,record2,record3</td>
+</tr>
+<tr>
+<td>partition2（位于broker2上）</td>
+<td>null</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h3 id="支持回调"><a href="#支持回调" class="headerlink" title="支持回调"></a>支持回调</h3><p>当broker收到producer的发送信息时，producer做出反应。好处就是保障信息已经投递给broker集群了。</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>只修改sendMsg()方法就可以：send(record, CallBack函数)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendMsg</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="comment">// 创建消息记录（包含主题、partition、key、消息本身）  (String topic, Integer partition, K key, V value)</span></span><br><span class="line">       ProducerRecord&lt;Integer, String&gt; record = <span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">&quot;cities&quot;</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="string">&quot;tianjin&quot;</span>);</span><br><span class="line">   	<span class="comment">//使用lambda表达式表示callBack函数</span></span><br><span class="line">       producer.send(record, (metadata, ex) -&gt; &#123;</span><br><span class="line">           System.out.println(<span class="string">&quot;topic = &quot;</span> + metadata.topic());</span><br><span class="line">           System.out.println(<span class="string">&quot;partition = &quot;</span> + metadata.partition());</span><br><span class="line">           System.out.println(<span class="string">&quot;offset = &quot;</span> + metadata.offset());</span><br><span class="line">       &#125;);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="验证-1"><a href="#验证-1" class="headerlink" title="验证"></a>验证</h4><p>每次发送完数据，broker接收到数据以后，producer都会在console打印出topic\partitin\offset信息</p>
+<h3 id="批量发送和定时发送"><a href="#批量发送和定时发送" class="headerlink" title="批量发送和定时发送"></a>批量发送和定时发送</h3><p>批量发送可不是for循环发送数据，这还是单次发送；批量发送乃是把数据攒起来，一次发送所有攒起来的数据。</p>
+<ul>
+<li><p>batch.size： 官方解释These buffers are of a size specified by the <em>batch</em>.<em>size</em> config，其实就是buffer大小</p>
+</li>
+<li><p>producer.send()方法还是调用10次，但是它并有实际发送，而是将数据存储起来，第10次才发送</p>
+</li>
+</ul>
+<h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p>只需要改properties文件就可以。加上batch.size参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">SomeProducerBatch</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">        <span class="comment">// 指定kafka集群</span></span><br><span class="line">        properties.put(<span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092&quot;</span>);</span><br><span class="line">        <span class="comment">// 指定key与value的序列化器</span></span><br><span class="line">        properties.put(<span class="string">&quot;key.serializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.IntegerSerializer&quot;</span>);</span><br><span class="line">        properties.put(<span class="string">&quot;value.serializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.StringSerializer&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//新增参数</span></span><br><span class="line">        <span class="comment">// 指定生产者每10条向broker发送一次</span></span><br><span class="line">        properties.put(<span class="string">&quot;batch.size&quot;</span>, <span class="number">1000</span>);</span><br><span class="line">        <span class="comment">// 指定生产者每50ms向broker发送一次</span></span><br><span class="line">        properties.put(<span class="string">&quot;linger.ms&quot;</span>, <span class="number">50</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.producer = <span class="keyword">new</span> KafkaProducer&lt;Integer, String&gt;(properties);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="验证-2"><a href="#验证-2" class="headerlink" title="验证"></a>验证</h4><p>发送3条数据，没有达到batch.size=1000字节，发现数据并没有发送</p>
+<h2 id="创建Consumer"><a href="#创建Consumer" class="headerlink" title="创建Consumer"></a>创建Consumer</h2><p> (<strong>1</strong>) 自动提交的问题</p>
+<p>前面的消费者都是以自动提交 offset 的方式对 broker 中的消息进行消费的，但自动提交 可能会出现消息重复消费的情况。所以在生产环境下，很多时候需要对 offset 进行手动提交， 以解决重复消费的问题。</p>
+<p>(<strong>2</strong>) 手动提交分类</p>
+<p>手动提交又可以划分为<a href="">同步提交、异步提交、同异步联合</a>提交。这些提交方式仅仅是 doWork()方法不相同，其构造器是相同的。所以下面首先在前面消费者类的基础上进行构造 器的修改，然后再分别实现三种不同的提交方式。</p>
+<h3 id="创建消费者组-自动提交"><a href="#创建消费者组-自动提交" class="headerlink" title="创建消费者组 + 自动提交"></a>创建消费者组 + 自动提交</h3><p><img src="https://pic3.zhimg.com/80/v2-27ed316eb692a347dbcabacf09779d96_720w.jpg" alt="img"></p>
+<h4 id="消费者群体"><a href="#消费者群体" class="headerlink" title="消费者群体"></a>消费者群体</h4><ul>
+<li>消费者可以使用相同的 group.id 加入群组</li>
+<li>一个组的最大并行度是组中的消费者数量←不是分区。</li>
+<li>Kafka将主题的分区分配给组中的使用者，以便每个分区仅由组中的一个使用者使用。</li>
+<li>Kafka保证消息只能被组中的一个消费者读取。</li>
+<li>消费者可以按照消息存储在日志中的顺序查看消息。</li>
+</ul>
+<h4 id="重新平衡消费者"><a href="#重新平衡消费者" class="headerlink" title="重新平衡消费者"></a>重新平衡消费者</h4><p>添加更多进程/线程将导致Kafka重新平衡。 如果任何消费者或代理无法向ZooKeeper发送心跳，则可以通过Kafka集群重新配置。 在此重新平衡期间，Kafka将分配可用分区到可用线程，可能将分区移动到另一个进程。</p>
+<h4 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h4><blockquote>
+<p>// 开启自动提交，默认为true</p>
+<p>properties.put(“enable.auto.commit”, “true”);</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> kafka.utils.ShutdownableThread;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecord;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.ConsumerRecords;</span><br><span class="line"><span class="keyword">import</span> org.apache.kafka.clients.consumer.KafkaConsumer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.Properties;</span><br><span class="line"></span><br><span class="line"><span class="comment">//本质上是个Runnable线程，dowork()会被run()调用</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SomeConsumer</span> <span class="keyword">extends</span> <span class="title">ShutdownableThread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> KafkaConsumer&lt;Integer, String&gt; consumer;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SomeConsumer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 两个参数：</span></span><br><span class="line">        <span class="comment">// 1)指定当前消费者名称</span></span><br><span class="line">        <span class="comment">// 2)指定消费过程是否会被中断; fasle表示不会被中断</span></span><br><span class="line">        <span class="keyword">super</span>(<span class="string">&quot;KafkaConsumerTest&quot;</span>, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">        String brokers = <span class="string">&quot;kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092&quot;</span>;</span><br><span class="line">        <span class="comment">// 指定kafka集群</span></span><br><span class="line">        properties.put(<span class="string">&quot;bootstrap.servers&quot;</span>, brokers);</span><br><span class="line">        <span class="comment">// 指定消费者组ID</span></span><br><span class="line">        properties.put(<span class="string">&quot;group.id&quot;</span>, <span class="string">&quot;cityGroup1&quot;</span>);</span><br><span class="line">        <span class="comment">// 开启自动提交，默认为true</span></span><br><span class="line">        properties.put(<span class="string">&quot;enable.auto.commit&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">        <span class="comment">// 指定自动提交的超时时限，默认5s</span></span><br><span class="line">        properties.put(<span class="string">&quot;auto.commit.interval.ms&quot;</span>, <span class="string">&quot;1000&quot;</span>);</span><br><span class="line">        <span class="comment">// 指定消费者被broker认定为挂掉的时限。若broker在此时间内未收到当前消费者发送的心跳，则broker</span></span><br><span class="line">        <span class="comment">// 认为消费者已经挂掉。默认为10s</span></span><br><span class="line">        properties.put(<span class="string">&quot;session.timeout.ms&quot;</span>, <span class="string">&quot;30000&quot;</span>);</span><br><span class="line">        <span class="comment">// 指定两次心跳的时间间隔，默认为3s，一般不要超过session.timeout.ms的 1/3</span></span><br><span class="line">        properties.put(<span class="string">&quot;heartbeat.interval.ms&quot;</span>, <span class="string">&quot;10000&quot;</span>);</span><br><span class="line">        <span class="comment">// 当kafka中没有指定offset初值时，或指定的offset不存在时，从这里读取offset的值。其取值的意义为：</span></span><br><span class="line">        <span class="comment">// earliest:指定offset为第一条offset</span></span><br><span class="line">        <span class="comment">// latest: 指定offset为最后一条offset</span></span><br><span class="line">        properties.put(<span class="string">&quot;auto.offset.reset&quot;</span>, <span class="string">&quot;earliest&quot;</span>);</span><br><span class="line">        <span class="comment">// 指定key与value的反序列化器</span></span><br><span class="line">        properties.put(<span class="string">&quot;key.deserializer&quot;</span>,</span><br><span class="line">                <span class="string">&quot;org.apache.kafka.common.serialization.IntegerDeserializer&quot;</span>);</span><br><span class="line">        properties.put(<span class="string">&quot;value.deserializer&quot;</span>,</span><br><span class="line">                <span class="string">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.consumer = <span class="keyword">new</span> KafkaConsumer&lt;Integer, String&gt;(properties);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doWork</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 订阅消费主题topic</span></span><br><span class="line">        consumer.subscribe(Collections.singletonList(<span class="string">&quot;cities&quot;</span>));</span><br><span class="line">        <span class="comment">// 从broker摘取消费。参数表示，若buffer中没有消费，消费者等待消费的时间。</span></span><br><span class="line">        <span class="comment">// 0，表示没有消息什么也不返回</span></span><br><span class="line">        <span class="comment">// &gt;0，表示当时间到后仍没有消息，则返回空</span></span><br><span class="line">        ConsumerRecords&lt;Integer, String&gt; records = consumer.poll(<span class="number">1000</span>);</span><br><span class="line">        <span class="keyword">for</span>(ConsumerRecord record : records) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;topic = &quot;</span> + record.topic());</span><br><span class="line">            System.out.println(<span class="string">&quot;partition = &quot;</span> + record.partition());</span><br><span class="line">            System.out.println(<span class="string">&quot;key = &quot;</span> + record.key());</span><br><span class="line">            System.out.println(<span class="string">&quot;value = &quot;</span> + record.value());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="验证-3"><a href="#验证-3" class="headerlink" title="验证"></a>验证</h4><ul>
+<li>创建1个消费者，topic=cities, group.id = cityGroup1</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConsumerTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SomeConsumer consumer = <span class="keyword">new</span> SomeConsumer();</span><br><span class="line">        consumer.start(); <span class="comment">//其实就是个线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>线程</th>
+<th>启动状况</th>
+<th>消费状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>线程1</td>
+<td>第一次启动</td>
+<td>从头开始消费，历史数据也能获取</td>
+</tr>
+<tr>
+<td>线程1</td>
+<td>第二次启动</td>
+<td>从第一次启动获取的最后一条历史数据为起始，开始获取历史数据；<br />如果历史数据已经消费完，那么就开始等待新数据</td>
+</tr>
+<tr>
+<td>线程1</td>
+<td>指定新的group.id, 启动</td>
+<td>又是从头开始消费，历史数据也能获取</td>
+</tr>
+</tbody></table>
+<p><font color="red">原理其实很简单，因为kafka集群会记录group.id的offset，所以如果换一个新的group.id，那么又从头开始消费</font></p>
+<ul>
+<li>创建2个消费者（不同线程），属于同一个消费者组消费者同步手动提交</li>
+</ul>
+<p><a href="">详情见： kafka-消费者实现多线程</a></p>
+<h3 id="消费者手动同步提交"><a href="#消费者手动同步提交" class="headerlink" title="消费者手动同步提交"></a>消费者手动同步提交</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">properties.put(<span class="string">&quot;enable.auto.commit&quot;</span>, <span class="string">&quot;false&quot;</span>);  </span><br><span class="line">consumer.commitSync();</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="消费者异步手动提交"><a href="#消费者异步手动提交" class="headerlink" title="消费者异步手动提交"></a>消费者异步手动提交</h3><p>手动同步提交方式需要等待 broker 的成功响应，效率太低，影响消费者的吞吐量。异步提交方式是，消费者向 broker 提交 offset 后不用等待成功响应，所以其增加了消费者的吞吐量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">consumer.commitAsync((offsets, ex) -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(ex != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    System.out.print(<span class="string">&quot;提交失败，offsets = &quot;</span> + offsets);</span><br><span class="line">                    System.out.println(<span class="string">&quot;, exception = &quot;</span> + ex);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="消费者同异步组合手动提交"><a href="#消费者同异步组合手动提交" class="headerlink" title="消费者同异步组合手动提交"></a>消费者同异步组合手动提交</h3><p>同异步提交，即同步提交与异步提交组合使用。一般情况下，在异步手动提交时，若偶尔出现提交失败，其也不会影响消费者的消费。因为后续提交最终会将这次提交失败的 offset 给提交了。</p>
+<p>但异步手动提交会产生重复消费，为了防止重复消费，可以将同步提交与异常提交联合 使用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">consumer.commitAsync((offsets, ex) -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(ex != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    System.out.print(<span class="string">&quot;提交失败，offsets = &quot;</span> + offsets);</span><br><span class="line">                    System.out.println(<span class="string">&quot;, exception = &quot;</span> + ex);</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// 同步提交</span></span><br><span class="line">                    consumer.commitSync();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="验证-4"><a href="#验证-4" class="headerlink" title="验证"></a>验证</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OneProducerTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        OneProducer producer = <span class="keyword">new</span> OneProducer();</span><br><span class="line">        producer.sendMsg();</span><br><span class="line">        System.in.read();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="使用Spring-Boot-Kafka"><a href="#使用Spring-Boot-Kafka" class="headerlink" title="使用Spring Boot Kafka"></a>使用<strong>Spring Boot Kafka</strong></h1><h2 id="导入依赖-1"><a href="#导入依赖-1" class="headerlink" title="导入依赖"></a>导入依赖</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">&lt;groupId&gt;org.springframework.kafka&lt;&#x2F;groupId&gt;</span><br><span class="line">&lt;artifactId&gt;spring-kafka&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义属性</span></span><br><span class="line"><span class="attr">kafka:</span></span><br><span class="line">  <span class="attr">topic:</span> <span class="string">cities</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置Kafka</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">kafka:</span></span><br><span class="line">    <span class="attr">bootstrap-servers:</span> <span class="string">kafkaOS1:9092,kafkaOS2:9092,kafkaOS3:9092</span></span><br><span class="line">    <span class="comment"># producer:   # 配置生产者</span></span><br><span class="line">      <span class="comment"># key-serializer: org.apache.kafka.common.serialization.StringSerializer</span></span><br><span class="line">      <span class="comment"># value-serializer: org.apache.kafka.common.serialization.StringSerializer</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">consumer:</span>   <span class="comment"># 配置消费者</span></span><br><span class="line">      <span class="attr">group-id:</span> <span class="string">group0</span>  <span class="comment"># 消费者组</span></span><br><span class="line">      <span class="comment"># key-deserializer: org.apache.kafka.common.serialization.StringDeserializer</span></span><br><span class="line">      <span class="comment"># value-deserializer: org.apache.kafka.common.serialization.StringDeserializer</span></span><br></pre></td></tr></table></figure>
+
+<p> key-deserializer和value-deserializer不需要配置，因为自动装配类中已经设置了该默认值</p>
+<!--spring-cloud-autoconfig包下，找到spring.factories,再从中找到kafka的自动装配类，最后有EnableProperties注解，可以看到该默认配置的值-->
+
+<h2 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h2><p>Spring 是通过 KafkaTemplate 来完成对 Kafka 的操作的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SomeProducer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> KafkaTemplate&lt;String, String&gt; template;</span><br><span class="line">    <span class="comment">// 从配置文件读取自定义属性</span></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;kafka.topic&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 由于是提交数据，所以使用Post方式</span></span><br><span class="line">    <span class="meta">@PostMapping(&quot;/msg/send&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sendMsg</span><span class="params">(<span class="meta">@RequestParam(&quot;message&quot;)</span> String message)</span> </span>&#123;</span><br><span class="line">        template.send(topic, message);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;send success&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Consumer"><a href="#Consumer" class="headerlink" title="Consumer"></a>Consumer</h2><p>Spring Kafka 是通过 KafkaListener 监听方式来完成消息订阅与接收的。当监听到有指定主题的消息时，就会触发@KafkaListener 注解所标注的方法的执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SomeConsumer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@KafkaListener(topics = &quot;$&#123;kafka.topic&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMsg</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Kafka消费者接受到消息 &quot;</span> + message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/13/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-%E5%AE%89%E8%A3%85/" rel="prev" title="kafka-安装">
+                  <i class="fa fa-chevron-left"></i> kafka-安装
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/14/Christ/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2021-02-21/" rel="next" title="2021-02-21主日讲道">
+                  2021-02-21主日讲道 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

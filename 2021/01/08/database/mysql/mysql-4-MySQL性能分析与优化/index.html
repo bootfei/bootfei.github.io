@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="性能分析的思路 首先需要使用【慢查询日志】功能，去获取所有查询时间比较长的SQL语句   其次【查看执行计划】查看有问题的SQL的执行计划 explain  最后可以使用【show profile[s]】 查看有问题的SQL的性能使用情况   慢查询日志修改my.cnf开启: 123slow_query_log&#x3D;ONlong_query_time&#x3D;3slow_query_log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql - 4.MySQL性能分析与优化">
+<meta property="og:url" content="http://example.com/2021/01/08/database/mysql/mysql-4-MySQL%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="性能分析的思路 首先需要使用【慢查询日志】功能，去获取所有查询时间比较长的SQL语句   其次【查看执行计划】查看有问题的SQL的执行计划 explain  最后可以使用【show profile[s]】 查看有问题的SQL的性能使用情况   慢查询日志修改my.cnf开启: 123slow_query_log&#x3D;ONlong_query_time&#x3D;3slow_query_log">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-01-08T07:59:03.000Z">
+<meta property="article:modified_time" content="2021-02-13T04:15:57.326Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/01/08/database/mysql/mysql-4-MySQL%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>mysql - 4.MySQL性能分析与优化 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="nav-number">1.</span> <span class="nav-text">性能分析的思路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97"><span class="nav-number">1.1.</span> <span class="nav-text">慢查询日志</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.1.1.</span> <span class="nav-text">慢查询日志介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%8A%9F%E8%83%BD"><span class="nav-number">1.1.2.</span> <span class="nav-text">开启慢查询功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%97%A5%E5%BF%97%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">1.1.3.</span> <span class="nav-text">分析慢查询日志的工具</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#profile%E5%88%86%E6%9E%90%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.</span> <span class="nav-text">profile分析语句</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%B1%82%E9%9D%A2%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">服务器层面优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%A1%AC%E4%BB%B6%E4%BC%98%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">服务器硬件优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CentOS%E7%B3%BB%E7%BB%9F%E9%92%88%E5%AF%B9mysql%E7%9A%84%E5%8F%82%E6%95%B0%E4%BC%98%E5%8C%96%EF%BC%88%E4%BA%A4%E7%BB%99%E4%B8%93%E4%B8%9ADBA%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">CentOS系统针对mysql的参数优化（交给专业DBA）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0-etc-sysctl-conf"><span class="nav-number">2.2.1.</span> <span class="nav-text">内核相关参数(&#x2F;etc&#x2F;sysctl.conf)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6-etc-security-limit-conf"><span class="nav-number">2.2.2.</span> <span class="nav-text">增加资源限制(&#x2F;etc&#x2F;security&#x2F;limit.conf)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5"><span class="nav-number">2.2.3.</span> <span class="nav-text">磁盘调度策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E9%85%8D%E7%BD%AE%E4%BC%98%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">MySQL数据库配置优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E6%95%B0%E6%8D%AE%E4%BF%9D%E5%AD%98%E5%9C%A8%E5%86%85%E5%AD%98%E4%B8%AD%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BB%8E%E5%86%85%E5%AD%98%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">2.3.1.</span> <span class="nav-text">将数据保存在内存中，保证从内存读取数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E7%A3%81%E7%9B%98%E5%86%99%E5%85%A5%E6%AC%A1%E6%95%B0"><span class="nav-number">2.3.2.</span> <span class="nav-text">降低磁盘写入次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E4%B8%8E%E4%B8%9A%E5%8A%A1%E6%97%A0%E5%85%B3%E4%BB%8E%E6%93%8D%E4%BD%9C"><span class="nav-number">2.3.3.</span> <span class="nav-text">减少与业务无关从操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E5%B1%82%E9%9D%A2%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">数据库设计层面优化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SQL%E8%AF%AD%E5%8F%A5%E4%BC%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">SQL语句优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">索引优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LIMIT%E4%BC%98%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">LIMIT优化</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/08/database/mysql/mysql-4-MySQL%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql - 4.MySQL性能分析与优化
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-01-08 15:59:03" itemprop="dateCreated datePublished" datetime="2021-01-08T15:59:03+08:00">2021-01-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-02-13 12:15:57" itemprop="dateModified" datetime="2021-02-13T12:15:57+08:00">2021-02-13</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="性能分析的思路"><a href="#性能分析的思路" class="headerlink" title="性能分析的思路"></a><strong>性能分析的思路</strong></h1><ul>
+<li><p>首先需要使用【慢查询日志】功能，去获取所有查询时间比较长的SQL语句 </p>
+</li>
+<li><p>其次【查看执行计划】查看有问题的SQL的执行计划 explain</p>
+</li>
+<li><p>最后可以使用【show profile[s]】 查看有问题的SQL的性能使用情况</p>
+</li>
+</ul>
+<h2 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a><strong>慢查询日志</strong></h2><p>修改my.cnf开启:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">slow_query_log&#x3D;ON</span><br><span class="line">long_query_time&#x3D;3</span><br><span class="line">slow_query_log_file&#x3D;&#x3D;&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;slow-log.log</span><br></pre></td></tr></table></figure>
+
+<h3 id="慢查询日志介绍"><a href="#慢查询日志介绍" class="headerlink" title="慢查询日志介绍"></a>慢查询日志介绍</h3><h3 id="开启慢查询功能"><a href="#开启慢查询功能" class="headerlink" title="开启慢查询功能"></a>开启慢查询功能</h3><h3 id="分析慢查询日志的工具"><a href="#分析慢查询日志的工具" class="headerlink" title="分析慢查询日志的工具"></a>分析慢查询日志的工具</h3><p>使用mysqldumpslow工具</p>
+<ul>
+<li>mysqldumpslow是MySQL自带的慢查询日志工具。 </li>
+<li>可以使用mysqldumpslow工具搜索慢查询日志中的SQL语句</li>
+</ul>
+<p>使用percona-toolkit工具</p>
+<ul>
+<li>percona-toolkit是一组高级命令行工具的集合，</li>
+<li>可以查看当前服务的摘要信息，磁盘检测，分析慢查询日志，查找重复索引，实现表同步等等。</li>
+</ul>
+<h2 id="profile分析语句"><a href="#profile分析语句" class="headerlink" title="profile分析语句"></a>profile分析语句</h2><p>Query Profiler是MySQL自带的一种<strong>query</strong>诊断分析工具<strong>，通过它可以分析出一条SQL语句的</strong>硬件性能 瓶颈**在什么地方。比如CPU，IO等，以及该SQL执行所耗费的时间等。不过该工具只有在MySQL 5.0.37 以及以上版本中才有实现。默认的情况下，MYSQL的该功能没有打开，需要自己手动启动。</p>
+<p><strong>开启</strong>Profile功能</p>
+<p>Profile 功能由MySQL会话变量 : </p>
+<ul>
+<li><strong>profiling</strong>控制,默认是<strong>OFF</strong>关闭状态。 </li>
+<li>查看是否开启了Profile功能:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">select @@profiling;</span><br><span class="line">show variables like ‘%profil%’;</span><br><span class="line">set profiling&#x3D;1; --1是开启、0是关闭</span><br><span class="line">show profiles;</span><br><span class="line">show profile for query 6;  --查询query 6的cpu,IO等消耗时间</span><br><span class="line">show profile cpu,block io,swaps for query 6;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="服务器层面优化"><a href="#服务器层面优化" class="headerlink" title="服务器层面优化"></a><strong>服务器层面优化</strong></h1><h2 id="服务器硬件优化"><a href="#服务器硬件优化" class="headerlink" title="服务器硬件优化"></a><strong>服务器硬件优化</strong></h2><p>提升硬件设备，例如选择尽量高频率的内存(频率不能高于主板的支持)、提升网络带宽、使用SSD高 速磁盘、提升CPU性能等。</p>
+<p>CPU的选择:</p>
+<ul>
+<li>对于数据库并发比较高的场景，CPU的数量比频率重要。 </li>
+<li>对于CPU密集型场景和频繁执行复杂SQL的场景，CPU的频率越高越好。</li>
+</ul>
+<h2 id="CentOS系统针对mysql的参数优化（交给专业DBA）"><a href="#CentOS系统针对mysql的参数优化（交给专业DBA）" class="headerlink" title="CentOS系统针对mysql的参数优化（交给专业DBA）"></a>CentOS系统针对mysql的参数优化（交给专业DBA）</h2><h3 id="内核相关参数-etc-sysctl-conf"><a href="#内核相关参数-etc-sysctl-conf" class="headerlink" title="内核相关参数(/etc/sysctl.conf)"></a>内核相关参数(/etc/sysctl.conf)</h3><p>以下参数可以直接放到sysctl.conf文件的末尾。 </p>
+<p>1.增加监听队列上限:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net.core.somaxconn &#x3D; 65535 </span><br><span class="line">net.core.netdev_max_backlog &#x3D; 65535 </span><br><span class="line">net.ipv4.tcp_max_syn_backlog &#x3D; 65535</span><br></pre></td></tr></table></figure>
+
+<p>2.加快TCP连接的回收:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_fin_timeout &#x3D; 10 </span><br><span class="line">net.ipv4.tcp_tw_reuse &#x3D; 1 </span><br><span class="line">net.ipv4.tcp_tw_recycle &#x3D; 1</span><br></pre></td></tr></table></figure>
+
+<p>3.TCP连接接收和发送缓冲区大小的默认值和最大值:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net.core.wmem_default &#x3D; 87380 </span><br><span class="line">net.core.wmem_max &#x3D; 16777216 </span><br><span class="line">net.core.rmem_default &#x3D; 87380 </span><br><span class="line">net.core.rmem_max &#x3D; 16777216</span><br></pre></td></tr></table></figure>
+
+<p>4.减少失效连接所占用的TCP资源的数量，加快资源回收的效率:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_keepalive_time &#x3D; 120 </span><br><span class="line">net.ipv4.tcp_keepalive_intvl &#x3D; 30 </span><br><span class="line">net.ipv4.tcp_keepalive_probes &#x3D; 3</span><br></pre></td></tr></table></figure>
+
+<p>5.单个共享内存段的最大值: kernel.shmmax = 4294967295</p>
+<ol>
+<li>这个参数应该设置的足够大，以便能在一个共享内存段下容纳整个的Innodb缓冲池的大小。 </li>
+<li>这个值的大小对于64位linux系统，可取的最大值为(物理内存值-1)byte，建议值为大于物理</li>
+</ol>
+<p>内存的一半，一般取值大于Innodb缓冲池的大小即可。</p>
+<p>6.控制换出运行时内存的相对权重:</p>
+<p>vm.swappiness = 0</p>
+<p>这个参数当内存不足时会对性能产生比较明显的影响。(设置为0，表示Linux内核虚拟内存完全被占 用，才会要使用交换区。)</p>
+<p>Linux系统内存交换区: 在Linux系统安装时都会有一个特殊的磁盘分区，称之为系统交换分区。<br>使用 free -m 命令可以看到swap就是内存交换区。 作用:当操作系统没有足够的内存时，就会将部分虚拟内存写到磁盘的交换区中，这样就会发生内存交换。</p>
+<p>如果Linux系统上完全禁用交换分区，带来的风险: </p>
+<ol>
+<li><p>降低操作系统的性能</p>
+</li>
+<li><p>容易造成内存溢出，崩溃，或都被操作系统kill掉</p>
+</li>
+</ol>
+<h3 id="增加资源限制-etc-security-limit-conf"><a href="#增加资源限制-etc-security-limit-conf" class="headerlink" title="增加资源限制(/etc/security/limit.conf)"></a>增加资源限制(/etc/security/limit.conf)</h3><p>打开文件数的限制(以下参数可以直接放到limit.conf文件的末尾):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">* soft nofile 65535 </span><br><span class="line">* hard nofile 65535</span><br></pre></td></tr></table></figure>
+
+<p>*:表示对所有用户有效 soft:表示当前系统生效的设置(soft不能大于hard ) hard:表明系统中所能设定的最大值 nofile:表示所限制的资源是打开文件的最大数目 65535:限制的数量</p>
+<p>以上两行配置将可打开的文件数量增加到65535个，以保证可以打开足够多的文件句柄。 注意:这个文件的修改需要重启系统才能生效。</p>
+<h3 id="磁盘调度策略"><a href="#磁盘调度策略" class="headerlink" title="磁盘调度策略"></a>磁盘调度策略</h3><p>1.cfq (完全公平队列策略，Linux2.6.18之后内核的系统默认策略) </p>
+<p>该模式按进程创建多个队列，各个进程发来的IO请求会被cfq以轮循方式处理，对每个IO请求都是公平的。该策略适合离散读的应用。</p>
+<p>2.deadline (截止时间调度策略)</p>
+<p>deadline，包含读和写两个队列，确保在一个截止时间内服务请求(截止时间是可调整的)，而默认读 期限短于写期限。这样就防止了写操作因为不能被读取而饿死的现象，deadline对数据库类应用是最好 的选择。</p>
+<p>3.noop (电梯式调度策略) </p>
+<p>noop只实现一个简单的FIFO队列，倾向饿死读而利于写，因此noop对于闪存设备、RAM及嵌入式系统是最好的选择。</p>
+<p>4.anticipatory (预料I/O调度策略)</p>
+<p>本质上与deadline策略一样，但在最后一次读操作之后，要等待6ms，才能继续进行对其它I/O请求进 行调度。它会在每个6ms中插入新的I/O操作，合并写入流，用写入延时换取最大的写入吞吐量。 anticipatory适合于写入较多的环境，比如文件服务器。该策略对数据库环境表现很差。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">查看调度策略的方法:cat &#x2F;sys&#x2F;block&#x2F;devname&#x2F;queue&#x2F;scheduler</span><br><span class="line">修改调度策略的方法:echo &gt; &#x2F;sys&#x2F;block&#x2F;devname&#x2F;queue&#x2F;scheduler</span><br></pre></td></tr></table></figure>
+
+<h2 id="MySQL数据库配置优化"><a href="#MySQL数据库配置优化" class="headerlink" title="MySQL数据库配置优化"></a><strong>MySQL</strong>数据库配置优化</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/my.cnf</span><br></pre></td></tr></table></figure>
+
+<h3 id="将数据保存在内存中，保证从内存读取数据"><a href="#将数据保存在内存中，保证从内存读取数据" class="headerlink" title="将数据保存在内存中，保证从内存读取数据"></a>将数据保存在内存中，保证从内存读取数据</h3><p>设置足够大的 innodb_buffer_pool_size ，将数据读取到内存中。建议innodb_buffer_pool_size设置为总内存大小的3/4或者4/5.</p>
+<p>怎样确定 innodb_buffer_pool_size 足够大。数据是从内存读取而不是硬盘?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show global status like &#39;innodb_buffer_pool_pages_%&#39;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="降低磁盘写入次数"><a href="#降低磁盘写入次数" class="headerlink" title="降低磁盘写入次数"></a><strong>降低磁盘写入次数</strong></h3><ul>
+<li>用来控制redo log刷新到磁盘的策略<strong>innodb_flush_log_at_trx_commit</strong>。(0性能最好，主从机制的机器，从机器是不负责写操作， 所以不牵扯事务提交，所以为了从数据库的性能提升，需要将此参数设置为0)</li>
+<li>每提交1次事务同步写到磁盘中<strong>sync_binlog</strong>，可以设置为n。(主从机制的机器，从机器是不负责写操作，所 以不牵扯事务提交，也不需要再重复写binlog，所以将此处设置为0)</li>
+<li>使用足够大的写入缓存 <strong>innodb_log_file_size</strong>，过小导致造成日志切换频繁。推荐值为20%~25%。</li>
+<li>脏页占innodb_buffer_pool_size的比例<strong>innodb_max_dirty_pages_pct</strong>时，触发刷脏页到磁盘。 推荐值为25%~50%。</li>
+<li>指定innodb共享表空间文件的大小<strong>innodb_data_file_path</strong>。(分磁盘，这样可以减轻磁盘的IO操作性能压力)</li>
+</ul>
+<h3 id="减少与业务无关从操作"><a href="#减少与业务无关从操作" class="headerlink" title="减少与业务无关从操作"></a>减少与业务无关从操作</h3><ul>
+<li>全量日志建议关闭。<strong>general_log</strong>=0</li>
+<li>慢查询日志，不要随意开启，开启的时候，要合理设置阈值</li>
+</ul>
+<h1 id="数据库设计层面优化"><a href="#数据库设计层面优化" class="headerlink" title="数据库设计层面优化"></a><strong>数据库设计层面优化</strong></h1><p>设计表的时候，添加如下几列</p>
+<ul>
+<li>业务字段(预留字段)</li>
+<li>系统字段(修改人、修改时间)</li>
+<li>流程字段(状态)</li>
+</ul>
+<p>具体优化方案如下: </p>
+<ul>
+<li><strong>设计中间表</strong>，一般针对于<strong>统计分析</strong>功能，或者实时性不高的需求(OLTP、OLAP)</li>
+<li>为减少关联查询，创建合理的<strong>冗余字段</strong>(考虑数据库的三范式和查询性能的取舍，创建冗余字段还 需要注意<strong>数据一致性问题</strong>)逆范式</li>
+<li>对于字段太多的大表，考虑<strong>拆表</strong>(比如一个表有100多个字段)(查询的时候，是以整行为单位去 加载的。)</li>
+<li>Blob Clob Text类型的字段，建议拆到另一张表中。(商品表10-15列，<strong>商品详情介绍**</strong>[text]-**–建议 将商品详情介绍拆成单独的表)</li>
+<li>对于表中经常不被使用的字段或者存储数据比较多的字段，考虑拆表(比如商品表中会存储商品介绍，此时可以将商品介绍字段单独拆解到另一个表中，使用商品ID关联)</li>
+<li>每张表建议都要有一个主键(<strong>主键索引</strong>)，而且主键类型最好是<strong>int</strong>类型**，建议自增主键(**如果是分布式系统的情况，采用雪花算法)。</li>
+</ul>
+<h1 id="SQL语句优化"><a href="#SQL语句优化" class="headerlink" title="SQL语句优化"></a><strong>SQL</strong>语句优化</h1><h2 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h2><ul>
+<li><p>为搜索字段(<strong>where中的条件</strong>)、排序字段、select查询列，创建合适的索引，不过要考虑数据的 业务场景:查询多还是增删多?</p>
+</li>
+<li><p>尽量建立<strong>组合索引</strong>并注意组合索引的创建顺序，按照顺序组织查询条件、尽量将筛选粒度大的查询 条件放到最左边。</p>
+</li>
+<li><p><strong>尽量使用覆盖索引</strong>，SELECT语句中尽量不要使用*。</p>
+</li>
+<li><p>order by、group by语句要尽量使用到索引</p>
+<p>name,age—组合索引</p>
+<p>select * from user where name = “james” order by age —- 使用到索引</p>
+<p>select * from user order by name,age —- 使用到索引</p>
+</li>
+<li><p>索引长度尽量短，短索引可以节省索引空间，使查找的速度得到提升，同时内存中也可以装载更多的索引键值。<a target="_blank" rel="noopener" href="https://blog.csdn.net/sinat_37903468/article/details/108469482">不推荐UUID当索引</a>。太长的列，可以选择建立前缀索引。比如给name列加索引，但是name列长度为300。其实最多在使用索引搜索的时候，使用到前10 个字节长度。这个时候建议建立前缀索引</p>
+</li>
+<li><p>索引更新不能频繁，更新非常频繁的数据不适宜建索引，因为维护索引的成本。</p>
+</li>
+<li><p>order by的索引生效，order by排序应该遵循最佳左前缀查询，如果是使用多个索引字段进行排序，那么排序的规则必须相同(同是升序或者降序)，否则索引同样会失效。</p>
+</li>
+</ul>
+<h2 id="LIMIT优化"><a href="#LIMIT优化" class="headerlink" title="LIMIT优化"></a><strong>LIMIT</strong>优化</h2><ul>
+<li><p>如果预计SELECT语句的查询结果是一条，最好使用 <strong>LIMIT 1</strong>，可以停止全表扫描。</p>
+<ul>
+<li><pre><code>SELECT * FROM user WHERE username=’全力詹’; -- username没有建立唯一索引 
+SELECT * FROM user WHERE username=’全力詹’ LIMIT 1;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 处理分页会使用到 LIMIT ，当翻页到非常靠后的页面的时候，偏移量会非常大，这时LIMIT的效率 会非常差。 LIMIT OFFSET , SIZE;</span><br><span class="line"></span><br><span class="line">  - 解决方案1:**使用**order by和索引覆盖</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;</span><br><span class="line">      原SQL(如果 表中的记录有10020条):</span><br><span class="line">      SELECT id,name FROM user  LIMIT 10000, 20;</span><br><span class="line">      </span><br><span class="line">      优化的SQL:</span><br><span class="line">      SELECT id,name FROM user  ORDER BY id desc LIMIT 20;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+<li><p>解决方案2:<strong>使用子查询</strong></p>
+<ul>
+<li><pre><code>SELECTid,nameFROM(selectid,namefromuserorderbyidlimit 10000,20) t
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  - 解决方案3:单表分页时，使用自增主键排序之后，先使用where条件 id &gt; offset值，limit后面只 写rows</span><br><span class="line"></span><br><span class="line">## **其他查询优化**</span><br><span class="line"></span><br><span class="line">- 小表驱动大表，建议使用left join时，以小表关联大表，因为使用join的话，第一张表是必须全扫 描的，以少关联多就可以减少这个扫描次数。</span><br><span class="line"></span><br><span class="line">explain---select列的信息，显示查询顺序。</span><br><span class="line"> A表10万条记录</span><br><span class="line"> B表一千万条记录 需求:关联A表和B表去查询数据。比如结果能匹配的也就10条记录</span><br><span class="line"></span><br><span class="line">- 避免全表扫描，mysql在使用不等于(!&#x3D;或者&lt;&gt;)的时候无法使用导致全表扫描。在查询的时候，如 果对索引使用不等于的操作将会导致索引失效，进行全表扫描</span><br><span class="line"></span><br><span class="line">- 如果mysql估计使用全表扫描要比使用索引快，则不使用索引。(最典型的场景就是数据量少的时候)</span><br><span class="line"></span><br><span class="line">- 尽量不使用count(*)、尽量使用count(主键)</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;</span><br><span class="line">    COUNT(*)\COUNT(1)\COUNT(列)，从索引使用情况来说，是一样的。</span><br><span class="line">    如果COUNT(非索引列)， 那么MySQL会选择该表中，最小的那颗索引树，去进行统计。</span><br><span class="line">    COUNT(*)以行为统计，最终的结果是包含null值 </span><br><span class="line">    COUNT(1)会过滤NULL值 </span><br><span class="line">    COUNT(列)会过滤NULL</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>JOIN两张表的关联字段最好都建立索引，而且最好字段类型是一样的。</p>
+</li>
+<li><p>WHERE条件中尽量不要使用1=1、not in语句(建议使用not exists)</p>
+</li>
+<li><p>不用 MYSQL 内置的函数，因为内置函数不会建立查询缓存。</p>
+<ul>
+<li><pre><code>SQL查询语句和查询结果都会在第一次查询只会存储到MySQL的查询缓存中，如果需要获取到查询缓 存中的查询结果，查询的SQL语句必须和第一次的查询SQL语句一致。
+SELECT * FROM user where birthday = now();</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/08/database/mysql/mysql-3-MySQL%E9%94%81%E5%92%8C%E4%BA%8B%E5%8A%A1/" rel="prev" title="mysql - 3.MySQL锁和事务">
+                  <i class="fa fa-chevron-left"></i> mysql - 3.MySQL锁和事务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/01/08/database/mysql/mysql-2-MySQL%E7%B4%A2%E5%BC%95/" rel="next" title="mysql - 2.MySQL索引">
+                  mysql - 2.MySQL索引 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

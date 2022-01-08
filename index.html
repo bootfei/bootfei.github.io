@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="learn more, forget more; practice more, get more.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BootFei&#39;s Blog">
+<meta property="og:url" content="http://example.com/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="learn more, forget more; practice more, get more.">
+<meta property="og:locale">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner index posts-expand">
+      
+
+      
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/08/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%89%96%E6%9E%90tomcat/chapter03-%E8%BF%9E%E6%8E%A5%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/08/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%89%96%E6%9E%90tomcat/chapter03-%E8%BF%9E%E6%8E%A5%E5%99%A8/" class="post-title-link" itemprop="url">chapter03-连接器</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-08 07:55:05 / Modified: 08:12:07" itemprop="dateCreated datePublished" datetime="2021-05-08T07:55:05+08:00">2021-05-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在简介一章里说明了，tomcat由两大模块组成：连接器（connector）和容器（container）。本章将使用连接器来增强application 2的功能。</p>
+<ul>
+<li><p>application2使用Server创建Request和Response; 现在交给连接器创建  <!--它们作为参数传递给要调用的某个的servlet的service方法--></p>
+</li>
+<li><p>application2的servlet容器仅仅能运行实现了javax.servlet.Servlet接口，并把javax.servlet.ServletRequest和javax.servlet.ServletResponse实例传递给servlet的service方法；但是由于连接器并不知道servlet的具体类型（例如，该servlet是否javax.servlet.Servlet接口，还是继承自javax.servlet.GenericServlet类，或继承自javax.servlet.http.HttpServlet类），因此连接器总是传入HttpServletRequest和HttpServletResponse的实例对象。</p>
+</li>
+</ul>
+<p>​     本章中所要建立的connector实际上是tomcat4中的默认连接器（将在第4章讨论）的简化版。本章中，connector和container将分离开。</p>
+<p>​     在开始说明本章的程序之前，先花点时间介绍下org.apache.catalina.util.StringManager类，它被tomcat用来处理不同模块内错</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/zoom%E7%AE%A1%E7%90%86%E8%80%85-01-%E8%8E%B7%E5%8F%96%E4%B8%BB%E6%8C%81%E4%BA%BA%E6%9D%83%E9%99%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/zoom%E7%AE%A1%E7%90%86%E8%80%85-01-%E8%8E%B7%E5%8F%96%E4%B8%BB%E6%8C%81%E4%BA%BA%E6%9D%83%E9%99%90/" class="post-title-link" itemprop="url">zoom管理者-01-获取主持人权限</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-07 22:26:37 / Modified: 22:53:27" itemprop="dateCreated datePublished" datetime="2021-05-07T22:26:37+08:00">2021-05-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在使用 Zoom 的过程中，为了有效的利用 Zoom 资源降低公司成本，Zoom 可能被多个人甚至多个部门之间共同使用。在使用 Zoom 的过程中，也存在需要把主持人权限临时授予其中的一个参会者。如何利用 Zoom 的机制来解决这些情况呢？</p>
+<h2 id="前置配置prerequsite"><a href="#前置配置prerequsite" class="headerlink" title="前置配置prerequsite"></a>前置配置prerequsite</h2><p>管理员登录官网，在账号的setting界面，保证联席主持人 (co-host) 必须开启</p>
+<h2 id="操作方法"><a href="#操作方法" class="headerlink" title="操作方法"></a>操作方法</h2><h3 id="主持人在会议中授权参会者为主持人（亲测可用）"><a href="#主持人在会议中授权参会者为主持人（亲测可用）" class="headerlink" title="主持人在会议中授权参会者为主持人（亲测可用）"></a>主持人在会议中授权参会者为主持人（亲测可用）</h3><p>1、主持人在 Zoom 下方功能菜单中点击【管理参会者】按钮，打开【参会者】对话框。</p>
+<p><img src="https://www.zoomvip.cn/uploads/allimg/180815/2-1PQ5111131Z2.png" alt="Zoom"></p>
+<p>2、在参会者列表中，把鼠标挪在需要授权的参会者上面会自动显示【更多】按钮，点击【更多】按钮，在弹出的弹出框中，点击【设为主持人】按钮即可。</p>
+<p><img src="https://www.zoomvip.cn/uploads/allimg/180815/2-1PQ511133I32.png" alt="Zoom管理参会者"></p>
+<h3 id="参会者获取主持人权限（目前好像不行）"><a href="#参会者获取主持人权限（目前好像不行）" class="headerlink" title="参会者获取主持人权限（目前好像不行）"></a>参会者获取主持人权限（目前好像不行）</h3><p>1、参会者在会议里面，在 Zoom 下方功能菜单中点击【参会者】按钮，打开【参会者】对话框。</p>
+<p><img src="https://www.zoomvip.cn/uploads/allimg/180815/2-1PQ5112631304.png" alt="Zoom参会者"></p>
+<p>2、在【参会者】页面，点击【获取主持人权限】按钮，打开【获取主持人权限】页面。</p>
+<p><img src="https://www.zoomvip.cn/uploads/allimg/180815/2-1PQ5112K5300.png" alt="Zoom参会者"></p>
+<p>3、在【获取主持人权限】页面输入主持人秘钥（主持人秘钥是个六位数的数字），或者参会者也可以点击【以主持人身份登录】按钮，跳转到登录页面，输入主持人账号和密码登陆（不推荐这种方式，主持人账号是最高权限，如果账号密码被多个人知道，容易产生会议冲突）。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E7%BD%91%E5%85%B3%E5%88%86%E6%9E%90%E8%AF%8A%E6%96%AD%E5%92%8C%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98-01-%E9%93%BE%E6%8E%A5%E8%B6%85%E6%97%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E7%BD%91%E5%85%B3%E5%88%86%E6%9E%90%E8%AF%8A%E6%96%AD%E5%92%8C%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98-01-%E9%93%BE%E6%8E%A5%E8%B6%85%E6%97%B6/" class="post-title-link" itemprop="url">网关分析诊断和性能调优-01-链接超时</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-07 13:26:35 / Modified: 13:36:04" itemprop="dateCreated datePublished" datetime="2021-05-07T13:26:35+08:00">2021-05-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>前端调用说偶尔返回这样的问题：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;timestamp&quot;:&quot;2021-01-06T01:50:00.468+0000&quot;,&quot;path&quot;:&quot;&#x2F;gateway-accept&#x2F;policy&quot;,&quot;status&quot;:500,&quot;error&quot;:&quot;Internal Server Error&quot;,&quot;message&quot;:&quot;Connection prematurely closed BEFORE response&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>字面意思是“响应前过早关闭连接”, 查看后台服务的日志，根本没有调用的信息，再次调用也没有问题，到底怎么回事？</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>gateway调用后台服务，会使用httpclient连接池里面的连接</p>
+<p>gateway使用的httpclient连接池的连接有个参数：max-idle-time，大意指的是多长时间连接不使用就关闭。如果设置为null, 连接不会关闭。</p>
+<p>后台服务也有相应的连接对应连接池的连接，参数keepAliveTimeout，大意指后台服务的连接空闲多长时间就会自动关闭，缺省的值就是connection-timeout参数的值。如果为-1就不会有时间限制，缺省值为60s ,但是一般的再server.xml里面设置为20s.</p>
+<p><strong>重要</strong>：如果网关的连接池的连接max-idle-time不设置（null）,后台服务的connection-timeout为20s</p>
+<ul>
+<li>假设网络连接池有个连接(gateway-connect-1)对应后台服务的连接(server-connect-1)</li>
+<li>前端请求过来，gateway的分配给这个请求的连接正好是(gateway-connect-1), 向后端发起请求调用</li>
+<li>同时，后端服务端连接(server-connect-1)已经等待空闲20秒，自动关闭;</li>
+<li>可想而知，后盾服务端没有和(gateway-connect-1)对应的连接，于是发生了异常。</li>
+</ul>
+<p>需要在网关层设置spring.cloud.gateway.httpclient.pool.max-idle-time</p>
+<p>需要服务端设置server.connection-timeout， 这个值要适当的大于网关层的max-idle-time, 意思就是，网关层对后端连接的空闲时间要小于后端服务的连接空闲时间，这样就不会取到无效的网关层的连接。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>根据上面的描述，我在yml里面加入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    gateway:</span><br><span class="line">      httpclient:</span><br><span class="line">        pool:</span><br><span class="line">          max-idle-time: 5000</span><br><span class="line">          max-connections: 30</span><br></pre></td></tr></table></figure>
+
+<p>在idea里面发现max-idle-time黄色标底，找不到这个配置，说明当前版本不支持</p>
+<p>新建了一个gateway服务，用的版本如下:</p>
+<table>
+<thead>
+<tr>
+<th align="left">组件</th>
+<th align="left">版本</th>
+<th align="left">其他</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">spring boot</td>
+<td align="left">2.3.4.RELEASE</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">spring cloud</td>
+<td align="left">Hoxton.SR1</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">spring cloud gateway</td>
+<td align="left">2.2.1.RELEASE</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>在网关服务层设置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  cloud:</span><br><span class="line">    gateway:</span><br><span class="line">      httpclient:</span><br><span class="line">        pool:</span><br><span class="line">          max-idle-time: 10000</span><br></pre></td></tr></table></figure>
+
+
+
+<p>后端服务设置(后端用的内嵌tomcat)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server:</span><br><span class="line">  tomcat:</span><br><span class="line">    connection-timeout: 20000</span><br></pre></td></tr></table></figure>
+
+<p>服务调用接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@GetMapping(value &#x3D; &quot;&#x2F;test&quot;)</span><br><span class="line">public String get() throws InterruptedException &#123;</span><br><span class="line">    Thread.sleep(10);</span><br><span class="line">    return &quot;laza&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="第一种设置"><a href="#第一种设置" class="headerlink" title="第一种设置"></a>第一种设置</h3><p>网关不设置max-idle-time</p>
+<p>后端服务设置connection-time: 100</p>
+<p>后台出现错误：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufxekVTqYGjCYiawbk6PXXGgn0o1Gg112e9RxU6Aicv2TIViauTia1oFcBu2ib1IPsPfE8WrbicuaZchQTg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h3 id="第二种设置"><a href="#第二种设置" class="headerlink" title="第二种设置"></a>第二种设置</h3><p>网关设置max-idle-time：10000</p>
+<p>后端服务我设置connection-time: 20000</p>
+<p>jmeter设置和上面一样，测试一切正常。</p>
+<p>和版本也有点关系，我生产使用的版本目前不支持max-idle-time这个参数的设置，所以要升级一下gateway使用的版本了。</p>
+<h2 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h2><p>在issues最后，发现这个：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufxekVTqYGjCYiawbk6PXXGgvvXia79koiaVCxIia0TYqswRfXRiclrwX682Xeoq0iavlIAnsDpMHACqXlg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>点进去以后，发现是蚂蚁金服的同学<strong>Lovnx</strong>, 详细的阐述了这个问题，在文章中提到：</p>
+<p><code>reactor.netty.pool.leasingStrategy=lifo</code>获取连接策略由默认的FIFO变更为LIFO，因为LIFO能够确保获取的连接最大概率是最近刚被用过的，也就是热点连接始终是热点连接，而始终用不到的连接就可以被回收掉，LRU的思想（文中原话）</p>
+<p>spring cloud gateway 2.2.1.release提供的Reactor-Netty版本是0.9.2.RELEASE</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;io.projectreactor.netty&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;reactor-netty&lt;&#x2F;artifactId&gt;</span><br><span class="line">      &lt;version&gt;0.9.2.RELEASE&lt;&#x2F;version&gt;</span><br><span class="line">      &lt;scope&gt;compile&lt;&#x2F;scope&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-02-%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-02-%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE/" class="post-title-link" itemprop="url">shiro应用-02-权限配置</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-07 09:17:57 / Modified: 10:07:42" itemprop="dateCreated datePublished" datetime="2021-05-07T09:17:57+08:00">2021-05-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="配置位置"><a href="#配置位置" class="headerlink" title="配置位置"></a>配置位置</h3><p>认证和授权的存储和交互都在AuthorizingReaml中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthRealm</span> <span class="keyword">extends</span> <span class="title">AuthorizingRealm</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@Lazy</span> 延迟注入，不然redis注解会因为注入顺序问题失效</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="meta">@Lazy</span></span><br><span class="line">    <span class="keyword">private</span> UserService userService;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 授权</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> principals</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> AuthorizationInfo <span class="title">doGetAuthorizationInfo</span><span class="params">(PrincipalCollection principals)</span> </span>&#123;</span><br><span class="line">        User user = (User) principals.fromRealm(<span class="keyword">this</span>.getClass().getName()).iterator().next();</span><br><span class="line">        List&lt;String&gt; permissionList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        List&lt;String&gt; roleNameList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        Set&lt;Role&gt; roleSet = user.getRoles();</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isNotEmpty(roleSet)) &#123;</span><br><span class="line">            <span class="keyword">for</span>(Role role : roleSet) &#123;</span><br><span class="line">                roleNameList.add(role.getName());</span><br><span class="line">                Set&lt;Permission&gt; permissionSet = role.getPermissions();</span><br><span class="line">                <span class="keyword">if</span> (CollectionUtils.isNotEmpty(permissionSet)) &#123;</span><br><span class="line">                    <span class="keyword">for</span> (Permission permission : permissionSet) &#123;</span><br><span class="line">                        permissionList.add(permission.getName());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        SimpleAuthorizationInfo info = <span class="keyword">new</span> SimpleAuthorizationInfo();</span><br><span class="line">        info.addStringPermissions(permissionList);</span><br><span class="line">        info.addRoles(roleNameList);</span><br><span class="line">        <span class="keyword">return</span> info;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 认证登录</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> token</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> AuthenticationException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> AuthenticationInfo <span class="title">doGetAuthenticationInfo</span><span class="params">(AuthenticationToken token)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">        UsernamePasswordToken usernamePasswordToken = (UsernamePasswordToken) token;</span><br><span class="line">        String username = usernamePasswordToken.getUsername();</span><br><span class="line">        User user = userService.findByUsername(username);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SimpleAuthenticationInfo(user, user.getPassword(), <span class="keyword">this</span>.getClass().getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行位置"><a href="#执行位置" class="headerlink" title="执行位置"></a>执行位置</h3><p>shiro 中的AuthorizingRealm有2个方法doGetAuthorizationInfo()和doGetAuthenticationInfo(),一般实际开发中继承AuthorizingRealm类然后重写doGetAuthorizationInfo和doGetAuthenticationInfo。     </p>
+<ul>
+<li>doGetAuthenticationInfo方法是在用户登录的时候调用的也就是执SecurityUtils.getSubject().login（）的时候调用，即登录验证</li>
+<li>doGetAuthorizationInfo方法是调用SecurityUtils.getSubject().isPermitted（）这个方法时会调用doGetAuthorizationInfo（），<ul>
+<li>@RequiresPermissions这个注解起始就是在执行SecurityUtils.getSubject().isPermitted（）。</li>
+<li>某个方法上加上@RequiresPermissions，那么访问这个方法就会自动调用SecurityUtils.getSubject().isPermitted（），从而区调用doGetAuthorizationInfo</li>
+</ul>
+</li>
+</ul>
+<h4 id="踩的坑"><a href="#踩的坑" class="headerlink" title="踩的坑"></a>踩的坑</h4><p>调用链：isPermitted -&gt; getAuhtorizationInfo -&gt; doGetAuthorizationInfo</p>
+<p>但是，如果不做单点登录，一个账号被多个用户登录，那么账户信息会被cache保存，在getAuhtorizationInfo会判断，如果账户信息被cache了，就不执行doGetAuthorizationInfo</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-04-%E6%9D%83%E9%99%90%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-04-%E6%9D%83%E9%99%90%E6%B3%A8%E8%A7%A3/" class="post-title-link" itemprop="url">shiro源码解析-04-权限注解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-07 09:13:54 / Modified: 09:15:55" itemprop="dateCreated datePublished" datetime="2021-05-07T09:13:54+08:00">2021-05-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>前不久学习了Shiro 1.4.0提供的权限注解实现权限拦截。最开始猜测实现方式是基于AspectJ方式，即基于<code>@Apsect</code>配合<code>@Pointcut和@After,@AfterReturning,@AfterThrowing,@Around,@Before</code>实现。具体Spring基于Aspect，AOP实现类可以查看<code>AnnotationAwareAspectJAutoProxyCreator</code>。在此提供该类的UML图：</p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155105740.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70"><img src="https://img-blog.csdnimg.cn/20190915155105740.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70" alt="Spring基于AspectJ实现的AOP实现类UML图"></a></p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155105740.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70">Spring基于AspectJ实现的AOP实现类UML图</a></p>
+<p>你可以看到Spring AOP实现继承类大致为ProxyConfig-&gt;ProxyProcessorSupport-&gt;AbstractAutoProxyCreator</p>
+<p>-&gt;AbstractAdvisorAutoProxyCreator这条路线。其中Spring常见AOP实现类有3个。</p>
+<ul>
+<li><code>DefaultAdvisorAutoProxyCreator</code>：寻找当前BeanFactory中所有的候选<code>Advisor(有一个切点和一个通知构成)</code>，将这些Advisor应用到所有符合切点的Bean中。基于Advisor 匹配规则。</li>
+<li><code>BeanNameAutoProxyCreator</code>：基于Bean配置名规则</li>
+<li><code>AnnotationAwareAspectJAutoProxyCreator</code>：基于Bean中@AspectJ注解匹配规则。</li>
+</ul>
+<p>而Shiro权限注解实现原理是基于<code>DefaultAdvisorAutoProxyCreator</code>实现的。其权限注解处理Advisor实现类是<code>AuthorizationAttributeSourceAdvisor</code>。该类继承了<code>StaticMethodMatcherPointcutAdvisor</code>，内部只对Shiro提供的5个权限注解标注的方法或者类进行切面增强。<code>StaticMethodMatcherPointcutAdvisor</code>是静态方法切点基类，默认匹配所有的的类。<code>StaticMethodMatcherPointcut</code>包括两个主要的子类分别是</p>
+<p><code>JdkRegexpMethodPointcut</code>和<code>NameMatchMethodPointcut</code>。前者提供正则表达式匹配方法切面，而后者<strong>作为正则表达式的替代，不处理重载方法，默认实现检测xxx*, *xxx 和*xxx*</strong>。</p>
+<h3 id="AuthorizationAttributeSourceAdvisor"><a href="#AuthorizationAttributeSourceAdvisor" class="headerlink" title="AuthorizationAttributeSourceAdvisor"></a>AuthorizationAttributeSourceAdvisor</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">public class AuthorizationAttributeSourceAdvisor extends StaticMethodMatcherPointcutAdvisor &#123;</span><br><span class="line"></span><br><span class="line">    private static final Class&lt;? extends Annotation&gt;[] AUTHZ_ANNOTATION_CLASSES &#x3D;</span><br><span class="line">            new Class[] &#123;</span><br><span class="line">                    RequiresPermissions.class, RequiresRoles.class,</span><br><span class="line">                    RequiresUser.class, RequiresGuest.class, RequiresAuthentication.class</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">    protected SecurityManager securityManager &#x3D; null;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * Create a new AuthorizationAttributeSourceAdvisor.</span><br><span class="line">     *&#x2F;</span><br><span class="line">    public AuthorizationAttributeSourceAdvisor() &#123;</span><br><span class="line">        setAdvice(new AopAllianceAnnotationsAuthorizingMethodInterceptor());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public SecurityManager getSecurityManager() &#123;</span><br><span class="line">        return securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setSecurityManager(org.apache.shiro.mgt.SecurityManager securityManager) &#123;</span><br><span class="line">        this.securityManager &#x3D; securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public boolean matches(Method method, Class targetClass) &#123;</span><br><span class="line">        Method m &#x3D; method;</span><br><span class="line"></span><br><span class="line">        if ( isAuthzAnnotationPresent(m) ) &#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;The &#39;method&#39; parameter could be from an interface that doesn&#39;t have the annotation.</span><br><span class="line">        &#x2F;&#x2F;Check to see if the implementation has it.</span><br><span class="line">        if ( targetClass !&#x3D; null) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                m &#x3D; targetClass.getMethod(m.getName(), m.getParameterTypes());</span><br><span class="line">                return isAuthzAnnotationPresent(m) || isAuthzAnnotationPresent(targetClass);</span><br><span class="line">            &#125; catch (NoSuchMethodException ignored) &#123;</span><br><span class="line">                &#x2F;&#x2F;default return value is false.  If we can&#39;t find the method, then obviously</span><br><span class="line">                &#x2F;&#x2F;there is no annotation, so just use the default return value.</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 检测类上是否存在权限验证注解</span><br><span class="line">    private boolean isAuthzAnnotationPresent(Class&lt;?&gt; targetClazz) &#123;</span><br><span class="line">        for( Class&lt;? extends Annotation&gt; annClass : AUTHZ_ANNOTATION_CLASSES ) &#123;</span><br><span class="line">            Annotation a &#x3D; AnnotationUtils.findAnnotation(targetClazz, annClass);</span><br><span class="line">            if ( a !&#x3D; null ) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 检测方法上是否存在权限验证注解</span><br><span class="line">    private boolean isAuthzAnnotationPresent(Method method) &#123;</span><br><span class="line">        for( Class&lt;? extends Annotation&gt; annClass : AUTHZ_ANNOTATION_CLASSES ) &#123;</span><br><span class="line">            Annotation a &#x3D; AnnotationUtils.findAnnotation(method, annClass);</span><br><span class="line">            if ( a !&#x3D; null ) &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Shiro注解权限验证MethodInterceptor"><a href="#Shiro注解权限验证MethodInterceptor" class="headerlink" title="Shiro注解权限验证MethodInterceptor"></a>Shiro注解权限验证MethodInterceptor</h3><p>该类是Shiro权限注解拦截器。初始化时，<code>interceptors</code>添加了5个方法拦截器，分别对5种权限验证方法进行拦截。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">public class AopAllianceAnnotationsAuthorizingMethodInterceptor</span><br><span class="line">        extends AnnotationsAuthorizingMethodInterceptor implements MethodInterceptor &#123;</span><br><span class="line"></span><br><span class="line">    public AopAllianceAnnotationsAuthorizingMethodInterceptor() &#123;</span><br><span class="line">        List&lt;AuthorizingAnnotationMethodInterceptor&gt; interceptors &#x3D;</span><br><span class="line">                new ArrayList&lt;AuthorizingAnnotationMethodInterceptor&gt;(5);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;use a Spring-specific Annotation resolver - Spring&#39;s AnnotationUtils is nicer than the</span><br><span class="line">        &#x2F;&#x2F;raw JDK resolution process.</span><br><span class="line">        AnnotationResolver resolver &#x3D; new SpringAnnotationResolver();</span><br><span class="line">        &#x2F;&#x2F;we can re-use the same resolver instance - it does not retain state:</span><br><span class="line">        interceptors.add(new RoleAnnotationMethodInterceptor(resolver));</span><br><span class="line">        interceptors.add(new PermissionAnnotationMethodInterceptor(resolver));</span><br><span class="line">        interceptors.add(new AuthenticatedAnnotationMethodInterceptor(resolver));</span><br><span class="line">        interceptors.add(new UserAnnotationMethodInterceptor(resolver));</span><br><span class="line">        interceptors.add(new GuestAnnotationMethodInterceptor(resolver));</span><br><span class="line"></span><br><span class="line">        setMethodInterceptors(interceptors);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    public Object invoke(MethodInvocation methodInvocation) throws Throwable &#123;</span><br><span class="line">        org.apache.shiro.aop.MethodInvocation mi &#x3D; createMethodInvocation(methodInvocation);</span><br><span class="line">        return super.invoke(mi);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该类通过调用invoke方法，进而调用超级父类<code>AuthorizingMethodInterceptor</code>的invoke方法，在该方法中会先执行<code>assertAuthorized</code>方法，进行权限校验，校验不通过抛出<code>AuthorizationException</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public abstract class AuthorizingMethodInterceptor extends MethodInterceptorSupport &#123;</span><br><span class="line"></span><br><span class="line">    public Object invoke(MethodInvocation methodInvocation) throws Throwable &#123;</span><br><span class="line">        assertAuthorized(methodInvocation);</span><br><span class="line">        return methodInvocation.proceed();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected abstract void assertAuthorized(MethodInvocation methodInvocation) throws AuthorizationException;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>assertAuthorized</code>方法最终执行还是<code>AnnotationsAuthorizingMethodInterceptor</code>。而<code>AuthorizingMethodInterceptor</code>有5个具体的实现类。如下：</p>
+<ul>
+<li>RoleAnnotationMethodInterceptor</li>
+<li>PermissionAnnotationMethodInterceptor</li>
+<li>AuthenticatedAnnotationMethodInterceptor</li>
+<li>UserAnnotationMethodInterceptor</li>
+<li>GuestAnnotationMethodInterceptor</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">public abstract class AnnotationsAuthorizingMethodInterceptor extends AuthorizingMethodInterceptor &#123;</span><br><span class="line">   </span><br><span class="line">    ...</span><br><span class="line">        </span><br><span class="line">    protected void assertAuthorized(MethodInvocation methodInvocation) throws AuthorizationException &#123;</span><br><span class="line">        &#x2F;&#x2F;default implementation just ensures no deny votes are cast:</span><br><span class="line">        Collection&lt;AuthorizingAnnotationMethodInterceptor&gt; aamis &#x3D; getMethodInterceptors();</span><br><span class="line">        if (aamis !&#x3D; null &amp;&amp; !aamis.isEmpty()) &#123;</span><br><span class="line">            for (AuthorizingAnnotationMethodInterceptor aami : aamis) &#123;</span><br><span class="line">                if (aami.supports(methodInvocation)) &#123;</span><br><span class="line">                    aami.assertAuthorized(methodInvocation);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>AuthorizingAnnotationMethodInterceptor</code>首先从子类获取<code>AuthorizingAnnotationHandler</code>，再调用该实现类的<code>assertAuthorized</code>方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">public abstract class AuthorizingAnnotationMethodInterceptor extends AnnotationMethodInterceptor</span><br><span class="line">&#123;</span><br><span class="line">    </span><br><span class="line">    public AuthorizingAnnotationMethodInterceptor( AuthorizingAnnotationHandler handler ) &#123;</span><br><span class="line">        super(handler);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public AuthorizingAnnotationMethodInterceptor( AuthorizingAnnotationHandler handler,</span><br><span class="line">                                                   AnnotationResolver resolver) &#123;</span><br><span class="line">        super(handler, resolver);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public Object invoke(MethodInvocation methodInvocation) throws Throwable &#123;</span><br><span class="line">        assertAuthorized(methodInvocation);</span><br><span class="line">        return methodInvocation.proceed();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void assertAuthorized(MethodInvocation mi) throws AuthorizationException &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            ((AuthorizingAnnotationHandler)getHandler()).assertAuthorized(getAnnotation(mi));</span><br><span class="line">        &#125;</span><br><span class="line">        catch(AuthorizationException ae) &#123;</span><br><span class="line">            &#x2F;&#x2F; Annotation handler doesn&#39;t know why it was called, so add the information here if possible. </span><br><span class="line">            &#x2F;&#x2F; Don&#39;t wrap the exception here since we don&#39;t want to mask the specific exception, such as </span><br><span class="line">            &#x2F;&#x2F; UnauthenticatedException etc. </span><br><span class="line">            if (ae.getCause() &#x3D;&#x3D; null) ae.initCause(new AuthorizationException(&quot;Not authorized to invoke method: &quot; + mi.getMethod()));</span><br><span class="line">            throw ae;</span><br><span class="line">        &#125;         </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="RoleAnnotationMethodInterceptor"><a href="#RoleAnnotationMethodInterceptor" class="headerlink" title="RoleAnnotationMethodInterceptor"></a>RoleAnnotationMethodInterceptor</h3><p>下面分析一下RoleAnnotationMethodInterceptor。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public class RoleAnnotationMethodInterceptor extends AuthorizingAnnotationMethodInterceptor &#123;</span><br><span class="line"></span><br><span class="line">    public RoleAnnotationMethodInterceptor() &#123;</span><br><span class="line">        super( new RoleAnnotationHandler() );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	&#x2F;&#x2F; 具体校验逻辑交给RoleAnnotationHandler</span><br><span class="line">    public RoleAnnotationMethodInterceptor(AnnotationResolver resolver) &#123;</span><br><span class="line">        super(new RoleAnnotationHandler(), resolver);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>RoleAnnotationHandler</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public class RoleAnnotationHandler extends AuthorizingAnnotationHandler &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">   </span><br><span class="line">    public void assertAuthorized(Annotation a) throws AuthorizationException &#123;</span><br><span class="line">        if (!(a instanceof RequiresRoles)) return;</span><br><span class="line"></span><br><span class="line">        RequiresRoles rrAnnotation &#x3D; (RequiresRoles) a;</span><br><span class="line">        String[] roles &#x3D; rrAnnotation.value();</span><br><span class="line"></span><br><span class="line">        if (roles.length &#x3D;&#x3D; 1) &#123;</span><br><span class="line">            getSubject().checkRole(roles[0]);</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        if (Logical.AND.equals(rrAnnotation.logical())) &#123;</span><br><span class="line">            getSubject().checkRoles(Arrays.asList(roles));</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        if (Logical.OR.equals(rrAnnotation.logical())) &#123;</span><br><span class="line">            &#x2F;&#x2F; Avoid processing exceptions unnecessarily - &quot;delay&quot; throwing the exception by calling hasRole first</span><br><span class="line">            boolean hasAtLeastOneRole &#x3D; false;</span><br><span class="line">            for (String role : roles) if (getSubject().hasRole(role)) hasAtLeastOneRole &#x3D; true;</span><br><span class="line">            &#x2F;&#x2F; Cause the exception if none of the role match, note that the exception message will be a bit misleading</span><br><span class="line">            if (!hasAtLeastOneRole) getSubject().checkRole(roles[0]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现类似编程式AOP"><a href="#实现类似编程式AOP" class="headerlink" title="实现类似编程式AOP"></a>实现类似编程式AOP</h2><ol>
+<li>定义一个注解<code>LogPrinter</code></li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Target(&#123;ElementType.METHOD&#125;)</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">public @interface LogPrinter &#123;</span><br><span class="line">    String value() default &quot;&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>继承StaticMethodMatcherPointcutAdvisor</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public class LogPrinterAdvisor extends StaticMethodMatcherPointcutAdvisor &#123;</span><br><span class="line"></span><br><span class="line">    public LogPrinterAdvisor() &#123;</span><br><span class="line">        setAdvice(new LogPrinterMethodInterceptor());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean matches(@NonNull Method method, Class&lt;?&gt; targetClass) &#123;</span><br><span class="line">        Method m &#x3D; method;</span><br><span class="line">        if (isAnnotationPresent(m)) &#123;</span><br><span class="line">            return true;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (targetClass !&#x3D; null) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                m &#x3D; targetClass.getMethod(m.getName(), m.getParameterTypes());</span><br><span class="line">                return isAnnotationPresent(m);</span><br><span class="line">            &#125; catch (NoSuchMethodException ignored) &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private boolean isAnnotationPresent(Method method) &#123;</span><br><span class="line">        Annotation a &#x3D; AnnotationUtils.findAnnotation(method, LogPrinter.class);</span><br><span class="line">        return a !&#x3D; null;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>实现<code>MethodInterceptor</code>接口，定义切面处理逻辑</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class LogPrinterMethodInterceptor implements MethodInterceptor &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public Object invoke(MethodInvocation invocation) throws Throwable &#123;</span><br><span class="line">        LogPrinter logPrinter &#x3D; invocation.getMethod().getAnnotation(LogPrinter.class);</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;log printer: &quot;+logPrinter.value());</span><br><span class="line">        return invocation.proceed();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>定义测试类，并添加LogPrinter注解</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@Component</span><br><span class="line">public class HelloWorld &#123;</span><br><span class="line"></span><br><span class="line">    @LogPrinter(&quot;hello world&quot;)</span><br><span class="line">    public void hello() &#123;</span><br><span class="line">        System.out.println(&quot;Hello&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>启动类</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogAdvisorApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DefaultAdvisorAutoProxyCreator <span class="title">defaultAdvisorAutoProxyCreator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = <span class="keyword">new</span> DefaultAdvisorAutoProxyCreator();</span><br><span class="line">        defaultAdvisorAutoProxyCreator.setProxyTargetClass(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">return</span> defaultAdvisorAutoProxyCreator;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LogPrinterAdvisor <span class="title">logPrinterAdvisor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> LogPrinterAdvisor();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ConfigurableApplicationContext context = SpringApplication.run(LogAdvisorApplication.class, args);</span><br><span class="line">        HelloWorld helloWorld = context.getBean(HelloWorld.class);</span><br><span class="line">        helloWorld.hello();</span><br><span class="line">        context.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结与思考"><a href="#总结与思考" class="headerlink" title="总结与思考"></a>总结与思考</h2><p>Shiro的注解式权限，核心配置是一个<code>DefaultAdvisorAutoProxyCreator</code>和继承静态方法顾问<code>StaticMethodMatcherPointcutAdvisor</code>。其中5种权限注解，使用了统一的代码架构，用到了模板</p>
+<p>设计模式。在架构实现上要好于<code>AspectJ注解实现</code>。</p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155201485.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70"><img src="https://img-blog.csdnimg.cn/20190915155201485.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70" alt="Shiro角色权限注解UML示意图"></a></p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155201485.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70">Shiro角色权限注解UML示意图</a></p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155130196.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70"><img src="https://img-blog.csdnimg.cn/20190915155130196.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70" alt="Shiro权限注解AOP实现类UML图"></a></p>
+<p><a target="_blank" rel="noopener" href="https://img-blog.csdnimg.cn/20190915155130196.JPG?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0ExNjkzODg4NDI=,size_16,color_FFFFFF,t_70">Shiro权限注解AOP实现类UML图</a></p>
+<p><strong>文章作者:</strong> <a href="mailto:undefined">知源</a></p>
+<p><strong>文章链接:</strong> <a target="_blank" rel="noopener" href="https://crazyblitz.github.io/2019/09/15/Shiro%E6%9D%83%E9%99%90%E6%B3%A8%E8%A7%A3AOP%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">https://crazyblitz.github.io/2019/09/15/Shiro权限注解AOP实现原理分析/</a></p>
+<p><strong>版权声明:</strong> 本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a target="_blank" rel="noopener" href="https://crazyblitz.github.io/">知源博客</a>！</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-01/" class="post-title-link" itemprop="url">shiro源码解析-01</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-07 09:12:23 / Modified: 09:12:31" itemprop="dateCreated datePublished" datetime="2021-05-07T09:12:23+08:00">2021-05-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>目录</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="http://my.oschina.net/huangyong/blog/209339">Shiro 之 入口：EnvironmentLoaderListener</a>【由 黄勇 分享】</li>
+<li><a target="_blank" rel="noopener" href="http://my.oschina.net/huangyong/blog/210438">Shiro 之 Filter（上）：ShiroFilter</a>【由 黄勇 分享】</li>
+<li>Shiro 之 Filter（下）</li>
+<li><a target="_blank" rel="noopener" href="http://my.oschina.net/snakerflow/blog/219860">Shiro 之 Realm</a>【由 Dead_knight 分享】</li>
+<li>Shiro 之 SessionManager</li>
+<li><a target="_blank" rel="noopener" href="http://my.oschina.net/snakerflow/blog/219859">Shiro 之 SecurityManager</a>【由 Dead_knight 分享】</li>
+<li>Shiro 之 加密与解密</li>
+<li>Shiro 之 JSP Tag</li>
+<li>Shiro 之 Cache</li>
+<li>Shiro 之 与 Spring 集成</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/06/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/06/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">类加载机制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-06 23:44:42" itemprop="dateCreated datePublished" datetime="2021-05-06T23:44:42+08:00">2021-05-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-07 08:37:32" itemprop="dateModified" datetime="2021-05-07T08:37:32+08:00">2021-05-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="双亲委派是什么"><a href="#双亲委派是什么" class="headerlink" title="双亲委派是什么"></a>双亲委派是什么</h3><p>如果一个类加载器收到了类加载的请求，他首先会从自己缓存里查找是否之前加载过这个class，加载过直接返回，没加载过的话他不会自己亲自去加载，他会把这个请求委派给父类加载器去完成，每一层都是如此，类似递归，一直递归到顶层父类。</p>
+<p>也就是<code>Bootstrap ClassLoader</code>，只要加载完成就会返回结果，如果顶层父类加载器无法加载此class，则会返回去交给子类加载器去尝试加载，若最底层的子类加载器也没找到，则会抛出<code>ClassNotFoundException</code>。</p>
+<p>源码在<code>java.lang.ClassLoader#loadClass(java.lang.String, boolean)</code></p>
+<h3 id="为什么需要破坏双亲委派模型"><a href="#为什么需要破坏双亲委派模型" class="headerlink" title="为什么需要破坏双亲委派模型"></a>为什么需要破坏双亲委派模型</h3><blockquote>
+<p>Jdbc</p>
+</blockquote>
+<p>Jdbc为什么要破坏双亲委派模型？</p>
+<p>以前的用法是未破坏双亲委派模型的，比如<code>Class.forName(&quot;com.mysql.cj.jdbc.Driver&quot;);</code></p>
+<p>而在JDBC4.0以后，开始支持使用spi的方式来注册这个Driver，具体做法就是在mysql的jar包中的<code>META-INF/services/java.sql.Driver</code>文件中指明当前使用的Driver是哪个，然后使用的时候就不需要我们手动的去加载驱动了，我们只需要直接获取连接就可以了。<code>Connection con = DriverManager.getConnection(url, username, password );</code></p>
+<p>首先，理解一下为什么JDBC需要破坏双亲委派模式，原因是原生的JDBC中Driver驱动本身只是一个接口，并没有具体的实现，具体的实现是由不同数据库类型去实现的。例如，MySQL的<code>mysql-connector-*.jar</code>中的Driver类具体实现的。</p>
+<p>原生的JDBC中的类是放在<code>rt.jar</code>包的，是由Bootstrap加载器进行类加载的，在JDBC中的Driver类中需要动态去加载不同数据库类型的Driver类，而<code>mysql-connector-*.jar</code>中的Driver类是用户自己写的代码，那Bootstrap类加载器肯定是不能进行加载的，既然是自己编写的代码，那就需要由Application类加载器去进行类加载。</p>
+<p>这个时候就引入线程上下文件类加载器(<code>Thread Context ClassLoader</code>)，通过这个东西程序就可以把原本需要由Bootstrap类加载器进行加载的类由Application类加载器去进行加载了。</p>
+<blockquote>
+<p>Tomcat</p>
+</blockquote>
+<p>Tomcat为什么要破坏双亲委派模型？</p>
+<p>因为一个Tomcat可以部署N个web应用，但是每个web应用都有自己的classloader，互不干扰。比如web1里面有<code>com.test.A.class</code>，web2里面也有<code>com.test.A.class</code>，如果没打破双亲委派模型的话，那么web1加载完后，web2在加载的话会冲突。</p>
+<p>因为只有一套classloader，却出现了两个重复的类路径，所以tomcat打破了双亲委派。Tomcat线程级别的，不同web应用是不同的classloader。</p>
+<ul>
+<li>Java spi 方式，比如jdbc4.0开始就是其中之一。</li>
+<li>热部署的场景会破坏，否则实现不了热部署。</li>
+</ul>
+<h3 id="如何破坏双亲委派模型"><a href="#如何破坏双亲委派模型" class="headerlink" title="如何破坏双亲委派模型"></a>如何破坏双亲委派模型</h3><p>重写<code>loadClass</code>方法，别重写<code>findClass</code>方法，因为<code>loadClass</code>是核心入口，将其重写成自定义逻辑即可破坏双亲委派模型。</p>
+<h3 id="如何自定义一个类加载器"><a href="#如何自定义一个类加载器" class="headerlink" title="如何自定义一个类加载器"></a>如何自定义一个类加载器</h3><p>只需要继承<code>java.lang.Classloader</code>类，然后覆盖他的<code>findClass(String name)</code>方法即可，该方法根据参数指定的类名称，返回对应 的Class对象的引用。</p>
+<h3 id="热部署原理"><a href="#热部署原理" class="headerlink" title="热部署原理"></a>热部署原理</h3><p>采取破坏双亲委派模型的手段来实现热部署，默认的<code>loadClass()</code>方法先找缓存，你改了class字节码也不会热加载，所以自定义ClassLoader，去掉找缓存那部分，直接就去加载，也就是每次都重新加载。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/06/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BC%93%E5%AD%98/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/06/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BC%93%E5%AD%98/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">一致性哈希算法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-06 13:26:45 / Modified: 23:28:47" itemprop="dateCreated datePublished" datetime="2021-05-06T13:26:45+08:00">2021-05-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>本文将从如下三个方面探探一致性哈希算法。</p>
+<ul>
+<li>一致性哈希算法经典实用场景</li>
+<li>一致性哈希算法通常不适合用于服务类负载均衡</li>
+<li>面试应对之策</li>
+</ul>
+<h2 id="一致性哈希算法经典使用场景"><a href="#一致性哈希算法经典使用场景" class="headerlink" title="一致性哈希算法经典使用场景"></a>一致性哈希算法经典使用场景</h2><hr>
+<p>在数据库存储领域如果单表数据量很大，通常会采用分库分表，在缓存领域同样需要分库</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazTP2F95VGicFbQBvMibgPhhib5cibKbtdSTPAxQWT6s8vsicst9w4LibkUHIg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>将上述3个Redis节点称之为分片，每一个节点存储部分数据，需要使用负载均衡算法，将数据尽量分摊到各个节点，充分发挥分布式的优势，提升系统缓存访问的性能。</p>
+<p>在分布缓存领域，对数据存在新增与查询，即数据通过路由算法存储在某一个节点后，查询时需要尽量路由到同一个节点，否则会出现查询未命中缓存的情况，<strong>这也是与分布式服务调用领域的负载算法一个不同点。</strong></p>
+<p>分布式缓存存储类领域的负载均衡算法通常会使用某一个字段当<strong>分片键</strong>，在进行负载之前先求出分片字段对应的HashCode，然后与当前的节点数取模。**即 hashcode(分片键) % 节点总数(分片总数)**。<!--取模这种方式，不如HashMap中位操作的方式--></p>
+<h4 id="在分布式缓存领域上述算法的弊端"><a href="#在分布式缓存领域上述算法的弊端" class="headerlink" title="在分布式缓存领域上述算法的弊端"></a>在分布式缓存领域上述算法的弊端</h4><p>先哈希再取模实现起来简单高效，但在分布式缓存领域存在一个<strong>致命的痛点</strong>，对扩容、缩容不友好，会降低缓存的命中率。</p>
+<p>因扩容引起的数据命中率问题示意图如下：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazfGvt8SyQNB77xgTMnvK9Ivh004acnkBXmVk3oulAQ3Wog80NM0QDYg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>例如当前集群中由3个节点存储，例如现在向集群中写入6个数据，其分片键的hashcode为1-6，数据的分布情况如上述所示，但由于随着业务的急剧增长，从原先的3台扩容到4台，这个时候项目组尝试去缓存中查找 k1,k2,k3,k4,k5,k6时会出现什么问题？</p>
+<p>根据 hashcode 再取模的方式，由于数量从3台到4台，经路由算法路由后，k4 会尝试从3.169的机器去查找，但对应的数据却存储在3.166上，以上面6个key的命中来看，只有50%的命中率，扩容后带来<strong>缓存穿透</strong>，大量数据进入穿透到后台数据库。</p>
+<p>面对上述问题第一种解决方案：<strong>成倍扩容</strong>。将原来的3个节点数量翻倍倍，新增加的第一台数据来源于第一台，以此类推，第6台的数据来源于第3台，这样k6经过新的负载均衡算法会落到第6台，数据原本存在于第3台，而第6台的数据来源于第3台，这样避免了<strong>缓存穿透</strong>。</p>
+<p><strong>成倍扩容能有效解决扩容后带来的缓存穿透问题，但这样做会造成资源的浪费</strong>，有没有其他更好的方法呢？</p>
+<h4 id="一致性哈希算法"><a href="#一致性哈希算法" class="headerlink" title="一致性哈希算法"></a>一致性哈希算法</h4><p>一致性哈希算法的设计理念如下图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazEZMqXm5WHWricqib8tcicJW1q5IeIpqiaCgu3ibazp84BR2W8fjkSia3pcnw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>首先将哈希值映射到 0 ~ 2的32次方的一个圆中，然后将实际的物理节点的IP地址或取其可以表示一个节点的hash值，放入到hash环中。<!--可以这么认为，取模的分母永远是2^32--></p>
+<p><strong>然后对需要插入的数据先求哈希，再顺时针沿着哈希环，找到第一个实际节点，数据将存储到该实际节点上。</strong></p>
+<p>扩容后的示例图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazGn2LbxQauP5AIXKIWAEL2TibMGdlg60qcyMXBGMo737icyayTap9FBibQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>从中可以看到受影响的范围能控制在两个节点的hashcode之间的部分数据</p>
+<p>但一致性哈希算法要得到较好的效果，取决于各个实体节点在哈希环的分布情况，是否能分散，例如如下分布则会大打折扣：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazkxgBozHliccTJZiaAgy1slgI8a4tZR9309qdNG7Ts16YsE3thiagee9tw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>这种情况会造成数据分布不均衡，为了解决数据很可能分布不均匀的情况，对一致性哈希算法，提出了改进，引入了虚拟节点的，可以设置一个哈希环中存在多少个虚拟节点，然后将虚拟节点映射到实体节点，从而解决数据分布不均衡的问题。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFssgxpwib1WRrDCUDzF1vzazdomLMFjKPIlHfBUsLNshViajGibbD0vtj3CMEs4cdP6zAYa38kYCmdAg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>这样通过为不同的的实际节点映射到多个虚拟节点，实现数据的均匀分布，并且扩容或缩容时并不会出现大面积的缓存穿透。</p>
+<blockquote>
+<p>温馨提示：上述的映射只是一个理想状态，其核心思路是为每一个实体节点创建多个虚拟节点，并且核心虚拟节点的Hash值越分散越好。</p>
+</blockquote>
+<p>JAVA实现一致性哈希算法的两个关键：</p>
+<ul>
+<li>顺时针选择节点<br>可以使用TreeMap，一来具备排序功能，天然提供了相应的方法获取顺时针的一个元素。<br><strong>TreeMap 的 ceilingEntry()方法</strong>用于返回与大于或等于给定键元素(ele)的最小键元素链接的键值对。</li>
+<li>虚拟节点如何生成分散的哈希值<br>生成分散的哈希值，通常可以基于md5来实现。</li>
+</ul>
+<h2 id="一致性哈希算法被“滥用”"><a href="#一致性哈希算法被“滥用”" class="headerlink" title="一致性哈希算法被“滥用”"></a>一致性哈希算法被“滥用”</h2><hr>
+<p>一致性哈希算法在面对分布式缓存有着得天独厚的优势，因为它的产生就是为了解决分布式缓存扩容、缩容带来的缓存穿透问题。但现在一致性在分布式服务调用的负载算法竟然也提供了一致性哈希算法的实现。</p>
+<p>在Dubbo中为了实现客户端在服务调用时对服务提供者进行负载均衡，官方也提供了一致性哈希算法；在RocketMQ集群消费模式时消费队列的负载均衡机制竟然也实现了一致性哈希算法，<strong>但我觉得一致性哈希算法在这些领域完全无法发挥其他优势，比轮循、加权轮循、随机、加权随机算法等负载均衡算法相比，实现复杂，性能低下，运维管理复杂</strong>。</p>
+<p>因为在服务调用等负载均衡算法，<strong>多次服务调用之间关联性不太强</strong>，在服务端扩容、缩容后，对于客户端来说其实并不关心路由到哪台服务器，其关心的是能否返回一台服务器即可。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/06/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8A%E9%AB%98%E5%BB%B6%E8%BF%9F%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/06/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8A%E9%AB%98%E5%BB%B6%E8%BF%9F%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">Redis-线上高延迟排查</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-06 12:04:04 / Modified: 13:22:05" itemprop="dateCreated datePublished" datetime="2021-05-06T12:04:04+08:00">2021-05-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="一条命令执行过程"><a href="#一条命令执行过程" class="headerlink" title="一条命令执行过程"></a>一条命令执行过程</h3><p>在本文场景下，延迟 (latency) 是指从客户端发送命令到客户端接收到命令返回值的时间间隔。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXQoemRPGek07hlpV6XpJsFTsnZuTyeVWg7Gymsd7yU84UOhwXMUSe3A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>上图是 Redis 客户端发送一条命令的执行过程示意图，绿色的是执行步骤，而蓝色的则是可能出现的导致高延迟的原因。</p>
+<h4 id="网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题"><a href="#网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题" class="headerlink" title="网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题"></a>网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题</h4><h4 id="Redis-自己可能导致高延迟"><a href="#Redis-自己可能导致高延迟" class="headerlink" title="Redis 自己可能导致高延迟"></a>Redis 自己可能导致高延迟</h4><ul>
+<li>命令或者数据结构误用、持久化阻塞和内存交换。</li>
+<li>而且，Redis 采用<a href="">单线程</a>和<a href="">事件驱动的机制</a>来处理网络请求，分别有对应的<a href="">连接应答处理器</a>，<a href="">命令请求处理器</a>和<a href="">命令回复处理器</a>来处理客户端的网络请求事件，处理完一个事件就继续处理队列中的下一个。一条命令处理出现了高延迟会影响接下来处于排队状态的其他命令。</li>
+</ul>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXscLk1bRExg5BlLia5K6hRZQz1gUakMksxtLjkl7ibMDMz8m9ib2evyEYg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
+
+<h3 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h3><p>对于高延迟，Redis 原生提供慢查询统计功能，执行 slowlog get {n} 命令可以获取最近的 n 条慢查询命令，默认对于执行超过10毫秒(可配置)的命令都会记录到一个定长队列中，线上实例建议设置为1毫秒便于及时发现毫秒级以上的命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 超过 slowlog-log-slower-than 阈值的命令都会被记录到慢查询队列中</span><br><span class="line"># 队列最大长度为 slowlog-max-lenslowlog-log-slower-than 10000s lowlog-max-len 128</span><br></pre></td></tr></table></figure>
+
+<p>如果命令执行时间在毫秒级，则实例实际OPS只有1000左右。慢查询队列长度默认128，可适当调大。慢查询本身只记录了命令执行时间，不包括数据网络传输时间和命令排队时间，因此客户端发生阻塞异常 后，可能不是当前命令缓慢，而是在等待其他命令执行。需要重点比对异常和慢查询发生的时间点，确认是否有慢查询造成的命令阻塞排队。</p>
+<h4 id="不合理的命令或者数据结构"><a href="#不合理的命令或者数据结构" class="headerlink" title="不合理的命令或者数据结构"></a>不合理的命令或者数据结构</h4><p>比如对一个包含上万个元素的 hash 结构执行 hgetall 操作，由于数据量比较大且命令算法复杂度是 O(n)，这条命令执行速度必然很慢。</p>
+<p>这个问题就是典型的不合理使用命令和数据结构。对于高并发的场景我们应该尽量避免在大对象上执行算法复杂度超过 O(n) 的命令。对于键值较多的 hash 结构可以使用 scan 系列命令来逐步遍历，而不是直接使用 hgetall 来全部获取。</p>
+<p>Redis 本身提供发现大对象的工具，对应命令：redis-cli-h {ip} -p {port} bigkeys。这条命令会使用 scan 从指定的 Redis DB 中持续采样，实时输出当时得到的 value 占用空间最大的 key 值，并在最后给出各种数据结构的 biggest key 的总结报告。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli -h host -p 12345 --bigkeys</span><br></pre></td></tr></table></figure>
+
+<h4 id="持久化阻塞"><a href="#持久化阻塞" class="headerlink" title="持久化阻塞"></a>持久化阻塞</h4><p>对于开启了持久化功能的Redis节点，需要排查是否是持久化导致的阻塞。持久化引起主线程阻塞的操作主要有：fork 阻塞、AOF刷盘阻塞。</p>
+<p>fork 操作发生在 RDB 和 AOF 重写时，Redis 主线程调用 fork 操作产生共享内存的子进程，由子进程完成对应的持久化工作。如果 fork 操作本身耗时过长，必然会导致主线程的阻塞。</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXA2v2rmicbJ08REVFIiaYfMbvnJtMTqCV27OtND6ZCkibB9ia69ZWlmr3rw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:67%;" />
+
+<p>Redis 执行 fork 操作产生的子进程内存占用量表现为与父进程相同，理论上需要一倍的物理内存来完成相应的操作。但是 Linux 具有写时复制技术 (copy-on-write)，父子进程会共享相同的物理内存页，当父进程处理写请求时会对需要修改的页复制出一份副本完成写操作，而子进程依然读取 fork 时整个父进程的内存快照。所以，一般来说，fork 不会消耗过多时间。</p>
+<p>可以执行 <code>info stats</code>命令获取到 latestforkusec 指标，表示 Redis 最近一次 fork 操作耗时，如果耗时很大，比如超过1秒，则需要做出优化调整。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli -c -p 7000 info | grep -w latest_fork_useclatest_fork_usec:315</span><br></pre></td></tr></table></figure>
+
+<p>当我们开启AOF持久化功能时，文件刷盘的方式一般采用每秒一次，后台线程每秒对AOF文件做 fsync 操作。当硬盘压力过大时，fsync 操作需要等待，直到写入完成。如果主线程发现距离上一次的 fsync 成功超过2秒，为了数据安全性它会阻塞直到后台线程执行 fsync 操作完成。这种阻塞行为主要是硬盘压力引起，可以查看 Redis日志识别出这种情况，当发生这种阻塞行为时，会打印如下日志：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Asynchronous AOF fsync is taking too long (disk is busy). \Writing the AOF buffer without waiting for fsync to complete, \this may slow down Redis.</span><br></pre></td></tr></table></figure>
+
+<p>也可以查看 info persistence 统计中的 aofdelayedfsync 指标，每次发生 fdatasync 阻塞主线程时会累加。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;info persistenceloading:0aof_pending_bio_fsync:0aof_delayed_fsync:0</span><br></pre></td></tr></table></figure>
+
+<h4 id="内存交换"><a href="#内存交换" class="headerlink" title="内存交换"></a>内存交换</h4><p>内存交换（swap）对于 Redis 来说是非常致命的，Redis 保证高性能的一个重要前提是所有的数据在内存中。如果操作系统把 Redis 使用的部分内存换出到硬盘，由于内存与硬盘读写速度差几个数量级，会导致发生交换后的 Redis 性能急剧下降。识别 Redis 内存交换的检查方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;redis-cli -p 6383 info server | grep process_id # 查询 redis 进程号</span><br><span class="line">&gt;cat &#x2F;proc&#x2F;4476&#x2F;smaps | grep Swap # 查询内存交换大小Swap: 0 kBSwap: 4 kBSwap: 0 kBSwap: 0 kB</span><br></pre></td></tr></table></figure>
+
+<p>如果交换量都是0KB或者个别的是4KB，则是正常现象，说明Redis进程内存没有被交换。</p>
+<p>有很多方法可以避免内存交换的发生。比如说：</p>
+<ul>
+<li>保证机器充足的可用内存</li>
+<li>确保所有Redis实例设置最大可用内存(maxmemory)，防止极端情况下 Redis 内存不可控的增长。</li>
+<li>降低系统使用swap优先级，如 <code>echo 10&gt;/proc/sys/vm/swappiness</code>。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" class="post-title-link" itemprop="url">Redis-线上CPU飙升排查</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-05 23:10:13" itemprop="dateCreated datePublished" datetime="2021-05-05T23:10:13+08:00">2021-05-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-06 12:03:19" itemprop="dateModified" datetime="2021-05-06T12:03:19+08:00">2021-05-06</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Redis调用时间严重超时，这样高速的缓存反而变成了短板，由于数据一直没有返回，导致了请求响应变慢。</p>
+<h2 id="网页监控"><a href="#网页监控" class="headerlink" title="网页监控"></a>网页监控</h2><p>通过阿里的 Grafana 监控，服务器的 CPU 负载、内存、网络输入输出都挺正常的，所以肯定是 Redis 出现了问题。</p>
+<p>使用的是单节点的 32M 16GB 的阿里云 Redis，登录网页监控看性能监控，发现 CPU 使用情况飙升到100%</p>
+<p>QPS 虽然从 1000 多升到 6000，但是远远低于极限值，连接数量从 0 升到 3000，也是远远低于极限值（可能用户刚上班，开始有请求，然后响应延迟，导致命令队列数量过多，打开很多连接）。</p>
+<hr>
+<h2 id="服务器命令监控"><a href="#服务器命令监控" class="headerlink" title="服务器命令监控"></a>服务器命令监控</h2><p>登录 Redis-cli，通过 info 命令查看服务器状态和命令统计，总结了两点异常点：</p>
+<ul>
+<li><p>查询 redis 慢指令 slowlog，排行前十的指令均为<code>keys _</code>，并且耗时严重，在当前业务流量下执行<code>keys _</code>，一定会阻塞业务，导致查询慢，cpu 高的。值得注意的是应用层面没有开放 <code>keys *</code> 接口，不排查有后台人为或后台程序触发该指令。</p>
+<ul>
+<li><p>通过 slowlog 命令查看慢命令（默认超过 10ms 就会被记录到日志，只会记录其命令执行的时间，不包含 IO 往返操作，也不记录单由网络延迟引起的响应慢）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">xxxxx&gt; slowlog get 10</span><br><span class="line"> 3) 1) (integer) 411           </span><br><span class="line">    2) (integer) 1545386469     </span><br><span class="line">    3) (integer) 232663          </span><br><span class="line">    4) 1) &quot;keys&quot;              </span><br><span class="line">       2) &quot;mecury:*&quot;</span><br></pre></td></tr></table></figure>
+
+<p>图中各字段表示的是：</p>
+<ul>
+<li>1=日志的唯一标识符</li>
+<li>2=命令的执行时间点，以UNIX时间戳表示</li>
+<li>3=查询命令执行时间，以微妙为单位，中的是230ms</li>
+<li>4=执行的命令，以数组的形式排列。完整的命令是 keys mucury:*</li>
+</ul>
+</li>
+<li><p>所以通过这些参数，基本可以确定，是突然有大量的<code>keys *</code>命令导致CPU负载升高，导致响应延迟，问题我们应用中没有开放<code>keys *</code>命令。最后将这些统计结果和慢命令发到研发群，发现是别的应用配置配成了我们的Redis，然后他们有个业务场景是爬数据，突然涌入大量的调用，不断的keys *，导致我们的Redis不堪重负，于是将配置修改正确，不再调用我们的Redis。</p>
+</li>
+</ul>
+</li>
+<li><p>查看 redis 指令执行情况，排除 ‘exec’,’flushall’ 等指令，业务使用指令中，耗时严重的有 setnx 有7.5千万次调用平均耗时 6s，setex 有8.4千万次调用平均耗时7.33s，del 有2.6亿次调用平均耗时69s，hmset 有1亿次调用平均耗时 64s，hmget 有6.8千万次调用平均耗时 9s，hgetall 有14亿次调用平均耗时 205s，keys 有2千万次调用平均耗时 3740s。</p>
+<ul>
+<li><p>通常而言，这些指令耗时与 value 大小呈正比，所以可以排查这些指令相关的数据近期有没有较大增长。或者近期有没有业务改造，会频繁使用上述指令，也会造成 cpu 高。</p>
+</li>
+<li><p>通过 info commandstats 可以查看 Redis 命令统计信息，其中命令格式是<br>调用次数、耗费CPU时间、每个命令平均耗费CPU(单位为微秒）</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmdstat_XXX: calls&#x3D;XXX,usec&#x3D;XXX,usec_per_call&#x3D;XXX</span><br></pre></td></tr></table></figure>
+
+
+
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>Redis 抖动可以先看网页监控</li>
+<li>通过命令查看 Redis 指令状态和慢命令的情况</li>
+<li>考虑优化 Redis 在代码中的使用情况</li>
+<li>如果流量继续上升，需要考虑一下升级了</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+  
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+  </nav>
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

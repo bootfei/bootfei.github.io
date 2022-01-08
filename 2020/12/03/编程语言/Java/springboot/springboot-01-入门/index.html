@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="Springboot基础创建工程Spring Initializr -&gt; packaging:jar -&gt; selected dependencies: web Spring Initializr -&gt; packaging:war -&gt; selected dependencies: web 配置文件Spring Boot 的主配置文件可使用 application.yml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot-1.入门">
+<meta property="og:url" content="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-01-%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="Springboot基础创建工程Spring Initializr -&gt; packaging:jar -&gt; selected dependencies: web Spring Initializr -&gt; packaging:war -&gt; selected dependencies: web 配置文件Spring Boot 的主配置文件可使用 application.yml">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-12-03T04:12:59.000Z">
+<meta property="article:modified_time" content="2021-03-20T12:38:08.689Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-01-%E5%85%A5%E9%97%A8/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>springboot-1.入门 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Springboot%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">Springboot基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B7%A5%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">创建工程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Actuator-%E7%9B%91%E6%8E%A7%E5%99%A8"><span class="nav-number">1.3.</span> <span class="nav-text">Actuator 监控器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-number">1.3.1.</span> <span class="nav-text">基本环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">导入依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%AE%BF%E9%97%AEhealth"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">测试访问health</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0info%E4%BF%A1%E6%81%AF"><span class="nav-number">1.3.2.</span> <span class="nav-text">添加info信息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-1"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%B5%8B%E8%AF%95info"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">访问测试info</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%94%BE%E5%85%B6%E4%BB%96%E7%9B%91%E6%8E%A7%E7%BB%88%E7%AB%AF"><span class="nav-number">1.3.3.</span> <span class="nav-text">开放其他监控终端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-2"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%AE%BF%E9%97%AE"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">测试访问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E5%85%B6%E4%BB%96%E7%9B%91%E6%8E%A7%E7%BB%88%E7%AB%AF"><span class="nav-number">1.3.4.</span> <span class="nav-text">关闭其他监控终端</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-3"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%AE%BF%E9%97%AE-1"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">测试访问</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Springboot%E9%87%8D%E8%A6%81%E7%94%A8%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">Springboot重要用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8%E9%A1%B5%E9%9D%A2"><span class="nav-number">2.1.</span> <span class="nav-text">自定义异常页面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E7%9B%AE%E5%BD%95"><span class="nav-number">2.1.1.</span> <span class="nav-text">定义目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8%E9%A1%B5%E9%9D%A2"><span class="nav-number">2.1.2.</span> <span class="nav-text">定义异常页面</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%80%89%E6%8B%A9"><span class="nav-number">2.2.</span> <span class="nav-text">多环境选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">2.2.1.</span> <span class="nav-text">多配置文件实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%90%8C%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E5%9C%A8%E4%B8%8D%E5%90%8C%E7%8E%AF%E5%A2%83"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">相同代码运行在不同环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E7%8E%AF%E5%A2%83%E6%89%A7%E8%A1%8C%E4%B8%8D%E5%90%8C%E5%AE%9E%E7%8E%B0%E7%B1%BB"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">不同环境执行不同实现类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%EF%BC%88%E7%95%A5%EF%BC%8C%E4%B8%8D%E5%AE%9E%E7%94%A8%EF%BC%89"><span class="nav-number">2.2.2.</span> <span class="nav-text">单配置文件实现方式（略，不实用）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">读取自定义配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E4%B8%BB%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">读取主配置文件中的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E5%AF%B9%E8%B1%A1%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.2.</span> <span class="nav-text">读取对象属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96List-lt-String-gt-%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.3.</span> <span class="nav-text">读取List&lt; String &gt;属性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E4%B8%AD%E4%BD%BF%E7%94%A8-MyBatis"><span class="nav-number">2.4.</span> <span class="nav-text">Spring Boot 中使用 MyBatis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E7%9A%84%E4%BA%8B%E5%8A%A1%E6%94%AF%E6%8C%81"><span class="nav-number">2.5.</span> <span class="nav-text">Spring Boot 的事务支持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E5%AF%B9%E6%97%A5%E5%BF%97%E7%9A%84%E6%8E%A7%E5%88%B6"><span class="nav-number">2.6.</span> <span class="nav-text">Spring Boot 对日志的控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%B6%88%E8%B4%B9%E8%80%85-%E7%95%A5"><span class="nav-number">2.6.1.</span> <span class="nav-text">定义消费者(略)</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-01-%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          springboot-1.入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-03 12:12:59" itemprop="dateCreated datePublished" datetime="2020-12-03T12:12:59+08:00">2020-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-20 20:38:08" itemprop="dateModified" datetime="2021-03-20T20:38:08+08:00">2021-03-20</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Springboot基础"><a href="#Springboot基础" class="headerlink" title="Springboot基础"></a>Springboot基础</h1><h2 id="创建工程"><a href="#创建工程" class="headerlink" title="创建工程"></a>创建工程</h2><p>Spring Initializr -&gt; packaging:jar -&gt; selected dependencies: web</p>
+<p>Spring Initializr -&gt; packaging:war -&gt; selected dependencies: web</p>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>Spring Boot 的主配置文件可使用 application.yml 文件。</p>
+<p>application.properties 与 application.yml 这两个文件只能有一个。要 求文件名必须为 application。</p>
+<h2 id="Actuator-监控器"><a href="#Actuator-监控器" class="headerlink" title="Actuator 监控器"></a><strong>Actuator</strong> 监控器</h2><h3 id="基本环境搭建"><a href="#基本环境搭建" class="headerlink" title="基本环境搭建"></a>基本环境搭建</h3><h4 id="导入依赖"><a href="#导入依赖" class="headerlink" title="导入依赖"></a>导入依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;spring-boot-starter-actuator&lt;&#x2F;artifactId&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">management.server.port=9999</span></span><br><span class="line"><span class="comment">#指定server的基本路径</span></span><br><span class="line"><span class="string">management.server.servlet.context-path=/xxx</span></span><br><span class="line"><span class="comment">#指定监控终端的基本路径，默认为/actuator</span></span><br><span class="line"><span class="string">management.endpoints.web.base-path=/base</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="测试访问health"><a href="#测试访问health" class="headerlink" title="测试访问health"></a>测试访问health</h4><p>Localhost:9999/xxx/base/health</p>
+<h3 id="添加info信息"><a href="#添加info信息" class="headerlink" title="添加info信息"></a>添加info信息</h3><h4 id="修改配置文件-1"><a href="#修改配置文件-1" class="headerlink" title="修改配置文件"></a>修改配置文件</h4><p>在配置文件中添加如下 Info 信息，则可以通过 info 监控终端查看到。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#自定义info信息</span></span><br><span class="line"><span class="string">info.company.name=com.abc</span></span><br><span class="line"><span class="string">info.company.url=http://com.abc.www</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#从pom.xml文件中读取数值</span></span><br><span class="line"><span class="string">info.project.groupid=@project.groupId@</span></span><br><span class="line"><span class="string">info.project.artifactid=@project.artifactId@</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="访问测试info"><a href="#访问测试info" class="headerlink" title="访问测试info"></a>访问测试info</h4><p>Localhost:9999/xxx/base/info</p>
+<h3 id="开放其他监控终端"><a href="#开放其他监控终端" class="headerlink" title="开放其他监控终端"></a>开放其他监控终端</h3><p>默认情况下，Actuator 仅开放了 health 与 info 两个监控终端，但其还有很多终端可用，不过，需要手工开放。</p>
+<h4 id="修改配置文件-2"><a href="#修改配置文件-2" class="headerlink" title="修改配置文件"></a>修改配置文件</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">management.endpoints.web.exposure.include=*</span> <span class="comment">#开放所有终端</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="测试访问"><a href="#测试访问" class="headerlink" title="测试访问"></a>测试访问</h4><ul>
+<li><strong>mappings</strong> 终端: <ul>
+<li>Localhost:9999/xxx/base/mappings</li>
+<li>通过 mappings 终端，可以看到当前工程中所有的 URI 与处理器的映射关系，及详细的 处理器方法及其映射规则。很实用。</li>
+</ul>
+</li>
+<li><strong>beans</strong> 终端: <ul>
+<li>Localhost:9999/xxx/base/beans</li>
+<li>可以查看到当前应用中所有的对象信息。</li>
+</ul>
+</li>
+<li><strong>env</strong> 终端<ul>
+<li>Localhost:9999/xxx/base/env</li>
+<li>查看运行环境</li>
+</ul>
+</li>
+</ul>
+<h3 id="关闭其他监控终端"><a href="#关闭其他监控终端" class="headerlink" title="关闭其他监控终端"></a>关闭其他监控终端</h3><h4 id="修改配置文件-3"><a href="#修改配置文件-3" class="headerlink" title="修改配置文件"></a>修改配置文件</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">management.endpoints.web.exposure.exclude=env,beans</span> <span class="comment">#关闭env,beans终端</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="测试访问-1"><a href="#测试访问-1" class="headerlink" title="测试访问"></a>测试访问</h4><h1 id="Springboot重要用法"><a href="#Springboot重要用法" class="headerlink" title="Springboot重要用法"></a>Springboot重要用法</h1><h2 id="自定义异常页面"><a href="#自定义异常页面" class="headerlink" title="自定义异常页面"></a>自定义异常页面</h2><p>对于 404、405、500 等异常状态，服务器会给出默认的异常页面，而这些异常页面一般 都是英文的，且非常不友好。我们可以通过简单的方式使用自定义异常页面，并将默认状态 码页面进行替换。</p>
+<h3 id="定义目录"><a href="#定义目录" class="headerlink" title="定义目录"></a>定义目录</h3><p>在 src/main/resources 目录下再定义新的目录 public/error，必须是这个目录名称。</p>
+<h3 id="定义异常页面"><a href="#定义异常页面" class="headerlink" title="定义异常页面"></a>定义异常页面</h3><p>在 error 目录中定义异常页面。这些异常页面的名称必须为相应的状态码，扩展名为 html。如404.html, 500.html</p>
+<h2 id="多环境选择"><a href="#多环境选择" class="headerlink" title="多环境选择"></a>多环境选择</h2><ul>
+<li>相同代码运行在不同环境<ul>
+<li>开发、测试、生产 环境等。每个环境的数据库地址、服务器端口号等配置都会不同</li>
+<li>此时就需要定义出不同的配置信息，在不同的环境中选择不同的配置。</li>
+</ul>
+</li>
+<li>不同环境执行不同实现类<ul>
+<li>在开发应用时，有时不同的环境，需要运行的接口的实现类也是不同的。例如，若要开发一个具有短信发送功能的应用，开发环境中要执行的 send()方法仅需调用短信模拟器即可， 而生产环境中要执行的 send()则需要调用短信运营商所提供的短信发送接口。</li>
+<li>此时就需要开发两个相关接口的实现类去实现 send()方法，然后在不同的环境中自动选 择不同的实现类去执行。</li>
+</ul>
+</li>
+</ul>
+<h3 id="多配置文件实现方式"><a href="#多配置文件实现方式" class="headerlink" title="多配置文件实现方式"></a>多配置文件实现方式</h3><p>在 src/main/resources 中再定义两个配置文件，分别对应开发环境application-dev.properties与生产环境application-prod.properties。</p>
+<p>在 Spring Boot 中多环境配置文件名需要满足 application-{profile}.properties 的格式，其 中{profile}为对应的环境标识，例如</p>
+<ul>
+<li>application-dev.properties:开发环境 </li>
+<li>application-test.properties:测试环境 </li>
+<li>application-prod.properties:生产环境</li>
+</ul>
+<h4 id="相同代码运行在不同环境"><a href="#相同代码运行在不同环境" class="headerlink" title="相同代码运行在不同环境"></a>相同代码运行在不同环境</h4><p>至于哪个配置文件会被加载，则需要在 application.properties 文件中通过 spring.profiles.active 属性来设置，其值对应{profile}值。例如，spring.profiles.active=test 就会 加载 application-test.properties 配置文件内容。</p>
+<p>在生产环境下，application.properties 中一般配置通用内容，并设置 spring.profiles.active 属性的值为 dev，即，直接指定要使用的配置文件为开发时的配置文件，而对于其它环境的 选择，一般是通过命令行方式去激活。配置文件 application-{profile}.properties 中则配置各个 环境的不同内容。</p>
+<h4 id="不同环境执行不同实现类"><a href="#不同环境执行不同实现类" class="headerlink" title="不同环境执行不同实现类"></a>不同环境执行不同实现类</h4><p>在实现类上添加@Profile 注解，并在注解参数中指定前述配置文件中的{profile}值，用于指定该实现类所适用的环境。</p>
+<ul>
+<li>@Profile(“prod”)</li>
+<li>@Profile(“dev”)</li>
+</ul>
+<h3 id="单配置文件实现方式（略，不实用）"><a href="#单配置文件实现方式（略，不实用）" class="headerlink" title="单配置文件实现方式（略，不实用）"></a>单配置文件实现方式（略，不实用）</h3><h2 id="读取自定义配置"><a href="#读取自定义配置" class="headerlink" title="读取自定义配置"></a>读取自定义配置</h2><p>自定义配置，可以是定义在主配置文件 application.properties 中的自定义属性，也可以 是自定义配置文件中的属性。</p>
+<h3 id="读取主配置文件中的属性"><a href="#读取主配置文件中的属性" class="headerlink" title="读取主配置文件中的属性"></a>读取主配置文件中的属性</h3><p>在@Value 注解中通过${ }符号可以读取指定的属性值。</p>
+<ul>
+<li><p>修改主配置文件</p>
+<ul>
+<li>Student.name=’xiaoming’</li>
+</ul>
+</li>
+<li><p>修改 <strong>SomeHandler</strong> 类</p>
+<ul>
+<li><pre><code class="java">@Value(&quot;$&#123;student.name&#125;&quot;)
+private String name;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 读取指定配置文件中的属性</span><br><span class="line"></span><br><span class="line">一般情况下，[主配置文件]()中存放[系统中定义好的属性设置]()，而[自定义属性]()一般会写入[自定义的配置文件]()中。也就是说，Java 代码除了可以读取主配置文件中的属性外，还可以读取指定配置文件中的属性，可以通过@PropertySource 注解加载指定的配置文件。</span><br><span class="line"></span><br><span class="line">&gt; spring boot 官网给出说明，@PropertySource 注解不能加载 yml文件。所以其建议自定义配置文件就使用approperties文件。</span><br><span class="line">&gt;</span><br><span class="line"></span><br><span class="line">- 修改property配置文件: </span><br><span class="line"></span><br><span class="line">  - myapp.approperties</span><br><span class="line">  - 存放在 src&#x2F;main&#x2F;resources 目录中</span><br><span class="line">  - student.name&#x3D;&quot;张三&quot;</span><br><span class="line"></span><br><span class="line">- 修改controller类:</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @PropertySource(value&#x3D;&quot;classpath:myapp.approperties&quot;,encoding&#x3D;&quot;UTF-8&quot;)</span><br><span class="line">    pulibc class testController&#123;</span><br><span class="line">      @Value(&quot;$&#123;student.name&#125;&quot;)</span><br><span class="line">    	private String name;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+​    
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="读取对象属性"><a href="#读取对象属性" class="headerlink" title="读取对象属性"></a>读取对象属性</h3><ul>
+<li>@ProertySource用于指定要读取的配置文件</li>
+<li>@ConfigurationProperties用于指定要读取配置文件中的对象属性，即指定要读取的配置文件属性的前辍</li>
+<li>@Component表示当前从配置文件读取来的对象，由Spring容器创建 </li>
+<li>要保证类的属性名要与配置文件中的对象属性名相同</li>
+</ul>
+<p>修改property配置文件: </p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">student.id=&quot;0100&quot;</span></span><br><span class="line"><span class="string">student.name=&quot;张三&quot;</span></span><br><span class="line"><span class="string">student.class=&quot;三班&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改自义配置属性类:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@PropertySource(&quot;classpath:myapp.approperties&quot;)</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(&quot;student&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">student</span></span>&#123;</span><br><span class="line">  <span class="keyword">private</span> String id;</span><br><span class="line">  <span class="keyword">private</span> String name;</span><br><span class="line">  <span class="keyword">private</span> String <span class="class"><span class="keyword">class</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取List-lt-String-gt-属性"><a href="#读取List-lt-String-gt-属性" class="headerlink" title="读取List&lt; String &gt;属性"></a>读取List&lt; String &gt;属性</h3><ul>
+<li><p>导入依赖</p>
+<ul>
+<li><p>注解@ConfigurationProperties 注解需要以下依赖。</p>
+</li>
+<li><pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+    &lt;optional&gt;true&lt;/optional&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改自定义配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    country.cities[0]&#x3D;beijing</span><br><span class="line">    country.cities[1]&#x3D;shanghai</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>定义配置属性类</p>
+<ul>
+<li><pre><code class="java">@Component
+@PropertySource(&quot;classpath:myapp.approperties&quot;)
+@ConfigurationProperties(&quot;country&quot;)
+public class Country&#123;
+  private List&lt;String&gt; cities;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 读取 **List&lt; Object &gt;**属性</span><br><span class="line"></span><br><span class="line">- 修改自定义配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    group.students[0].name &#x3D; &quot;张三&quot;</span><br><span class="line">    group.students[0].id &#x3D; 01</span><br><span class="line">    </span><br><span class="line">    group.students[1].name &#x3D; &quot;李四&quot;</span><br><span class="line">    group.students[1].id &#x3D; 02</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>定义配置属性类</p>
+<ul>
+<li><pre><code class="java">@Component
+@PropertySource(&quot;classpath:myapp.approperties&quot;)
+@ConfigurationProperties(&quot;group&quot;)
+public class Group&#123;
+  private List&lt;Student&gt; students;
+&#125;
+
+//不需要添加任何注解
+public class Student&#123;
+  String name;
+  String id;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">##  **Spring Boot** 下使用 **JSP** 页面</span><br><span class="line"></span><br><span class="line">&gt; 在 Spring Boot 下直接使用 JSP 文件，其是无法解析的，需要做专门的配置。</span><br><span class="line">&gt;</span><br><span class="line">&gt; [无法解析]()意味着访问该文件路径会下载该文件，而不是展示在页面</span><br><span class="line"></span><br><span class="line">- 创建目录：</span><br><span class="line"></span><br><span class="line">  - 在 src&#x2F;main 下创建 webapp 目录，用于存放 jsp 文件。这就是一个普通的目录，无需执行 Mark Directory As。</span><br><span class="line"></span><br><span class="line">- 创建 **index.jsp** :</span><br><span class="line"></span><br><span class="line">  - [指定 **web** 资源目录](): 在 spring boot 工程中若要创建 jsp 文件，一般是需要在 src&#x2F;main 下创建 webapp 目录， 然后在该目录下创建 jsp 文件。但发现没有创建 jsp 文件的选项。此时，需要打开 Project Structrue 窗口，将 webapp 目录指定为 web 资源目录，点击右下角的加号，然后才可以创建 jsp 文件。</span><br><span class="line">  - 创建 **index** 页面：在webapp目录下创建index.jsp页面</span><br><span class="line"></span><br><span class="line">- [添加tomcat内置的jsp解析器]()：</span><br><span class="line"></span><br><span class="line">  - 添加 **jasper** 依赖, jsp 引擎是用于解析 jsp 文件的， 即将 jsp 文件解析为 Servlet 是由 jsp 引擎完成的。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    	&lt;groupId&gt;org.apache.tomcat.embed tomcat-embed-jasper&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;tomcat-embed-jasper&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p><a href="">注册资源目录</a>:</p>
+<ul>
+<li><p>在 pom 文件中将 webapp 目录注册为资源目录。若不注册，那么target中就没有该资源，也就是说无法访问。</p>
+</li>
+<li><pre><code class="xml">&lt;build&gt;
+ &lt;resources&gt;
+   &lt;resource&gt;
+       &lt;directory&gt;src/main/webapp&lt;/directory&gt;
+     &lt;targetPath&gt;META-INFO/resources&lt;/targetPath&gt;
+     &lt;includes&gt;
+       &lt;include&gt;**/*.*&lt;/include&gt;
+     &lt;/includes&gt;
+   &lt;/resource&gt;
+ &lt;/resources&gt;
+&lt;/build&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- Controller类：</span><br><span class="line"></span><br><span class="line">  - &#x2F;test&#x2F;register&#x2F;</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;</span><br><span class="line">    return &quot;jsp&#x2F;welcome.jsp&quot;;</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>路由访问：</p>
+<ul>
+<li><a href="">Iocalhost:8000/index.jsp</a> :访问到index.jsp页面</li>
+<li><a href="">Iocalhost:8000/test/register.jsp</a> : 访问到welcome.jsp页面</li>
+</ul>
+</li>
+</ul>
+<h2 id="Spring-Boot-中使用-MyBatis"><a href="#Spring-Boot-中使用-MyBatis" class="headerlink" title="Spring Boot 中使用 MyBatis"></a><strong>Spring Boot</strong> 中使用 <strong>MyBatis</strong></h2><ul>
+<li><p>导入三个依赖:</p>
+<ul>
+<li><p>mybatis 与 Spring Boot 整合依赖，mysql 驱动依赖， Druid 数据源依赖。</p>
+</li>
+<li><pre><code class="xml">&lt;!--mybatis 与 spring boot 整合依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+  &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!--mysql 驱动--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+  &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- druid 驱动，数据源 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+  &lt;artifactId&gt;druid&lt;/artifactId&gt;
+  &lt;version&gt;1.1.12&lt;/version&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 定义 Service接口</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    public class StudentService&#123;</span><br><span class="line">    	@Autowired</span><br><span class="line">    	private IstudentDao dao;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>定义 <strong>Dao</strong> 接口</p>
+<ul>
+<li><p>Com.abc.dao目录</p>
+</li>
+<li><pre><code class="java">//Dao 接口上要添加@Mapper 注解。
+public interface IstudentDao&#123;
+    void insertStudent(Student s);
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 定义映射文件</span><br><span class="line"></span><br><span class="line">  - Com.abc.dao目录， &lt;!--与Dao接口在同一目录--&gt;</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot; ?&gt;   </span><br><span class="line">    &lt;!DOCTYPE mapper   </span><br><span class="line">        PUBLIC &quot;-&#x2F;&#x2F;mybatis.org&#x2F;&#x2F;DTD Mapper 3.0&#x2F;&#x2F;EN&quot;   </span><br><span class="line">        &quot;http:&#x2F;&#x2F;mybatis.org&#x2F;dtd&#x2F;mybatis-3-mapper.dtd&quot;&gt;</span><br><span class="line">    &lt;mapper namespace&#x3D;&quot;com.abc.dao.IstudentDao&quot;&gt;</span><br><span class="line">        &lt;!-- 这里namespace必须是UserMapper接口的路径” --&gt;</span><br><span class="line">        &lt;insert id&#x3D;&quot;insertStudent&quot;&gt;</span><br><span class="line">            insert into student(name,age) values(#&#123;name&#125;,#&#123;age&#125;)</span><br><span class="line">        &lt;&#x2F;insert&gt;</span><br><span class="line">    &lt;&#x2F;mapper&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>注册资源目录</p>
+<ul>
+<li><p>在 pom 文件中将 dao 目录注册为资源目录。</p>
+</li>
+<li><pre><code class="xml"> &lt;!-- dao 目录注册为资源目录 --&gt;
+&lt;build&gt;
+  &lt;resources&gt;
+    &lt;resource&gt;
+        &lt;directory&gt;src/main/java&lt;/directory&gt;
+      &lt;includes&gt;
+        &lt;include&gt;**/*.xml&lt;/include&gt;
+      &lt;/includes&gt;
+    &lt;/resource&gt;
+  &lt;/resources&gt;
+&lt;/build&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改主配置文件</span><br><span class="line"></span><br><span class="line">  - 注册映射文件</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;properties</span><br><span class="line">      mybatis.mapper-location&#x3D;classpath:com&#x2F;abc&#x2F;dao&#x2F;.xml</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+<li><p>注册实体类别名</p>
+<ul>
+<li><pre><code class="properties">mybatis.type-aliases-packages=com.abc.beans
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 注册数据源</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;properties</span><br><span class="line">    spring.datasource.type&#x3D;com.alibaba.druid.pool.DruidDataSource</span><br><span class="line">    spring.datasource.driver-class-name&#x3D;com.mysql.jdbc.Driver</span><br><span class="line">    spring.datasource.url&#x3D;jdbc:mysql:&#x2F;&#x2F;&#x2F;test</span><br><span class="line">    spring.datasource.username&#x3D;root</span><br><span class="line">    spring.datasource.password&#x3D;root</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Spring-Boot-的事务支持"><a href="#Spring-Boot-的事务支持" class="headerlink" title="Spring Boot 的事务支持"></a><strong>Spring Boot</strong> 的事务支持</h2><p>若工程直接或间接依赖于 spring-tx，则框架会自动注入 DataSourceTransactionManager事务管理器;若依赖于 spring-boot-data-jpa，则会自动注入 JpaTransactionManager。</p>
+<ul>
+<li><p>Spring对事务的实现：</p>
+<ul>
+<li>运行时异常，回滚</li>
+<li>受检查异常，提交；如果希望回滚，使用@Transactional（rollbackFor = Exception.class）</li>
+</ul>
+</li>
+<li><p>修改启动类</p>
+<ul>
+<li><pre><code class="java">@EnableTranscationManagement //开启事务
+public class Application&#123;
+
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改 **Service** 实现类</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @Transactional</span><br><span class="line">    public void addStudent(Student s) throw Exception&#123;</span><br><span class="line">    	dao.insert(s);</span><br><span class="line">    	&#x2F;&#x2F;int i&#x3D;0; &#x2F;&#x2F;运行时异常，回滚</span><br><span class="line">    	throw new Exception();&#x2F;&#x2F;受检查异常，提交</span><br><span class="line">    	dao.insert(s);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Spring-Boot-对日志的控制"><a href="#Spring-Boot-对日志的控制" class="headerlink" title="Spring Boot 对日志的控制"></a><strong>Spring Boot</strong> 对日志的控制</h2><p>Spring Boot 中使用的日志技术为 logback。其与 Log4J 都出自同一人，性能要优于 Log4J， 是 Log4J 的替代者。</p>
+<ul>
+<li><p>添加依赖</p>
+</li>
+<li><p>在 Spring Boot 中若要使用 logback，则需要具有 spring-boot-starter-logging 依赖，而该依 赖被 spring-boot-starter-web 所依赖，即不用直接导入 spring-boot-starter-logging 依赖。</p>
+</li>
+<li><p>添加配置文件</p>
+<ul>
+<li><p>该文件名为 logback.xml，且必须要放在 src/main/resources 类路径下。</p>
+</li>
+<li><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;configuration scan=&quot;true&quot; scanPeriod=&quot;60 seconds&quot; debug=&quot;false&quot; &gt;
+   &lt;!-- 上下文名称：取项目名称 --&gt;
+   &lt;contextName&gt;tlogback&lt;/contextName&gt;
+   &lt;!-- 时间戳格式 --&gt;
+   &lt;timestamp key=&quot;myDateFormat&quot; datePattern=&quot;yyyy-MM-dd HH:mm:ss&quot;/&gt;
+   &lt;!-- 属性，以$&#123;key&#125;引用 --&gt;
+   &lt;property name=&quot;path&quot; value=&quot;D:/log&quot;/&gt;
+
+   &lt;appender name=&quot;stdout&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot; &gt;
+       &lt;encoder&gt;
+           &lt;pattern&gt;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%p] %logger - %line - %msg%n&lt;/pattern&gt;
+       &lt;/encoder&gt;
+   &lt;/appender&gt;
+
+   &lt;appender name=&quot;file&quot; class=&quot;ch.qos.logback.core.FileAppender&quot;&gt;
+       &lt;file&gt;$&#123;path&#125;/tlogback.log&lt;/file&gt;
+       &lt;append&gt;true&lt;/append&gt;
+       &lt;encoder&gt;
+           &lt;pattern&gt;%d&#123;yyyy-MM-dd HH:mm:ss.SSS&#125; [%t] [%p] %logger - %line - %msg%n&lt;/pattern&gt;
+       &lt;/encoder&gt;
+   &lt;/appender&gt;
+
+   &lt;!-- 为某个包，或某各类特别指定级别和appender,additivity表示是否向上级传递msg --&gt;
+   &lt;logger name=&quot;com.abc.dao&quot; level=&quot;debug&quot; additivity=&quot;false&quot;&gt;
+       &lt;appender-ref ref=&quot;stdout&quot;/&gt;
+   &lt;/logger&gt;
+
+   &lt;!-- 顶层的logger,为所有的类记录日志 --&gt;
+   &lt;root&gt;
+       &lt;appender-ref ref=&quot;stdout&quot;/&gt;
+       &lt;appender-ref ref=&quot;file&quot;/&gt;
+   &lt;/root&gt;
+
+&lt;/configuration&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## **Spring Boot** 中使用 **Redis**</span><br><span class="line"></span><br><span class="line">&gt; 高并发下访问 Redis，存在什么问题?存在三个问题: </span><br><span class="line">&gt;</span><br><span class="line">&gt; - 缓存穿透: 为DB查询为null的数据预设一个值</span><br><span class="line">&gt; - 缓存雪崩: 提前规划好缓存到期时间</span><br><span class="line">&gt; - 热点缓存: 属于缓存雪崩的特例，有一个缓存到期了，大量请求访问这个缓存无效，从而大量请求数据库。双重检测锁机制</span><br><span class="line"></span><br><span class="line">- 定义需求</span><br><span class="line"></span><br><span class="line">  - 当前工程完成让用户在页面中输入要查询学生的 id，其首先会查看 Redis 缓存中是否存在，若存在，则直接从 Redis 中读取;若不存在，则先从 DB 中查询出来，然后再存放到 Redis 缓存中</span><br><span class="line">  - 但用户也可以通过页面注册学生，一旦有新的学生注册，则需要将缓存中的学生信 息清空。根据 id 查询出的学生信息要求必须是实时性的，其适合使用注解方式的 Redis 缓存。</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - 小技巧：如redis,mybatis等依赖，[可以从父spring依赖中（ctrl + c）找到该依赖和版本号]()，然后添加</span><br><span class="line"></span><br><span class="line">  - 在 pom 文件中添加 Spring Boot 与 Redis 整合依赖。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;xml</span><br><span class="line">    &lt;!--mybatis 与 spring boot 整合依赖--&gt;</span><br><span class="line">    &lt;dependency&gt;</span><br><span class="line">    	&lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;spring-boot-starter-data-redis&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改主配置文件</p>
+<ul>
+<li><pre><code class="properties">#单机redis
+spring.redis.host=
+spring.redis.port=
+spring.redis.password=
+
+#集群redis
+spring.redis.sentinel.master=mymaster
+spring.redis.sentinel.nodes=sentine1:22076
+
+spring.cache.type=redis
+spring.cache.cache-names=realTimeCache
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 修改启动类</span><br><span class="line"></span><br><span class="line">  - 添加@EnableCaching: 开启缓存</span><br><span class="line"></span><br><span class="line">- 修改实体类 **Student**</span><br><span class="line"></span><br><span class="line">  - 由于要将查询的实体类对象缓存到 Redis，Redis 要求实体类必须序列化。所以需要实体类实现序列化接口。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    public class Student implements Serializable&#123;</span><br><span class="line">    	private static final Long serialVersionUID&#x3D;397293791;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改 <strong>Service</strong> 接口实现类</p>
+<ul>
+<li><p>@CacheEvict(value=””, allEntries=””)  清楚所有缓存。业务场景，插入必须清楚所缓存</p>
+</li>
+<li><p>@Cacheable(value=””, key=””) 如果没有缓存，那么查数据库，并添加缓存；如果有缓存，查询指定缓存</p>
+</li>
+<li><pre><code class="java">@Cacheable(value=&quot;realTimeCache&quot;, key=&quot;&#39;student&#39;+#id&quot;)
+public student findStudent(int id)&#123;
+    return dao.findStudent(id);
+&#125;
+
+@CacheEvict(value=&quot;realTimeCache&quot;, allEntries=&quot;true&quot;)  
+@Transactional
+public void addStudent(Student s)&#123;
+  dao.insertStudent(s);
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- [使用双重检查锁解决热点缓存]()</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    public Integer getStudentsCount()&#123;</span><br><span class="line">    	BoundValueOperations&lt;Object,Object&gt; ops &#x3D; redisTemplate.boundValuesOps(&quot;count&quot;);</span><br><span class="line">      Object cnt&#x3D; ops.getValue();&#x2F;&#x2F;第一重检查</span><br><span class="line">      if(cnt &#x3D;&#x3D; null)&#123; </span><br><span class="line">        &#x2F;&#x2F;1nd请求来到，2nd请求，3rd请求...，因为这个锁而阻塞</span><br><span class="line">        synchronized(this)&#123;</span><br><span class="line">          cnt&#x3D; ops.getValue();&#x2F;&#x2F;第二重检查</span><br><span class="line">          if(cnt&#x3D;&#x3D;null)&#123; </span><br><span class="line">            cnt &#x3D; dao.findStudentsCount();</span><br><span class="line">            opt.set(cnt,10,TimeUnits.Seconds);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      return (Integer) cnt;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+<li><p><a href="">是否存在线程安全问题呢？</a></p>
+<ul>
+<li><p>首先，synchronized(this)中的锁必须是单例的, @Component已经保证该锁的对象在Spring容器中是单例了，所以此处没有线程安全</p>
+</li>
+<li><pre><code class="java">private Integer cnt = new Integer(1);
+public Integer getStudentsCount()&#123;
+  if(cnt == null)&#123; 
+    synchronized(this)&#123;
+      if(cnt==null)&#123; 
+        //以下这个new语句的底层步骤
+        //1: 申请一个堆空间space
+        //2: 使用对象初始数据初始化对空间space
+        //3: cnt应用指向堆空间space
+           cnt = new Integer(2);
+      &#125;
+    &#125;
+  &#125;
+
+  return (Integer) cnt;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">      - 第一个请求来到，如果2,3的步骤被编译器优化，3先执行；然后第二个请求来到，if(cnt&#x3D;&#x3D;null)为真, 那么则返回一个没有经过2步骤的cnt对象</span><br><span class="line">      - 解决方法：[cnt设置为volatile保证编译器不优化(推荐) 或者是 设置该方法为同步(略)]()</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">## Spring Boot 中使用Dubbo</span><br><span class="line"></span><br><span class="line">  ### 步骤</span><br><span class="line"></span><br><span class="line">  - 消费者与提供者工程均需要导入四个依赖 </span><br><span class="line">    -  Dubbo 与 Spring Boot 整合依赖</span><br><span class="line">    -  zkClient依赖</span><br><span class="line">    -  slf4j-log4j12依赖</span><br><span class="line"></span><br><span class="line">  - 自定义 commons 工程依赖 </span><br><span class="line">  - 提供者工程</span><br><span class="line">    - 将 Service 接口实现类的@Service 注解更换为阿里的注解，并添加@Component 注解</span><br><span class="line">    - 在启动类上添加@EnableDubboConfiguration 与@EnableTransactionManager 注解</span><br><span class="line">    - 修改配置文件:指定应用名称与注册中心地址 </span><br><span class="line">  -  消费者工程</span><br><span class="line">    - 将处理器中 Service 的声明上的@Autowired 注解更换为阿里的@Reference 注解 </span><br><span class="line">    -  在启动类上添加@EnableDubboConfiguration 注解</span><br><span class="line">    -  修改配置文件:指定应用名称与注册中心地址</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 定义 **commons** 工程</span><br><span class="line"></span><br><span class="line">- 依赖：无，因为是纯java项目</span><br><span class="line">- 定义实体类</span><br><span class="line">- 定义业务接口</span><br><span class="line"></span><br><span class="line">### 定义提供者</span><br><span class="line"></span><br><span class="line">- 依赖：</span><br><span class="line"></span><br><span class="line">  - 添加 **dubbo** 与 **spring boot** 整合依赖，需要从alibaba的github中找到依赖</span><br><span class="line">  - 添加 **zkClient** 依赖</span><br><span class="line">  - dubboCommons依赖</span><br><span class="line">  - 还有其他的mysql, druid,mybatis依赖</span><br><span class="line"></span><br><span class="line">- 定义业务接口</span><br><span class="line"></span><br><span class="line">  - 将 Service 接口实现类的@Service 注解更换为阿里的注解，并添加@Component 注解</span><br><span class="line"></span><br><span class="line">- 修改启动类</span><br><span class="line"></span><br><span class="line">  - 添加@EnableDubboConfiguration 与@EnableTransactionManager 注解</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    spring:</span><br><span class="line">      # 功能等价于 spring-dubbo 配置文件中的&lt;dubbo:application&#x2F;&gt; # 该名称是由服务治理平台使用</span><br><span class="line">      application:</span><br><span class="line">      	name: 11-provider-springboot # 指定zk注册中心</span><br><span class="line">      dubbo:</span><br><span class="line">      	registry: zookeeper:&#x2F;&#x2F;zkOS:2181</span><br><span class="line">      # zk 集群作注册中心</span><br><span class="line">      # registry: zookeeper:&#x2F;&#x2F;zkOS1:2181?backup&#x3D;zkOS2:2181,zkOS3:2181</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="定义消费者-略"><a href="#定义消费者-略" class="headerlink" title="定义消费者(略)"></a>定义消费者(略)</h3><ul>
+<li><p>依赖：</p>
+<ul>
+<li>添加 <strong>dubbo</strong> 与 <strong>spring boot</strong> 整合依赖，需要从alibaba的github中找到依赖</li>
+<li>添加 <strong>zkClient</strong> 依赖</li>
+<li>dubboCommons依赖</li>
+</ul>
+</li>
+<li><p>修改配置文件</p>
+<ul>
+<li><pre><code class="yaml">spring:
+  # 功能等价于 spring-dubbo 配置文件中的&lt;dubbo:application/&gt; # 该名称是由服务治理平台使用
+  application:
+      name: 11-consumer-springboot # 指定zk注册中心
+  dubbo:
+      registry: zookeeper://zkOS:2181
+  # zk 集群作注册中心
+  # registry: zookeeper://zkOS1:2181?backup=zkOS2:2181,zkOS3:2181
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## **Spring Boot** 下使用拦截器</span><br><span class="line"></span><br><span class="line">&gt; 在非 Spring Boot 工程中若要使用 SpringMVC 的拦截器，在定义好拦截器后，需要在 Spring 配置文件中对其进行注册。但 Spring Boot 工程中没有了 Spring 配置文件，那么如何使用拦截器呢?</span><br><span class="line">&gt;</span><br><span class="line">&gt; Spring Boot 对于原来在配置文件配置的内容，现在全部体现在一个类中，该类需要继承 自 WebMvcConfigurationSupport 类，并使用@Configuration 进行注解，表示该类为一个 JavaConfig 类，其充当配置文件的角色。</span><br><span class="line"></span><br><span class="line">- 定义拦截器</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    public class SomeInterceptor extends HandlerInterceptor&#123;</span><br><span class="line">        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception &#123;</span><br><span class="line">            String path &#x3D; request.getServletPath();</span><br><span class="line">            if (path.matches(Const.NO_INTERCEPTOR_PATH)) &#123;</span><br><span class="line">            	&#x2F;&#x2F;不需要的拦截直接过</span><br><span class="line">                return true;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">            	&#x2F;&#x2F; 这写你拦截需要干的事儿，比如取缓存，SESSION，权限判断等</span><br><span class="line">                System.out.println(&quot;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&quot;);</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>定义配置文件类</p>
+<ul>
+<li><pre><code class="java">@Configuration
+public class WebConfigurer implements WebMvcConfigurerSupport &#123;
+     @Override
+     public void addInterceptors(InterceptorRegistry registry) &#123;
+        registry.addInterceptor(new SomeInterceptor())
+          .addPathPatterns(&quot;/first/**&quot;);
+          .excludePathPatterns(&quot;/second/**&quot;);
+     &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">##  **Spring Boot** 中使用 **Servlet**</span><br><span class="line"></span><br><span class="line">在 Spring Boot 中使用 Servlet，根据 Servlet 注册方式的不同，有两种使用方式。若使用 的是 Servlet3.0+版本，则两种方式均可使用;若使用的是 Servlet2.5 版本，则只能使用配置类方式。这里我们只记录Servlet3.0+版本。</span><br><span class="line"></span><br><span class="line">- 创建 **Servlet**</span><br><span class="line"></span><br><span class="line">  - @WebServlet</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @WebServlet(urlPatterns &#x3D; &quot;&#x2F;some&quot;, asyncSupported &#x3D; true)</span><br><span class="line">    public class SomeServlet extends HttpServlet &#123;</span><br><span class="line">    @Override</span><br><span class="line">        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException &#123;</span><br><span class="line">            System.out.println(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;CometServlet Request&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;);</span><br><span class="line">            doPost(req, resp);</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改入口类</p>
+<ul>
+<li><p>在入口类中添加 Servlet 扫描注解。</p>
+</li>
+<li><pre><code class="java">@ServletComponentScan(&quot;com.abc.servlets&quot;)
+public class Application&#123;&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">## **Spring Boot** 中使用 **Filter**</span><br><span class="line"></span><br><span class="line">在 Spring Boot 中使用 Filter 与前面的使用 Servlet 相似，根据 Filter 注册方式的不同，有 两种使用方式。若使用的是 Servlet3.0+版本，则两种方式均可使用;若使用的是 Servlet2.5 版本，则只能使用配置类方式。</span><br><span class="line"></span><br><span class="line">- 创建filter</span><br><span class="line"></span><br><span class="line">  - @WebFilter</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @WebFilter(urlPatterns &#x3D; &quot;&#x2F;*&quot;)</span><br><span class="line">    public class SomeeFilter extends Filter &#123;</span><br><span class="line">    		@Override</span><br><span class="line">        protected void doFilter(HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws ServletException, IOException &#123;</span><br><span class="line">            System.out.println(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;CometServlet Request&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;);</span><br><span class="line">            chain.doFilter(req,resp);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改入口类</p>
+<ul>
+<li><p>在入口类中添加 Servlet 扫描注解。</p>
+</li>
+<li><pre><code class="java">@ServletComponentScan(&quot;com.abc.filters&quot;)
+public class Application&#123;&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 路径问题基础理论</span><br><span class="line"></span><br><span class="line">### 路径的构成</span><br><span class="line"></span><br><span class="line">路径由两部分构成:资源路径与资源名称。[即 路径 &#x3D; 资源路径 + 资源名称]()</span><br><span class="line"></span><br><span class="line">资源路径与资源名称的分水岭为:路径中的最后一个斜杠。斜杠的前面部分称为资源路径，后面部分称为资源名称。</span><br><span class="line"></span><br><span class="line">例如:</span><br><span class="line"></span><br><span class="line">- 请求路径:http:&#x2F;&#x2F;localhost:8080&#x2F;xxx&#x2F;test&#x2F;index</span><br><span class="line">- 资源路径:http:&#x2F;&#x2F;localhost:8080&#x2F;xxx&#x2F;test</span><br><span class="line">- 资源名称:index</span><br><span class="line"></span><br><span class="line">### 路径的分类</span><br><span class="line"></span><br><span class="line">根据是否可以唯一的定位一个资源，可以将路径划分为两类:绝对路径与相对路径。</span><br><span class="line"></span><br><span class="line">- 绝对路径:可以唯一的定位一个资源的路径。在Web应用中，一般使用URL形式表示。</span><br><span class="line"></span><br><span class="line">- 相对路径:仅依赖此路径无法唯一定位资源，但若为其指定一个参数路径，则可以将其转换为一个绝对路径，这样的路径称为相对路径。在 Web 应用中，一般使用 URI 形式表示。</span><br><span class="line">- 转换关系: 绝对路径 &#x3D; 参照路径 + 相对路径</span><br><span class="line"></span><br><span class="line">### 绝对路径分类</span><br><span class="line"></span><br><span class="line">根据路径作用的不同，可以将绝对路径分为:资源定义路径，与资源请求路径。</span><br><span class="line"></span><br><span class="line">- 资源定义路径:用于表示资源位置的路径。</span><br><span class="line"></span><br><span class="line">- 资源请求路径:客户端所发出的对指定资源的请求路径。</span><br><span class="line"></span><br><span class="line">### 相对路径分类</span><br><span class="line"></span><br><span class="line">根据相对路径是否以斜杠开头，可以划分为两类:</span><br><span class="line"></span><br><span class="line">- 斜杠路径：[又可以分为两类]() &lt;!--注意，这里是重点--&gt;</span><br><span class="line"></span><br><span class="line">  - 对于斜杠路径，根据其出现的位置的不同，可以划分为</span><br><span class="line">    - 前台路径:</span><br><span class="line">    - 出现在HTML、JS、CSS，及JSP文件的静态部分的斜杠路径。例如，&lt;img src&#x3D;&quot;&quot;&#x2F;&gt;等等</span><br><span class="line">      - 其参照路径为当前web服务器的根。</span><br><span class="line">    - 后台路径:</span><br><span class="line">      - 出现在Java代码、JSP文件的动态部分(Java代码块、JSP动作等)、XML、properties 等配置文件中</span><br><span class="line">      - 其参照路径为当前web应用的根。</span><br><span class="line">- 非杠路径：&lt;!--建议不用--&gt;</span><br><span class="line">  - 其参照路径为当前请求路径的资源路径。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 路径解析器</span><br><span class="line"></span><br><span class="line">相对路径，最终都会经过路径解析器，将其转换为绝对路径，以定义或定位一个资源。 不同的相对路径，其路径解析器也是不同的。</span><br><span class="line"></span><br><span class="line">-  前台路径:路径解析器为浏览器。</span><br><span class="line"></span><br><span class="line">- 后台路径:路径解析器为服务器。</span><br><span class="line"></span><br><span class="line">- 非杠路径:若非杠路径出现在前台路径位置，其路径解析器为浏览器; 若非杠路径出现在后台路径位置，其路径解析器为服务器。</span><br><span class="line"></span><br><span class="line">### 解析规则</span><br><span class="line"></span><br><span class="line">&gt; 不同的路径解析器，对同一个相对路径的解析结果是不同的。所谓解析结果，指的是将 相对路径所转换为的绝对路径。</span><br><span class="line">&gt;</span><br><span class="line">&gt; 由于 绝对路径 &#x3D; 参照路径 + 相对路径 ，所以不同的 解析器，会为相对路径匹配不同的参照路径。</span><br><span class="line">&gt;</span><br><span class="line">&gt; 换句话说就是，我们学习的重点是，浏览器、 服务器对于不同的相对路径所匹配的参照路径到底是谁。</span><br><span class="line"></span><br><span class="line">- 一般规则</span><br><span class="line">  </span><br><span class="line">  - 斜杆路径：</span><br><span class="line">    - 前台路径:其参照路径为当前web服务器的根。</span><br><span class="line">    - 后台路径:其参照路径为当前web应用的根。</span><br><span class="line">  - 非杠路径:其参照路径为当前请求路径的资源路径。</span><br><span class="line">  </span><br><span class="line">- 例子，请求路径: http:&#x2F;&#x2F;localhost:8080&#x2F;xxx&#x2F;test&#x2F;index</span><br><span class="line"></span><br><span class="line">  - 当前 web 服务器的根: http:&#x2F;&#x2F;localhost:8080</span><br><span class="line">  - 当前web应用的根: http:&#x2F;&#x2F;localhost:8080&#x2F;xxx</span><br><span class="line">  - 资源路径: http:&#x2F;&#x2F;localhost:8080&#x2F;xxx&#x2F;test</span><br><span class="line"></span><br><span class="line">- 特殊规则：</span><br><span class="line"></span><br><span class="line">  - 在代码中使用HttpServletResponse的sendRedirect()方法使用斜杠路径进行重定向时， 其参照路径按照之前规则，应该是当前 web 应用的根，但实际情况是，当前 web 服务器的根。</span><br><span class="line"></span><br><span class="line">  - 以上规则对于一次跳转是没有问题的，若跳转次数超过一次，则有可能会存在问题。</span><br><span class="line"></span><br><span class="line">  - 如何解决呢？</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;java</span><br><span class="line">      response.sendRedirect(request.getContextPath()+&quot;&#x2F;html&#x2F;welcome.html&quot;);</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/26/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/%E9%AB%98%E5%B9%B6%E5%8F%91/%E9%AB%98%E5%B9%B6%E5%8F%91%EF%BC%9A%E5%B9%B6%E5%8F%91%E7%B2%92%E5%BA%A6%E4%B8%8E%E7%BA%BF%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" rel="prev" title="高并发：并发粒度与线程间通信">
+                  <i class="fa fa-chevron-left"></i> 高并发：并发粒度与线程间通信
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%B8%B8%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E6%96%B9%E5%BC%8F/" rel="next" title="springboot常用的打包方式">
+                  springboot常用的打包方式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

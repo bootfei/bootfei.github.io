@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="一条命令执行过程在本文场景下，延迟 (latency) 是指从客户端发送命令到客户端接收到命令返回值的时间间隔。  上图是 Redis 客户端发送一条命令的执行过程示意图，绿色的是执行步骤，而蓝色的则是可能出现的导致高延迟的原因。 网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题Redis 自己可能导致高延迟 命令或者数据结构误用、持久化阻塞和内存交换。 而且，Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis-线上高延迟排查">
+<meta property="og:url" content="http://example.com/2021/05/06/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8A%E9%AB%98%E5%BB%B6%E8%BF%9F%E6%8E%92%E6%9F%A5/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="一条命令执行过程在本文场景下，延迟 (latency) 是指从客户端发送命令到客户端接收到命令返回值的时间间隔。  上图是 Redis 客户端发送一条命令的执行过程示意图，绿色的是执行步骤，而蓝色的则是可能出现的导致高延迟的原因。 网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题Redis 自己可能导致高延迟 命令或者数据结构误用、持久化阻塞和内存交换。 而且，Redis">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXQoemRPGek07hlpV6XpJsFTsnZuTyeVWg7Gymsd7yU84UOhwXMUSe3A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXscLk1bRExg5BlLia5K6hRZQz1gUakMksxtLjkl7ibMDMz8m9ib2evyEYg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXA2v2rmicbJ08REVFIiaYfMbvnJtMTqCV27OtND6ZCkibB9ia69ZWlmr3rw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-05-06T04:04:04.000Z">
+<meta property="article:modified_time" content="2021-05-06T05:22:05.460Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXQoemRPGek07hlpV6XpJsFTsnZuTyeVWg7Gymsd7yU84UOhwXMUSe3A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/05/06/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8A%E9%AB%98%E5%BB%B6%E8%BF%9F%E6%8E%92%E6%9F%A5/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>Redis-线上高延迟排查 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E6%9D%A1%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">一条命令执行过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E9%99%90%E5%88%B6%E3%80%81%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E9%80%9F%E7%8E%87%E5%92%8CCPU%E6%80%A7%E8%83%BD%E7%AD%89%E6%98%AF%E6%89%80%E6%9C%89%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%83%BD%E5%8F%AF%E8%83%BD%E4%BA%A7%E7%94%9F%E7%9A%84%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis-%E8%87%AA%E5%B7%B1%E5%8F%AF%E8%83%BD%E5%AF%BC%E8%87%B4%E9%AB%98%E5%BB%B6%E8%BF%9F"><span class="nav-number">1.2.</span> <span class="nav-text">Redis 自己可能导致高延迟</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-number">2.</span> <span class="nav-text">问题排查</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%90%88%E7%90%86%E7%9A%84%E5%91%BD%E4%BB%A4%E6%88%96%E8%80%85%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">不合理的命令或者数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E9%98%BB%E5%A1%9E"><span class="nav-number">2.2.</span> <span class="nav-text">持久化阻塞</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%BA%A4%E6%8D%A2"><span class="nav-number">2.3.</span> <span class="nav-text">内存交换</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/06/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8A%E9%AB%98%E5%BB%B6%E8%BF%9F%E6%8E%92%E6%9F%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis-线上高延迟排查
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-05-06 12:04:04 / Modified: 13:22:05" itemprop="dateCreated datePublished" datetime="2021-05-06T12:04:04+08:00">2021-05-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="一条命令执行过程"><a href="#一条命令执行过程" class="headerlink" title="一条命令执行过程"></a>一条命令执行过程</h3><p>在本文场景下，延迟 (latency) 是指从客户端发送命令到客户端接收到命令返回值的时间间隔。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXQoemRPGek07hlpV6XpJsFTsnZuTyeVWg7Gymsd7yU84UOhwXMUSe3A/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>上图是 Redis 客户端发送一条命令的执行过程示意图，绿色的是执行步骤，而蓝色的则是可能出现的导致高延迟的原因。</p>
+<h4 id="网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题"><a href="#网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题" class="headerlink" title="网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题"></a>网络连接限制、网络传输速率和CPU性能等是所有服务端都可能产生的性能问题</h4><h4 id="Redis-自己可能导致高延迟"><a href="#Redis-自己可能导致高延迟" class="headerlink" title="Redis 自己可能导致高延迟"></a>Redis 自己可能导致高延迟</h4><ul>
+<li>命令或者数据结构误用、持久化阻塞和内存交换。</li>
+<li>而且，Redis 采用<a href="">单线程</a>和<a href="">事件驱动的机制</a>来处理网络请求，分别有对应的<a href="">连接应答处理器</a>，<a href="">命令请求处理器</a>和<a href="">命令回复处理器</a>来处理客户端的网络请求事件，处理完一个事件就继续处理队列中的下一个。一条命令处理出现了高延迟会影响接下来处于排队状态的其他命令。</li>
+</ul>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXscLk1bRExg5BlLia5K6hRZQz1gUakMksxtLjkl7ibMDMz8m9ib2evyEYg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
+
+<h3 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h3><p>对于高延迟，Redis 原生提供慢查询统计功能，执行 slowlog get {n} 命令可以获取最近的 n 条慢查询命令，默认对于执行超过10毫秒(可配置)的命令都会记录到一个定长队列中，线上实例建议设置为1毫秒便于及时发现毫秒级以上的命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 超过 slowlog-log-slower-than 阈值的命令都会被记录到慢查询队列中</span><br><span class="line"># 队列最大长度为 slowlog-max-lenslowlog-log-slower-than 10000s lowlog-max-len 128</span><br></pre></td></tr></table></figure>
+
+<p>如果命令执行时间在毫秒级，则实例实际OPS只有1000左右。慢查询队列长度默认128，可适当调大。慢查询本身只记录了命令执行时间，不包括数据网络传输时间和命令排队时间，因此客户端发生阻塞异常 后，可能不是当前命令缓慢，而是在等待其他命令执行。需要重点比对异常和慢查询发生的时间点，确认是否有慢查询造成的命令阻塞排队。</p>
+<h4 id="不合理的命令或者数据结构"><a href="#不合理的命令或者数据结构" class="headerlink" title="不合理的命令或者数据结构"></a>不合理的命令或者数据结构</h4><p>比如对一个包含上万个元素的 hash 结构执行 hgetall 操作，由于数据量比较大且命令算法复杂度是 O(n)，这条命令执行速度必然很慢。</p>
+<p>这个问题就是典型的不合理使用命令和数据结构。对于高并发的场景我们应该尽量避免在大对象上执行算法复杂度超过 O(n) 的命令。对于键值较多的 hash 结构可以使用 scan 系列命令来逐步遍历，而不是直接使用 hgetall 来全部获取。</p>
+<p>Redis 本身提供发现大对象的工具，对应命令：redis-cli-h {ip} -p {port} bigkeys。这条命令会使用 scan 从指定的 Redis DB 中持续采样，实时输出当时得到的 value 占用空间最大的 key 值，并在最后给出各种数据结构的 biggest key 的总结报告。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli -h host -p 12345 --bigkeys</span><br></pre></td></tr></table></figure>
+
+<h4 id="持久化阻塞"><a href="#持久化阻塞" class="headerlink" title="持久化阻塞"></a>持久化阻塞</h4><p>对于开启了持久化功能的Redis节点，需要排查是否是持久化导致的阻塞。持久化引起主线程阻塞的操作主要有：fork 阻塞、AOF刷盘阻塞。</p>
+<p>fork 操作发生在 RDB 和 AOF 重写时，Redis 主线程调用 fork 操作产生共享内存的子进程，由子进程完成对应的持久化工作。如果 fork 操作本身耗时过长，必然会导致主线程的阻塞。</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/9QbuglRCMtdhic9zTZh5xCllEzgLWRcOXA2v2rmicbJ08REVFIiaYfMbvnJtMTqCV27OtND6ZCkibB9ia69ZWlmr3rw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:67%;" />
+
+<p>Redis 执行 fork 操作产生的子进程内存占用量表现为与父进程相同，理论上需要一倍的物理内存来完成相应的操作。但是 Linux 具有写时复制技术 (copy-on-write)，父子进程会共享相同的物理内存页，当父进程处理写请求时会对需要修改的页复制出一份副本完成写操作，而子进程依然读取 fork 时整个父进程的内存快照。所以，一般来说，fork 不会消耗过多时间。</p>
+<p>可以执行 <code>info stats</code>命令获取到 latestforkusec 指标，表示 Redis 最近一次 fork 操作耗时，如果耗时很大，比如超过1秒，则需要做出优化调整。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; redis-cli -c -p 7000 info | grep -w latest_fork_useclatest_fork_usec:315</span><br></pre></td></tr></table></figure>
+
+<p>当我们开启AOF持久化功能时，文件刷盘的方式一般采用每秒一次，后台线程每秒对AOF文件做 fsync 操作。当硬盘压力过大时，fsync 操作需要等待，直到写入完成。如果主线程发现距离上一次的 fsync 成功超过2秒，为了数据安全性它会阻塞直到后台线程执行 fsync 操作完成。这种阻塞行为主要是硬盘压力引起，可以查看 Redis日志识别出这种情况，当发生这种阻塞行为时，会打印如下日志：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Asynchronous AOF fsync is taking too long (disk is busy). \Writing the AOF buffer without waiting for fsync to complete, \this may slow down Redis.</span><br></pre></td></tr></table></figure>
+
+<p>也可以查看 info persistence 统计中的 aofdelayedfsync 指标，每次发生 fdatasync 阻塞主线程时会累加。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;info persistenceloading:0aof_pending_bio_fsync:0aof_delayed_fsync:0</span><br></pre></td></tr></table></figure>
+
+<h4 id="内存交换"><a href="#内存交换" class="headerlink" title="内存交换"></a>内存交换</h4><p>内存交换（swap）对于 Redis 来说是非常致命的，Redis 保证高性能的一个重要前提是所有的数据在内存中。如果操作系统把 Redis 使用的部分内存换出到硬盘，由于内存与硬盘读写速度差几个数量级，会导致发生交换后的 Redis 性能急剧下降。识别 Redis 内存交换的检查方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;redis-cli -p 6383 info server | grep process_id # 查询 redis 进程号</span><br><span class="line">&gt;cat &#x2F;proc&#x2F;4476&#x2F;smaps | grep Swap # 查询内存交换大小Swap: 0 kBSwap: 4 kBSwap: 0 kBSwap: 0 kB</span><br></pre></td></tr></table></figure>
+
+<p>如果交换量都是0KB或者个别的是4KB，则是正常现象，说明Redis进程内存没有被交换。</p>
+<p>有很多方法可以避免内存交换的发生。比如说：</p>
+<ul>
+<li>保证机器充足的可用内存</li>
+<li>确保所有Redis实例设置最大可用内存(maxmemory)，防止极端情况下 Redis 内存不可控的增长。</li>
+<li>降低系统使用swap优先级，如 <code>echo 10&gt;/proc/sys/vm/swappiness</code>。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" rel="prev" title="Redis-线上CPU飙升排查">
+                  <i class="fa fa-chevron-left"></i> Redis-线上CPU飙升排查
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/06/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BC%93%E5%AD%98/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95/" rel="next" title="一致性哈希算法">
+                  一致性哈希算法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

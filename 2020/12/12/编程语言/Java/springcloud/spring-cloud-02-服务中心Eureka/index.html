@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="Eureka 概述CAP 定理CAP 定理指的是在一个分布式系统中，Consistency(一致性)、 Availability(可用性)、 Partition tolerance(分区容错性)，三者不可兼得。CAP 定理的内容是:对于分布式系统，网络环境相对是不可控的，出现网络分区是不可 避免的，因此系统必须具备分区容错性。但系统不能同时保证一致性与可用性。即要么 CP， 要么 AP。  一致性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spring cloud 02 服务中心Eureka">
+<meta property="og:url" content="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-02-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83Eureka/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="Eureka 概述CAP 定理CAP 定理指的是在一个分布式系统中，Consistency(一致性)、 Availability(可用性)、 Partition tolerance(分区容错性)，三者不可兼得。CAP 定理的内容是:对于分布式系统，网络环境相对是不可控的，出现网络分区是不可 避免的，因此系统必须具备分区容错性。但系统不能同时保证一致性与可用性。即要么 CP， 要么 AP。  一致性">
+<meta property="og:locale">
+<meta property="og:image" content="http://example.com/Users/qifei/Library/Application%20Support/typora-user-images/image-20201212173428818.png">
+<meta property="article:published_time" content="2020-12-12T09:08:01.000Z">
+<meta property="article:modified_time" content="2021-02-06T02:30:03.244Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/Users/qifei/Library/Application%20Support/typora-user-images/image-20201212173428818.png">
+
+
+<link rel="canonical" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-02-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83Eureka/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>spring cloud 02 服务中心Eureka | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Eureka-%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">Eureka 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP-%E5%AE%9A%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">CAP 定理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Eureka-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.2.</span> <span class="nav-text">Eureka 简介</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-Eureka-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83"><span class="nav-number">2.</span> <span class="nav-text">创建 Eureka 服务中心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAprovider-module"><span class="nav-number">3.</span> <span class="nav-text">创建provider module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAconsumer-module"><span class="nav-number">4.</span> <span class="nav-text">创建consumer module</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">服务发现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Eureka-%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">Eureka 的自我保护机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%80%BC%E4%BF%AE%E6%94%B9"><span class="nav-number">6.1.</span> <span class="nav-text">默认值修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GUI-%E4%B8%8A%E7%9A%84%E5%B1%9E%E6%80%A7%E5%80%BC"><span class="nav-number">6.2.</span> <span class="nav-text">GUI 上的属性值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EurekaServer-%E9%9B%86%E7%BE%A4"><span class="nav-number">7.</span> <span class="nav-text">EurekaServer 集群</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-02-%E6%9C%8D%E5%8A%A1%E4%B8%AD%E5%BF%83Eureka/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          spring cloud 02 服务中心Eureka
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-12 17:08:01" itemprop="dateCreated datePublished" datetime="2020-12-12T17:08:01+08:00">2020-12-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-02-06 10:30:03" itemprop="dateModified" datetime="2021-02-06T10:30:03+08:00">2021-02-06</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Eureka-概述"><a href="#Eureka-概述" class="headerlink" title="Eureka 概述"></a><strong>Eureka</strong> 概述</h1><h2 id="CAP-定理"><a href="#CAP-定理" class="headerlink" title="CAP 定理"></a><strong>CAP</strong> 定理</h2><p>CAP 定理指的是在一个分布式系统中，Consistency(一致性)、 Availability(可用性)、 Partition tolerance(分区容错性)，三者不可兼得。CAP 定理的内容是:对于分布式系统，网络环境相对是不可控的，出现网络分区是不可 避免的，因此系统必须具备分区容错性。但系统不能同时保证一致性与可用性。即要么 CP， 要么 AP。</p>
+<ul>
+<li>一致性(C):分布式系统中多个主机之间是否能够保持数据一致的特性。即，当系统数据发生更新操作后，各个主机中的数据仍然处于一致的状态。</li>
+<li>可用性(A):系统提供的服务必须一直处于可用的状态，即对于用户的每一个请求，系统总是可以在有限的时间内对用户做出响应。</li>
+<li>分区容错性(P):分布式系统在遇到任何网络分区故障时，仍能够保证对外提供满足一致性和可用性的服务。</li>
+</ul>
+<h2 id="Eureka-简介"><a href="#Eureka-简介" class="headerlink" title="Eureka 简介"></a><strong>Eureka</strong> 简介</h2><p>Eureka 就是一个专门用于服务发现的服务器，一些服务注册到该服务器，而另一 些服务通过该服务器查找其所要调用执行的服务。可以充当服务发现服务器的组件很多，例 如 Zookeeper、Consul、Eureka 等。</p>
+<p>Eureka 与 Zookeeper 都可以充当服务中心，那么它们有什么区别呢?它们的区别主要体 现在对于 CAP 原则的支持的不同。</p>
+<ul>
+<li>Eureka:AP</li>
+<li>zk:CP</li>
+</ul>
+<h1 id="创建-Eureka-服务中心"><a href="#创建-Eureka-服务中心" class="headerlink" title="创建 Eureka 服务中心"></a>创建 <strong>Eureka</strong> 服务中心</h1><blockquote>
+<p>总步骤：</p>
+<ul>
+<li>添加 Eureka Server 依赖</li>
+<li>在配置文件中配置 Eureka Server</li>
+<li>在启动类上添加@EnableEurekaServer 注解，启动 Eureka Server 功能</li>
+</ul>
+</blockquote>
+<ul>
+<li>Maven依赖</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//eureka server依赖</span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>配置文件</li>
+</ul>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">	<span class="attr">port:</span> <span class="number">8000</span></span><br><span class="line">	</span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">localhost</span> <span class="comment"># 应用的主机名称,我一般喜欢用spring.application.name</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">registerWithEureka:</span> <span class="literal">false</span> <span class="comment">#值为`false`意味着自身仅作为服务器，不作为客户端</span></span><br><span class="line">    <span class="attr">fetchRegistry:</span> <span class="literal">false</span> <span class="comment">#值为`false`意味着无需注册自身</span></span><br><span class="line">    <span class="attr">serviceUrl:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:8000/eureka/</span>  <span class="comment">#指明了应用的URL</span></span><br><span class="line">      </span><br><span class="line">  <span class="attr">server:</span></span><br><span class="line">	  <span class="comment">#开启自我保护机制</span></span><br><span class="line">  	<span class="attr">enable-self-preservation:</span> <span class="literal">true</span></span><br><span class="line">  	<span class="comment">#指定开启阈值</span></span><br><span class="line">  	<span class="attr">renewal-percent-threshold:</span> <span class="number">0.75</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>定义spring boot启动类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableEurekaServer</span> <span class="comment">//非常关键！！！</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="http://localhost:8000/">http://localhost:8000/</a> 访问Eureka启动UI界面</p>
+<h1 id="创建provider-module"><a href="#创建provider-module" class="headerlink" title="创建provider module"></a>创建provider module</h1><p>注意：与实验一大致相同，只记录不同部分</p>
+<blockquote>
+<p>总步骤</p>
+<ul>
+<li>添加 Eureka Client 依赖</li>
+<li>在配置文件中指定要注册的 Eureka Server 地址，指定自己微服务名称</li>
+</ul>
+</blockquote>
+<ul>
+<li>Maven依赖</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!--eureka 客户端依赖--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">  <span class="comment">&lt;!--actuator依赖--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>配置文件</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">serviceUrl:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:8000/eureka/</span></span><br><span class="line">      <span class="comment">#若使用Eureka集群，则改为以下配置</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:8000/eureka/,http://localhost:8100/eureka/</span></span><br><span class="line">    <span class="attr">instance:</span></span><br><span class="line">    	<span class="attr">instance-id:</span> <span class="string">abc-msc-provider-8081</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">	<span class="attr">application:</span></span><br><span class="line">		<span class="attr">name:</span> <span class="string">abcmsc-provider-depart</span>  <span class="comment">#指定当前微服务对外暴露时的名称</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>修改启动类<ul>
+<li>从官网介绍看到，provider和consumer启动类不需要做修改，eureka已经做了</li>
+<li><img src="/Users/qifei/Library/Application Support/typora-user-images/image-20201212173428818.png" alt="image-20201212173428818" style="zoom:25%;" />
+
+
+
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="创建consumer-module"><a href="#创建consumer-module" class="headerlink" title="创建consumer module"></a>创建consumer module</h1><blockquote>
+<p>总步骤 </p>
+<ul>
+<li>添加 Eureka Client 依赖</li>
+<li>在配置文件中指定要注册的 Eureka Server 地址，指定自己微服务名称</li>
+<li>在JavaConfig类中为RestTemplate添加@LoadBalance注解，实例负载均衡 </li>
+<li>修改处理器，将“主机名:端口” -&gt; “提供者微服务名称”</li>
+</ul>
+</blockquote>
+<ul>
+<li><p>添加依赖</p>
+<ul>
+<li><pre><code class="xml">&lt;dependencies&gt;
+  &lt;!--eureka 客户端依赖--&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>  &lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+  &lt;/dependency&gt;
+
+&lt;/dependencies&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  </span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    eureka:</span><br><span class="line">    	#指定Eureka服务中心</span><br><span class="line">      client:</span><br><span class="line">        serviceUrl:</span><br><span class="line">          defaultZone: http:&#x2F;&#x2F;localhost:8000&#x2F;eureka&#x2F;</span><br><span class="line">          #若使用Eureka集群，则改为以下配置</span><br><span class="line">          defaultZone: http:&#x2F;&#x2F;localhost:8000&#x2F;eureka&#x2F;,http:&#x2F;&#x2F;localhost:8100&#x2F;eureka&#x2F;</span><br><span class="line">    </span><br><span class="line">    spring:</span><br><span class="line">    	application:</span><br><span class="line">    		name: abcmsc-consumer-depart  #指定当前微服务对外暴露时的名称</span><br></pre></td></tr></table></figure></code></pre>
+<ul>
+<li><p>修改处理器</p>
+<ul>
+<li><pre><code class="java">@RestController
+@RequestMapping(&quot;/consumer/depart&quot;)
+public class ConsumerController &#123;
+    @Autowired
+    private RestTemplate restTemplate;
+
+      //将原来的主机：端口，改为微服务的服务名称
+    private final String  SERVICE_PROVIDER=&quot;http://abcmsc-provider-depart&quot;;
+        ...
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">- 修改 **JavaConfig** 类</span><br><span class="line"></span><br><span class="line">  - 修改RestTemplate</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @Configuration</span><br><span class="line">    public class DepartCodeConfig &#123;</span><br><span class="line">      	@LoadBalanced &#x2F;&#x2F;提供消费者负载均衡的功能</span><br><span class="line">        @Bean</span><br><span class="line">        public RestTemplate restTemplate()&#123;</span><br><span class="line">            return new RestTemplate();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h1><ul>
+<li><p>修改controller类</p>
+<ul>
+<li><p>使用org.springframework.cloud.client.discovery.DiscoveryClient类</p>
+</li>
+<li><pre><code class="java">package com.abc.controller;
+
+import com.abc.bean.Depart;
+import com.abc.service.DepartService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/provider/depart&quot;)
+public class DepartController &#123;
+    @Autowired
+    private DepartService service;
+    // 声明服务发现客户端
+    @Autowired
+    private DiscoveryClient client;
+
+    @GetMapping(&quot;/discovery&quot;)
+    public List&lt;String&gt; discoveryHandler() &#123;
+        List&lt;String&gt; services = client.getServices();
+        for (String name : services) &#123;
+            // 获取当前遍历微服务名称的所有提供者主机
+            List&lt;ServiceInstance&gt; instances = client.getInstances(name);
+            // 遍历所有提供者主机的详情
+            for(ServiceInstance instance : instances) &#123;
+                // 获取当前提供者的唯一标识，service id
+                String serviceId = instance.getServiceId();
+                String instanceId = instance.getInstanceId();
+                // 获取当前提供者主机的host
+                String host = instance.getHost();
+                Map&lt;String, String&gt; metadata = instance.getMetadata();
+                System.out.println(&quot;serviceId = &quot; + serviceId);
+                System.out.println(&quot;instanceId = &quot; + serviceId);
+                System.out.println(&quot;host = &quot; + host);
+                System.out.println(&quot;metadata = &quot; + metadata);
+            &#125;
+        &#125;
+        return services;
+    &#125;
+&#125;
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">    </span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"># 服务离线</span><br><span class="line"></span><br><span class="line">服务离线，即某服务不能对外提供服务了。服务离线的原因有两种:服务下架与服务下线。这两种方案都是基于 Actuator 监控器实现的。</span><br><span class="line"></span><br><span class="line">&gt; - 服务下架:将注册到 Eureka Server 中的 Eureka Client 从 Server 的注册表中移除，这样其实 Client 就无法发现该 Client 了。</span><br><span class="line">&gt; - 服务下线:Client并没有从Eureka Server的注册表中移除(其它Client仍可发现该服务)，而是通过修改服务的状态来到达其它 Client 无法调用的目的。</span><br><span class="line"></span><br><span class="line">- 添加依赖</span><br><span class="line"></span><br><span class="line">  - 为 Eureka Client 添加 actuator 依赖。</span><br><span class="line">  - 具体pom依赖（略）</span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    management:</span><br><span class="line">      # 开启所有监控终端</span><br><span class="line">      endpoints:</span><br><span class="line">        web:</span><br><span class="line">          exposure:</span><br><span class="line">            include: &quot;*&quot;</span><br><span class="line">      # 开启shutdown监控终端</span><br><span class="line">      endpoint:</span><br><span class="line">        shutdown:</span><br><span class="line">          enabled: true</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+<li><p>发送shutdown的post请求：<a target="_blank" rel="noopener" href="http://localhost:8081/actuator/shutdown">http://localhost:8081/actuator/shutdown</a></p>
+</li>
+<li><p>发送DOWN的post请求：<a target="_blank" rel="noopener" href="http://localhost:8081/actuator/service-registry">http://localhost:8081/actuator/service-registry</a>   body: { ‘status’: ‘DOWN’ }</p>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="Eureka-的自我保护机制"><a href="#Eureka-的自我保护机制" class="headerlink" title="Eureka 的自我保护机制"></a><strong>Eureka</strong> 的自我保护机制</h1><p>在 Eureka 服务页面中看到如下红色字体内容，表示当前 EurekaServer 启动了自我保护 机制，进入了自我保护模式。</p>
+<p>默认情况下，EurekaServer 在 90 秒内没有检测到服务列表中的某微服务，则会自动将 该微服务从服务列表中删除。但很多情况下并不是该微服务节点(主机)出了问题，而是由 于网络抖动等原因使该微服务无法被EurekaServer发现，即无法检测到该微服务主机的心跳。 若在短暂时间内网络恢复正常，但由于 EurekaServer 的服务列表中已经没有该微服务，所以 该微服务已经无法提供服务了。</p>
+<p>在短时间内若 EurekaServer 丢失较多微服务，即 EurekaServer 收到的心跳数量小于阈值， 为了保证系统的可用性(AP)，给那些由于网络抖动而被认为宕机的客户端“重新复活”的 机会，Eureka 会自动进入自我保护模式:服务列表只可读取、写入，不可执行删除操作。当 EurekaServer 收到的心跳数量恢复到阈值以上时，其会自动退出 Self Preservation 模式。</p>
+<h2 id="默认值修改"><a href="#默认值修改" class="headerlink" title="默认值修改"></a>默认值修改</h2><p>启动自我保护的阈值因子默认为 0.85，即 85%。即 EurekaServer 收到的心跳数量若小于 应该收到数量的 85%时，会启动自我保护机制。</p>
+<p>自我保护机制默认是开启的，可以通过修改 EurekaServer 中配置文件来关闭。但不建议关闭。</p>
+<h2 id="GUI-上的属性值"><a href="#GUI-上的属性值" class="headerlink" title="GUI 上的属性值"></a><strong>GUI</strong> 上的属性值</h2><ul>
+<li>Renews threshold:Eureka Server 期望每分钟收到客户端的续约总数。 count * 0.85 / 15</li>
+<li>Renews(lastmin):EurekaServer实际在最后一分钟收到客户端的续约数量。</li>
+<li>说明:若 Renews (last min) &lt; Renews threshold ，就会启动自我保护</li>
+</ul>
+<h1 id="EurekaServer-集群"><a href="#EurekaServer-集群" class="headerlink" title="EurekaServer 集群"></a><strong>EurekaServer</strong> 集群</h1><p>这里要搭建的 EurekaServer 集群中包含三个 EurekaServer 节点，其端口号分别为 8100、8200 与 8300。</p>
+<ul>
+<li><p>创建 <strong>00-eurekaserver-8100</strong></p>
+<ul>
+<li><p>修改端口号和Eureka的service-url</p>
+</li>
+<li><pre><code class="yaml">eureka:
+  client:
+    service-url:
+      # 指定当前Client所要连接的eureka Server集群
+      defaultZone: http://eureka8100.com:8100/eureka,http://eureka8200.com:8200/eureka,http://eureka8300.com:8300/eureka</code></pre>
+</li>
+</ul>
+</li>
+<li><p>创建 <strong>00-eurekaserver-8200</strong></p>
+</li>
+<li><p>创建 <strong>00-eurekaserver-8300</strong></p>
+</li>
+<li><p>修改provider和consumer的配置文件</p>
+<ul>
+<li>修改端Eureka的service-url</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-01-%E5%85%A5%E9%97%A8/" rel="prev" title="spring-cloud-1.入门">
+                  <i class="fa fa-chevron-left"></i> spring-cloud-1.入门
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/15/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E9%AB%98%E6%80%A7%E8%83%BDmysql/%E7%AC%AC1%E7%AB%A0-MySQL%E6%9E%B6%E6%9E%84%E4%B8%8E%E5%8E%86%E5%8F%B2/" rel="next" title="第1章:MySQL架构与历史">
+                  第1章:MySQL架构与历史 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

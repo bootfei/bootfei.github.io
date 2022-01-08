@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="Spring boot特点自动配置（最大特点）注解2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。 自动加载总步骤在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现  首先项目有能力进行扫描">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springboot-02-自动配置">
+<meta property="og:url" content="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-02-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="Spring boot特点自动配置（最大特点）注解2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。 自动加载总步骤在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现  首先项目有能力进行扫描">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-12-03T04:12:59.000Z">
+<meta property="article:modified_time" content="2021-03-20T12:48:15.647Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-02-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>springboot-02-自动配置 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-boot%E7%89%B9%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">Spring boot特点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%EF%BC%88%E6%9C%80%E5%A4%A7%E7%89%B9%E7%82%B9%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">自动配置（最大特点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.2.</span> <span class="nav-text">注解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD%E6%80%BB%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">自动加载总步骤</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">自动配置源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90-SpringBootApplication"><span class="nav-number">3.1.</span> <span class="nav-text">解析**@SpringBootApplication**</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E6%B3%A8%E8%A7%A3"><span class="nav-number">3.1.1.</span> <span class="nav-text">元注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBootConfiguration"><span class="nav-number">3.1.2.</span> <span class="nav-text">@SpringBootConfiguration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ComponentScan"><span class="nav-number">3.1.3.</span> <span class="nav-text">@ComponentScan</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableXxx"><span class="nav-number">3.1.4.</span> <span class="nav-text">@EnableXxx</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#application-yml-%E7%9A%84%E5%8A%A0%E8%BD%BD"><span class="nav-number">4.</span> <span class="nav-text">application.yml 的加载</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E6%88%98"><span class="nav-number">5.</span> <span class="nav-text">实战</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%981-%E5%8A%A0%E8%BD%BD%E6%A1%86%E6%9E%B6%E7%B1%BB-Spring-Boot%E4%B8%8ERedis%E6%95%B4%E5%90%88"><span class="nav-number">5.1.</span> <span class="nav-text">实战1:加载框架类 Spring Boot与Redis整合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%982-%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%AE%9A%E4%B9%89%E7%B1%BB-MyBatis%E4%B8%8ESpring-Boot%E6%95%B4%E5%90%88"><span class="nav-number">5.2.</span> <span class="nav-text">实战2:加载自定义类 MyBatis与Spring Boot整合</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-Starter"><span class="nav-number">6.</span> <span class="nav-text">自定义 Starter</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAstarter"><span class="nav-number">6.1.</span> <span class="nav-text">创建starter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8starter"><span class="nav-number">6.2.</span> <span class="nav-text">使用starter</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E9%97%AE%E7%AD%94"><span class="nav-number">7.</span> <span class="nav-text">常见问题问答</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#starter%E5%92%8Cmaven%E5%BC%95%E5%85%A5%E4%BE%9D%E8%B5%96%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-number">7.1.</span> <span class="nav-text">starter和maven引入依赖有什么区别</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-02-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          springboot-02-自动配置
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-03 12:12:59" itemprop="dateCreated datePublished" datetime="2020-12-03T12:12:59+08:00">2020-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-20 20:48:15" itemprop="dateModified" datetime="2021-03-20T20:48:15+08:00">2021-03-20</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Spring-boot特点"><a href="#Spring-boot特点" class="headerlink" title="Spring boot特点"></a>Spring boot特点</h1><h2 id="自动配置（最大特点）"><a href="#自动配置（最大特点）" class="headerlink" title="自动配置（最大特点）"></a>自动配置（最大特点）</h2><h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><p>2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。</p>
+<h1 id="自动加载总步骤"><a href="#自动加载总步骤" class="headerlink" title="自动加载总步骤"></a>自动加载总步骤</h1><p><font color="red">在Spring Boot中，内置类被Spring Boot自动加载的步骤以及实现</font></p>
+<ul>
+<li>首先项目有能力进行扫描，所以Application有@ComponentScan，对类所在的包进行扫描</li>
+<li>然后只有被标记的类，才能在扫描中被Spring容器管理，所以有类有@Component，表明此类交给Spring容器管理</li>
+<li>自动加载功能由@EnableAutoConfiguration标记，表明此类需要加载其他的相关类<ul>
+<li>@EnableAutoConfiguration表明此类需要加载哪些类呢？由Meta-Info/spring.factories中的key=EnableAutoConfiguration表明，value都是xxxxAutoConfiguration.class类</li>
+<li>类已经加载了，怎么创建对象呢？@Component表明该类需要创建对象</li>
+</ul>
+</li>
+</ul>
+<p><font color="red">在Spring Boot中，自定义starter被Spring Boot自动加载的步骤以及实现</font></p>
+<ul>
+<li>@SpringBootApplication包含了@EnalbeAutoConfiguration表明启动自动加载</li>
+<li>自动加载会</li>
+</ul>
+<h1 id="自动配置源码解析"><a href="#自动配置源码解析" class="headerlink" title="自动配置源码解析"></a>自动配置源码解析</h1><h2 id="解析-SpringBootApplication"><a href="#解析-SpringBootApplication" class="headerlink" title="解析**@SpringBootApplication**"></a>解析**@SpringBootApplication**</h2><p>@SpringBootApplication 注解其实就是一个组合注解。包含有</p>
+<ul>
+<li>@Target</li>
+<li>@Retention</li>
+<li>@Documented</li>
+<li>@Inherited:表示注解会被子类自动继承。</li>
+<li>@SpringBootConfiguration </li>
+<li>@ComponentScan</li>
+<li>@EnableAutoConfiguration</li>
+</ul>
+<h3 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h3><p>前四个是专门(即只能)用于对注解进行注解的，称为元注解。</p>
+<ul>
+<li>@Target</li>
+<li>@Retention</li>
+<li>@Documented</li>
+<li>@Inherited:表示注解会被子类自动继承。</li>
+</ul>
+<h3 id="SpringBootConfiguration"><a href="#SpringBootConfiguration" class="headerlink" title="@SpringBootConfiguration"></a><strong>@SpringBootConfiguration</strong></h3><p>查看该注解的源码注解可知，该注解与@Configuration 注解功能相同，仅表示当前类为一个 JavaConfig 类，其就是为 Spring Boot 专门创建的一个注解。表明该类交给Spring容器管理。</p>
+<h3 id="ComponentScan"><a href="#ComponentScan" class="headerlink" title="@ComponentScan"></a><strong>@ComponentScan</strong></h3><p>顾名思义，用于完成组件扫描。不过需要注意，其<a href="">仅仅用于配置组件扫描指令</a>，并没有真正扫描，更没有装配其中的类，这个<a target="_blank" rel="noopener" href="https://www.hangge.com/blog/cache/detail_2807.html">真正扫描是由@EnableAutoConfiguration 完成的</a>。</p>
+<p>看作者的注解：</p>
+<blockquote>
+<p>Either basePackageClasses or basePackages (or its alias value) may be specified to define specific packages to scan. If specific packages are not defined, scanning will occur <a href="">from the package of the class that declares this annotation</a>.</p>
+</blockquote>
+<p>说明了Spring会扫描该类所在的包，这个包下的所有类及其子包中的类！！！</p>
+<h3 id="EnableXxx"><a href="#EnableXxx" class="headerlink" title="@EnableXxx"></a><strong>@EnableXxx</strong></h3><p>@EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注 解，就会自动导入某些类。所以该类注解是组合注解，一般都会包含一个@Import 注解，用 于导入指定的多个类，而被导入的类一般分为三种:<a target="_blank" rel="noopener" href="https://www.hangge.com/blog/cache/detail_2807.html">配置类、选择器与注册器</a>。</p>
+<ul>
+<li><p>配置类</p>
+<ul>
+<li><p>@Import 中指定的类一般以 Configuration 结尾，且该类上会注解@Configuration，表示当前类为配置类。</p>
+</li>
+<li><pre><code class="java">@Import(SchedulingConfiguration.class)
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">- 选择器</span><br><span class="line"></span><br><span class="line">  - @Import 中指定的类一般以 Selector 结尾，且该类实现了 ImportSelector 接口，表示当前类会根据条件选择导入不同的类。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    @Import(AutoConfigurationImportSelector.class)</span><br></pre></td></tr></table></figure>
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>注册器</p>
+<ul>
+<li><p>@Import 指定的类一般以 Registrar 结尾，且该类实现了 ImportBeanDefinitionRegistrar接口，用于导入注册器，该类可以在代码运行时动态注册指定类的实例。</p>
+</li>
+<li><pre><code class="java">@Import(AspectJAutoProxyRegistrar.class)
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">## 解析**@EnableAutoConfiguration**</span><br><span class="line"></span><br><span class="line">该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的starter以及用于自定义的类，然后交给 Spring 容器完成这些类的装配。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import(AutoConfigurationImportSelector.class)
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&gt; 它扫描的相关类有2种：一种是系统内部定义好的,如starter, 另外一种是自定义的,如controller,service</span><br><span class="line"></span><br><span class="line">[&quot;META-INFO&#x2F;spring.factories&quot;非常重要的文件, 里面有个key &#x3D; EnableAutoConfiguratin, value是众多自动配置类，如Redis配置类, Mongo配置类]()</span><br><span class="line"></span><br><span class="line">### **@Import**</span><br><span class="line"></span><br><span class="line">- 用于导入[第一种类：框架本身所包含的自动配置相关的类](https:&#x2F;&#x2F;www.hangge.com&#x2F;blog&#x2F;cache&#x2F;detail_2807.html)。其参数 AutoConfigurationImportSelector 类，该类用于导入自动配置的类。</span><br><span class="line"></span><br><span class="line">- [只是加载类的名称（我觉得更准确的说，是封装类的名称），并没有创建实例]()，什么时候创建呢？</span><br><span class="line"></span><br><span class="line">- &#96;&#96;&#96;java</span><br><span class="line">  @Import(AutoConfigurationImportSelector.class)</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+<li><p><a href="">具体加载框架本身的自动配置类的过程如下</a></p>
+</li>
+<li><p>AutoConfigurationImportSelector.class：</p>
+<ul>
+<li>getCandidateConfigurations()</li>
+<li>SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());</li>
+</ul>
+</li>
+<li><p>SpringFactoriesLoader.class</p>
+<ul>
+<li><p>loadFactoryNames</p>
+</li>
+<li><p>loadSpringFactories</p>
+<ul>
+<li><pre><code class="java">Enumeration&lt;URL&gt; urls = classLoader != null ? classLoader.getResources(&quot;META-INF/spring.factories&quot;) : ClassLoader.getSystemResources(&quot;META-INF/spring.factories&quot;);
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">      - 非常重要！最终@Import实现了加载&quot;[META-INF&#x2F;spring.factories]()&quot;这个文件。那么这个文件在哪里呢？</span><br><span class="line"></span><br><span class="line">        - 项目的source目录下没有，继续</span><br><span class="line">        - Pom.xml中有spring-boot-starter-web, 查看内部依赖，发现有spring-boot-starter,继续查看内部依赖，有spring-boot-autoconfigure依赖，在其项目下source目录，找到了！！！</span><br><span class="line"></span><br><span class="line">### **@AutoConfigurationPackage** </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@Import(AutoConfigurationPackages.Registrar.class)
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 用于导入[第二种类：用户自定义类](https:&#x2F;&#x2F;www.hangge.com&#x2F;blog&#x2F;cache&#x2F;detail_2807.html)，即自动扫描包中的类。</span><br><span class="line"></span><br><span class="line">- &#96;&#96;&#96;java</span><br><span class="line">  @Import(AutoConfigurationPackages.Registrar.class)</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>AutoConfigurationPackages.Registrar</p>
+<ul>
+<li>registerBeanDefinitions()</li>
+<li>register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); <a href="">//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="application-yml-的加载"><a href="#application-yml-的加载" class="headerlink" title="application.yml 的加载"></a><strong>application.yml</strong> 的加载</h1><p>application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重要，那么，该文件是 如何加载到内存的呢?需要从启动类的 run()方法开始跟踪。</p>
+<ul>
+<li><p>xxxApplication: </p>
+<ul>
+<li>SpringApplication.run(DemoApplication.class, args);</li>
+</ul>
+</li>
+<li><p>SpringApplication:  </p>
+<ul>
+<li>(new SpringApplication(primarySources)).run(args);</li>
+<li>this.prepareEnvironment(listeners, bootstrapContext, applicationArguments);</li>
+<li>listeners.environmentPrepared(bootstrapContext, (ConfigurableEnvironment)environment);</li>
+</ul>
+</li>
+<li><p>SpringApplicationRunListeners</p>
+<ul>
+<li>listener.environmentPrepared(environment);</li>
+</ul>
+</li>
+<li><p>EventPublishingRunListener</p>
+<ul>
+<li>initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));</li>
+</ul>
+</li>
+<li><p>SimpleApplicationEventMulticaster</p>
+<ul>
+<li>this.invokeListener(listener, event);</li>
+<li>this.doInvokeListener(listener, event);</li>
+</ul>
+</li>
+<li><p>…..</p>
+</li>
+</ul>
+<p><a href="">自己跟一下就行</a></p>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h2 id="实战1-加载框架类-Spring-Boot与Redis整合"><a href="#实战1-加载框架类-Spring-Boot与Redis整合" class="headerlink" title="实战1:加载框架类 Spring Boot与Redis整合"></a>实战1:加载框架类 Spring Boot与Redis整合</h2><blockquote>
+<p>SpringBoot整合了Redis</p>
+</blockquote>
+<blockquote>
+<p>总步骤：</p>
+<ul>
+<li>首先@SpringBootApplication的@Import注解，通过spring-boot-starter下的spring.factories, 加载了框架自定义的RedisAutoConfiguration类</li>
+<li>然后RedisAutoConfiguration类加载了配置文件中的”spring.redis”</li>
+</ul>
+</blockquote>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.hangge.com/blog/cache/detail_2807.html">在 spring.factories 中有一个 RedisAutoConfiguration 类，通过前面的分析我们知道，该类 一定会被 Spring 容器自动装配</a>。但自动装配了就可以读取到 Spring Boot 配置文件中 Redis 相关的配置信息了?这个类与 Spring Boot 配置文件是怎么建立的联系?</li>
+<li>RedisAutoConfiguration 类<ul>
+<li>有@ConditionOn(RedisOperations.class),注解<ul>
+<li>表明如果路径下有RedisOperation.class才会生效; </li>
+<li>RedisOperations.class就是Redis的操作对象</li>
+</ul>
+</li>
+<li>有@EnableConfigurationProperties(RedisProperties.class)注解<ul>
+<li>RedisProperties类有@ConfigurationProperties(prefix=”spring.redis”)<!--录播课有讲-->, 表明将配置文件中前缀为spring.redis的信息加载进来，并且将信息封装到RedisProperties.class中</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="实战2-加载自定义类-MyBatis与Spring-Boot整合"><a href="#实战2-加载自定义类-MyBatis与Spring-Boot整合" class="headerlink" title="实战2:加载自定义类 MyBatis与Spring Boot整合"></a>实战2:加载自定义类 MyBatis与Spring Boot整合</h2><blockquote>
+<p>Mybatis整合了Spring Boot</p>
+</blockquote>
+<blockquote>
+<p>总步骤：</p>
+<ul>
+<li>首先@SpringBootApplication的@注解，通过spring-boot-starter下的spring.factories, 加载了框架自定义的RedisAutoConfiguration类</li>
+<li>然后RedisAutoConfiguration类加载了配置文件中的”spring.redis”</li>
+</ul>
+</blockquote>
+<ul>
+<li>在 External Libraries 中找到 mybatis-spring-boot-starter 依赖。<ul>
+<li>但是该依赖下却没有META-INF/spring.factories文件。再往下找依赖。</li>
+</ul>
+</li>
+<li>而该依赖又依赖于 mybatis-spring-boot-autoconfigure。<ul>
+<li>其 META-INF 中有 spring.factories 文件，打开这个文件 我们找到了 Mybatis 的自动配置类，即MyBatisAutoConfiguration.class类</li>
+</ul>
+</li>
+<li>MyBatisAutoConfiguration.class类<ul>
+<li>有@ConditionOnClass注解</li>
+<li>有@ConditionOnBean注解</li>
+<li>有@EnableConfigurationProperties注解</li>
+<li>有@AutoConfigurationAfter(DataSourceAutoConfiguration.class)<ul>
+<li>表明DataSourceAutoConfiguration.class配置完以后，才能配置MyBatisAutoConfiguration.class</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="自定义-Starter"><a href="#自定义-Starter" class="headerlink" title="自定义 Starter"></a>自定义 <strong>Starter</strong></h1><h2 id="创建starter"><a href="#创建starter" class="headerlink" title="创建starter"></a>创建starter</h2><blockquote>
+<p>总步骤</p>
+<ul>
+<li>导入spring-boot-configuration-processor依赖</li>
+<li>创建封装类，使用@ConfigurationProperties(“xxxx.xxxx”)获取配置文件中的信息并封装</li>
+<li>创建自定义配置类<ul>
+<li>@Configuration必须使用，因为要交给Spring容器管理</li>
+<li>@ConditionalOnClass(WrapService.class)必须使用，因为starter的意义就是使用其中的服务</li>
+<li>@EnableConfigurationProperties(WrapProperties.class)必须使用，因为要获取封装好的配置信息</li>
+<li>创建@Bean的业务示例对象, return new XXXService();</li>
+</ul>
+</li>
+<li>创建Spring.factories, 用来通知Spring该starter的自动装配所需要的配置类在哪里。</li>
+</ul>
+</blockquote>
+<p>前面的代码中，无论是 Spring Boot 中使用 Web、Test，还是 MyBatis、Dubbo，<a target="_blank" rel="noopener" href="https://www.hangge.com/blog/cache/detail_2807.html">都是通过导入一个相应的 Starter 依赖，然后由 Spring Boot 自动配置完成的</a>。那么，如果我们自己 的某项功能也想通过自动配置的方式应用到 Spring Boot 中，为 Spring Boot 项目提供相应支持，需要怎样实现呢?同样，我们需要定义自己的 Starter。</p>
+<ul>
+<li><p>命名: Starter 工程的命名需要遵循的规范</p>
+<ul>
+<li>Spring官方定义的Starter格式为:spring-boot-starter-{name} </li>
+<li>非官方定义的Starter格式为:{name}-spring-boot-starter</li>
+</ul>
+</li>
+<li><p>需求</p>
+<ul>
+<li>下面我们自定义一个我们自己的 Starter，实现的功能是:为用户提供的字符串添加前辍 与后辍，而前辍与后辍定义在 yml 或 properties 配置文件中。</li>
+<li>例如，用户输入的字符串为 China， application.yml 配置文件中配置的前辍为$$$，后辍为+++，则最终生成的字符串为 $$$China+++。</li>
+</ul>
+</li>
+<li><p>实现</p>
+<ul>
+<li><p>导入依赖</p>
+<ul>
+<li><p>配置处理器依赖</p>
+</li>
+<li><pre><code class="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt; 
+  &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+  &lt;optional&gt;true&lt;/optional&gt;
+  &lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 定义配置属性封装类</span><br><span class="line"></span><br><span class="line">  - 我们指定当前类用于封装来自于 Spring Boot 核心配置文件中的以 some.service 开头的 beore 与 after 属性值。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    import lombok.Data;</span><br><span class="line">    import org.springframework.boot.context.properties.ConfigurationProperties;</span><br><span class="line">    &#x2F;**</span><br><span class="line">     * 封装配置文件中的如下属性：</span><br><span class="line">     * wrap.service.prefix</span><br><span class="line">     * wrap.service.suffix</span><br><span class="line">     *&#x2F;</span><br><span class="line">    @ConfigurationProperties(&quot;wrap.service&quot;)</span><br><span class="line">    @Data</span><br><span class="line">    public class WrapProperties &#123;</span><br><span class="line">        private String prefix;</span><br><span class="line">        private String suffix;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>定义自动配置类</p>
+<ul>
+<li><p>为了加深大家对“自动配置类与配置文件属性关系”的理解，这里再增加一个功能:为 some.service 再增加一个组装开关，一个 boolean 属性 enable，当 enable 属性值为 true 时， 或没有设置 some.service.enable 属性时才进行组装，若 enable 为 false，则不进行组装。</p>
+</li>
+<li><pre><code class="java">@Configuration
+@ConditionalOnClass(WrapService.class)
+@EnableConfigurationProperties(WrapProperties.class)
+public class WrapAutoConfiguration &#123;
+    @Autowired
+    private WrapProperties properties;
+
+    // 注意，以下两个@Bean方法的先后顺序不能颠倒，否则会创建2个WrapService Bean。可以通过 两个都加上@ConditionalOnMissingBean，保证只有1个WrapService Bean
+    @Bean
+    @ConditionalOnProperty(name = &quot;wrap.service.enable&quot;, havingValue = &quot;true&quot;, matchIfMissing = true)
+    public WrapService wrapService() &#123;
+        return new WrapService(properties.getPrefix(), properties.getSuffix());
+    &#125;
+
+    @Bean
+    @ConditionalOnMissingBean
+    public WrapService wrapService2() &#123;
+        return new WrapService(&quot;&quot;, &quot;&quot;);
+    &#125;
+&#125;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 创建 **spring.factories** 文件</span><br><span class="line"></span><br><span class="line">  - 在 resources&#x2F;META-INF 目录下创建一个名为 spring.factories 的文件。该配置文件是一个 键值对文件，键是固定的，为 EnableAutoConfiguration 类的全限定性类名，而值则为我们自定义的自动配置类。</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;</span><br><span class="line">    org.springframework.boot.autoconfigure.EnableAutoConfiguration&#x3D;com.abc.config.WrapAutoConfiguration</span><br></pre></td></tr></table></figure>
+
+
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="使用starter"><a href="#使用starter" class="headerlink" title="使用starter"></a>使用starter</h2><blockquote>
+<p>总步骤</p>
+<ul>
+<li>导入自定义的starter依赖，所以必须保证install到maven库中</li>
+<li>修改配置文件</li>
+<li>修改controller</li>
+</ul>
+</blockquote>
+<ul>
+<li><p>导入依赖</p>
+<ul>
+<li><pre><code class="xml">&lt;dependency&gt;
+  &lt;groupId&gt;com.abc&lt;/groupId&gt;
+  &lt;artifactId&gt;wrap-spring-boot-starter&lt;/artifactId&gt;
+  &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">- 修改配置文件</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;yaml</span><br><span class="line">    wrap:</span><br><span class="line">      service:</span><br><span class="line">        enable: true</span><br><span class="line">        prefix: AAA-</span><br><span class="line">        suffix: -BBB</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>修改controller</p>
+<ul>
+<li><p>使用自定义starter中的业务类WrapService</p>
+</li>
+<li><pre><code class="java">@RestController
+public class WrapController &#123;
+    @Autowired
+    private WrapService service;
+
+    @RequestMapping(&quot;/wrap/&#123;param&#125;&quot;)
+    public String wrapHandler(@PathVariable(&quot;param&quot;) String word) &#123;
+        return service.wrap(word);
+    &#125;
+
+&#125;</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="常见问题问答"><a href="#常见问题问答" class="headerlink" title="常见问题问答"></a>常见问题问答</h1><h2 id="starter和maven引入依赖有什么区别"><a href="#starter和maven引入依赖有什么区别" class="headerlink" title="starter和maven引入依赖有什么区别"></a>starter和maven引入依赖有什么区别</h2><ul>
+<li>相同点<ul>
+<li>都引入了某个类的依赖</li>
+</ul>
+</li>
+<li>不同点<ul>
+<li>maven只是单纯的引入某个类的class文件，并不负责创建该类</li>
+<li>starter不仅引入某个类的class文件，还负责交给Spring容器并创建对象<ul>
+<li>starter通过spring.factories通知spring容器，”我需要自动装配”</li>
+<li>starter中定义了xxxService业务类，将核心业务交给spring容器创建对象</li>
+<li>starter中封装了配置类，通知spring容器使用该配置初始化业务量对象</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%B8%B8%E7%94%A8%E7%9A%84%E6%89%93%E5%8C%85%E6%96%B9%E5%BC%8F/" rel="prev" title="springboot常用的打包方式">
+                  <i class="fa fa-chevron-left"></i> springboot常用的打包方式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04-Hystrix%20%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD%E4%B8%8E%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7/" rel="next" title="spring-cloud-4-Hystrix服务熔断与服务降级">
+                  spring-cloud-4-Hystrix服务熔断与服务降级 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

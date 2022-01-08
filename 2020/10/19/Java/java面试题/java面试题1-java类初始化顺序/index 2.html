@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="知识点ref:   https:&#x2F;&#x2F;developer.ibm.com&#x2F;zh&#x2F;articles&#x2F;j-lo-clobj-init&#x2F; https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;65872513 https:&#x2F;&#x2F;blog.nowcoder.net&#x2F;n&#x2F;a9a1c0cf7dc841c496769865b91a3b05 http:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1626">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java面试题1: java类初始化顺序">
+<meta property="og:url" content="http://example.com/2020/10/19/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="知识点ref:   https:&#x2F;&#x2F;developer.ibm.com&#x2F;zh&#x2F;articles&#x2F;j-lo-clobj-init&#x2F; https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;65872513 https:&#x2F;&#x2F;blog.nowcoder.net&#x2F;n&#x2F;a9a1c0cf7dc841c496769865b91a3b05 http:&#x2F;&#x2F;baijiahao.baidu.com&#x2F;s?id&#x3D;1626">
+<meta property="og:locale">
+<meta property="article:published_time" content="2020-10-19T15:30:35.000Z">
+<meta property="article:modified_time" content="2020-12-24T09:14:14.417Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="java面试题">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2020/10/19/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>java面试题1: java类初始化顺序 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/19/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/java%E9%9D%A2%E8%AF%95%E9%A2%981-java%E7%B1%BB%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%BA%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java面试题1: java类初始化顺序
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-19 23:30:35" itemprop="dateCreated datePublished" datetime="2020-10-19T23:30:35+08:00">2020-10-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-12-24 17:14:14" itemprop="dateModified" datetime="2020-12-24T17:14:14+08:00">2020-12-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>知识点ref: </p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/65872513">https://zhuanlan.zhihu.com/p/65872513</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05">https://blog.nowcoder.net/n/a9a1c0cf7dc841c496769865b91a3b05</a></li>
+<li><a target="_blank" rel="noopener" href="http://baijiahao.baidu.com/s?id=1626608229788927963">http://baijiahao.baidu.com/s?id=1626608229788927963</a></li>
+</ol>
+<p>练习题ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://developer.ibm.com/zh/articles/j-lo-clobj-init/">https://developer.ibm.com/zh/articles/j-lo-clobj-init/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/60949531">https://www.zhihu.com/question/60949531</a></li>
+</ol>
+<p>类初始化过程以及该过程的意义：</p>
+<ol>
+<li>对于类和接口，初始化就是调用初始化方法；</li>
+<li>java虚拟机层面：</li>
+<li>java虚拟机是支持多线程的，所以需要处理同步<ol>
+<li>同步就需要互斥，需要锁LC; C和LC的映射关系，有jvm自行决定</li>
+<li>如果C的Class对象显示当前C的初始化由其他线程正在执行 -&gt; 当前线程释放LC并进入阻塞，直等到其他线程完成初始化</li>
+<li>如果C的Class对象显示当前C的初始化由当前线程正在执行 -&gt; do nothing, release LC</li>
+</ol>
+</li>
+</ol>
+<p>bootfei’s answer:</p>
+<ol>
+<li>初始化是类加载过程中的最后一步，也是真正开始调用java的字节码文件</li>
+<li>类初始化首先区分是针对接口还是类<ol>
+<li>如果是类，会首先调用父类的<clinit>,然后调用子类的<clinit></li>
+<li>如果是接口，因为接口是没有静态代码块的，如果没有静态变量，则不会调用父接口的<clinit></li>
+</ol>
+</li>
+<li>类初始化的顺序是<ol>
+<li>父类的变量和代码块、静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
+<li>子类的变量和代码块、静态变量和静态代码块，并且按照文本顺序执行，其中不能访问其他静态变量，只能赋值</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="tag"># java面试题</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/10/17/Java/java-ThreadLocal%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%E9%97%AE%E9%A2%98/" rel="prev" title="java ThreadLocal底层原理以及内存溢出问题">
+                  <i class="fa fa-chevron-left"></i> java ThreadLocal底层原理以及内存溢出问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/10/21/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/java%E9%9D%A2%E8%AF%95%E9%A2%98-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" rel="next" title="java面试题: 如何实现延迟队列">
+                  java面试题: 如何实现延迟队列 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

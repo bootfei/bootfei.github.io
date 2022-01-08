@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="ILoadBalance 负载均衡器ribbon是一个为客户端提供负载均衡功能的服务(客户端从Eureka下载提供者列表，ribbo负责选择提供者)，它内部提供了一个叫做ILoadBalance的接口代表负载均衡器的操作，比如有添加服务器操作、选择服务器操作、获取所有的服务器列表、获取可用的服务器列表等等。 ILoadBalance的继承关系 负载均衡器是从EurekaClient（EurekaC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ribbon的负载均衡策略及原理">
+<meta property="og:url" content="http://example.com/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="ILoadBalance 负载均衡器ribbon是一个为客户端提供负载均衡功能的服务(客户端从Eureka下载提供者列表，ribbo负责选择提供者)，它内部提供了一个叫做ILoadBalance的接口代表负载均衡器的操作，比如有添加服务器操作、选择服务器操作、获取所有的服务器列表、获取可用的服务器列表等等。 ILoadBalance的继承关系 负载均衡器是从EurekaClient（EurekaC">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjvROr20CAwaIlF6OydDt3vWUF5fEhRkDjztiazZmnJhOs0e2bIvrqjUw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjNJYRSuCAy0WiaP8JEeIxtHQ2q7Ss7pbArUibIwMhcJMrBumqxVuWON9g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjiagxZ2sFxP5m0JBhLJXJLdNY8hia1FtLSz7iaFLR7jqdm8RQSiamPHl2zA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-04-02T04:50:59.000Z">
+<meta property="article:modified_time" content="2021-04-02T05:01:38.844Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjvROr20CAwaIlF6OydDt3vWUF5fEhRkDjztiazZmnJhOs0e2bIvrqjUw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>Ribbon的负载均衡策略及原理 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ILoadBalance-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">ILoadBalance 负载均衡器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ILoadBalance%E7%9A%84%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB"><span class="nav-number">1.1.</span> <span class="nav-text">ILoadBalance的继承关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8EEureka%E8%8E%B7%E5%8F%96%E6%B3%A8%E5%86%8C%E4%BF%A1%E6%81%AF"><span class="nav-number">1.2.</span> <span class="nav-text">从Eureka获取注册信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IRule-%E8%B7%AF%E7%94%B1"><span class="nav-number">2.</span> <span class="nav-text">IRule 路由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E5%B9%B6%E4%BD%BF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">验证并使用</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ribbon的负载均衡策略及原理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-04-02 12:50:59 / Modified: 13:01:38" itemprop="dateCreated datePublished" datetime="2021-04-02T12:50:59+08:00">2021-04-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="ILoadBalance-负载均衡器"><a href="#ILoadBalance-负载均衡器" class="headerlink" title="ILoadBalance 负载均衡器"></a>ILoadBalance 负载均衡器</h2><p><a href="">ribbon是一个为客户端提供负载均衡功能的服务(客户端从Eureka下载提供者列表，ribbo负责选择提供者)</a>，它内部提供了一个叫做ILoadBalance的接口代表负载均衡器的操作，比如有添加服务器操作、选择服务器操作、获取所有的服务器列表、获取可用的服务器列表等等。</p>
+<h3 id="ILoadBalance的继承关系"><a href="#ILoadBalance的继承关系" class="headerlink" title="ILoadBalance的继承关系"></a>ILoadBalance的继承关系</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjvROr20CAwaIlF6OydDt3vWUF5fEhRkDjztiazZmnJhOs0e2bIvrqjUw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>负载均衡器是从EurekaClient（EurekaClient的实现类为DiscoveryClient）获取服务信息，根据IRule去路由，并且根据IPing判断服务的可用性。</p>
+<h3 id="从Eureka获取注册信息"><a href="#从Eureka获取注册信息" class="headerlink" title="从Eureka获取注册信息"></a>从Eureka获取注册信息</h3><p>负载均衡器多久一次去获取一次从Eureka Client获取注册信息呢？在BaseLoadBalancer类下，BaseLoadBalancer的构造函数，该构造函数开启了一个PingTask任务setupPingTask();，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public BaseLoadBalancer(String name, IRule rule, LoadBalancerStats stats,</span><br><span class="line">        IPing ping, IPingStrategy pingStrategy) &#123;</span><br><span class="line">    if (logger.isDebugEnabled()) &#123;</span><br><span class="line">        logger.debug(&quot;LoadBalancer:  initialized&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    this.name &#x3D; name;</span><br><span class="line">    this.ping &#x3D; ping;</span><br><span class="line">    this.pingStrategy &#x3D; pingStrategy;</span><br><span class="line">    setRule(rule);</span><br><span class="line">    setupPingTask();</span><br><span class="line">    lbStats &#x3D; stats;</span><br><span class="line">    init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>setupPingTask()的具体代码逻辑，它开启了ShutdownEnabledTimer执行PingTask任务，在默认情况下pingIntervalSeconds为10，即每10秒钟，向EurekaClient发送一次”ping”。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">void setupPingTask() &#123;</span><br><span class="line">      if (canSkipPing()) &#123;</span><br><span class="line">          return;</span><br><span class="line">      &#125;</span><br><span class="line">      if (lbTimer !&#x3D; null) &#123;</span><br><span class="line">          lbTimer.cancel();</span><br><span class="line">      &#125;</span><br><span class="line">      lbTimer &#x3D; new ShutdownEnabledTimer(&quot;NFLoadBalancer-PingTimer-&quot; + name,</span><br><span class="line">              true);</span><br><span class="line">      lbTimer.schedule(new PingTask(), 0, pingIntervalSeconds * 1000);</span><br><span class="line">      forceQuickPing();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>PingTask源码，即new一个Pinger对象，并执行runPinger()方法。</p>
+<p>查看Pinger的runPinger()方法，最终根据 pingerStrategy.pingServers(ping, allServers)来获取服务的可用性，如果该返回结果，如之前相同，则不去向EurekaClient获取注册列表，如果不同则通知ServerStatusChangeListener或者changeListeners发生了改变，进行更新或者重新拉取。</p>
+<p><strong>完整过程是：</strong></p>
+<p>LoadBalancerClient（RibbonLoadBalancerClient是实现类）在初始化的时候（execute方法），会通过ILoadBalance（BaseLoadBalancer是实现类）向Eureka注册中心获取服务注册列表，并且每10s一次向EurekaClient发送“ping”，来判断服务的可用性，如果服务的可用性发生了改变或者服务数量和之前的不一致，则从注册中心更新或者重新拉取。LoadBalancerClient有了这些服务注册列表，就可以根据具体的IRule来进行负载均衡。</p>
+<h2 id="IRule-路由"><a href="#IRule-路由" class="headerlink" title="IRule 路由"></a>IRule 路由</h2><p>IRule接口代表负载均衡策略：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public interface IRule&#123;</span><br><span class="line">    public Server choose(Object key);</span><br><span class="line">    public void setLoadBalancer(ILoadBalancer lb);</span><br><span class="line">    public ILoadBalancer getLoadBalancer();    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>IRule接口的实现类有以下几种：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjNJYRSuCAy0WiaP8JEeIxtHQ2q7Ss7pbArUibIwMhcJMrBumqxVuWON9g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhoejcjMf928HTQuV66ZKynjiagxZ2sFxP5m0JBhLJXJLdNY8hia1FtLSz7iaFLR7jqdm8RQSiamPHl2zA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>其中RandomRule表示随机策略、RoundRobinRule表示轮询策略、WeightedResponseTimeRule表示加权策略、BestAvailableRule表示请求数最少策略等等。</p>
+<p>随机策略很简单，就是从服务器中随机选择一个服务器，RandomRule的实现代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public Server choose(ILoadBalancer lb, Object key) &#123;</span><br><span class="line">    if (lb &#x3D;&#x3D; null) &#123;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line">    Server server &#x3D; null;</span><br><span class="line"> </span><br><span class="line">    while (server &#x3D;&#x3D; null) &#123;</span><br><span class="line">        if (Thread.interrupted()) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">        List&lt;Server&gt; upList &#x3D; lb.getReachableServers();</span><br><span class="line">        List&lt;Server&gt; allList &#x3D; lb.getAllServers();</span><br><span class="line">        int serverCount &#x3D; allList.size();</span><br><span class="line">        if (serverCount &#x3D;&#x3D; 0) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">        int index &#x3D; rand.nextInt(serverCount); &#x2F;&#x2F; 使用jdk内部的Random类随机获取索引值index</span><br><span class="line">        server &#x3D; upList.get(index); &#x2F;&#x2F; 得到服务器实例</span><br><span class="line"> </span><br><span class="line">        if (server &#x3D;&#x3D; null) &#123;</span><br><span class="line">            Thread.yield();</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        if (server.isAlive()) &#123;</span><br><span class="line">            return (server);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        server &#x3D; null;</span><br><span class="line">        Thread.yield();</span><br><span class="line">    &#125;</span><br><span class="line">    return server;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>RoundRobinRule轮询策略表示每次都取下一个服务器，比如一共有5台服务器，第1次取第1台，第2次取第2台，第3次取第3台，以此类推：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">public Server choose(ILoadBalancer lb, Object key) &#123;</span><br><span class="line">    if (lb &#x3D;&#x3D; null) &#123;</span><br><span class="line">        log.warn(&quot;no load balancer&quot;);</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    Server server &#x3D; null;</span><br><span class="line">    int count &#x3D; 0;</span><br><span class="line">    while (server &#x3D;&#x3D; null &amp;&amp; count++ &lt; 10) &#123;</span><br><span class="line">        List&lt;Server&gt; reachableServers &#x3D; lb.getReachableServers();</span><br><span class="line">        List&lt;Server&gt; allServers &#x3D; lb.getAllServers();</span><br><span class="line">        int upCount &#x3D; reachableServers.size();</span><br><span class="line">        int serverCount &#x3D; allServers.size();</span><br><span class="line"> </span><br><span class="line">        if ((upCount &#x3D;&#x3D; 0) || (serverCount &#x3D;&#x3D; 0)) &#123;</span><br><span class="line">            log.warn(&quot;No up servers available from load balancer: &quot; + lb);</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        int nextServerIndex &#x3D; incrementAndGetModulo(serverCount);</span><br><span class="line">        server &#x3D; allServers.get(nextServerIndex);</span><br><span class="line"> </span><br><span class="line">        if (server &#x3D;&#x3D; null) &#123;</span><br><span class="line">            &#x2F;* Transient. *&#x2F;</span><br><span class="line">            Thread.yield();</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        if (server.isAlive() &amp;&amp; (server.isReadyToServe())) &#123;</span><br><span class="line">            return (server);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        &#x2F;&#x2F; Next.</span><br><span class="line">        server &#x3D; null;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    if (count &gt;&#x3D; 10) &#123;</span><br><span class="line">        log.warn(&quot;No available alive servers after 10 tries from load balancer: &quot;</span><br><span class="line">                + lb);</span><br><span class="line">    &#125;</span><br><span class="line">    return server;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">&#x2F;**</span><br><span class="line"> * Inspired by the implementation of &#123;@link AtomicInteger#incrementAndGet()&#125;.</span><br><span class="line"> *</span><br><span class="line"> * @param modulo The modulo to bound the value of the counter.</span><br><span class="line"> * @return The next value.</span><br><span class="line"> *&#x2F;</span><br><span class="line">private int incrementAndGetModulo(int modulo) &#123;</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        int current &#x3D; nextServerCyclicCounter.get();</span><br><span class="line">        int next &#x3D; (current + 1) % modulo;</span><br><span class="line">        if (nextServerCyclicCounter.compareAndSet(current, next))</span><br><span class="line">            return next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>WeightedResponseTimeRule继承了RoundRobinRule，开始的时候还没有权重列表，采用父类的轮询方式，有一个默认每30秒更新一次权重列表的定时任务，该定时任务会根据实例的响应时间来更新权重列表，choose方法做的事情就是，用一个(0,1)的随机double数乘以最大的权重得到randomWeight，然后遍历权重列表，找出第一个比randomWeight大的实例下标，然后返回该实例，代码略。</p>
+<p>BestAvailableRule策略用来选取最少并发量请求的服务器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public Server choose(Object key) &#123;</span><br><span class="line">    if (loadBalancerStats &#x3D;&#x3D; null) &#123;</span><br><span class="line">        return super.choose(key);</span><br><span class="line">    &#125;</span><br><span class="line">    List&lt;Server&gt; serverList &#x3D; getLoadBalancer().getAllServers(); &#x2F;&#x2F; 获取所有的服务器列表</span><br><span class="line">    int minimalConcurrentConnections &#x3D; Integer.MAX_VALUE;</span><br><span class="line">    long currentTime &#x3D; System.currentTimeMillis();</span><br><span class="line">    Server chosen &#x3D; null;</span><br><span class="line">    for (Server server: serverList) &#123; &#x2F;&#x2F; 遍历每个服务器</span><br><span class="line">        ServerStats serverStats &#x3D; loadBalancerStats.getSingleServerStat(server); &#x2F;&#x2F; 获取各个服务器的状态</span><br><span class="line">        if (!serverStats.isCircuitBreakerTripped(currentTime)) &#123; &#x2F;&#x2F; 没有触发断路器的话继续执行</span><br><span class="line">            int concurrentConnections &#x3D; serverStats.getActiveRequestsCount(currentTime); &#x2F;&#x2F; 获取当前服务器的请求个数</span><br><span class="line">            if (concurrentConnections &lt; minimalConcurrentConnections) &#123; &#x2F;&#x2F; 比较各个服务器之间的请求数，然后选取请求数最少的服务器并放到chosen变量中</span><br><span class="line">                minimalConcurrentConnections &#x3D; concurrentConnections;</span><br><span class="line">                chosen &#x3D; server;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    if (chosen &#x3D;&#x3D; null) &#123; &#x2F;&#x2F; 如果没有选上，调用父类ClientConfigEnabledRoundRobinRule的choose方法，也就是使用RoundRobinRule轮询的方式进行负载均衡        </span><br><span class="line">        return super.choose(key);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return chosen;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="验证并使用"><a href="#验证并使用" class="headerlink" title="验证并使用"></a>验证并使用</h2><p>使用Ribbon提供的负载均衡策略很简单，只需以下几部：</p>
+<p><strong>1、创建具有负载均衡功能的RestTemplate实例</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@Bean</span><br><span class="line">@LoadBalanced</span><br><span class="line">RestTemplate restTemplate() &#123;</span><br><span class="line">    return new RestTemplate();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用RestTemplate进行rest操作的时候，会自动使用负载均衡策略，它内部会在RestTemplate中加入LoadBalancerInterceptor这个拦截器，<!--可以看到，注解的实现就是通过拦截--> 这个拦截器的作用就是使用负载均衡。</p>
+<p>默认情况下会采用轮询策略，如果希望采用其它策略，则指定IRule实现，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Bean</span><br><span class="line">public IRule ribbonRule() &#123;</span><br><span class="line">    return new BestAvailableRule();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种方式对Feign也有效。</p>
+<p>我们也可以参考ribbon，自己写一个负载均衡实现类。</p>
+<p>可以通过下面方法获取负载均衡策略最终选择了哪个服务实例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@Autowired</span><br><span class="line">LoadBalancerClient loadBalancerClient; </span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;测试负载均衡最终选中哪个实例</span><br><span class="line">public String getChoosedService() &#123;</span><br><span class="line">    ServiceInstance serviceInstance &#x3D; loadBalancerClient.choose(&quot;USERINFO-SERVICE&quot;);</span><br><span class="line">    StringBuilder sb &#x3D; new StringBuilder();</span><br><span class="line">    sb.append(&quot;host: &quot;).append(serviceInstance.getHost()).append(&quot;, &quot;);</span><br><span class="line">    sb.append(&quot;port: &quot;).append(serviceInstance.getPort()).append(&quot;, &quot;);</span><br><span class="line">    sb.append(&quot;uri: &quot;).append(serviceInstance.getUri());</span><br><span class="line">    return sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/Springboot-03-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%9D%E5%A7%8B%E5%8C%96%E9%92%A9%E5%AD%90/" rel="prev" title="springboot初始化时添加钩子">
+                  <i class="fa fa-chevron-left"></i> springboot初始化时添加钩子
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/03/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/http/%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%E9%A1%B5%E9%9D%A2%E5%8F%98%E6%9B%B4%E6%8E%A8%E9%80%81-%E6%8F%90%E9%86%92%E7%B3%BB%E7%BB%9F/" rel="next" title="如何设计页面变更推送/提醒系统">
+                  如何设计页面变更推送/提醒系统 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

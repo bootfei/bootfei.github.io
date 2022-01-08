@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="一、什么是服务网关服务网关 &#x3D; 路由转发 + 过滤器 1、路由转发：接收一切外界请求，转发到后端的微服务上去； 2、过滤器：在服务网关中可以完成一系列的横切功能，例如权限校验、限流以及监控等，这些都可以通过过滤器完成（其实路由转发也是通过过滤器实现的）。 二、为什么需要服务网关上述所说的横切功能（以权限校验为例）可以写在三个位置：  每个服务自己实现一遍 写到一个公共的服务中，然后其他所有服务都依">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为什么需要服务网关">
+<meta property="og:url" content="http://example.com/2021/04/27/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="一、什么是服务网关服务网关 &#x3D; 路由转发 + 过滤器 1、路由转发：接收一切外界请求，转发到后端的微服务上去； 2、过滤器：在服务网关中可以完成一系列的横切功能，例如权限校验、限流以及监控等，这些都可以通过过滤器完成（其实路由转发也是通过过滤器实现的）。 二、为什么需要服务网关上述所说的横切功能（以权限校验为例）可以写在三个位置：  每个服务自己实现一遍 写到一个公共的服务中，然后其他所有服务都依">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucguqG86ia9ZKsJrkpgzSb5TtqOF5YU4p7qKlgSgjrwFu1oicJQsibjhnLeS4yQUQuau8icCHUAmmFEibQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-04-27T05:35:50.000Z">
+<meta property="article:modified_time" content="2021-04-27T05:36:14.897Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucguqG86ia9ZKsJrkpgzSb5TtqOF5YU4p7qKlgSgjrwFu1oicJQsibjhnLeS4yQUQuau8icCHUAmmFEibQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/04/27/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>为什么需要服务网关 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3"><span class="nav-number">1.</span> <span class="nav-text">一、什么是服务网关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3"><span class="nav-number">2.</span> <span class="nav-text">二、为什么需要服务网关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">三、服务网关技术选型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">1、总体流程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%BC%95%E5%85%A5%E7%BD%91%E5%85%B3%E7%9A%84%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">3.2.</span> <span class="nav-text">2、引入网关的注意点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD"><span class="nav-number">3.3.</span> <span class="nav-text">3、服务网关基本功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="nav-number">3.4.</span> <span class="nav-text">4、技术选型</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/27/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          为什么需要服务网关
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-04-27 13:35:50 / Modified: 13:36:14" itemprop="dateCreated datePublished" datetime="2021-04-27T13:35:50+08:00">2021-04-27</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="一、什么是服务网关"><a href="#一、什么是服务网关" class="headerlink" title="一、什么是服务网关"></a>一、什么是服务网关</h2><p>服务网关 = 路由转发 + 过滤器</p>
+<p>1、<strong>路由转发：</strong>接收一切外界请求，转发到后端的微服务上去；</p>
+<p>2、<strong>过滤器：</strong>在服务网关中可以完成一系列的横切功能，例如权限校验、限流以及监控等，这些都可以通过过滤器完成（其实路由转发也是通过过滤器实现的）。</p>
+<h2 id="二、为什么需要服务网关"><a href="#二、为什么需要服务网关" class="headerlink" title="二、为什么需要服务网关"></a>二、为什么需要服务网关</h2><p>上述所说的横切功能（以权限校验为例）可以写在三个位置：</p>
+<ul>
+<li>每个服务自己实现一遍</li>
+<li>写到一个公共的服务中，然后其他所有服务都依赖这个服务</li>
+<li>写到服务网关的前置过滤器中，所有请求过来进行权限校验</li>
+</ul>
+<p>第一种，缺点太明显，基本不用；</p>
+<p>第二种，相较于第一点好很多，代码开发不会冗余，但是有两个缺点：</p>
+<ul>
+<li>由于每个服务引入了这个公共服务，那么相当于在每个服务中都引入了相同的权限校验的代码，使得每个服务的jar包大小无故增加了一些，尤其是对于使用docker镜像进行部署的场景，jar越小越好；</li>
+<li>由于每个服务都引入了这个公共服务，那么我们后续升级这个服务可能就比较困难，而且公共服务的功能越多，升级就越难，而且假设我们改变了公共服务中的权限校验的方式，想让所有的服务都去使用新的权限校验方式，我们就需要将之前所有的服务都重新引包，编译部署。</li>
+</ul>
+<p><strong>而服务网关恰好可以解决这样的问题：</strong></p>
+<ul>
+<li>将权限校验的逻辑写在网关的过滤器中，后端服务不需要关注权限校验的代码，所以服务的jar包中也不会引入权限校验的逻辑，不会增加jar包大小；</li>
+<li>如果想修改权限校验的逻辑，只需要修改网关中的权限校验过滤器即可，而不需要升级所有已存在的微服务。</li>
+</ul>
+<p>所以，需要服务网关！！！</p>
+<h2 id="三、服务网关技术选型"><a href="#三、服务网关技术选型" class="headerlink" title="三、服务网关技术选型"></a>三、<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247490615&idx=1&sn=1a8c7126bf46a3cf1add60119803f220&chksm=ebd6231bdca1aa0d71508d01024fd639000fb556b67593a4c4a31a1f701b95a5adc112c858c6&scene=21#wechat_redirect">服务网关技术选型</a></h2><p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucguqG86ia9ZKsJrkpgzSb5TtqOF5YU4p7qKlgSgjrwFu1oicJQsibjhnLeS4yQUQuau8icCHUAmmFEibQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>引入服务网关后的微服务架构如上，总体包含三部分：<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247499813&idx=2&sn=b99a6b64dbb96fb9f7c74d50eb59cb79&chksm=ebd5ff09dca2761f3f5e5ec146837c5721feeae48c9443f2345a93b4cc519128b6792d6a96e2&scene=21#wechat_redirect">服务网关</a>、open-service和service。</p>
+<h3 id="1、总体流程："><a href="#1、总体流程：" class="headerlink" title="1、总体流程："></a>1、总体流程：</h3><ul>
+<li>服务网关、open-service和service启动时注册到注册中心上去；</li>
+<li>用户请求时直接请求网关，网关做智能路由转发（包括服务发现，负载均衡）到open-service，这其中包含权限校验、监控、限流等操作</li>
+<li>open-service聚合内部service响应，返回给网关，网关再返回给用户</li>
+</ul>
+<h3 id="2、引入网关的注意点"><a href="#2、引入网关的注意点" class="headerlink" title="2、引入网关的注意点"></a>2、引入网关的注意点</h3><ul>
+<li>增加了网关，多了一层转发（原本用户请求直接访问open-service即可），性能会下降一些（但是下降不大，通常，网关机器性能会很好，而且网关与open-service的访问通常是内网访问，速度很快）；</li>
+<li>网关的单点问题：在整个网络调用过程中，一定会有一个单点，可能是网关、nginx、dns服务器等。防止网关单点，可以在网关层前边再挂一台nginx，nginx的性能极高，基本不会挂，这样之后，网关服务就可以不断的添加机器。但是这样一个请求就转发了两次，所以最好的方式是网关单点服务部署在一台牛逼的机器上（通过压测来估算机器的配置），而且nginx与zuul的性能比较，根据国外的一个哥们儿做的实验来看，其实相差不大，zuul是netflix开源的一个用来做网关的开源框架；</li>
+<li>网关要尽量轻。</li>
+</ul>
+<h3 id="3、服务网关基本功能"><a href="#3、服务网关基本功能" class="headerlink" title="3、服务网关基本功能"></a>3、服务网关基本功能</h3><ul>
+<li><p><strong>智能路由：</strong>接收外部一切请求，并转发到后端的对外服务open-service上去；</p>
+</li>
+<li><ul>
+<li>注意：我们只转发外部请求，服务之间的请求不走网关，这就表示全链路追踪、内部服务API监控、内部服务之间调用的容错、智能路由不能在网关完成；当然，也可以将所有的服务调用都走网关，那么几乎所有的功能都可以集成到网关中，但是这样的话，网关的压力会很大，不堪重负。</li>
+</ul>
+</li>
+<li><p><strong>权限校验：</strong>只校验用户向open-service服务的请求，不校验服务内部的请求。服务内部的请求有必要校验吗？</p>
+</li>
+<li><p><strong>API监控：</strong>只监控经过网关的请求，以及网关本身的一些性能指标（例如，gc等）；</p>
+</li>
+<li><p><strong>限流：</strong>与监控配合，进行限流操作；</p>
+</li>
+<li><p>API<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247502455&idx=1&sn=846469197b743a1156c4563853a1b83b&chksm=ebd5f55bdca27c4d17974290fecd2a055c5cecf431959f628582d347a5edfe694e2a8bd96632&scene=21#wechat_redirect">日志统一收集</a>：类似于一个aspect切面，记录接口的进入和出去时的相关日志</p>
+</li>
+<li><p>。。。后续补充</p>
+</li>
+</ul>
+<p>上述功能是网关的基本功能，网关还可以实现以下功能：</p>
+<ul>
+<li>A|B测试：A|B测试时一块比较大的东西，包含后台实验配置、数据埋点（看转化率）以及分流引擎，在服务网关中，可以实现分流引擎，但是实际上分流引擎会调用内部服务，所以如果是按照上图的架构，分流引擎最好做在open-service中，不要做在服务网关中。</li>
+<li>。。。后续补充</li>
+</ul>
+<h3 id="4、技术选型"><a href="#4、技术选型" class="headerlink" title="4、技术选型"></a>4、技术选型</h3><p>笔者准备自建一个轻量级的服务网关，技术选型如下：</p>
+<ul>
+<li>开发语言：java + groovy，groovy的好处是网关服务不需要重启就可以动态的添加filter来实现一些功能；</li>
+<li>微服务基础框架：springboot；</li>
+<li>网关基础组件：netflix zuul；</li>
+<li>服务注册中心：consul；</li>
+<li>权限校验：jwt；</li>
+<li>API监控：prometheus + grafana；</li>
+<li>API统一日志收集：logback + ELK；</li>
+<li>压力测试：Jmeter；</li>
+<li>。。。后续补充</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/26/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BD%91%E5%85%B3/%E7%BD%91%E5%85%B3%E5%AE%9E%E8%B7%B5-%E5%96%9C%E9%A9%AC%E6%8B%89%E9%9B%85%E8%87%AA%E7%A0%94API%E7%BD%91%E5%85%B3%E6%9E%B6%E6%9E%84%E5%AE%9E%E8%B7%B5/" rel="prev" title="网关实践-喜马拉雅自研API网关架构实践">
+                  <i class="fa fa-chevron-left"></i> 网关实践-喜马拉雅自研API网关架构实践
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/28/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/%E6%9F%A5%E6%89%BEOOM%E5%8E%9F%E5%9B%A0/" rel="next" title="查找OOM原因">
+                  查找OOM原因 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
