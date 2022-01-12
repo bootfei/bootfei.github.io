@@ -6,7 +6,7 @@ tags:
 
 
 
-## 自动配置（SpringBoot最大特点）
+**自动配置（SpringBoot最大特点）**
 
 注解：2004年，jdk5发布，支持注解和组合注解; 2003年，Spring第一个项目开始；所以Spring 2.0开始支持注解，注解不是Spring boot的特点，反而是Spring特点。Spring支持xml 和注解两种方式。
 
@@ -27,7 +27,7 @@ tags:
 
 
 
-### 解析**@SpringBootApplication**
+### **@SpringBootApplication**
 
 @SpringBootApplication 注解其实就是一个组合注解。包含有
 
@@ -41,11 +41,13 @@ tags:
 
   
 
-##### **@SpringBootConfiguration** 
+### **@SpringBootConfiguration**  = @Configuration
 
-查看该注解的源码注解可知，该注解与@Configuration 注解功能相同，仅表示当前类为一个 JavaConfig 类，其就是为 Spring Boot 专门创建的一个注解。表明该类交给Spring容器管理。
+该注解与@Configuration 注解功能相同，其目的就是为 Spring Boot 专门创建的一个注解 
 
-##### **@ComponentScan** 
+> @Configuration是Spring的注解
+
+### **@ComponentScan** 
 
 顾名思义，用于完成组件扫描。不过需要注意，其[仅仅用于配置组件扫描指令]()，并没有真正扫描，更没有装配其中的类，这个[真正扫描是由@EnableAutoConfiguration 完成的](https://www.hangge.com/blog/cache/detail_2807.html)。
 
@@ -55,11 +57,13 @@ tags:
 
 说明了Spring会扫描该类所在的包，这个包下的所有类及其子包中的类！！！
 
-##### **@EnableXxx**
+### 知识点补充 **@EnableXxx**
 
 @EnableXxx 注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注 解，就会自动导入某些类。所以该类注解是组合注解，一般都会包含一个@Import 注解，用 于导入指定的多个类，而被导入的类一般分为三种:[配置类、选择器与注册器](https://www.hangge.com/blog/cache/detail_2807.html)。
 
-配置类：@Import 中指定的类一般以 Configuration 结尾，且该类上会注解@Configuration，表示当前类为配置类。
+#### 配置类：
+
+@Import 中指定的类一般以 Configuration 结尾，且该类上会注解@Configuration，表示当前类为配置类。
 
 ```java
   @Import(SchedulingConfiguration.class)
@@ -67,7 +71,9 @@ tags:
 
   
 
-选择器：@Import 中指定的类一般以 Selector 结尾，且该类实现了 ImportSelector 接口，表示当前类会根据条件选择导入不同的类。
+#### 选择器：
+
+@Import 中指定的类一般以 Selector 结尾，且该类实现了 ImportSelector 接口，表示当前类会根据条件选择导入不同的类。
 
 ```java
   @Import(AutoConfigurationImportSelector.class)
@@ -75,7 +81,9 @@ tags:
 
   
 
-注册器：@Import 指定的类一般以 Registrar 结尾，且该类实现了 ImportBeanDefinitionRegistrar接口，用于导入注册器，该类可以在代码运行时动态注册指定类的实例。
+#### 注册器：
+
+@Import 指定的类一般以 Registrar 结尾，且该类实现了 ImportBeanDefinitionRegistrar接口，用于导入注册器，该类可以在代码运行时动态注册指定类的实例。
 
 ```java
   @Import(AspectJAutoProxyRegistrar.class)
@@ -83,11 +91,11 @@ tags:
 
   
 
-### 解析**@EnableAutoConfiguration**
+### **@EnableAutoConfiguration**(属于@EnableXXX的[Selctor]())
 
 该注解用于开启自动配置，是 Spring Boot 的核心注解，是一个组合注解。所谓自动配置是指，其会自动找到其所需要的starter以及用于自定义的类，然后交给 Spring 容器完成这些类的装配。
 
-```
+```java
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -96,86 +104,154 @@ tags:
 @Import(AutoConfigurationImportSelector.class)
 ```
 
-属于@EnableXXX的[Selctor]()类，因为@import中是selector
 
-> @EnableAutoConfiguration扫描的自动配置类有2种：
->
-> - 一种是系统外部的类,如starter,
-> - 另外一种是用户内部自定义的,如程序员自己写的controller,service
 
-["META-INFO/spring.factories"非常重要的文件, 里面有个key = EnableAutoConfiguratin, value是众多自动配置类，如Redis配置类, Mongo配置类]()
+@EnableAutoConfiguration扫描的自动配置类有2种：
 
-##### **@Import**
+- 一种是系统内置的类和starter的类，**由@Import(AutoConfigurationImportSelector.class)完成**
+- 另外一种是Application内部自定义的,如程序员自己写的controller,service，**由@AutoConfigurationPackage完成**
 
-- 用于导入[第一种类：框架本身所包含的自动配置相关的类](https://www.hangge.com/blog/cache/detail_2807.html)。其参数 AutoConfigurationImportSelector 类，该类用于导入自动配置的类。
 
-- [只是加载类的名称（我觉得更准确的说，是封装类的名称），并没有创建实例]()，什么时候创建呢？
 
-- ```java
-  @Import(AutoConfigurationImportSelector.class)
-  ```
+##### **@Import**：完成系统内置类和starter类的扫描
 
-  - [具体加载框架本身的自动配置类的过程如下]()
+```java
+//AutoConfigurationImportSelector.class
 
-  - AutoConfigurationImportSelector.class：
+protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+      List<String> configurations = SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
+      Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you are using a custom packaging, make sure that file is correct.");
+      return configurations;
+}
+```
 
-    - getCandidateConfigurations()
-    - SpringFactoriesLoader.loadFactoryNames(this.getSpringFactoriesLoaderFactoryClass(), this.getBeanClassLoader());
 
-  - SpringFactoriesLoader.class
 
-    - loadFactoryNames
+```java
+//SpringFactoriesLoader.class
+// loadFactoryNames() --> loadSpringFactories()  -->   "META-INF/spring.factories"
 
-    - loadSpringFactories
+public static List<String> loadFactoryNames(Class<?> factoryClass, @Nullable ClassLoader classLoader) {
+        String factoryClassName = factoryClass.getName();
+        return (List)loadSpringFactories(classLoader).getOrDefault(factoryClassName, Collections.emptyList());
+}
 
-      - ```java
-        Enumeration<URL> urls = classLoader != null ? classLoader.getResources("META-INF/spring.factories") : ClassLoader.getSystemResources("META-INF/spring.factories");
-        ```
 
-      - 非常重要！最终@Import实现了加载"[META-INF/spring.factories]()"这个文件。那么这个文件在哪里呢？
 
-        - 项目的source目录下没有，继续
-        - Pom.xml中有spring-boot-starter-web, 查看内部依赖，发现有spring-boot-starter,继续查看内部依赖，有spring-boot-autoconfigure依赖，在其项目下source目录，找到了！！！
+private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+        MultiValueMap<String, String> result = (MultiValueMap)cache.get(classLoader);
+        if (result != null) {
+            return result;
+        } else {
+            try {
+                Enumeration<URL> urls = classLoader != null ? classLoader.getResources("META-INF/spring.factories") : ClassLoader.getSystemResources("META-INF/spring.factories");
+                LinkedMultiValueMap result = new LinkedMultiValueMap();
 
-##### **@AutoConfigurationPackage** 
+                while(urls.hasMoreElements()) {
+                    URL url = (URL)urls.nextElement();
+                    UrlResource resource = new UrlResource(url);
+                    Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+                    Iterator var6 = properties.entrySet().iterator();
+
+                    while(var6.hasNext()) {
+                        Entry<?, ?> entry = (Entry)var6.next();
+                        List<String> factoryClassNames = Arrays.asList(StringUtils.commaDelimitedListToStringArray((String)entry.getValue()));
+                        result.addAll((String)entry.getKey(), factoryClassNames);
+                    }
+                }
+
+                cache.put(classLoader, result);
+                return result;
+            } catch (IOException var9) {
+                throw new IllegalArgumentException("Unable to load factories from location [META-INF/spring.factories]", var9);
+            }
+        }
+    }
+```
+
+
+
+ **"META-INF/spring.factories"位置**
+
+```xml
+<artifactId>spring-boot-starter-web</artifactId>
+	--->parent
+<artifactId>spring-boot-starters</artifactId>
+	--->parent
+<artifactId>spring-boot-parent</artifactId>
+	--->parent
+<artifactId>spring-boot-dependencies</artifactId>
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-autoconfigure</artifactId>
+  <version>2.0.3.RELEASE</version>
+</dependency>
 
 ```
-@Target(ElementType.TYPE)
+
+
+
+![image-20220111132534741](/Users/qifei/Documents/blog/source/_posts/编程语言/Java/springboot/自动配置Spring-Factories.png)
+
+从这里可以看到：系统内置的AutoConfiguration(starter)都被加载进来了，包括Redis, Aop等等
+
+> 这些starter又引用了其他starter，这些starter同时也会被加载尽量
+
+
+
+
+
+##### **@AutoConfigurationPackage**: 完成Applicaiton中用户自定义的类
+
+用于导入[第二种类：用户自定义类](https://www.hangge.com/blog/cache/detail_2807.html)，即自动扫描包中的类。
+
+```java
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import(AutoConfigurationPackages.Registrar.class)
+@Import({Registrar.class})
+public @interface AutoConfigurationPackage {
+}
 ```
 
-- 用于导入[第二种类：用户自定义类](https://www.hangge.com/blog/cache/detail_2807.html)，即自动扫描包中的类。
 
-- ```java
-  @Import(AutoConfigurationPackages.Registrar.class)
-  ```
 
-  - AutoConfigurationPackages.Registrar
-    - registerBeanDefinitions()
-    - register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); [//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类]()
+```java
+//AutoConfigurationPackages.class
 
-### 配置文件application.yml的加载
+//Registrar是个内置类
+static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
+  Registrar() {
+  }
 
-application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重要，那么，该文件是 如何加载到内存的呢?需要从启动类的 run()方法开始跟踪。
+  //关键方法
+  public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+    AutoConfigurationPackages.register(registry, (new AutoConfigurationPackages.PackageImport(metadata)).getPackageName());
+  }
 
-- xxxApplication: 
-  - SpringApplication.run(DemoApplication.class, args);
-- SpringApplication:  
-  - (new SpringApplication(primarySources)).run(args);
-  - this.prepareEnvironment(listeners, bootstrapContext, applicationArguments);
-  - listeners.environmentPrepared(bootstrapContext, (ConfigurableEnvironment)environment);
-- SpringApplicationRunListeners
-  - listener.environmentPrepared(environment);
-- EventPublishingRunListener
-  - initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));
-- SimpleApplicationEventMulticaster
-  - this.invokeListener(listener, event);
-  - this.doInvokeListener(listener, event);
+  public Set<Object> determineImports(AnnotationMetadata metadata) {
+    return Collections.singleton(new AutoConfigurationPackages.PackageImport(metadata));
+  }
+}
+```
 
-- .....
+
+
+debug可以看到：扫描的是com.abc(用户的自定义的包)
+
+![image-20220111133841003](/Users/qifei/Documents/blog/source/_posts/编程语言/Java/springboot/自动配置registerBeanDefinitions.png)
+
+
+
+
+
+AutoConfigurationPackages.Registrar
+
+- registerBeanDefinitions()
+- register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0])); [//非常重要，可以看到第二个arg为项目的包名，即该类扫描了用户自定义的类]()
+
+
 
 
 

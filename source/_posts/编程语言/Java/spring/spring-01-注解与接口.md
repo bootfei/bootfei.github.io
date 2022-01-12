@@ -177,9 +177,27 @@ private void callRunner(CommandLineRunner runner, ApplicationArguments args) {
 
 ## 注解
 
+### @Configuration
 
+作用：
 
+该注解表示一个类声明了一个或多个拥有 @Bean注解的方法，并且这些拥有 @Bean的方法的返回对象将被 [Spring 容器]()管理，在其他类中就可以使用 @Autowired注解注入这些 Bean。
 
+```java
+@Configuration
+public class AppConfig {
+    @Bean
+    public MyBean myBean() {
+			return new Car("bmw");
+	  }
+}
+```
+
+面配置对应到传统 Spring XML 配置如下：
+
+```xml
+<bean id=”myBean” class=”com.huangx.springboot.MyBean” />
+```
 
 ### @Autowire
 
@@ -368,7 +386,7 @@ Spring Framework2.0开始，引入可扩展的XML编程机制，该机制要求X
 
 ContextNamespaceHandler#init()方法注册了ComponentScanBeanDefinitionParser
 
-![Image](https://mmbiz.qpic.cn/mmbiz_gif/JfTPiahTHJhpasNr82txibgDK8LDTzxQHicribzfxul4HV2iabRB8IxE6VPYEcZrDUdcMUUCOibNgRLf6RnejbpdVrtA/640?wx_fmt=gif&wxfrom=5&wx_lazy=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_gif/JfTPiahTHJhpasNr82txibgDK8LDTzxQHicribzfxul4HV2iabRB8IxE6VPYEcZrDUdcMUUCOibNgRLf6RnejbpdVrtA/640)
 
 
 
