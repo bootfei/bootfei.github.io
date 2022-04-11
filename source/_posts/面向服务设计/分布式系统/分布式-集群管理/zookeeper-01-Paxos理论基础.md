@@ -4,11 +4,9 @@ date: 2021-02-16 09:57:32
 tags:
 ---
 
-# [**Zookeeper** 简介](https://my.oschina.net/u/4403337/blog/4328713)
+Ref: https://www.zhihu.com/question/19787937 朱一聪的回答
 
 ZooKeeper 由雅虎研究院开发，后来捐赠给了 Apache。ZooKeeper 是一个开源的分布式 应用程序协调服务器，其为分布式系统提供一致性服务。其一致性是通过基于 Paxos 算法的 ZAB 协议完成的。其主要功能包括:配置维护、域名服务、分布式同步、集群管理等。
-
-zookeeper 的官网: http://zookeeper.apache.org
 
 ## zk特点
 
@@ -16,132 +14,103 @@ zk本身是可以记录数据的，那zk 是如何保证分布式系统的一致
 
 - 顺序一致性：从同一个客户端发起的多个事务请求(写操作请求)，最终会严格按照其发起顺序记录到zk中。
 
-- 原子性：所有事务请求的结果在集群中所有 Server 上的应用情况是一致的。要么全部应用成功， 要么都没有成功，不会出现部分成功，部分失败的情况。
+- 原子性：事务请求的结果在集群中所有 Server 上的应用情况是一致的。ACID中的A
 
-- 单一视图：无论客户端连接的是集群中的哪台 Server（节点），其读取到的数据模型中的数据都是一致的。
+- 单一视图：无论客户端client连接的是集群中的哪台 Server（znode节点），其读取到的数据模型中的数据都是一致的。
 
-- 可靠性：一旦某事务被成功应用到了 zk，则会一直被保留下来，除非另一个事务将其修改。
+- 可靠性(ACID中的D)：一旦某事务被成功应用到了 zk，则会一直被保留下来，除非另一个事务将其修改。
 
-- 最终一致性：一旦一个事务被成功应用，zk 可以保证在一段较短的时间内<!--对于客户端而言，它还是读的旧数据，不是实时数据-->，客户端最终一定能够从服务端读取到最新的数据。但[不能保证实时读取到]()。
+- 最终一致性(ACID中的C)：一旦一个事务被成功应用，zk 可以保证在一段较短的时间内<!--对于客户端而言，它还是读的旧数据，不是实时数据-->，客户端最终一定能够从服务端读取到最新的数据。但[不能保证实时读取到]()。
 
 ## Paxos理论算法
 
- 对于 zk 理论的学习，最重要也是最难的知识点就是 Paxos 算法。所以我们首先学习 Paxos算法。
+Paxos 算法是莱斯利·兰伯特(Leslie Lamport)1990 年提出的一种基于消息传递的、具有高容错性的一致性算法。较有名的 Paxos 工程实现有 Google Chubby、 ZAB、微信的 PhxPaxos 等。
 
-### 算法简介
-
-Paxos 算法是莱斯利·兰伯特(Leslie Lamport)1990 年提出的一种基于消息传递的、具有高 容错性的一致性算法。Paxos 算法是一种公认的晦涩难懂的算法，并且工程实现上也具有很大难度。较有名的 Paxos 工程实现有 Google Chubby、 ZAB、微信的 PhxPaxos 等。
-
-Paxos 算法要解决的问题是，在分布式系统中如何 就某个决议达成一致。
+Paxos 算法要解决的问题是，在分布式系统中【针对某个决议，集群中所有server达成一致】。
 
 拜占庭将军问题是由 Paxos 算法作者莱斯利·兰伯特提出的点对点通信中的基本问题。该 问题要说明的含义是，在不可靠信道上试图通过消息传递的方式达到一致性是不可能的。所 以，[Paxos 算法的前提是不存在拜占庭将军问题，即信道是安全的、可靠的，集群节点间传递的消息是不会被篡改的]()。
 
-一般情况下，分布式系统中各个节点间采用两种通讯模型:共享内存(Shared Memory)、消息传递(Messages Passing)。而 Paxos 是基于消息传递通讯模型的。
+> 现代校验算法保证消息是可靠的；局域网内部保证消息是安全的
+
+一般情况下，分布式系统中各个节点间采用两种通讯模型: 
+
+- 共享内存(Shared Memory)：拜占庭是唯一决策者，所有将军把消息只给拜占庭
+- 消息传递(Messages Passing)：所有将军都是潜在决策者，所有将军把消息互相同步给对方。而 Paxos 是基于消息传递通讯模型的。
 
 ### 算法描述
 
+- 2种名词：
+  - maxN:  每个【表决者】中保存的已经被 accept 的提案中会存在一个编号最大的提案
+  - prepare(N): 一个编号为 N 的提议
+
 - 三种角色:在 Paxos 算法中有三种角色，分别具有三种不同的行为。但[很多时候，一个node同时充当着以下所有角色]()。
-  
-  - Proposer:提案者，会干活，也参与政治
-  - Acceptor:表决者，会干活，也参与政治
-  - Learner:同步者，会干活，不参与政治
-  
+
+  - Proposer:提案者，【会干活同步本地，也参与政治提案】
+  - Acceptor:表决者，【会干活同步本地，也参与政治提案】
+  - Learner  :同步者，【会干活同步本地，不参与政治天】
 - **Paxos** 算法的一致性
-  
-  - 每个提案者在提出提案时都会首先获取到一个具有全局唯一性的、递增的提案编号N，即在整个集群中是唯一的编号 N，然后将该编号赋予其要提出的提案。
-  - 每个表决者在accept某提案后，会将该提案的编号N记录在本地，这样每个表决者中保存的已经被 accept 的提案中会存在一个编号最大的提案，其编号假设为 maxN。每个表决者仅会 accept 编号大于自己本地 maxN 的提案。
+
+  - 每个【提案者】在提出提案时都会首先获取到一个具有全局唯一性的、递增的【提案编号N】，即在整个集群中是唯一的编号 N，然后将该编号赋予其要提出的提案。
+  - 每个【表决者】在accept某提案后，会将该提案的编号N记录在本地，这样每个【表决者】中保存的已经被 accept 的提案中会存在一个编号最大的提案，其编号假设为 maxN。每个【表决者】仅会 accept 编号大于自己本地 maxN 的提案。
   - 在众多提案中最终只能有一个提案被选定。
   - 一旦一个提案被选定，则其它服务器会主动同步(Learn)该提案到本地。
   - 没有提案被提出则不会有提案被选定。
 
-- 算法过程描述：prepare 和accept(包含commit）两个阶段
-  <img src="https://oscimg.oschina.net/oscnet/c57e9770d24e5b380f343f7b68fcddd0050.jpg" alt="img" style="zoom: 67%;" />
+### 算法过程描述：prepare 和accept(包含commit）两个阶段
 
-  - **prepare** 阶段
-    <img src="https://img-blog.csdnimg.cn/2019052015524633.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTI5NjUyMDM=,size_16,color_FFFFFF,t_70" alt="img" style="zoom: 67%;" />
 
-    1. 提案者(Proposer)准备提交一个编号为 N 的提议 <!--这个N从哪里来？一般会有一个配置中心，proposer从这里领取-->，于是其首先向所有表决者(Acceptor)发送 prepare(N)请求，用于试探集群是否支持该编号的提议。
 
-    2. 每个表决者(Acceptor)中都保存着自己曾经 accept 过的提议中的最大编号 maxN。当一个表决者接收到其它主机发送来的 prepare(N)请求时，其会比较 N 与 maxN 的值。有以下 几种情况:
+#### **prepare** 阶段
 
-       -  若 N 小于 maxN，则说明该提议已过时，当前表决者采取不回应或回应 Error 的方式来拒绝该 prepare 请求;[如左上角的Acceptor]()<!--由于Paxos是理论算法，具体采取什么措施，由实践者自行决定-->
-  - 若 N 大于 maxN，则说明该提议是可以接受的，当前表决者会首先将该 N 记录下来([以prepareN的形式]() <!--后边的算法演示用maxN代替，注意区别--> ，并[将其曾经记录的已经 accept 的编号最大的提案 Proposal(myid,maxN,value)]()反馈给Proposer， 以向Proposer展示自己支持的提案意愿。
-       其中第一个参数 myid 表示该提案的提案者 标识 id，第二个参数表示[其曾接受的提案的最大编号 maxN]()，第三个参数表示该提案的真正内容 value。当然，若当前表决者还未曾 accept 过任何提议，则会Proposal(myid,null,null)反馈给提案者。[如右上角的Acceptor]()
-    
-       > 注意：在 prepare 阶段N 不可能等于 maxN。这是由 N 的生成机制决定的 <!--这是因为配置中心唯一，N永远自增，proposer只能从中获取--> 。要获得 N 的值， 其必定会在原来数值的基础上采用同步锁方式增一。
-       
-  - accept阶段
-    ![][Paxos Accept阶段]
-  
-  1. 当[提案者(Proposer)]()发出 [prepare(N)]()后，若收到了超过半数的[表决者(Accepter)]()的反馈， 那么该提案者就会将其[真正的提案 Proposal(myid,N,value)]() 发送给所有的[表决者]()。
-    2. 当[表决者(Acceptor)]()接收到提案者发送的 [Proposal(myid,N,value)]()提案后，会再次拿出自己曾经 accept 过的提议中的最大编号 maxN，或曾经记录下的 prepare 的最大编号，让 N与它们进行比较，<!--有prepareN,就比较prepareN-->
-       - 若 N 大于等于这两个编号，则当前表决者 accept 该提案，并反馈给提案者[ACK]()。[如右边的2个node]()
-       - 若 N 小于这两个编号，则表决者采取[不回应或回应 Error]() 的方式来拒绝该提议。[如左上角的node]()
-    3. 若提案者接收到的反馈数量<=一半，则有两种可能的结果产生。
-       - 放弃该提案，不再提出;
-       - 重新进入 prepare 阶段，递增提案号，重新提出 prepare请求。
-    4. 若提案者接收到的反馈数量>一半，则其会向外广播两类信息:
-       - 向曾 accept 其提案的表决者发送[“可执行数据同步信号”commit]()，即让它们执行其曾接收 到的提案。[并且把Proposal(myid,N,value)记录下来]()。
-       - 向未曾向其发送 accept 反馈的表决者发送[“提案proposal + 可执行数据同步信号commit”]()，即让它们接受到该提案后马上执行。[并且把Proposal(myid,N,value)记录下来。]()
+<img src="https://img-blog.csdnimg.cn/2019052015524633.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTI5NjUyMDM=,size_16,color_FFFFFF,t_70" alt="img" style="zoom: 67%;" />
+
+1. 【Proposer】准备提交一个编号为 N 的提议 ，于是其首先向所有【Acceptor】发送 prepare(N)请求，用于试探集群是否支持该编号的提议。
+   <!--这个N从哪里来？一般会有一个配置中心，proposer从这里领取-->
+
+2. 【Acceptor】接收到其它【Proposer】发送来的 prepare(N)请求时，其会比较 N 与 maxN 的值。
+
+   -  若 N < maxN，则说明该提议已过时，当前【Acceptor】采取不回应或回应 Error 的方式来拒绝该 prepare(N) 请求;
+        [如左上角的Acceptor]()<!--由于Paxos是理论算法，具体采取什么措施，由实践者自行决定-->
+   
+   - 若 N > maxN，则说明该提议是可以接受的，当前【Acceptor】会首先将该 N 记录下来([以prepareN的形式]() <!--后边的算法演示用maxN代替，注意区别--> ，并[将其曾经记录的已经 accept 的编号最大的提案 Proposal(myid,maxN,value)]()反馈给Proposer， 以向Proposer展示自己支持的提案意愿。
+        第一个参数【myid】 表示该提案的【Proposer】标识 id
+        第二个参数【maxN】表示当前【Acceptor】曾接受的提案的最大编号 
+        第三个参数表示该提案的真正内容 value。若当前表决者还未曾 accept 过任何提议，则会Proposal(myid,null,null)反馈给提案者。[如右上角的Acceptor]()
+   
+> 注意：在 prepare 阶段N 不可能等于 maxN。这是由 N 的生成机制决定的 <!--这是因为配置中心唯一，N永远自增，proposer只能从中获取--> 。要获得 N 的值， 其必定会在原来数值的基础上采用同步锁方式增一。
+
+
+#### accept阶段
+
+![][Paxos Accept阶段]
+
+1. 当【Proposer】发出 [prepare(N)]()后，若收到了超过半数的[【Accepter】]()， 那么该提案者就会将其[真正的提案 Proposal(myid,N,value)]() 发送给所有的【Acceptor】。
+  2. 当【Acceptor】接收到【Proposer】发送的 [Proposal(myid,N,value)]()提案后，会根据本地**曾经 accept** 过的提议中的最大编号【 maxN】，或**曾经记录**下的 prepare 的最大编号【prepareN】，与【proposal(N)】比较
+     - 若 N > (prepareN,maxN) ，则当前表决者 accept 该提案，并反馈给【Proposer】[ACK]()。[如右边的2个node]()
+     - 若 N < (prepareN,maxN) ，则表决者采取[不回应或回应 Error]() 的方式来拒绝该提议。[如左上角的node]()
+  3. 若【Proposer】接收到的ack数量<=一半，则有两种可能的结果产生。
+     - 放弃该提案，不再提出;
+     - 重新进入 prepare 阶段，递增提案号，重新提出 prepare请求。
+  4. 若【Proposer】接收到的ack数量>一半，则其会向外广播两类信息:
+     - 向曾 accept 其提案的表决者发送[“可执行数据同步信号”commit]()，即让它们执行其曾接收 到的提案。[并且把Proposal(myid,N,value)记录下来]()。
+     - 向未曾向其发送 accept 反馈的表决者发送[【proposal(N)】 + commit]()，即让它们接受到该提案后马上执行。[并且把Proposal(myid,N,value)记录下来。]()
 
 > 提问 1:
->  在 Prepare 阶段已经比较过了，并且已经通过了，为什么在 Accept 阶段还需要进行比较?
+> 在 Prepare 阶段已经比较过了，并且已经通过了，为什么在 Accept 阶段还需要进行比较?
 >
-> - 就是担心A发送Prepare阶段过了PN，然后又有一个更好的提案B发送Prepare也通过了PN+1。那么Acceptor就会记录PN+1,把PN替换了。半路杀出个程咬金.....所以比较比较
+> - 担心提案A发送Prepare阶段并同过了，记录为Proposal(N)
+> - 然后又提案B发送Prepare也并同过了，记录为Proposal(N+1)。
+> - 那么Acceptor就会记录为Proposal(N+1) ,把Proposal(N)替换了。半路杀出个程咬金.....所以比较
 >
 > 提问 2:
 >  在 Prepare 阶段与 Accept 阶段都进行了比较，为什么在发送 COMMIT 信号量时无需进行比较?
 >
 > - PAXOS确实也会有半路杀出个程咬金的问题，所以在实现上，通过给3种角色添加[状态]()从而避免
 
-### 算法演示
-
-只是演示了一种简单情况，便于理解：
-
-#### **prepare 阶段：**
-
-<!--需要注意的是，maxN不是acceptor返回的proposal(id,N,value)中的N，为什么呢？因为N表示已经接收过的提案对应的maxN，而图中指的是prepare阶段接受的（还没到accept阶段）最大N，所以图中maxN准确来说是prepareN-->
-
-<img src="https://img-blog.csdnimg.cn/20200624182120402.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-- Server-1 向自己，和Server-2 发送了一个编号为2的预提案（`预提案，只有编号`）（没有向Server-3发送是为了模拟网络异常 等收不到回复的情况）
-- 此时Server-1 和 和Server-2 之前都没有接受过提案，所以会接编号2的预提案，并反馈给Server-1，对于Server-1来说会收到两个Accept反馈
-- Server-2 向自己，和Server-3 发送了一个编号为1的预提案
-- 由于Server-2 已经接收过编号2的预提案，所以会拒绝Server-2编号1的预提案，而Server-3会接受编号为1的预提案，此时对于Server-2来说只收到一个Accept反馈
-
-<img src="https://img-blog.csdnimg.cn/20200624181801867.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-- Server-3(proposer) 向自己，和Server-2 发送了一个编号为3的预提案  <!--重新进入 prepare 阶段，递增提案号，重新提出 prepare请求-->
-- Server-2 和 和Server-3 发现编号3都比自己已经接受的提案编号大，所以都会接受编号为3的预提案，对于Server-3来说收到两个Accept反馈
-
-  <img src="https://img-blog.csdnimg.cn/20200624180611488.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-- 由于Server-2 (proposer)被拒绝了，这个时候尝试重新发送新的提案，于是向Server-2和Server-3发送编号为4的预提案 <!--重新进入 prepare 阶段，递增提案号，重新提出 prepare请求-->
-- 此时Server-2 (acceptor) 和 和Server-3 (acceptor) 发现编号4都比自己已经接受的提案编号大，所以都会接受编号为4的预提案，对于Server-2来说也收到两个Accept反馈
-
-#### **accept 阶段：**
-
-prepare 阶段时，每个Server都收到了两个接受反馈，所以`假如他们刚好在prepare阶段同时结束，一起进入accept阶段，他们都会在accept 阶段发送自己认为的真正的提案`：
-
-<img src="https://img-blog.csdnimg.cn/2020062418030826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MTk0NzM3OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-- Server-1 向 Server-1和Server-2发送编号2的提案，只有 Server-1 能够接受，提案不通过
-- Server-2 向 Server-2和Server-3发送编号4的提案，可以收到两个接受反馈，超过半数，提案通过
-- Server-3 向 Server-2和Server-3发送编号3的提案，没有任何Server接受反馈，提案不通过
-
-可以看到，最终只有一个提案可以通过。
-
-没有接收到超过半数表决者 accept 反馈的Server，可以选择放弃该提案，等待已经提案通过的Server通知并更新，也可以选择递增提案号，重新提出 prepare请求，假如prepare请求能够通过（超过半数反馈），那么此时在prepare阶段肯定能收到包含“已经通过的提案”的反馈，然后在accept阶段将已经通过的提案的内容作为本次新提案的内容广播出去，所以`即使是新的提案（编号更大的提案），但提案的内容还是和已经通过的提案内容一致，仍然能保证一致性！`
-
-```
-注意：上面演示的只是一种可能出现的简单情况，实际上每个Server在发起提案时，每个提案的prepare阶段和accept 阶段都是交错的，并不是所有提案prepare阶段都结束了才一起进入accept阶段，但是即使这样，仍然能保持一致性
-```
-
 
 
 ### **Paxos** 算法的活锁问题
 
-> 活锁定义(摘自百度百科)：
 > 活锁指的是任务或者执行者没有被阻塞，由于某些条件没有满足，导致一直重复尝试—失败—尝试—失败的过程。处于活锁的实体是在不断的改变状态，活锁有可能自行解开。
 
 Paxous什么情况会出现死锁？
@@ -157,42 +126,50 @@ Paxous什么情况会出现死锁？
 
 
 
-## Paxos的实现: ZAB协议
-
-### ZAB协议简介
+## Paxos的实现和活锁的解决: ZAB协议
 
 ZAB ，Zookeeper Atomic Broadcast，zk 原子消息广播协议，是专为 ZooKeeper 设计的一 种[支持崩溃恢复]()的原子广播协议，在 Zookeeper 中，主要依赖 ZAB 协议来实现分布式数据 一致性。
 
-**Leader处理写请求：**Zookeeper 使用一个[单一主进程]()来接收并处理客户端的[所有事务请求]()，即写请求。当服务器数据的状态发生变更后，[集群采用 ZAB 原子广播协议]()，以[事务提案 Proposal]() 的形式广 播到所有的副本进程上。ZAB 协议能够保证一个全局的变更序列，即[可以为每一个事务分配 一个全局的递增编号 xid]()。<!--有个唯一的分配中心-->
+**Leader处理写请求：**Zookeeper 使用一个[单一主进程，即Leader]()来接收并处理客户端的[所有事务请求]()。当服务器数据的状态发生变更后，[集群采用 ZAB 原子广播协议]()，以[事务提案 【Proposal】]() 的形式广 播到所有的副本进程上。ZAB 协议能够保证一个全局的变更序列，即[可以为每一个事务分配 一个全局的递增编号 xid]()。
 
-**Followers处理读请求和转发写请求：**当 Zookeeper 客户端连接到 Zookeeper 集群的一个节点后，若[客户端]()提交的是读请求， 那么当前节点就直接根据自己保存的数据对其进行响应;如果是写请求且当前节点不是 Leader，那么节点就会将该写请求转发给 Leader，Leader 会以提案的方式广播该写操作，只 要有超过半数节点同意该写操作，则该写操作请求就会被提交。然后 Leader 会再次广播给所有订阅者，即 Learner，通知它们同步数据。
+**Followers处理读请求和转发写请求：**当 Zookeeper 客户端连接到 Zookeeper 集群的一个节点后，若[客户端]()提交的是读请求， 那么当前节点就直接根据自己保存的数据对其进行响应;如果是写请求且当前节点不是 Leader，那么节点就会将该写请求转发给 Leader，Leader 会以提案的方式广播该写操作，只要有超过半数节点同意该写操作，则该写操作请求就会被提交。然后 Leader 会再次广播给所有订阅者，即 Learner，通知它们同步数据。
 ![img](https://img-blog.csdnimg.cn/20190520161427939.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3UwMTI5NjUyMDM=,size_16,color_FFFFFF,t_70)
 
-红线：读请求， 绿线：写请求
+> 红线：事务请求，即读请求； 绿线：写请求
+
+
 
 ### **ZAB** 与 **Paxos** 的关系
 
 ZAB 协议是 Paxos 算法的一种工业实现算法。但两者的设计目标不太一样。
 
-- ZAB 协议主 要用于构建一个高可用的分布式数据主从系统，即Follower是Leader的从机，Leader挂了， 马上就可以选举出一个新的 Leader，但平时它们都对外提供服务。[运行在集群leader挂了的时候]()
-- Fast Paxos 算法则是用 于构建一个分布式一致性状态机系统，确保系统中各个节点的状态都是一致的。[运行在集群正常工作的时候]()
+- ZAB 协议主 要用于构建一个高可用的分布式数据【主从系统】。[运行在集群leader挂了的时候]()
+- Fast Paxos 算法则是用 于构建一个分布式一致性【状态机系统】，确保系统中各个节点的状态都是一致的。[运行在集群正常工作的时候]()
+
+### 2个权利
+
+- 表决权：集群正常工作时，是否参与事务请求的prepare和accept2个阶段
+- 选举权：集群leader挂了，server是否有权参与选举
+
+
 
 ### 三类角色
 
-<img src="https://upload-images.jianshu.io/upload_images/6808142-22bcbfaa17f6c56d.jpg" alt="img" style="zoom: 67%;" />
-
 为了避免 Zookeeper 的单点问题，zk 也是以集群的形式出现的。zk 集群中的角色主要有以下三类:
 
-- Leader:<!--领导阶级的一把手-->
-  - 事务请求的唯一处理者，也可以处理读请求。
+- Leader:
+  - 处理事务请求的唯一处理者
+  - 处理读请求，直接向客户端响应;
   - 具有选举权和被选举权
   - 具有表决权
-- Follower:<!--领导阶级-->
-  - 可以直接处理客户端的读请求，并向客户端响应;但其不会处理事务请求，其只会将客户端事务请求转发给 Leader 来处理; 同步 Leader 中的事务处理结果
+- Follower:
+  - 不会处理事务请求，将事务请求转发给 Leader ，并接收 Leader 中的事务处理结果在本地同步
+  - 处理读请求，直接向客户端响应;
   - 具有表决权;
   - 具有选举权与被选举权。
-- Observer: <!--工人阶级，不参与管理，只会埋头干活-->
+- Observer: <!--不参与leader选举，不参与2个阶段的表决，只会埋头干活-->
   - 用于协助 Follower 处理更多的客户端读请求。Observer 的增加，会提高集群读请求处理的吞吐量，但不会增加事务请求 的通过压力，不会增加 Leader 选举的压力。
+  - 处理读请求，直接向客户端响应;
   - 没有选举权与被选举权
   - 没有表决权
 
@@ -213,8 +190,8 @@ ZAB 协议是 Paxos 算法的一种工业实现算法。但两者的设计目标
   - 即要从Leader中同步数据的Server
   - Learner = Follower + Observer
 - QuorumServer:QuorumPeer，Participant，法定服务器，法定主机，参与者。
-  - 在集群正常服务状态下，具有表决权的服务器称为 QuorumServer，或 QuorumPeer;
-  - 在 Leader 选举过程中，具有选举权与被选举权的服务器，称为 Participant。
+  - 在集群正常服务状态下，具有【表决权】的服务器称为 QuorumServer，或 QuorumPeer;
+  - 在 Leader 选举过程中，具有【选举权与被选举权】的服务器，称为 Participant。
   - QuorumServer = Leader + Follower = Participant
 
 ### 三个数据
@@ -222,34 +199,29 @@ ZAB 协议是 Paxos 算法的一种工业实现算法。但两者的设计目标
 在 ZAB 中有三个很重要的数据:
 
 - zxid:其为一个64位长度的Long类型，其中高32位表示epoch，低32位表示xid。
-  - epoch:(时期、年号)每个Leader选举结束后都会生成一个新的epoch，并会通知到集群中所有其它 Server，包含 Follower 与 Observer。<!--皇上登基了，改年号，昭告天下-->
-  - xid:事务id（就是写请求的id），是一个流水号。
+- epoch:(时期、年号)每个Leader选举结束后都会生成一个新的epoch，并会通知到集群中所有其它 Server，包含 Follower 与 Observer。<!--皇上登基了，改年号，昭告天下-->
+- xid:事务id，是一个流水号。
 
 ### 四种状态
 
 zk 集群中的每一台主机，在不同的阶段会处于不同的状态。每一台主机具有四种状态。
 
 - LOOKING:选举状态
-
 - FOLLOWING:Follower的正常工作状态
-
 - OBSERVING:Observer的正常工作状态
-
 - LEADING:Leader的正常工作状态
 
-  
+姐
 
-### 同步模式与广播模式 
-
-#### 三种模式
+### 三种模式
 
 ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没有十分明显的界线，它们相互交织在一起。
 
-- 恢复模式:[在集群启动过程中，或 Leader 崩溃后]()，系统都需要进入恢复模式，以恢复系统对外提供服务的能力。其包含两个重要阶段:Leader 选举与初始化同步(广播)。
-- 广播模式
-- 同步模式
+- 恢复模式:[在集群启动过程中，或 Leader 崩溃后]()，系统都需要进入恢复模式，以恢复系统对外提供服务的能力。其包含两个重要阶段:Leader 选举与初始化同步。
+- 广播模式：初始化广播（在恢复模式下）与更新广播（集群正常运行，处理事务中）
+- 同步模式：初始化同步（在恢复模式下）与更新同步
 
-#### 初始化同步（准Leader发送消息）
+#### 初始化广播和更新广播（准Leader发送消息）
 
 <img src="https://img-blog.csdnimg.cn/20200330212107984.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2IxMzAzMTEwMzM1,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom: 25%;" />
 
@@ -433,7 +405,7 @@ ZAB 协议中对 zkServer 的状态描述有三种模式。这三种模式并没
 
 ## CAP
 
-### 简介
+
 
 CAP 定理指的是在一个分布式系统中，Consistency(一致性)、 Availability(可用性)、 Partition tolerance(分区容错性)，三者不可兼得。
 
@@ -494,5 +466,4 @@ A机房（Leader）,B机房，C机房；
 
 
  
-
 

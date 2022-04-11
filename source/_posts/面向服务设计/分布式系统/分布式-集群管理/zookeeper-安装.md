@@ -11,19 +11,17 @@ tags:
 
 # 安装第一台zk
 
-## 下载
-
 ```
 wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
 ```
 
-## 解压到/opt/apps目录下
+解压到/opt/apps目录下
 
 ```shell
 tar -xzf apache-zookeeper-3.6.2-bin.tar.gz -C /opt/apps
 ```
 
-## 创建软链接以屏蔽冗长版本号
+创建软链接以屏蔽冗长版本号
 
 ```shell
 ln -s /opt/apps/zookeeper-3.6.2 /opt/apps/zk

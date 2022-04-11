@@ -8,15 +8,13 @@ tags: [java,springboot,startup]
 
 # SpringBoot 启动过程
 
-![img](https://upload-images.jianshu.io/upload_images/6912735-51aa162747fcdc3d.png)
+![img](/Users/qifei/Documents/blog/source/_posts/编程语言/Java/springboot/springboot启动流程图.png)
 
 启动流程主要分为三个部分，
 
-1. 第一部分进行 `SpringApplication` 的初始化模块
-   1. 配置一些基本的**环境变量、资源、构造器、监听器**。
+1. 第一部分进行 `SpringApplication` 的初始化模块: 配置一些基本的**环境变量、资源、构造器、监听器**。
 2. 第二部分实现了应用具体的启动方案，包括启动流程的监听模块、加载配置环境模块、及核心的创建上下文环境模块
-
-3. 第三部分是自动化配置模块，该模块作为springboot自动配置核心，在后面的分析中会详细讨论。在下面的启动程序中我们会串联起结构中的主要功能。
+3. 第三部分是自动化配置模块，该模块作为springboot自动配置核心
 
 
 
@@ -25,14 +23,6 @@ tags: [java,springboot,startup]
 ## @SpringApplication
 
  每个SpringBoot程序都有一个主入口，也就是main方法，main里面调用SpringApplication.run()启动整个spring-boot程序。SpringBoot要求该main方法所在类必须使用@SpringBootApplication注解，以及@ImportResource注解(if need)
-
-@SpringBootApplication包括三个注解：
-
-| 注解                     | 功能                                                         |
-| ------------------------ | ------------------------------------------------------------ |
-| @EnableAutoConfiguration | 自动配置：从 `classpath` 中搜寻所有的 `META-INF/spring.factories` 配置文件，并将其中 `org.springframework.boot.autoconfigure.EnableAutoConfiguration` 对应的配置项通过**反射实例化**为对应的标注了 `@Configuration` 的 `JavaConfig` 形式的 IoC 容器配置类，然后汇总为一个并加载到 IoC 容器。 |
-| @SpringBootConfiguration | 源码内部其实是`@Configuration`：被标注的类等于在spring的XML配置文件中`applicationContext.xml`，装配所有bean事务，提供了一个spring的上下文环境Context |
-| @ComponentScan           | 组件扫描，可自动发现和装配Bean，默认扫描SpringApplication的run(xxx.class)中, xxx.class所在的包路径下文件，所以最好将该启动类放到根包路径下。`@ComponentScan`通常与`@Configuration`一起配合使用，相当于xml里面的`<context:component-scan>`，用来告诉Spring需要扫描哪些包或类。如果不设值的话默认扫描@ComponentScan注解所在类的同级类和同级目录下的所有类  , *所以对于一个Spring Boot项目，一般会把入口类放在顶层目录中，这样就能够保证源码目录下的所有类都能够被扫描到*。 |
 
 
 
@@ -62,6 +52,8 @@ private void initialize(Object[] sources) {
     this.mainApplicationClass = deduceMainApplicationClass();
 }
 
+//----------------分割线-----------------
+
 //run()方法链路：1st step
 public static ConfigurableApplicationContext run(Class<?> primarySource, String... args) {
   return run(new Class[]{primarySource}, args);
@@ -87,29 +79,29 @@ public ConfigurableApplicationContext run(String... args) {
     // Headless模式是系统的一种配置模式。在该模式下，系统缺少了显示设备、键盘或鼠标。
   this.configureHeadlessProperty();
   
-  //key-1: 获取SpringApplicationRunListeners
+  //key-1: 获取SpringApplicationRunListeners，并通知监听者，开始启动
   SpringApplicationRunListeners listeners = this.getRunListeners(args);
-  
-  // 通知监听者，开始启动
   listeners.starting();
 
   Collection exceptionReporters;
   try {
     ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
     
-     // KEY 2 - 根据SpringApplicationRunListeners以及参数来准备环境env
+    // key-2: 根据SpringApplicationRunListeners以及参数来准备环境env
     ConfigurableEnvironment environment = this.prepareEnvironment(listeners, applicationArguments);
     
     this.configureIgnoreBeanInfo(environment);
+    
+    //（忽略）banner小彩蛋
     Banner printedBanner = this.printBanner(environment);
     
     //key-3:  创建`应用配置上下文ConfigurableApplicationContext(即run方法的返回对象)
     context = this.createApplicationContext();
     exceptionReporters = this.getSpringFactoriesInstances(SpringBootExceptionReporter.class, new Class[]{ConfigurableApplicationContext.class}, context);
     
-    // KEY 4 - Spring上下文前置处理
+    //key-4: Spring上下文前置处理
     this.prepareContext(context, environment, listeners, applicationArguments, printedBanner);
-    // KEY 5 - Spring上下文刷新, 实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作
+    //key-5: Spring上下文刷新, 实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作
     this.refreshContext(context);
     
     // KEY 6 - Spring上下文后置处理
