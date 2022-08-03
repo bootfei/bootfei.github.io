@@ -1,5 +1,5 @@
 ---
-title: jdk时间日期常用命令
+title: JDK-util-Date
 date: 2021-04-01 12:17:47
 tags:
 ---
@@ -8,19 +8,15 @@ tags:
 
 # JDK
 
-## 获取当前时间
+获取当前时间
 
 ```java
-
-    public static void main(String[] args){
        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			 Date date = new Date(System.currentTimeMillis());
       formatter.format(date);
-    } 
-
 ```
 
-## 时间加减
+时间加减
 
 ```java
 public static void addDays(Date d, int days){
@@ -31,7 +27,7 @@ public static void addDays(Date d, int days){
 }
 ```
 
-## 时间比较
+时间比较
 
 ```java
 			Date d1 = sdformat.parse("2019-04-15");

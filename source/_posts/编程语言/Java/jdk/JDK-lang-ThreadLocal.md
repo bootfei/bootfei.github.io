@@ -505,7 +505,7 @@ ThreadLocal本身是线程隔离的，InheritableThreadLocal提供了一种父�
 
 可以看一下其中的具体实现
 
-```
+```java
 private ThreadLocalMap(ThreadLocalMap parentMap) {
     Entry[] parentTable = parentMap.table;
     int len = parentTable.length;
@@ -540,27 +540,33 @@ private ThreadLocalMap(ThreadLocalMap parentMap) {
 
 关于ThreadLocal是否会引起内存泄漏也是一个比较有争议性的问题
 
-- 认为ThreadLocal会引起内存泄漏，因为如果一个ThreadLocal实例对象被回收了，entry.key指向null，但是entry.value对于这个链路依旧可达
-  **当前线程 -> 当前线程的threadLocals(ThreadLocal.ThreadLocalMap对象）-> Entry数组 -> 某个entry.value**
-  因此value不会被回收。
-
-- 认为ThreadLocal不会引起内存泄，是因为ThreadLocal.ThreadLocalMap源码实现中自带一套自我清理的机制，对应线程之后调用ThreadLocal的get和set方法都有**很高的概率**会顺便清理掉无效对象，断开value强引用，从而大对象被收集器回收。
-
+- 认为ThreadLocal会引起内存泄漏，是因为Entry对象中，虽然Key(ThreadLocal)是通过弱引用引入的，但是value即变量值本身是通过强引用引入。
   
+  这就导致，由于ThreadLocalMap和线程的生命周期是一致的，当线程资源长期不释放，即使ThreadLocal本身由于弱引用机制已经回收掉了，但value还是驻留在线程的ThreadLocalMap的Entry中。即存在key为null，但value却有值的无效Entry。导致内存泄漏。
 
-之所以有关于内存泄露的讨论是因为在有线程复用如线程池的场景中，一个线程的寿命很长，大对象value长期不被回收影响系统运行效率与安全。如果线程不会复用，用完即销毁了也不会有ThreadLocal引发内存泄露的问题。《Effective Java》一书中的第6条对这种内存泄露称为`unintentional object retention`(无意识的对象保留）。
+  如果线程不会复用，用完即销毁了也不会有ThreadLocal引发内存泄露的问题。《Effective Java》一书中的第6条对这种内存泄露称为`unintentional object retention`(无意识的对象保留）。
+  
+  GC ROOT ： **当前线程 -> 当前线程的threadLocals-> Entry数组 -> entry.value**
+  
+- 认为ThreadLocal不会引起内存泄，是因为ThreadLocal.ThreadLocalMap自带自我清理的机制，运行对应线程之后调用ThreadLocal的get和set方法都有**很高的概率**会顺便清理掉无效对象，断开value强引用，从而大对象被收集器回收。
+
 
 如果在使用的ThreadLocal的过程中，显式地进行remove是个很好的编码习惯，这样是不会引起内存泄漏。
 
 
 
-只能说如果但无论如何，我们应该考虑到何时调用ThreadLocal的remove方法。一个比较熟悉的场景就是对于一个请求一个线程的server如tomcat，在代码中对web api作一个切面，存放一些如用户名等用户信息，在连接点方法结束后，再显式调用remove。
+1. 为什么ThreadLocalMap使用弱引用存储ThreadLocal作为Key？
+   - 假如使用强引用，当ThreadLocal不再使用、需要GC回收时，发现某个线程中ThreadLocalMap存在该ThreadLocal的强引用，无法回收，造成内存泄漏。因此，使用弱引用的key可以防止长期存在的线程（通常使用了线程池）导致ThreadLocal无法回收造成内存泄漏。
+2. 为什么ThreadLocalMap使用强引用存储客户的value？为什么不像key一样使用弱引用？
+   - **「不设置为弱引用，是因为不清楚这个`Value`除了`ThreadLocalMap`的引用, 是否还存在其他引用，如果不存在其他引用，当`GC`的时候就会直接将这个Value干掉了，而此时我们的`ThreadLocal`还处于使用期间，就会造成Value为null的错误，所以将其设置为强引用。」**
+
+
 
 **示例：**
 
 由于`ThreadLocal`的`key`是弱引用，因此如果使用后不调用`remove`清理的话会导致对应的`value`内存泄露。
 
-```
+```java
 @Test
 public void testThreadLocalMemoryLeaks() {
     ThreadLocal<List<Integer>> localCache = new ThreadLocal<>();
@@ -584,7 +590,7 @@ public void testThreadLocalMemoryLeaks() {
 
 下面我们看具体的内存泄露的例子：
 
-```
+```java
 public class MyCounter {
  private int count = 0;
 
@@ -629,15 +635,11 @@ public class LeakingServlet extends HttpServlet {
 
 
 
-
-
-
-
-### 线程池中线程上下文丢失
+### 常见问题2:线程池中线程上下文丢失
 
 `ThreadLocal`不能在父子线程中传递，因此最常见的做法是把父线程中的`ThreadLocal`值拷贝到子线程中，因此大家会经常看到类似下面的这段代码：
 
-```
+```java
 for(value in valueList){
      Future<?> taskResult = threadPool.submit(new BizTask(ContextHolder.get()));//提交任务，并设置拷贝Context到子线程
      results.add(taskResult);
@@ -649,7 +651,7 @@ for(result in results){
 
 提交的任务定义长这样：
 
-```
+```java
 class BizTask<T> implements Callable<T>  {
     private String session = null;
     
@@ -674,7 +676,7 @@ class BizTask<T> implements Callable<T>  {
 
 对应的线程上下文管理类为：
 
-```
+```java
 class ContextHolder {
     private static ThreadLocal<String> localThreadCache = new ThreadLocal<>();
     
@@ -695,7 +697,7 @@ class ContextHolder {
 
 这么写倒也没有问题，我们再看看线程池的设置：
 
-```
+```java
 ThreadPoolExecutor executorPool = new ThreadPoolExecutor(20, 40, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(40), new XXXThreadFactory(), ThreadPoolExecutor.CallerRunsPolicy);
 ```
 
@@ -710,11 +712,11 @@ ThreadPoolExecutor.CallerRunsPolicy //转串行执行
 
 可以看到，我们初始化线程池的时候指定如果线程池满，则新提交的任务转为串行执行，那我们之前的写法就会有问题了，串行执行的时候调用`ContextHolder.remove();`会将主线程的上下文也清理，即使后面线程池继续并行工作，传给子线程的上下文也已经是`null`了，而且这样的问题很难在预发测试的时候发现。
 
-### 并行流中线程上下文丢失
+### 常见问题3:并行流中线程上下文丢失
 
 如果`ThreadLocal`碰到并行流，也会有很多有意思的事情发生，比如有下面的代码：
 
-```
+```java
 class ParallelProcessor<T> {
     
     public void process(List<T> dataList) {

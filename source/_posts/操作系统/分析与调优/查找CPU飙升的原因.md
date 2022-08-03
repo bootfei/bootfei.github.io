@@ -8,13 +8,13 @@ tags: [java, jstack]
 
 ## 第一步：找到耗费CPU的进程
 
-首先，因为CPU飙升了，所以要查看CPU的相关信息，所以需要使用TOP命令
+使用TOP命令
 
 <img src="/Users/qifei/Library/Application Support/typora-user-images/image-20201202174921436.png" alt="image-20201202174921436" style="zoom:50%;" />
 
 ## 第二步：找到耗费CPU的线程（10进制）
 
-根据1st step中的返回内容，看到进程号116664的CPU很高。所以，需要进一步锁定该进程内部的线程耗费CPU, 所以需要使用top -H -p [pid]命令查看线程， (也可使用shift -h进行切换)
+进程号116664的CPU很高。所以，需要进一步锁定该进程内部的线程耗费CPU, 所以需要使用top -H -p [pid]命令查看线程， (也可使用shift -h进行切换)
 
 ![image-20201202175704489](/Users/qifei/Library/Application Support/typora-user-images/image-20201202175704489.png)
 

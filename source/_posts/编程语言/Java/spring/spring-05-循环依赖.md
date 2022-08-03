@@ -5,13 +5,16 @@ categories: [java,spring]
 tags:
 ---
 
+ref: 
+
+1. https://mp.weixin.qq.com/s/gbKoBjq7BKEL70Jr1WNdtw
+2. https://mp.weixin.qq.com/s/ZaGeEnOySH7OoZ-FXt_lvA
+
+
+
 ## 什么是循环依赖 
 
 循环依赖其实就是循环引用，也就是[两个或者两个以上的bean互相持有对方作为一个field，最终形成闭环]()。
-
-比如A依赖于B，B依赖于C，C又依赖于A。
-
-
 
 循环依赖分为：
 
@@ -19,63 +22,52 @@ tags:
 
 （2）setter方法的循环依赖（可解决）：[在解决setter方法的循环依赖时]()，Spring采用的是[提前暴露对象的方法]()。
 
-
-
 > 通过提前暴露原则，解决循环依赖：
 >
 > - 问题的本身来源于Spring对于暴露Bean对象和Java对于暴露对象的过程不同
 >
->   - spring中对象创建有3部：new实例化，依赖注入，使用init-method初始化方法。spring严厉的认为，一个Bean对象必须经历以上三步才能出去见人
->   - 但是java认为，第一步new，就可以从出去见人了。
+>   - spring认为，一个Bean对象必须经历3步才能暴露，创建Bean的3个步骤：实例化new XXX()，依赖注入populateBean()，init-method初始化方法。
+>   - java认为，一个对象在new以后就可以暴露。
 >
 > - 要解决这个问题，就得让Spring提前暴露对象，在new实例化的时候就得暴露
 >
->   
 
-
-
-### 构造器的循环依赖
+### constructor的循环依赖
 
 [这个Spring解决不了，只能调整配置文件，将构造函数注入方式改为属性注入方式。]()
 
 构造器循环依赖示例：
 
 ```java
+@Service
 public class ServiceA { 
-    private ServiceB serviceB ; 
-    //构造器循环依赖 
-    public ServiceA(ServiceB serviceB) { this.serviceB = serviceB; } 
+	private ServiceB serviceB ; 
+    
+  //构造器循环依赖 
+  @Resource
+  public ServiceA(ServiceB serviceB) { this.serviceB = serviceB; } 
 }
+
+@Service
 public class ServiceB { 
-    private ServiceA serviceA ; 
+    private ServiceA serviceA ;
+  
+    @Resource
     public ServiceB(ServiceA serviceA) { this.serviceA = serviceA; } 
 }
 ```
 
-```xml
-<bean id="a" class="com.kkb.student.ServiceA"> 
-	<constructor-arg index="0" ref="serviceB"></constructor-arg> 
-</bean> 
-<bean id="b" class="com.kkb.student.ServiceB"> 
-    <constructor-arg index="0" ref="serviceA"></constructor-arg>
-</bean>
-```
+
 
 测试类：
 
 ```java
-public class Test { 
-    public static void main(String[] args) { 
-        ApplicationContext context = new ClassPathXmlApplicationContext("com/kkb/student/applicationContext.xml"); //System.out.println(context.getBean("a", ServiceA.class)); 
-    } 
-}
-
 Caused by: org.springframework.beans.factory.BeanCurrentlyInCreationException: Error creating bean with name 'serviceA': Requested bean is currently in creation: Is there an unresolvable circular reference?
 ```
 
 
 
-### 为什么通过构造方法注入就无法解决？
+**Q: 为什么通过构造方法注入就无法解决？**
 
 当JVM接收到一条new Object（）时候会执行下面的逻辑：
 
@@ -95,8 +87,6 @@ Caused by: org.springframework.beans.factory.BeanCurrentlyInCreationException: E
 
 ### setter方法循环依赖
 
-setter方法循环依赖问题
-
 ```java
 @Service
 public class A {
@@ -113,9 +103,9 @@ public class B {
 
 
 
-## Spring中循环依赖发生的时机
+### Spring循环依赖发生的时机
 
-先搞清楚Spring中的单例Bean实例是如何被【合格生产】出来的。主要分为三步：
+Spring中的单例Bean创建的步骤为三步：
 
 ①：createBeanInstance：实例化，其实也就是 调用对象的构造方法实例化对象  ----> new ServiceA()
 
@@ -123,15 +113,15 @@ public class B {
 
 ③：initializeBean：调用spring xml中的init() 方法。
 
-从上面讲述的单例bean初始化步骤我们可以知道，[循环依赖主要发生在第一、第二步]()。也就是[构造器循环依赖和field循环依赖]()。
+从上面讲述的单例bean初始化步骤我们可以知道，如果是[构造器循环依赖]()，发生在第一步；如果是[field循环依赖]()，发生在第二步；
 
-那么我们要解决循环引用也应该从初始化过程着手，对于单例来说，在Spring容器整个生命周期内，有且只有一个对象，所以很容易想到这个对象应该存在Cache中，[Spring为了解决单例的循环依赖问题，使用了三级缓存]()。 
-
-
+那么我们要解决循环引用也应该从初始化过程着手，对于单例来说，在Spring容器整个生命周期内，有且只有一个对象，所以很容易想到这个对象应该存在Cache中，[Spring为了解决单例的循环依赖问题，使用了二级缓存断开循环，三级缓存保证`AOP`代理的生命周期正常]()。 
 
 
 
-## Spring是如何检测是否有循环依赖
+
+
+## Spring检测循环依赖
 
 [可以 Bean在创建的时候给其打个标记，如果递归调用回来发现正在创建中的话--->即可说明正在发生循环依赖。]()
 
@@ -181,65 +171,83 @@ public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 }
 ```
 
-## Spring是如何解决循环依赖问题的 
+## Spring解决循环依赖问题
 
-### 三级缓存
+### 三级缓存解决该问题
 
 DefaultSingletonBeanRegistry
 
 ```java
 /** 第一级缓存 */ 
 private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256); 
-/** 第三级缓存 */ 
-private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16); 
+
 /** 第二级缓存 */ 
 private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
+
+/** 第三级缓存 */ 
+private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16); 
 ```
 
-三级缓存的作用：
+1. 一级缓存，singletonObjects，存储所有已创建完毕的单例 Bean （完整的 Bean）
+2. 二级缓存，earlySingletonObjects，存储所有仅完成实例化，但还未进行属性注入和初始化的 Bean
+3. 三级缓存，singletonFactories，存储能建立这个 Bean 的一个工厂，通过工厂能获取这个 Bean，延迟化 Bean 的生成，工厂生成的 Bean 会塞入二级缓存
 
-- 第一级缓存：[存储创建完全成功的单例Bean]() <!--就是走完了3个步骤：new实例化、依赖注入、初始化init-method -->。
-- 第三级缓存：[主要设计用来解决循环依赖问题的]()，它是存储只执行了实例化步骤的bean（还未依赖注入和初始化bean操作），但是该缓存的key是beanname，value是ObjectFactory，而不是你想存储的bean（将只完成实例化的bean的引用交给ObjectFactory持有）
-- ObjectFactory的作用：保存提前暴露的Bean的引用的同时，针对该Bean进行BeanPostProcessor操作，也就是说，在这有一个步骤下，可能针对提前暴露的Bean产生代理对象。 
-- 第二级缓存：[主要设计用来解决循环依赖时，既有代理对象又有目标对象的情况下，如何保存代理对象]()。同时还要有人保存目标对象的引用，然后会在最后的部分，使用代理对象的引用去替换目标对象的引用。
+这三个 map 是如何配合的呢？
 
-### Spring循环依赖场景分析
+1. 首先，获取单例 Bean 的时候会通过 BeanName 先去 singletonObjects（一级缓存） 查找完整的 Bean，如果找到则直接返回，否则进行步骤 2。
+2. 看对应的 Bean 是否在创建中，如果不在直接返回找不到，如果是，则会去 earlySingletonObjects （二级缓存）查找 Bean，如果找到则返回，否则进行步骤 3
+3. 去 singletonFactories （三级缓存）通过 BeanName 查找到对应的工厂，如果存着工厂则通过工厂创建 Bean ，并且放置到 earlySingletonObjects 中。
+4. 如果三个缓存都没找到，则返回 null。
 
-> getBean --- 第一次获取ServiceA的实例
->
->  1.[A实例化]()：new ServiceA的实例 
->
-> ​		-- 将ServiceA的引用，交给一个ObjectFactory对象去持有，然后将ObjectFactory存入 第三级缓存中，key是beanName。<!--这个过程唯一的作用就是为了提供2-b步骤中需要的三级缓存,这里面的ObjectFactory-->
->
->  2.[A依赖注入]()：给ServiceA进行依赖注入ServiceB 
->
-> ​		<font color='red'>* getBean() --- 第一次获取获取ServiceB的实例 </font>
->
-> > ​				1) [B实例化]()：new ServiceB的实例 
-> >
-> > ​						-- 将ServiceB的引用，交给一个ObjectFactory对象去持有，然后将 ObjectFactory存入第三级缓存中，key是beanName。 
-> >
-> > ​				2) [B依赖注入]()：给ServiceB进行依赖注入ServiceA 
-> >
-> > ​						<font color='red'>*getBean() --- 第二次获取ServiceA的实例</font>   <!--还像第一次获取ServiceA Bean，走一样的步骤吗？肯定不是，要从第三级缓存找-->
-> >
-> > ​								*可以从【第三级缓存】中找到提早暴露的ServiceA的引用，是通过 BeanName找到ObjectFactory，再向ObjectFactory要它保存的ServiceA的引用。但是这个 ServiceA有可能已经不再是目标对象的引用了。 
-> >
-> > ​						<font color='red'>*依赖注入 ---- 顺利结束 </font>
-> >
-> > ​				3) [B初始化方法]()：初始化Bean
-> >
-> > ​						 ---- 判断是否可以从二级缓存中获取到ServiceB的引用 
-> >
-> > ​						---- 添加第一级缓存，同时清楚该beanName对应的第二级和第三级缓存数据。 
->
-> ​		<font color='red'>* 依赖注入 --- 只有当ServiceB实例完美结束，才能完成依赖注入。 </font>
->
-> 3.[A初始化方法]()：A初始化Bean 
->
-> ​		---- 添加第一级缓存，同时清除该beanName对应的第二级和第三级缓存数据。
+从上面的步骤我们可以得知，如果查询发现 Bean 还未创建，到第二步就直接返回 null，不会继续查二级和三级缓存。
 
+返回 null 之后，说明这个 Bean 还未创建，这个时候会标记这个 Bean 正在创建中，然后再调用 createBean 来创建 Bean，而实际创建是调用方法 doCreateBean。
 
+doCreateBean 这个方法就会执行上面我们说的三步骤：
+
+1. 实例化
+
+   - 在实例化 Bean 之后，会往 singletonFactories 塞入一个工厂，而调用这个工厂的 getObject 方法，就能得到这个 Bean。要注意，此时 Spring 是不知道会不会有循环依赖发生的，但是它不管，反正往 singletonFactories 塞这个工厂，这里就是提前暴露。
+
+2. 属性注入
+
+   - 然后就开始执行属性注入，这个时候 A 发现需要注入 B，所以去 getBean(B)，此时又会走一遍上面描述的逻辑，到了 B 的属性注入这一步。
+
+     此时 B 调用 getBean(A)，这时候一级缓存里面找不到，但是发现 A 正在创建中的，于是去二级缓存找，发现没找到，于是去三级缓存找，然后找到了。并且通过上面提前在三级缓存里暴露的工厂得到 A，然后将这个工厂从三级缓存里删除，并将 A 加入到二级缓存中。
+
+     然后结果就是 B 属性注入成功。
+
+3. 初始化
+
+   - 紧接着 B 调用 initializeBean 初始化，最终返回，此时 B 已经被加到了一级缓存里 。
+
+这时候就回到了 A 的属性注入，此时注入了 B，接着执行初始化，最后 A 也会被加到一级缓存里，且从二级缓存中删除 A。
+
+Spring 解决依赖循环就是按照上面所述的逻辑来实现的。
+
+重点就是在对象实例化之后，都会在三级缓存里加入一个工厂，提前对外暴露还未完整的 Bean，这样如果被循环依赖了，对方就可以利用这个工厂得到一个不完整的 Bean，破坏了循环的条件。
+
+| A的createBean流程                                            | B的createBean流程                                            | 3个缓存map的变化                                             |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1. 实例化Instance A a = new A();                             |                                                              |                                                              |
+| 一个持有a的ObjectFactory，被放入第三级缓存singletonFactories当中 |                                                              | singletonObjects: [] earlysingletonObjects: [] singletonObjectFactory: [a] |
+| 2. 依赖注入populateBean()                                    |                                                              |                                                              |
+| B b = getBean(b), 发现b的Bean不存在，则createBean            |                                                              |                                                              |
+|                                                              | 1. 实例化Instance B b = new B()                              |                                                              |
+|                                                              | 一个持有b的ObjectFactory，被放入第三级缓存singletonFactories当中 | singletonObjects: [] earlysingletonObjects: [] singletonObjectFactory: [a,b] |
+|                                                              | 2. 依赖注入populateBean()                                    |                                                              |
+|                                                              | A a = getBean(a)，发现a正在被创建                            |                                                              |
+|                                                              | 从第1级缓存中没有找到，                                      |                                                              |
+|                                                              | 从第2级缓存中没有找到，                                      |                                                              |
+|                                                              | 从第三级缓存singletonObjectFactory获取a的ObjectFactory， EarlySingletonObject a = singletonObjectFactory.getObject() |                                                              |
+|                                                              | 在3级缓存中清除a的singletonObjectFactory,  在2级缓存中添加a的earlySingletonObject | singletonObjects: [] earlysingletonObjects: [a] singletonObjectFactory: [b] |
+|                                                              | b.setA(a)                                                    |                                                              |
+|                                                              | 3. 初始化initMethod()                                        |                                                              |
+|                                                              | B的bean创建完成,并且在1级缓存中添加b的singletonObject        | singletonObjects: [b] earlysingletonObjects: [a] singletonObjectFactory: [b] |
+| 在1级缓存中找到b的bean                                       |                                                              | singletonObjects: [b] earlysingletonObjects: [a] singletonObjectFactory: [b] |
+| a.setB(b)                                                    |                                                              |                                                              |
+| 3. 初始化initMethod()                                        |                                                              |                                                              |
+| A的bean创建完成,并且在1级缓存中添加a的singletonObject        |                                                              | singletonObjects: [a,b] earlysingletonObjects: [a] singletonObjectFactory: [b] |
 
 ### 解决循环依赖的代码 
 
@@ -272,13 +280,7 @@ AbstractAutowireCapableBeanFactory#doCreateBean
 
 
 
-
-
-
-
 ## Spring源码解决循环依赖
-
-> 循环依赖只有单例Bean才支持循环依赖，Spring只支持field注入的循环依赖。
 
 以`AbstractBeanFactory#doGetBean`为起点，该方法中有两个`getSingleton()`方法，
 
@@ -288,7 +290,7 @@ protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredTy
     // 验证Bean的名字是否非法
     final String beanName = transformedBeanName(name);
     Object bean;
-    // Eagerly check singleton cache for manually registered singletons.
+    
     // 从单例缓存中检查是否存在单例bean，第一次必定返回null
     Object sharedInstance = getSingleton(beanName);
     if (sharedInstance != null && args == null) {
@@ -303,9 +305,7 @@ protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredTy
                     return createBean(beanName, mbd, args);
                 }
                 catch (BeansException ex) {
-                    // Explicitly remove instance from singleton cache: It might have been put there
-                    // eagerly by the creation process, to allow for circular reference resolution.
-                    // Also remove any beans that received a temporary reference to the bean.
+              
                     // 从单例缓存中删除该Bean，因为其可能因为循环依赖提前放入到eagerly缓存中，所以删除所有依赖其的Bean
                     destroySingleton(beanName);
                     throw ex;

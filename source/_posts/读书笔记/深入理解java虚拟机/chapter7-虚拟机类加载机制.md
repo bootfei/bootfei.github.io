@@ -4,9 +4,17 @@ date: 2020-12-23 18:42:39
 tags: [java]
 ---
 
-代码编译的结果从本地机器码转变为字节码，是存储格式发展的一小步
+ref: https://mp.weixin.qq.com/s/GbWAGFZqILdFJdGVLNpvRw
+
+
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/1TAcib2scKMT9n0lSVtWic7tmb0WgrrbBkicnpaWJNscP6888C0Bqd6zSsWTBicbWx5aW7KY9EkXGl63hAtRBlARfQ/640)
 
 # 概述
+
+代码编译的结果从本地机器码转变为字节码，是存储格式发展的一小步
+
+
 
 **在Class文件中描述的各种信息，最终都需要加载到虚拟机中之后才能被运行和使用。**
 
@@ -247,8 +255,8 @@ public class NotInitialization {
 
 这个阶段中有两个容易产生混淆的概念需要强调一下，
 
-- 首先是这时候进行内存分配的仅包括`类变量`（被static修饰的变量），而不包括`实例变量`，`实例变量`将会在对象实例化时随着对象一起分配在Java堆中。
-- 其次是这里所说的初始值“通常情况”下是**数据类型的零值**，假设一个类变量的定义为：
+- 这时候进行内存分配的仅包括`类变量`（被static修饰的变量），而不包括`实例变量`，`实例变量`将会在对象实例化时(猜测作者的意思是【初始化阶段】)随着对象一起分配在Java堆中。
+- 这里所说的初始值“通常情况”下是**数据类型的零值**，假设一个类变量的定义为：
 
 ```
 public static int value = 123;
@@ -258,17 +266,17 @@ public static int value = 123;
 
 注意这里所说的初始值概念，比如一个类变量定义为：
 
-```
-// 变量 v 在准备阶段过后的初始值为 0 而不是 8080
-// 将 v 赋值为 8080 的 putstatic 指令是程序被编译后，存在类构造器<client>方法中
+```java
+// 变量 v 在【准备阶段】过后的初始值为 0 而不是 8080
+// 将 v 赋值为 8080 的 putstatic 指令是程序被编译后，存在类构造器<clinit>方法中
 public static int v = 8080;
 ```
 
-但如果声明为：
+但如果声明为final所修饰时：
 
-```
-// 在编译阶段会为变量 v 生成 ConstantValue 属性
-// 在准备阶段，虚拟机会根据 ConstantValue 属性将 v 赋值为 8080
+```java
+// 在【编译阶段】会为变量 v 生成 ConstantValue 属性
+// 在【准备阶段】，虚拟机会根据 ConstantValue 属性将 v 赋值为 8080
 public static final int v = 8080;
 ```
 
@@ -380,6 +388,14 @@ public class FieldResolution {
 在`准备`阶段，变量已经赋过一次**系统要求的初始值**。
 
 在`初始化`阶段，则是**根据程序员通过程序制定的主观计划去初始化类变量**和其他资源，或者可以从另外一个角度来表达：初始化阶段是执行`类构造器`<clinit>()方法的过程。
+
+### JVM初始化类的步骤
+
+1. 若该类还没有被加载和连接，则程序先加载并连接该类
+2. 若该类的父类还没有初始化，则先初始化该类的父类
+3. 若该类种有静态代码块，则系统依次执行这些代码块
+
+### 执行`类构造器`<clinit>()方法
 
 我们先看一下<clinit>()方法执行过程中可能会影响程序运行行为的一些特点和细节[[7\]](http://reader.epubee.com/books/mobile/11/110629db113c9cb59f62032f449dd46c/text00046.html#ch7-back) ：
 
