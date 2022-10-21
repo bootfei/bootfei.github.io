@@ -8,7 +8,7 @@ tags: [java,springboot,startup]
 
 # SpringBoot 启动过程
 
-![img](/Users/qifei/Documents/blog/source/_posts/编程语言/Java/springboot/springboot启动流程图.png)
+<img src="/Users/qifei/Documents/blog/source/_posts/编程语言/Java/springboot/springboot启动流程图.png" alt="img" style="zoom:350%;" />
 
 启动流程主要分为三个部分，
 
@@ -23,6 +23,8 @@ tags: [java,springboot,startup]
 ## @SpringApplication
 
  每个SpringBoot程序都有一个主入口，也就是main方法，main里面调用SpringApplication.run()启动整个spring-boot程序。SpringBoot要求该main方法所在类必须使用@SpringBootApplication注解，以及@ImportResource注解(if need)
+
+![](https://img2018.cnblogs.com/blog/1158841/201907/1158841-20190709114128801-171612088.png)
 
 
 
@@ -180,20 +182,3 @@ key 4:  `ConfigurableApplicationContext`前置处理
 key 5:  `ConfigurableApplicationContext`刷新，实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作。
 
 key 6:  `ConfigurableApplicationContext`后置处理
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 参考
-
-- [SpringBoot启动流程解析](https://www.jianshu.com/p/87f101d8ec41)
-- [Spring Boot 启动过程分析](https://www.jianshu.com/p/dc12081b3598)
