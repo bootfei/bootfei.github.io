@@ -4,8 +4,6 @@ date: 2021-06-02 11:31:13
 tags:
 ---
 
-Orgin: https://www.effiu.cn/blog/2020/10/27/spring/3_beanPostProcessor/
-
 **Spring**的`BeanPostProcessor`后置处理器承担了很多工作
 
 - AOP、代理

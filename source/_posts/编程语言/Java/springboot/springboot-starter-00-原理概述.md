@@ -97,8 +97,7 @@ EventPublishingRunListenerz#environmentPrepared
 
 ConfigFileApplicaitonListener.class同时也是个postProcessor
 
-![image-20211201213539624](/Users/qifei/Library/Application Support/typora-user-images/image-20211201213539624.png)
+
 
 ConfigFileApplicaitonListener.class会加载所有的配置文件，包括yml中include的文件
 
-![image-20211202085003762](/Users/qifei/Library/Application Support/typora-user-images/image-20211202085003762.png)

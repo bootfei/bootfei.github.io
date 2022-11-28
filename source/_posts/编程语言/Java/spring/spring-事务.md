@@ -719,20 +719,6 @@ java阿里巴巴规范提示：方法【edit】需要在Transactional注解指�
 
 ## jdk异常分类
 
-![Image](https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfeNqRSGMQ1cElKBUq9LLCgvOedcKJ0Fb3JlqHGOicJCsJibYXbg3FcFss3j1pME8PgvZsFSzssuuSlw/640)
-
-- 运行时异常：都是 RuntimeException 类及其子类异常，如 NullPointerException (空指针异常)、IndexOutOfBoundsException(下标越界异常)等，这些异常是非检查异常，
-  - 程序中可以选择捕获处理，也可以不处理。
-  - 运行时异常的特点是 Java 编译器不会检查它，也就是说，当程序中可能出现这类异常，即使没有用 try-catch 语句捕获它，也没有用 throws 子句声明抛出它，也会编译通过。
-  - 如果不对运行时异常进行处理，那么出现运行时异常之后，要么是线程中止，要么是主程序终止。如果不想终止，则必须捕获所有的运行时异常，决不让这个处理线程退出。
-- 非运行时异常：是 RuntimeException 以外的异常，类型上都属于 Exception 类及其子类
-  - 从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过
-
-
-
-- 可查的异常（checked exceptions）:Exception下除了RuntimeException及其子类和错误（Error）外的异常
-- 不可查的异常（unchecked exceptions）:RuntimeException及其子类和错误（Error）
-
 
 
 ## @Transactional 正确的写法

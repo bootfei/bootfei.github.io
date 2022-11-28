@@ -16,12 +16,6 @@ tags:
 
 BeanFactory是生产bean的工厂并且通过getBean接口进行获取。但是在通过getBean获取bean之前，需要事先定义这个bean由哪些组件组成。定义的方式有很多，可以通过xml进行定义，或者在代码中通过注解（@Bean、@Service）进行定义。
 
-Controller，在最原始的xml配置bean的时候，我们需要定义它是由哪些service组成。xml要与Controller的service一一对应起来。
-
-![Image](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbudngSXpAkDiasH1qK8ojKKCjNLksdkxibGFpjw28Sl9aRkr1BUhHukCibTrTf5IB9Jm3eGLtPQ227m5A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
-
-这种方式的弊端是所有的bean都需要事先定义好，但是有时候，有的一些bean，我们只知道它大概的样子，但是无法事先定义出其具体的功能，只有运行时才知道。
-
 这样FactoryBean的就有了其意义，它可以定义出一种类型的Bean,并且在创建的时候再去实现其具体的功能。里面有三个方法。
 
 - `getObject` 获取bean方法，在此方法中，我们可以自己定义一个对象，然后自行修改其创建过程。通过这个方法，我们可以在mapper创建的时候再实现其具体的功能。
@@ -48,7 +42,7 @@ public interface FactoryBean<T> {
 
 这里带领大家了解下Mybatis的MapperFactoryBean，这个是生成Mapper的FactoryBean。
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbudngSXpAkDiasH1qK8ojKKCjb1k1G4PNRZ0nhyIuzyuoetyQabviaej3Phw7lmjtzaCrB5m1pxIHBAw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbudngSXpAkDiasH1qK8ojKKCjb1k1G4PNRZ0nhyIuzyuoetyQabviaej3Phw7lmjtzaCrB5m1pxIHBAw/640)
 
 通过上图的流程即可发现。每一个mapper是通过MapperFactoryBean的getObject方法进行创建，最后生成一个代理类。在代理类中对Mapper对应的注解信息进行解析。
 
