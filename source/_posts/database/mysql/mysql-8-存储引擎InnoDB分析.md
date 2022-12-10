@@ -4,7 +4,17 @@ date: 2020-10-08 15:59:03
 tags: [mysql]
 ---
 
-<img src="https://imgedu.lagou.com/131123de763c46a1b03b95c650ba32f0.jpg" style="zoom: 67%;" />
+ref:
+
+ https://mp.weixin.qq.com/s?__biz=MzkzMTIzMDgwMg==&mid=2247497169&idx=1&sn=8b9a6ba1891d48667cf8713d3fa8b048&chksm=c26c90ecf51b19fa2ef5485e39c3c0203c9de3ab16372b94dcd9edf6c95370f1fee2adb904d8&scene=21#wechat_redirect
+
+https://mp.weixin.qq.com/s/11fpbVPbQjNJM5hgXc-cUQ
+
+https://mp.weixin.qq.com/s?__biz=MzkzMTIzMDgwMg==&mid=2247496981&idx=1&sn=ec496da6e52e19ee505483a15fb54f6b&chksm=c26c9028f51b193e8d14a5e17f32d696a2cda0eb61f2fa7a3f2b3f179c9bfbd1cba09d0d83fa&scene=21#wechat_redirect
+
+
+
+
 
 # InnoDB存储引擎
 

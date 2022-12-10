@@ -30,12 +30,6 @@ AnnotaitionConfigApplicationContext context=new AnnotationConfigApplicationConte
 SpringApplicationContext.run(xxx.class, args);
 ```
 
-#### 类图
-
-
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FYpKCQlcsSPw5FNfAvJjNL5j7s2GPGsa8kD8P7fWXQ6FUic7Y8H5t3dA/640" alt="图片" style="zoom:80%;" />
-
 [从上图中可以看出 ApplicationContext 继承了 BeanFactory，这也说明了 Spring 容器中运行的主体对象是 Bean]()
 
 #### ApplicationContext启动流程
@@ -75,10 +69,6 @@ public ConfigurableApplicationContext run(String... args){
 
 
 - xml方式
-
-<img src="https://upload-images.jianshu.io/upload_images/10236819-6981e6e5078ff647.png" alt="img" style="zoom:67%;" />
-
-
 
 应用上下文准备就绪之后，我们就可以调用BeanFactory的getBean("xxx.class")方法从Spring容器中获取bean。
 
@@ -477,8 +467,6 @@ private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 #### BeanFactory启动流程
 
 - 以xml配置启动为例
-
-![img](https://lenjor.github.io/images/posts/myBlog/2019-12-21-Spring-Boot-IOC-initialize-01.png)
 
 重点找refresh在哪里被调用
 
