@@ -4,13 +4,9 @@ date: 2021-04-12 09:13:20
 tags:
 ---
 
-## 前言
 
-- 常说spring的核心是ioc，ioc的核心是BeanFactory: 通过getBean()提供Bean
 
-- FactoryBean: 在BeanFactory提供Bean之前，需要事先定义这个bean由哪些组件组成
-
-本文通过一些mybatis源码来讲述其区别，请大家参考。
+FactoryBean: 在BeanFactory提供Bean之前，需要事先定义这个bean由哪些组件组成
 
 ## FactoryBean应用
 

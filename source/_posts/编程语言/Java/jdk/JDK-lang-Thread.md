@@ -247,11 +247,11 @@ jstack pid
 
 ## JVM线程状态与锁的关系
 
-A. sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源
+sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源
 
 > yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。
 
-B. sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放锁。<!--真不要脸，自己不用CPU，还阻塞其他使用该锁的线程使用CPU-->而wait会释放锁。
+sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放锁。而wait会释放锁。
 
 - wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，
 - sleep是线程的方法，跟锁没关系，

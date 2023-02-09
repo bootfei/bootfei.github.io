@@ -151,7 +151,7 @@ for (Annotation annotation : annotations01) {
 注解类型 对象名 = (注解类型) c.getAnnotation(注解类型.class);
 ```
 
-## 内省 Introspector获取JavaBean
+### Introspector获取JavaBean
 
 基于反射 , java所提供的一套应用到JavaBean的API
 
@@ -165,7 +165,7 @@ Bean类的定义：
 
 Java提供了一套java.beans包的api , 对于反射的操作, 进行了封装
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX0PEZpoWVlXU9Qf2EibCia3dlsHN72X9EGdkDMMExWicL1WibZ5qVtDUs9Qw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+![Image](https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX0PEZpoWVlXU9Qf2EibCia3dlsHN72X9EGdkDMMExWicL1WibZ5qVtDUs9Qw/640)
 
 ```
 ##获取Bean类信息
@@ -178,5 +178,4 @@ MethodDescriptor[] getPropertyDescriptors():
 Method getReadMethod():获取一个get方法
 Method getWriteMethod():获取一个set方法。有可能返回null 注意 需要加判断
 ```
-
 

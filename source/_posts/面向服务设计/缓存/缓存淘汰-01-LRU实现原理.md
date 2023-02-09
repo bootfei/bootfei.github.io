@@ -4,21 +4,30 @@ date: 2021-04-15 13:06:49
 tags:
 ---
 
-
-
-## 分析
+![LRU Cache](https://tonydeng.github.io/images/blog/lru/lru-cache.png)
 
 LRU总体大概是这样的，最近使用的放在前面，最近没用的放在后面，如果来了一个新的数，此时内存满了，就需要把旧的数淘汰。
 
-- 为了方便移动数据，使用链表类似的数据结构
-- 要判断这条数据是不是最新的或者最旧的，使用hashmap等key-value形式的数据结构。
-- 如果数据量特别大，
+- 读和写的时间复杂度O(1)
 
-## 第一种实现(LinkedHashMap)
+- 使用hashmap等key-value形式的数据结构
 
+- 要判断这条数据是不是最新的或者最旧的，使用链表类似的数据结构。
+
+  
+
+## 使用LinkedHashMap
+
+
+
+```java
+ map.remove(map.entrySet().iterator().next().getKey());
 ```
-public class LRUCache {
 
+
+
+```java
+public class LRUCache {
     int capacity;
     Map<Integer,Integer> map;
 
@@ -65,9 +74,9 @@ public class LRUCache {
 
 ![Image](https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhq3OnECT6N8PXoicxEXBE8EEk6WeYaPqabgIkcj0adzxGz0gABSwzJEIyMbZz2g2WicL5HgeXNNMlzA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
 
-## 第二种实现(双链表+hashmap)
+## 使用双链表+hashmap
 
-```
+```java
 public class LRUCache {
 
     private int capacity;
@@ -123,7 +132,7 @@ public class LRUCache {
 
 像第一种方式，如果复写removeEldestEntry会更简单，这里简单的展示一下
 
-```
+```java
 public class LRUCache extends LinkedHashMap<Integer,Integer> {
     private int capacity;
     

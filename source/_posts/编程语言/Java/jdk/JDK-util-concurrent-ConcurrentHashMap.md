@@ -4,468 +4,28 @@ date: 2021-04-19 09:07:43
 tags:
 ---
 
-# [HashMap](https://mp.weixin.qq.com/s/UOr9BOWrv67d8l1VQxqUkA)
+# Jdk 7 ConcurrentHashMap
 
-## 把书读薄
+如何在高并发下提高系统吞吐是所有后端开发者追求的目标，Java并发的开创者Doug Lea在Java 7 ConcurrentHashMap的设计中给出了一些参考答案，**自旋锁、CAS的使用、延迟写内存、volatile语义**退化等不常见的技巧
 
-在`Java 7`中`HashMap`实现有1000多行，到了`Java 8`中增长为2000多行，虽然代码行数不多，但代码中有比较多的位运算，以及其他的一些细枝末节，导致这部分代码看起来很复杂，理解起来比较困难。但是如果我们跳出来看，`HashMap`这个数据结构是非常基础的，我们大脑中首先要有这样一幅图：
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdibMJVazadOLIHm8dB5Us2Nq4WlibbqZL4NMBNIMsRP3NibcOYT3uU7wNrw/640)
 
+<img src="https://mmbiz.qpic.cn/mmbiz_jpg/R7PtjL3tdAicMdbQfrvwSkfich8cYHngc1rpQ50iaXsQib1VWGqQLr22AgdZcyW71A5P2FpBd9nia1ahOJAXAXSVOOA/640" alt="Image" style="zoom:50%;" />
 
-
-图片来源：https://www.cnblogs.com/tianzhihensu/p/11972780.html
-
-这张图囊括了HashMap中最基础的几个点：
-
-1. `Java`中`HashMap`的实现的基础数据结构是数组，每一对`key`->`value`的键值对组成`Entity`类以双向链表的形式存放到这个数组中
-2. 元素在数组中的位置由`key.hashCode()`的值决定，如果两个`key`的哈希值相等，即发生了哈希碰撞，则这两个`key`对应的`Entity`将以链表的形式存放在数组中
-3. 调用`HashMap.get()`的时候会首先计算`key`的值，继而在数组中找到`key`对应的位置，然后遍历该位置上的链表找相应的值。
-
-当然这张图中没有体现出来的有两点：
-
-1. 为了提升整个`HashMap`的读取效率，当`HashMap`中存储的元素大小等于桶数组大小乘以负载因子的时候整个`HashMap`就要扩容，以减小哈希碰撞，具体细节我们在后文中讲代码会说到
-2. 在`Java 8`中如果桶数组的同一个位置上的链表数量超过一个定值，则整个链表有一定概率会转为一棵红黑树。
-
-整体来看，整个`HashMap`中最重要的点有四个：**初始化**，**数据寻址-`hash`方法**，**数据存储-`put`方法**,**扩容-`resize`方法**，只要理解了这四个点的原理和调用时机，也就理解了整个`HashMap`的设计。
-
-## 把书读厚
-
-在理解了`HashMap`的整体架构的基础上，我们可以试着回答一下下面的几个问题，如果对其中的某几个问题还有疑惑，那就说明我们还需要深入代码，把书读厚。
-
-1. `HashMap`内部的`bucket`数组长度为什么一直都是2的整数次幂
-2. `HashMap`默认的`bucket`数组是多大
-3. `HashMap`什么时候开辟`bucket`数组占用内存
-4. `HashMap`何时扩容？
-5. 桶中的元素链表何时转换为红黑树，什么时候转回链表，为什么要这么设计？
-6. `Java 8`中为什么要引进红黑树，是为了解决什么场景的问题？
-7. `HashMap`如何处理`key`为`null`的键值对？
-
-## `new HashMap()`
-
-在`JDK 8`中，在调用`new HashMap()`的时候并没有分配数组堆内存，只是做了一些参数校验，初始化了一些常量
-
-```
-public HashMap(int initialCapacity, float loadFactor) {
-    if (initialCapacity < 0)
-        throw new IllegalArgumentException("Illegal initial capacity: " +
-                                            initialCapacity);
-    if (initialCapacity > MAXIMUM_CAPACITY)
-        initialCapacity = MAXIMUM_CAPACITY;
-    if (loadFactor <= 0 || Float.isNaN(loadFactor))
-        throw new IllegalArgumentException("Illegal load factor: " +
-                                            loadFactor);
-    this.loadFactor = loadFactor;
-    this.threshold = tableSizeFor(initialCapacity);
-}
-
-static final int tableSizeFor(int cap) {
-    int n = cap - 1;
-    n |= n >>> 1;
-    n |= n >>> 2;
-    n |= n >>> 4;
-    n |= n >>> 8;
-    n |= n >>> 16;
-    return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
-}
-```
-
-`tableSizeFor`的作用是找到大于`cap`的最小的2的整数幂，我们假设n(注意是n，不是cap哈)对应的二进制为000001xxxxxx，其中x代表的二进制位是0是1我们不关心 <!--我个人看法，使用位运算时，一定要注意最高位，最高位是符号位，不能移动，所以32bit的int，只能用到倒数第2的高位bit，所以HashMap的最大容量是2^30 -->
-
-`n |= n >>> 1;`执行后`n`的值为：
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdibnWhteLvazicGAkd7go3CeiabRjYN0ib1Wb5h1B8TuPOHBT1cr1K0GCaSA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:33%;" />
-
-可以看到此时`n`的二进制最高两位已经变成了1（1和0或1异或都是1），再接着执行第二行代码：
-
-<img src="https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdibibEwy9YFEA0Gy21LJYNColicAxpW11teDQpRZvE0HqcTC1QYJ6Z7fWBQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:33%;" />
-
-可见`n`的二进制最高四位已经变成了1，等到执行完代码`n |= n >>> 16;`之后，`n`的二进制最低位全都变成了1，<!--就是为了创建最低位都是1的整数--> 也就是`n = 2^x - 1`其中x和n的值有关，如果没有超过`MAXIMUM_CAPACITY`，最后会返回一个2的正整数次幂，因此`tableSizeFor()`的作用就是保证返回一个比入参大的最小的2的正整数次幂。<!--说白了，就是把bit是1的最高位以后的低位，全部置为1，这就是“最小的2的正整数次幂”-->
-
-在`JDK 7`中初始化的代码大体一致，在`HashMap`第一次`put`的时候会调用`inflateTable`计算桶数组的长度，但其算法并没有变：
-
-```
-// 第一次put时，初始化table
-private void inflateTable(int toSize) {
-    // Find an power of 2 >= toSize
-    int capacity = roundUpToPowerOf2(toSize);
-    threshold = (int)Math.min(capacity * loadFactor, MAXIMUM_CAPACITY + 1);
-    table = new Entry(capacity);
-    initHashSeedAsNeeded(capacity);
-}
-```
-
-这里我们也回答了开头提出来的问题：
-
-`HashMap`什么时候开辟`bucket`数组占用内存？答案是在`HashMap`第一次`put`的时候，无论`Java 8`还是`Java 7`都是这样实现的 <!--计算机领域，只有对象真正被使用的时候，才被初始化。类似“延迟加载”-->。这里我们可以看到两个版本的实现中，桶数组的大小都是2的正整数幂，至于为什么这么设计，看完后文你就明白了。
-
-## `hash`
-
-在`HashMap`这个特殊的数据结构中，`hash`函数承担着寻址定址的作用，其性能对整个`HashMap`的性能影响巨大，那什么才是一个好的`hash`函数呢？
-
-- 计算出来的哈希值足够散列，能够有效减少哈希碰撞
-- 本身能够快速计算得出，因为`HashMap`每次调用`get`和`put`的时候都会调用`hash`方法
-
-下面是`Java 8`中的实现：
-
-```
-static final int hash(Object key) {
-    int h;
-    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
-}
-```
-
-这里比较重要的是`(h = key.hashCode()) ^ (h >>> 16)`，这个位运算其实是将`key.hashCode()`计算出来的`hash`值的高16位与低16位继续异或，为什么要这么做呢？
-
-我们知道`hash`函数的作用是用来确定`key`在桶数组中的位置的，在`JDK`中为了更好的性能，通常会这样写：
-
-```
-index =(table.length - 1) & key.hash();
-```
-
-回忆前文中的内容，`table.length`是一个2的正整数次幂，类似于`000100000`，这样的值减一就成了`000011111`，通过位运算可以高效寻址，这也回答了前文中提到的一个问题，`HashMap`内部的`bucket`数组长度为什么一直都是2的整数次幂？好处之一就是可以通过构造位运算快速寻址定址。
-
-回到本小节的议题，既然计算出来的哈希值都要与`table.length - 1`做与运算，那就意味着计算出来的`hash`值只有低位有效，这样会加大碰撞几率，因此让高16位与低16位做异或，让低位保留部分高位信息，减少哈希碰撞。
-
-我们再看`Java 7`中对hash的实现：
-
-```
-final int hash(Object k) {
-    int h = hashSeed;
-    if (0 != h && k instanceof String) {
-        return sun.misc.Hashing.stringHash32((String) k);
-    }
-
-    h ^= k.hashCode();
-
-    // This function ensures that hashCodes that differ only by 
-    // constant multiples at each bit position have a bounded 
-    // number of collisions (approximately 8 at default load factor). 
-    h ^= (h >>> 20) ^ (h >>> 12);
-    return h ^ (h >>> 7) ^ (h >>> 4);
-}
-```
-
-`Java 7`中为了避免`hash`值的高位信息丢失，做了更加复杂的异或运算，但是基本出发点都是一样的，都是让哈希值的低位保留部分高位信息，减少哈希碰撞。
-
-## `put`
-
-在`Java 8`中`put`这个方法的思路分为以下几步：
-
-1. 调用`key`的`hashCode`方法计算哈希值，并据此计算出数组下标index
-2. 如果发现当前的桶数组为`null`，则调用`resize()`方法进行初始化
-3. 如果没有发生哈希碰撞，则直接放到对应的桶中
-4. 如果发生哈希碰撞，且节点已经存在，就替换掉相应的`value`
-5. 如果发生哈希碰撞，且桶中存放的是树状结构，则挂载到树上
-6. 如果碰撞后为链表，添加到链表尾，如果链表长度超过`TREEIFY_THRESHOLD`默认是8，则将链表转换为树结构
-7. 数据`put`完成后，如果`HashMap`的总数超过`threshold`就要`resize`
-
-具体代码以及注释如下：
-
-```java
-public V put(K key, V value) {
-    // 调用上文我们已经分析过的hash方法
-    return putVal(hash(key), key, value, false, true);
-}
-
-final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                boolean evict) {
-    Node<K,V>[] tab; Node<K,V> p; int n, i;
-    if ((tab = table) == null || (n = tab.length) == 0)
-        // 第一次put时，会调用resize进行桶数组初始化
-        n = (tab = resize()).length;
-    // 根据数组长度和哈希值相与来寻址，原理上文也分析过
-    if ((p = tab[i = (n - 1) & hash]) == null)
-        // 如果没有哈希碰撞，直接放到桶中
-        tab[i] = newNode(hash, key, value, null);
-    else {
-        Node<K,V> e; K k;
-        if (p.hash == hash &&
-            ((k = p.key) == key || (key != null && key.equals(k))))
-            // 哈希碰撞，且节点已存在，直接替换
-            e = p;
-        else if (p instanceof TreeNode)
-            // 哈希碰撞，树结构
-            e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-        else {
-            // 哈希碰撞，链表结构
-            for (int binCount = 0; ; ++binCount) {
-                if ((e = p.next) == null) {
-                    p.next = newNode(hash, key, value, null);
-                    // 链表过长，转换为树结构
-                    if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
-                        treeifyBin(tab, hash);
-                    break;
-                }
-                if (e.hash == hash &&
-                    ((k = e.key) == key || (key != null && key.equals(k))))
-                    // 如果节点已存在，则跳出循环
-                    break;
-                // 否则，指针后移，继续后循环
-                p = e;
-            }
-        }
-        if (e != null) { // existing mapping for key
-            // 对应着上文中节点已存在，跳出循环的分支
-            // 直接替换
-            V oldValue = e.value;
-            if (!onlyIfAbsent || oldValue == null)
-                e.value = value;
-            afterNodeAccess(e);
-            return oldValue;
-        }
-    }
-    ++modCount;
-    if (++size > threshold)
-        // 如果超过阈值，还需要扩容
-        resize();
-    afterNodeInsertion(evict);
-    return null;
-}
-```
-
-相比之下`Java 7`中的`put`方法就简单不少
-
-```
-public V put(K key, V value) {
-    // 如果 key 为 null，调用 putForNullKey 方法进行处理  
-    if (key == null)
-        return putForNullKey(value);
-    int hash = hash(key.hashCode());
-    int i = indexFor(hash, table.length);
-    for (Entry<K, V> e = table[i]; e != null; e = e.next) {
-        Object k;  
-        if (e.hash == hash && ((k = e.key) == key
-                || key.equals(k))) {
-            V oldValue = e.value;
-            e.value = value;
-            e.recordAccess(this);
-            return oldValue;
-        }
-    }
-    modCount++;
-    addEntry(hash, key, value, i);
-    return null;
-}
-
-void addEntry(int hash, K key, V value, int bucketIndex) {
-    Entry<K, V> e = table[bucketIndex];     // ①  
-    table[bucketIndex] = new Entry<K, V>(hash, key, value, e);
-    if (size++ >= threshold)
-        resize(2 * table.length);    // ②  
-}
-```
-
-这里有一个小细节，`HashMap`允许`put`key为`null`的键值对，但是这样的键值对都放到了桶数组的第0个桶中。
-
-## `resize()`
-
-`resize`是整个`HashMap`中最复杂的一个模块，如果在`put`数据之后超过了`threshold`的值，则需要扩容，扩容意味着桶数组大小变化，我们在前文中分析过，`HashMap`寻址是通过`index =(table.length - 1) & key.hash();`来计算的，现在`table.length`发生了变化，势必会导致部分`key`的位置也发生了变化，`HashMap`是如何设计的呢？
-
-这里就涉及到桶数组长度为2的正整数幂的第二个优势了：当桶数组长度为2的正整数幂时，如果桶发生扩容（长度翻倍），则桶中的元素大概只有一半需要切换到新的桶中，另一半留在原先的桶中就可以，并且这个概率可以看做是均等的。
-
-![Image](https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdAib0uwiarfrxiaEt9lmHOAhYdiblzYia6ic0unz6yDBBUz9zaYTfnYCdtazFW4ibtEf8bs5F6K2zdNPK7n9w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
-
-通过这个分析可以看到如果在即将扩容的那个位上`key.hash()`的二进制值为0，则扩容后在桶中的地址不变，否则，扩容后的最高位变为了1，新的地址也可以快速计算出来`newIndex = oldCap + oldIndex;` <!--对以前的地址完美兼容，这就是size是2的次幂的优势-->
-
-下面是`Java 8`中的实现：
-
-```
-final Node<K,V>[] resize() {
-    Node<K,V>[] oldTab = table;
-    int oldCap = (oldTab == null) ? 0 : oldTab.length;
-    int oldThr = threshold;
-    int newCap, newThr = 0;
-    if (oldCap > 0) {
-        // 如果oldCap > 0则对应的是扩容而不是初始化
-        if (oldCap >= MAXIMUM_CAPACITY) {
-            threshold = Integer.MAX_VALUE;
-            return oldTab;
-        }
-        // 没有超过最大值，就扩大为原先的2倍
-        else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
-                    oldCap >= DEFAULT_INITIAL_CAPACITY)
-            newThr = oldThr << 1; // double threshold
-    }
-    else if (oldThr > 0) // initial capacity was placed in threshold
-        // 如果oldCap为0， 但是oldThr不为0，则代表的是table还未进行过初始化
-        newCap = oldThr;
-    else {               // zero initial threshold signifies using defaults
-        newCap = DEFAULT_INITIAL_CAPACITY;
-        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
-    }
-    if (newThr == 0) {
-        // 如果到这里newThr还未计算，比如初始化时，则根据容量计算出新的阈值
-        float ft = (float)newCap * loadFactor;
-        newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
-                    (int)ft : Integer.MAX_VALUE);
-    }
-    threshold = newThr;
-    @SuppressWarnings({"rawtypes","unchecked"})
-    Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
-    table = newTab;
-    if (oldTab != null) {
-        for (int j = 0; j < oldCap; ++j) {
-            // 遍历之前的桶数组，对其值重新散列
-            Node<K,V> e;
-            if ((e = oldTab[j]) != null) {
-                oldTab[j] = null;
-                if (e.next == null)
-                    // 如果原先的桶中只有一个元素，则直接放置到新的桶中
-                    newTab[e.hash & (newCap - 1)] = e;
-                else if (e instanceof TreeNode)
-                    ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
-                else { // preserve order
-                    // 如果原先的桶中是链表
-                    Node<K,V> loHead = null, loTail = null;
-                    // hiHead和hiTail代表元素在新的桶中和旧的桶中的位置不一致
-                    Node<K,V> hiHead = null, hiTail = null;
-                    Node<K,V> next;
-                    do {
-                        next = e.next;
-                        if ((e.hash & oldCap) == 0) {
-                            if (loTail == null)
-                                loHead = e;
-                            else
-                                loTail.next = e;
-                            loTail = e;
-                        }
-                        else {
-                            if (hiTail == null)
-                                hiHead = e;
-                            else
-                                hiTail.next = e;
-                            hiTail = e;
-                        }
-                    } while ((e = next) != null);
-                    if (loTail != null) {
-                        loTail.next = null;
-                        // loHead和loTail代表元素在新的桶中和旧的桶中的位置一致
-                        newTab[j] = loHead;
-                    }
-                    if (hiTail != null) {
-                        hiTail.next = null;
-                        // 新的桶中的位置 = 旧的桶中的位置 + oldCap， 详细分析见前文
-                        newTab[j + oldCap] = hiHead;
-                    }
-                }
-            }
-        }
-    }
-    return newTab;
-}
-```
-
-`Java 7`中的`resize`方法相对简单许多：
-
-1. 基本的校验之后`new`一个新的桶数组，大小为指定入参
-2. 桶内的元素根据新的桶数组长度确定新的位置，放置到新的桶数组中
-
-```
-void resize(int newCapacity) {
-    Entry[] oldTable = table;
-    int oldCapacity = oldTable.length;
-    if (oldCapacity == MAXIMUM_CAPACITY) {
-        threshold = Integer.MAX_VALUE;
-        return;
-    }
-
-    Entry[] newTable = new Entry[newCapacity];
-    boolean oldAltHashing = useAltHashing;
-    useAltHashing |= sun.misc.VM.isBooted() &&
-            (newCapacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
-    boolean rehash = oldAltHashing ^ useAltHashing;
-    transfer(newTable, rehash);
-    table = newTable;
-    threshold = (int) Math.min(newCapacity * loadFactor, MAXIMUM_CAPACITY + 1);
-}
-
-void transfer(Entry[] newTable, boolean rehash) {
-    int newCapacity = newTable.length;
-    for (Entry<K, V> e : table) {
-        //链表跟table[i]断裂遍历，头部往后遍历插入到newTable中
-        while (null != e) {
-            Entry<K, V> next = e.next;
-            if (rehash) {
-                e.hash = null == e.key ? 0 : hash(e.key);
-            }
-            int i = indexFor(e.hash, newCapacity);
-            e.next = newTable[i];
-            newTable[i] = e;
-            e = next;
-        }
-    }
-}
-```
-
-## 总结
-
-在看完了`HashMap`在`Java 8`和`Java 7`的实现之后我们回答一下前文中提出来的那几个问题：
-
-1. `HashMap`内部的`bucket`数组长度为什么一直都是2的整数次幂
-
-   答：这样做有两个好处，第一，可以通过`(table.length - 1) & key.hash()`这样的位运算快速寻址，第二，在`HashMap`扩容的时候可以保证同一个桶中的元素均匀的散列到新的桶中，具体一点就是同一个桶中的元素在扩容后一般留在原先的桶中，一般放到了新的桶中。
-
-2. `HashMap`默认的`bucket`数组是多大
-
-   答：默认是16，即时指定的大小不是2的整数次幂，`HashMap`也会找到一个最近的2的整数次幂来初始化桶数组。<!--长度不超过2^30-->
-
-3. `HashMap`什么时候开辟`bucket`数组占用内存
-
-   答：在第一次`put`的时候调用`resize`方法
-
-4. `HashMap`何时扩容？
-
-   答：当`HashMap`中的元素熟练超过阈值时，阈值计算方式是`capacity * loadFactor`，在`HashMap`中`loadFactor`是0.75
-
-5. 桶中的元素链表何时转换为红黑树，什么时候转回链表，为什么要这么设计？
-
-   答：当同一个桶中的元素数量大于等于8的时候元素中的链表转换为红黑树，反之，当桶中的元素数量小于等于6的时候又会转为链表，这样做的原因是避免红黑树和链表之间频繁转换，引起性能损耗
-
-6. `Java 8`中为什么要引进红黑树，是为了解决什么场景的问题？
-
-   答：引入红黑树是为了避免`hash`性能急剧下降，引起`HashMap`的读写性能急剧下降的场景，正常情况下，一般是不会用到红黑树的，在一些极端场景下，假如客户端实现了一个性能拙劣的`hashCode`方法，可以保证`HashMap`的读写复杂度不会低于O(lgN)
-
-   ```
-   public int hashCode() {
-       return 1;
-   }
-   ```
-
-7. `HashMap`如何处理`key`为`null`的键值对？
-
-   答：放置在桶数组中下标为0的桶中
-
-
-
-# [ConcurrentHashMap](https://mp.weixin.qq.com/s/BwSfp1yfQP-OJc9BqecPvQ)
-
-## 一些题外话
-
-如何在高并发下提高系统吞吐是所有后端开发者追求的目标，Java并发的开创者Doug Lea在Java 7 ConcurrentHashMap的设计中给出了一些参考答案，本文详细的总结了ConcurrentHashMap源码中影响并发性能的十个细节，有常见的自旋锁，CAS的使用，也有延迟写内存，volatile语义退化等不常见的技巧，希望对大家的开发设计有所帮助。
-
-## 把书读薄
-
-《阿里巴巴Java开发手册》的作者孤尽对`ConcurrentHashMap`的设计十分推崇，他说：“`ConcurrentHashMap`源码是学习`Java`代码开发规范的一个非常好的学习材料，我建议同学们可以时常去看一看，总会有新的收货的”，相信大家平常也能听到很多对于`ConcurrentHashMap`设计的溢美之词，在展开隐藏在`ConcurrentHashMap`所有小秘密之前，大家在大脑中首先要有这样的一幅图：
-
-![Image](https://mmbiz.qpic.cn/mmbiz_jpg/R7PtjL3tdAicMdbQfrvwSkfich8cYHngc1rpQ50iaXsQib1VWGqQLr22AgdZcyW71A5P2FpBd9nia1ahOJAXAXSVOOA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)img
-
-对于`Java 7`来说，这张图已经能完全把`ConcurrentHashMap`的架构说清楚了：
+对于`Java 7`来说
 
 1. `ConcurrentHashMap`是一个线程安全的`Map`实现，其读取不需要加锁，通过引入`Segment`，可以做到写入的时候加锁力度足够小
 2. 由于引入了`Segment`，`ConcurrentHashMap`在读取和写入的时候需要需要做两次哈希，但这两次哈希换来的是更细力粒度的锁，也就意味着可以支持更高的并发
 3. 每个桶数组中的`key-value`对仍然以链表的形式存放在桶中，这一点和`HashMap`是一致的。
 
-## 把书读厚
-
-关于`Java 7`的`ConcurrentHashMap`的整体架构，用上面三两句话就可以概括，这张图应该很快就可以在大家的大脑中留下印象，接下来我们通过几个问题来尝试吸引大家继续看下去，把书读厚：
+细节问题：
 
 1. `ConcurrentHashMap`的哪些操作需要加锁？
 2. `ConcurrentHashMap`的无锁读是如何实现的？
 3. 在多线程的场景下调用`size（）`方法获取`ConcurrentHashMap`的大小有什么挑战？`ConcurrentHashMap`是怎么解决的？
 4. 在有`Segment`存在的前提下，应该如何扩容的？
 
-在上一篇文章中我们总结了`HashMap`中最重要的点有四个：**初始化**，**数据寻址-`hash`方法**，**数据存储-`put`方法**,**扩容-`resize`方法**，对于`ConcurrentHashMap`来说，这四个操作依然是最重要的，但由于其引入了更复杂的数据结构，因此在调用`size()`查看整个`ConcurrentHashMap`的数量大小的时候也有不小的挑战，我们也会重点看下Doug Lea在`size()`方法中的设计
+`HashMap`中最重要的点有四个：**初始化**，**数据寻址-`hash`方法**，**数据存储-`put`方法**,**扩容-`resize`方法**，对于`ConcurrentHashMap`来说，这四个操作依然是最重要的，但由于其引入了更复杂的数据结构，因此在调用`size()`查看整个`ConcurrentHashMap`的数量大小的时候也有不小的挑战
 
 ## `new ConcurrentHashMap()`
 
@@ -507,7 +67,7 @@ public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyL
 2. 确定哈希寻址时的偏移量，这个偏移量在确定元素在`segment`数组中的位置时会用到
 3. 初始化`segment`数组中的第一个元素，元素类型为`HashEntry`的数组，这个数组的长度为`initialCapacity / ssize`，即初始化大小除以`segment`数组的大小，`segment`数组中的其他元素在后续`put`操作时参考第一个已初始化的实例初始化
 
-```
+```java
 static final class HashEntry<K,V> {
     final int hash; 
     final K key;
@@ -520,7 +80,8 @@ static final class HashEntry<K,V> {
         this.value = value;
         this.next = next;
     }
-    final void setNext(HashEntry<K,V> n) {
+    
+  	final void setNext(HashEntry<K,V> n) {
         UNSAFE.putOrderedObject(this, nextOffset, n);
     }
 }
@@ -528,11 +89,11 @@ static final class HashEntry<K,V> {
 
 这里的`HashEntry`和`HashMap`中的`HashEntry`作用是一样的，它是`ConcurrentHashMap`的数据项，这里要注意两个细节：
 
-**细节一：**
+### **细节一：**
 
 `HashEntry`的成员变量`value`和`next`是被关键字`volatile`修饰的，也就是说所有线程都可以及时检查到其他线程对这两个变量的改变，因而可以在不加锁的情况下读取到这两个引用的最新值
 
-**细节二：**
+### **细节二：**
 
 `HashEntry`的`setNext`方法中调用了`UNSAFE.putOrderedObject`，这个接口是属于`sun`安全库中的`api`，并不是`J2SE`的一部分，它的作用和`volatile`恰恰相反，调用这个`api`设值是使得`volatile`修饰的变量延迟写入主存，那到底是什么时候写入主存呢？
 
@@ -556,7 +117,7 @@ this.segmentShift = 32 - sshift;
 
 这里用32去减是因为`int`型的长度是32，有了`segmentShift`，`ConcurrentHashMap`是如何做第一次哈希的呢？
 
-```
+```java
 public V put(K key, V value) {
     Segment<K,V> s;
     if (value == null)
@@ -564,23 +125,21 @@ public V put(K key, V value) {
     int hash = hash(key);
     // 变量j代表着数据项处于segment数组中的第j项
     int j = (hash >>> segmentShift) & segmentMask;
-        // 如果segment[j]为null,则下面的这个方法负责初始化之
-        s = ensureSegment(j); 
+    // 如果segment[j]为null,则下面的这个方法负责初始化之
+    s = ensureSegment(j); 
     return s.put(key, hash, value, false);
 }
 ```
 
 我们以`put`方法为例，变量`j`代表着数据项处于`segment`数组中的第`j`项。如下图所示假如`segment`数组的大小为2的n次方，则`hash >>> segmentShift`正好取了key的哈希值的高n位，再与掩码`segmentMask`相与相当与仍然用key的哈希的高位来确定数据项在`segment`数组中的位置。
 
-![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)image-20210409232020703
+![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)`hash`方法与非线程安全的`HashMap`相似，这里不再细说。
 
-`hash`方法与非线程安全的`HashMap`相似，这里不再细说。
-
-**细节三：**
+### **细节三：**
 
 在延迟初始化`Segment`数组时，作者采用了`CAS`避免了加锁，而且`CAS`可以保证最终的初始化只能被一个线程完成。在最终决定调用`CAS`进行初始化前又做了两次检查，第一次检查可以避免重复初始化`tab`数组，而第二次检查则可以避免重复初始化`Segment`对象，每一行代码作者都有详细的考虑。
 
-```
+```java
 private Segment<K,V> ensureSegment(int k) {
     final Segment<K,V>[] ss = this.segments;
     long u = (k << SSHIFT) + SBASE; // raw offset 实际的字节偏移量
@@ -605,7 +164,7 @@ private Segment<K,V> ensureSegment(int k) {
 
 ## `put`方法
 
-```
+```java
 final V put(K key, int hash, V value, boolean onlyIfAbsent) {
     HashEntry<K,V> node = tryLock() ? null : scanAndLockForPut(key, hash, value); 
     V oldValue;
@@ -652,13 +211,13 @@ final V put(K key, int hash, V value, boolean onlyIfAbsent) {
 }
 ```
 
-这段代码在整个`ConcurrentHashMap`的设计中非常出彩，在这短短的40行代码中，Doug Lea就像一位神奇的魔术师，转眼间已经变换了好几种魔法，让人目瞪口呆，感叹其对并发的理解之深，让我们慢慢的解析Doug Lea在这段代码中使用的魔法：
+这段代码在整个`ConcurrentHashMap`的设计中非常出彩
 
-**细节四：**
+### **细节四：**
 
 CPU的调度是公平的，好不容易轮到的时间片如果因为获取不到锁就将本线程挂起无疑会降低本线程的效率，更何况挂起之后还要重新调度，切换上下文，又是一笔不小的开销。如果可以遇见其他线程占有锁的时间不会很长，采用自旋将会是一个比较好的选择，在这里面也有一个权衡，如果别的线程占有锁的时间过长，反而是挂起阻塞等待性能好一点，我们来看下`ConcurrentHashMap`的做法：
 
-```
+```java
 private HashEntry<K,V> scanAndLockForPut(K key, int hash, V value) {
     HashEntry<K,V> first = entryForHash(this, hash);
     HashEntry<K,V> e = first;
@@ -695,11 +254,11 @@ private HashEntry<K,V> scanAndLockForPut(K key, int hash, V value) {
 
 `ConcurrentHashMap`的策略是自旋`MAX_SCAN_RETRIES`次，如果还没有获取到锁则调用`lock`挂起阻塞等待，当然如果其他线程采用头插法改变了链表的头结点，则重置自旋等待次数。
 
-**细节五：**
+### **细节五：**
 
 要知道，如果要从编码的角度提升系统的并发度，一个黄金法则就是减少并发临界区的大小。在`scanAndLockForPut`这个方法的设计上，有个小细节让我眼前一亮，就是在自旋的过程中初始化了一个`HashEntry`，这样做的好处就是线程在拿到锁之后不用初始化`HashEntry`了，占有锁的时间相应减小，进而提升性能。
 
-**细节六：**
+### **细节六：**
 
 在`put`方法的开头，有这么一行不起眼的代码：
 
@@ -903,17 +462,13 @@ static final <K,V> Segment<K,V> segmentAt(Segment<K,V>[] ss, int j) {
 
 
 
-
-
-# Java 8 ConcurrentHashMap源码中隐藏2个BUG
+# Java 8 ConcurrentHashMap
 
 `Java 7`的`ConcurrenHashMap`的[源码](http://mp.weixin.qq.com/s?__biz=Mzk0NjExMjU3Mg==&mid=2247484661&idx=1&sn=0005cd08cf76c6bab5727ec532983415&chksm=c30a55a6f47ddcb04891349eef82f61830c6df7495944184fd98f1253913edd9e3187e73ddae&scene=21#wechat_redirect)我建议大家都看看，那个版本的源码就是`Java`多线程编程的教科书。在`Java 7`的源码中，作者对悲观锁的使用非常谨慎，大多都转换为自旋锁加`volatile`获得相同的语义，即使最后迫不得已要用，作者也会通过各种技巧减少锁的临界区。在上一篇文章中我们也有讲到，自旋锁在临界区比较小的时候是一个较优的选择是因为它避免了线程由于阻塞而切换上下文，但本质上它也是个锁，在自旋等待期间只有一个线程能进入临界区，其他线程只会自旋消耗`CPU`的时间片。`Java 8`中`ConcurrentHashMap`的实现通过一些巧妙的设计和技巧，避开了自旋锁的局限，提供了更高的并发性能。如果说`Java 7`版本的源码是在教我们如何将悲观锁转换为自旋锁，那么在`Java 8`中我们甚至可以看到如何将自旋锁转换为无锁的方法和技巧。
 
-## 把书读薄
 
-![Image](https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdA8G9gcTVIgP3JZWCv0UibUvicIeiaDmgzDGzAh50zu8uibcTzY7acGCJI84Y9J86iaJ0aPK0mD9ASTdR6Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)image
 
-图片来源：https://www.zhenchao.org/2019/01/31/java/cas-based-concurrent-hashmap/
+<img src="https://mmbiz.qpic.cn/mmbiz_png/R7PtjL3tdA8G9gcTVIgP3JZWCv0UibUvicIeiaDmgzDGzAh50zu8uibcTzY7acGCJI84Y9J86iaJ0aPK0mD9ASTdR6Q/640" alt="Image" style="zoom:50%;" />
 
 在开始本文之前，大家首先在心里还是要有这样的一张图，如果有同学对`HashMap`比较熟悉，那这张图也应该不会陌生。事实上在整体的数据结构的设计上`Java 8`的`ConcurrentHashMap`和`HashMap`基本上是一致的。
 
@@ -946,7 +501,7 @@ static final class ForwardingNode<K,V> extends Node<K,V> {
 - 在动态扩容的过程中标志某个桶已经被复制到了新的桶数组中
 - 如果在动态扩容的时候有`get`方法的调用，则`ForwardingNode`将会把请求转发到新的桶数组中，以避免阻塞`get`方法的调用，`ForwardingNode`在构造的时候会将扩容后的桶数组`nextTable`保存下来。
 
-### `UNSAFE.compareAndSwap***`
+### `UNSAFE.compareAndSwap`
 
 这是在`Java 8`版本的`ConcurrentHashMap`实现`CAS`的工具，以`int`类型为例其方法定义如下：
 
@@ -967,7 +522,7 @@ public final native boolean compareAndSwapInt(Object o, long offset,
 
 ## 初始化
 
-```
+```java
 public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
     if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0) // 检查参数
         throw new IllegalArgumentException();
@@ -987,7 +542,7 @@ public ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyL
 
 ## `put`方法
 
-```
+```java
 public V put(K key, V value) {
     return putVal(key, value, false);
 }
@@ -995,7 +550,7 @@ public V put(K key, V value) {
 
 `put`方法将调用转发到`putVal`方法：
 
-```
+```java
 final V putVal(K key, V value, boolean onlyIfAbsent) {
     if (key == null || value == null) throw new NullPointerException();
     int hash = spread(key.hashCode());
@@ -1025,11 +580,11 @@ final V putVal(K key, V value, boolean onlyIfAbsent) {
 }
 ```
 
-从整个代码结构上来看流程还是比较清楚的，我用括号加字母的方式标注了几个非常重要的步骤，`put`方法依然牵扯出很多的知识点
+
 
 ### 桶数组的初始化
 
-```
+```java
 private final Node<K,V>[] initTable() {
     Node<K,V>[] tab; int sc;
     while ((tab = table) == null || tab.length == 0) {
@@ -1066,7 +621,7 @@ private final Node<K,V>[] initTable() {
 
 ### 添加桶数组第一个元素
 
-```
+```java
 static final <K,V> Node<K,V> tabAt(Node<K,V>[] tab, int i) {
     return (Node<K,V>)U.getObjectVolatile(tab, ((long)i << ASHIFT) + ABASE);
 }
@@ -1365,7 +920,7 @@ private transient volatile long baseCount;
 
 在`put`方法的最后，有一个`addCount`方法，因为`putVal`执行到此处说明已经成功新增了一个元素，所以`addCount`方法的作用就是维护当前`ConcurrentHashMap`的元素总数，在`ConcurrentHashMap`中有一个变量`baseCount`用来记录`map`中元素的个数，如下图所示，如果同一时刻有n个线程通过CAS同时操作`baseCount`变量，有且仅有一个线程会成功，其他线程都会陷入无休止的自旋当中，那一定会带来性能瓶颈。
 
-![Image](data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==)image-20210420221407349
+
 
 为了避免大量线程都在自旋等待写入`baseCount`，`ConcurrentHashMap`引入了一个辅助队列，如下图所示，现在操作`baseCount`的线程可以分散到这个辅助队列中去了，调用`size()`的时候只需要将`baseCount`和辅助队列中的数值相加即可，这样就实现了调用`size()`无需加锁。
 

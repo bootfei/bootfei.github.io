@@ -21,34 +21,6 @@ git chekcout -b origin/远程分支名x
 ```
 ​    使用该方式会在本地新建分支x，并自动切换到该本地分支x。采用此种方法建立的本地分支会和远程分支建立映射关系。
 
-#### 本地和远程建立联系
-
-```shell
-#本地git和远程仓库建立联系
-git remote add origin git@github.com:bootfei/bootfei.github.io.git
-#git 新本地-分支master
-git branch -M master
-#git 新本地-分支master，推送到远程-仓库，并建立远程-分支master
-git push -u origin master
-```
-
-
-
-#### 远程仓库
-
-a. 查看远程分支
-
-```
-git remote -v
-```
-
-b. 从HTTPs切换到SSH，或者反过来
-
-```shell
-#见官网https://docs.github.com/en/github/using-git/changing-a-remotes-url
-git remote set-url origin git@github.com:USERNAME/REPOSITORY.git
-```
-
 
 
 ### 版本回退
