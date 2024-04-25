@@ -55,22 +55,22 @@ tags:
 
 ### 修改 **Service** 接口实现类
 
-- @CacheEvict(value="", allEntries="")  清楚所有缓存。业务场景，插入必须清楚所缓存
+@CacheEvict(value="", allEntries="")  清楚所有缓存。业务场景，插入必须清楚所缓存
 
-- @Cacheable(value="", key="") 如果没有缓存，那么查数据库，并添加缓存；如果有缓存，查询指定缓存
+@Cacheable(value="", key="") 如果没有缓存，那么查数据库，并添加缓存；如果有缓存，查询指定缓存
 
-- ```java
-  @Cacheable(value="realTimeCache", key="'student'+#id")
-  public student findStudent(int id){
-  	return dao.findStudent(id);
-  }
-  
-  @CacheEvict(value="realTimeCache", allEntries="true")  
-  @Transactional
-  public void addStudent(Student s){
-    dao.insertStudent(s);
-  }
-  ```
+```java
+@Cacheable(value="realTimeCache", key="'student'+#id")
+public student findStudent(int id){
+	return dao.findStudent(id);
+}
+
+@CacheEvict(value="realTimeCache", allEntries="true")  
+@Transactional
+public void addStudent(Student s){
+  dao.insertStudent(s);
+}
+```
 
 ### 解决缓存问题
 

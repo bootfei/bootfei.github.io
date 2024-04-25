@@ -125,9 +125,11 @@ Spring中的单例Bean创建的步骤为三步：
 
 [可以 Bean在创建的时候给其打个标记，如果递归调用回来发现正在创建中的话--->即可说明正在发生循环依赖。]()
 
-DefaultSingletonBeanRegistry 
+ 
 
 ```java
+//DefaultSingletonBeanRegistry.class
+
 private final Set<String> singletonsCurrentlyInCreation = Collections.newSetFromMap(new ConcurrentHashMap<>(16)); 
 protected void beforeSingletonCreation(String beanName) { 
     if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) { 
@@ -141,9 +143,10 @@ protected void afterSingletonCreation(String beanName) {
 }
 ```
 
-DefaultSingletonBeanRegistry#getSingleton 
+
 
 ```java
+//DefaultSingletonBeanRegistry#getSingleton 
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) { 
     synchronized (this.singletonObjects) { 
         Object singletonObject = this.singletonObjects.get(beanName); 
@@ -175,9 +178,10 @@ public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 
 ### 三级缓存解决该问题
 
-DefaultSingletonBeanRegistry
+
 
 ```java
+//DefaultSingletonBeanRegistry
 /** 第一级缓存 */ 
 private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256); 
 
@@ -249,10 +253,13 @@ Spring 解决依赖循环就是按照上面所述的逻辑来实现的。
 
 ### 解决循环依赖的代码 
 
-AbstractAutowireCapableBeanFactory#doCreateBean 
+
 
 ```java
-      // 解决循环依赖的关键步骤 
+//AbstractAutowireCapableBeanFactory#doCreateBean 
+
+
+// 解决循环依赖的关键步骤 
       boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&isSingletonCurrentlyInCreation(beanName)); //如果需要提前暴露单例Bean，则将该Bean放入三级缓存中
       if (earlySingletonExposure) { 
           //将刚创建的bean放入三级缓存中singleFactories(key是beanName，value是 FactoryBean) 
@@ -347,7 +354,7 @@ protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 
 第二次调用`getSingleton(String beanName, ObjectFactory<?> singletonFactory)`，为重载后的方法。
 
-```
+```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
     Assert.notNull(beanName, "Bean name must not be null");
     synchronized (this.singletonObjects) {
@@ -520,12 +527,12 @@ protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFa
 2. 调用`getSingleton(a)`，第一次调用，因为此时Bean a未创建且3个缓存中都没有,所以返回null
 3. 调用`getSingleton(a, ObjectFactory<?> singletonFactory)`，该方法中`singletonFactory.getObject()`实际调用的是`AbstractBeanFactory#createBean`
 4. Bean a的实例化
-5. 将Bean a提前暴露`addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean))`，将Bean a的对象工厂加入到`singletonFactories`中
+5. 将Bean a提前暴露`addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean))`，将Bean a的对象工厂加入到`3级缓存-singletonFactories`中
 6. Bean a的属性注入(`populateBean(beanName, mbd, instanceWrapper)`)，此时发现A依赖B，调用`getBean(b)`
 7. 调用`getSingleton(b)`，第一次调用返回**null**
 8. 第二次调用`getSingleton(ae, ObjectFactory<?> singletonFactory)`
 9. Bean b的实例化
-10. Bean b的属性注入，此时发现依赖A，调用`getBean(a)`，第一次执行`getSingleton(a)`，然后在`singletonFactories`中取得Bean a的工厂，调用`singletonFactory.getObject()`，这里会执行`addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean))`中的**lambda**表达式，实际是执行一个`BeanPostProcessor`后置处理器`AnnotationAwareAspectJAutoProxyCreator`，`AnnotationAwareAspectJAutoProxyCreator#getEarlyBeanReference`生成Bean a的代理类，即Bean b 注入Bean a的代理类。
+10. Bean b的属性注入，此时发现依赖A，调用`getBean(a)`，第一次执行`getSingleton(a)`，然后在`3级缓存-singletonFactories`中取得Bean a的工厂，调用`singletonFactory.getObject()`，这里会执行`addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean))`中的**lambda**表达式，实际是执行一个`BeanPostProcessor`后置处理器`AnnotationAwareAspectJAutoProxyCreator`，`AnnotationAwareAspectJAutoProxyCreator#getEarlyBeanReference`生成Bean a的代理类，即Bean b 注入Bean a的代理类。
 11. Bean b完成属性注入、**Aware**回调、初始化后，`getSingleton(b, false)`调用第一个`getSingleton`并禁用`singletonFacotries`，从`earlySingleObjects`中获取提前暴露的对象，`exposedObject = earlySingletonReference`将Bean替换为`earlySingletonReference`并返回
 12. Bean a完成属性注入、Aware回调、初始化
 13. Bean a返回提前暴露的`earlySingleObject`。

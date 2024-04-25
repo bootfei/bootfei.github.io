@@ -123,7 +123,7 @@ index =(table.length - 1) & key.hash();
 
 我们再看`Java 7`中对hash的实现：
 
-```
+```java
 final int hash(Object k) {
     int h = hashSeed;
     if (0 != h && k instanceof String) {
@@ -143,6 +143,8 @@ final int hash(Object k) {
 `Java 7`中为了避免`hash`值的高位信息丢失，做了更加复杂的异或运算，但是基本出发点都是一样的，都是让哈希值的低位保留部分高位信息，减少哈希碰撞。
 
 ## `put`
+
+### Jdk8:
 
 在`Java 8`中`put`这个方法的思路分为以下几步：
 
@@ -176,13 +178,13 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
         Node<K,V> e; K k;
         if (p.hash == hash &&
             ((k = p.key) == key || (key != null && key.equals(k))))
-            // 哈希碰撞，且节点已存在，直接替换
+            //【关键点1】 哈希碰撞，且节点已存在，直接替换
             e = p;
         else if (p instanceof TreeNode)
-            // 哈希碰撞，树结构
+            // 【关键点2】哈希碰撞，树结构
             e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
         else {
-            // 哈希碰撞，链表结构
+            // 【关键点3】哈希碰撞，链表结构
             for (int binCount = 0; ; ++binCount) {
                 if ((e = p.next) == null) {
                     p.next = newNode(hash, key, value, null);
@@ -193,14 +195,14 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                 }
                 if (e.hash == hash &&
                     ((k = e.key) == key || (key != null && key.equals(k))))
-                    // 如果节点已存在，则跳出循环
+                    // 【关键点4】：如果节点已存在，则跳出循环
                     break;
-                // 否则，指针后移，继续后循环
+                // 否则，指向下一个节点
                 p = e;
             }
         }
         if (e != null) { // existing mapping for key
-            // 对应着上文中节点已存在，跳出循环的分支
+            // 对应着上文中【关键点4】：节点已存在，跳出循环的分支
             // 直接替换
             V oldValue = e.value;
             if (!onlyIfAbsent || oldValue == null)
@@ -218,9 +220,11 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 }
 ```
 
-相比之下`Java 7`中的`put`方法就简单不少
+### jdk7:
 
-```
+`Java 7`中的`put`方法就简单不少
+
+```java
 public V put(K key, V value) {
     // 如果 key 为 null，调用 putForNullKey 方法进行处理  
     if (key == null)
@@ -254,6 +258,8 @@ void addEntry(int hash, K key, V value, int bucketIndex) {
 
 ## `resize()`
 
+### jdk8:
+
 `resize`是整个`HashMap`中最复杂的一个模块，如果在`put`数据之后超过了`threshold`的值，则需要扩容，扩容意味着桶数组大小变化，我们在前文中分析过，`HashMap`寻址是通过`index =(table.length - 1) & key.hash();`来计算的，现在`table.length`发生了变化，势必会导致部分`key`的位置也发生了变化，`HashMap`是如何设计的呢？
 
 这里就涉及到桶数组长度为2的正整数幂的第二个优势了：当桶数组长度为2的正整数幂时，如果桶发生扩容（长度翻倍），则桶中的元素大概只有一半需要切换到新的桶中，另一半留在原先的桶中就可以，并且这个概率可以看做是均等的。
@@ -264,7 +270,7 @@ void addEntry(int hash, K key, V value, int bucketIndex) {
 
 下面是`Java 8`中的实现：
 
-```
+```java
 final Node<K,V>[] resize() {
     Node<K,V>[] oldTab = table;
     int oldCap = (oldTab == null) ? 0 : oldTab.length;
@@ -350,6 +356,8 @@ final Node<K,V>[] resize() {
 }
 ```
 
+### jdk7:
+
 `Java 7`中的`resize`方法相对简单许多：
 
 1. 基本的校验之后`new`一个新的桶数组，大小为指定入参
@@ -429,5 +437,4 @@ void transfer(Entry[] newTable, boolean rehash) {
 7. `HashMap`如何处理`key`为`null`的键值对？
 
    答：放置在桶数组中下标为0的桶中
-
 

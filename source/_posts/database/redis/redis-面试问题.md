@@ -29,7 +29,33 @@ tags: [leetcode,interview]
 
 （2）除此以外，还有 Bitmaps、HyperLogLogs、GEO、Streams 等高级数据类型。
 
-## [#](https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-内存淘汰)Redis 内存淘汰
+## Redis zset跳表和压缩表
+
+ZSet 有两种不同的实现，分别是 ziplist 和 skiplist。具体使用哪种结构进行存储，规则如下：
+
+```
+ziplist：满足以下两个条件
+
+- [value,score] 键值对数量少于 128 个
+
+- 每个元素的长度小于 64 字节
+
+skiplist：不满足以上两个条件时使用跳表、组合了 hash 和 skiplist
+
+- hash 用来存储 value 到 score 的映射，这样就可以在 O(1) 时间内找到 value 对应的分数
+
+- skiplist 按照从小到大的顺序存储分数
+```
+
+skiplist 每个元素的值都是 [value,score] 对使用 ziplist 的示意图如下所示：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210516211822874.png)
+使用跳表时的示意图：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210516211842414.png)
+ziplist 压缩列表本文不是重点讨论范围，我们着重来看下跳跃表 skiplist。
+
+## Redis 内存淘汰
 
 【问题】
 
@@ -66,7 +92,54 @@ tags: [leetcode,interview]
 
 （4）LRU 算法实现思路：可以继承 LinkedHashMap，并覆写 removeEldestEntry 方法来实现一个最简单的 LRUCache
 
-## [#](https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-持久化)Redis 持久化
+## Redis大Key删除
+
+### (1) 异步删除
+
+- 开启lazy free功能，如果触发自动过期删除，则会异步执行
+- 使用unlink命令手动触发，会异步执行删除操作
+
+### (2) 使用分批删除
+
+对于集合类型的数据，可以通过客户端手动scan轮询的方式，每次只删除一部分的数据
+
+
+
+
+
+## Redis实现限流
+
+### 第一种：基于Redis的setnx的操作
+
+我们在使用Redis的分布式锁的时候，大家都知道是依靠了setnx的指令，在CAS（Compare and swap）的操作的时候，同时给指定的key设置了过期实践（expire），我们在限流的主要目的就是为了在单位时间内，有且仅有N数量的请求能够访问我的代码程序。所以依靠setnx可以很轻松的做到这方面的功能。
+
+```
+setNx(key, 20, 10,TimeUnit.Seconds)
+```
+
+比如我们需要在10秒内限定20个请求，那么我们在setnx的时候可以设置过期时间10，当请求的setnx数量达到20时候即达到了限流效果。代码比较简单就不做展示了。当然这种做法的弊端是很多的，比如当统计1-10秒的时候，无法统计2-11秒之内，如果需要统计N秒内的M个请求，那么我们的Redis中需要保持N个key等等问题
+
+
+
+### 第二种：基于Redis的数据结构zset
+
+其实限流涉及的最主要的就是滑动窗口，上面也提到1-10怎么变成2-11。其实也就是起始值和末端值都各+1即可。
+
+而我们如果用Redis的list数据结构可以轻而易举的实现该功能
+
+我们可以将请求打造成一个zset数组，当每一次请求进来的时候，value保持唯一，可以用UUID生成，而score可以用当前时间戳表示，因为score我们可以用来计算当前时间戳之内有多少的请求数量。而zset数据结构也提供了range方法让我们可以很轻易的获取到2个时间戳内有多少请求
+
+
+
+<img src="https://img-blog.csdnimg.cn/img_convert/e15884cf9931cea8d8c2e88b94c7858c.webp?x-oss-process=image/format,png" alt="image.png" style="zoom:50%;" />
+
+
+
+
+
+<img src="https://img-blog.csdnimg.cn/img_convert/cca8d7792e4958d52a43ff661ef7de74.webp?x-oss-process=image/format,png" alt="image.png" style="zoom:67%;" />
+
+## Redis 持久化
 
 【问题】
 
@@ -104,7 +177,7 @@ AOF 丢数据比 RDB 少，但文件会比 RDB 文件大很多。
 
 建议同时使用 RDB 和 AOF。用 AOF 来保证数据不丢失，作为数据恢复的第一选择; 用 RDB 来做不同程度的冷备，在 AOF 文件都丢失或损坏不可用的时候，还可以使用 RDB 来进行快速的数据恢复。
 
-## [#](https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-事务)Redis 事务
+## Redis 事务
 
 【问题】
 

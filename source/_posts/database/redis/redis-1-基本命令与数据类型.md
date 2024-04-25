@@ -23,7 +23,7 @@ Redis 中存储数据是通过 key-value 格式存储数据的，其中 value �
 
 ### 命令
 
-#### 赋值
+赋值
 
 ```
 SET key value
@@ -31,13 +31,13 @@ SET key value
 set test 123
 ```
 
-#### 取值
+取值
 
 ```
 127.0.0.1:6379> get test "123“
 ```
 
-#### 取值并赋值
+取值并赋值
 
 ```
 GETSET key value
@@ -46,7 +46,7 @@ getset s2 222
 
 #### 数值增减 
 
-##### 注意事项:
+注意事项:
 
 > 1、 当value为整数数据时，才能使用以下命令操作数值的增减。 
 >
@@ -139,11 +139,11 @@ hash 类型也叫散列类型，它提供了字段和字段值的映射。字段
 
 ### 命令
 
-#### 赋值
+赋值
 
 HSET 命令不区分插入和更新操作，当执行插入操作时 HSET 命令返回 1 ，当执行更新操作时返回 0 。 
 
-##### 设置一个字段值
+设置一个字段值
 
 ```
 HSET key field value
@@ -152,7 +152,7 @@ HSET key field value
 (integer) 1
 ```
 
-##### 设置多个字段值
+设置多个字段值
 
 ```
 HMSET key field value [field value ...]
@@ -160,7 +160,7 @@ HMSET key field value [field value ...]
 OK
 ```
 
-##### 当字段不存在时赋值
+当字段不存在时赋值
 
 类似 `HSET` ，区别在于如果字段存在，该命令不执行任何操作
 

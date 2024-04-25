@@ -166,6 +166,7 @@ private Segment<K,V> ensureSegment(int k) {
 
 ```java
 final V put(K key, int hash, V value, boolean onlyIfAbsent) {
+  	//细节4
     HashEntry<K,V> node = tryLock() ? null : scanAndLockForPut(key, hash, value); 
     V oldValue;
     try {
@@ -252,7 +253,7 @@ private HashEntry<K,V> scanAndLockForPut(K key, int hash, V value) {
 }
 ```
 
-`ConcurrentHashMap`的策略是自旋`MAX_SCAN_RETRIES`次，如果还没有获取到锁则调用`lock`挂起阻塞等待，当然如果其他线程采用头插法改变了链表的头结点，则重置自旋等待次数。
+`ConcurrentHashMap`的策略是tryLock()自旋,  (最多`MAX_SCAN_RETRIES`次); 如果还没有获取到锁则调用`lock`挂起阻塞等待，当然如果其他线程采用头插法改变了链表的头结点，则重置自旋等待次数。
 
 ### **细节五：**
 
@@ -262,13 +263,13 @@ private HashEntry<K,V> scanAndLockForPut(K key, int hash, V value) {
 
 在`put`方法的开头，有这么一行不起眼的代码：
 
-```
+```java
 HashEntry<K,V>[] tab = table;
 ```
 
 看起来好像就是简单的临时变量赋值，其实大有来头，我们看一下`table`的声明：
 
-```
+```java
 transient volatile HashEntry<K,V>[] table;
 ```
 
@@ -278,21 +279,21 @@ transient volatile HashEntry<K,V>[] table;
 >
 > 每个处理器通过嗅探在总线上传播的数据来检查自己缓存的值是不是过期了，当处理器发现自己缓存行对应的内存地址被修改，就会将当前处理器的缓存行设置成无效状态，当处理器对这个数据进行修改操作的时候，会重新从系统内存中把数据读到处理器缓存里
 
-因此直接读取这类变量的读取和写入比普通变量的性能消耗更大，因此在`put`方法的开头将`table`变量赋值给一个普通的本地变量目的是为了消除`volatile`带来的性能损耗。这里就有另外一个问题：那这样做会不会导致`table`的语义改变，让别的线程读取不到最新的值呢？别着急，我们接着看。
+因此直接读取这类变量的读取和写入比普通变量的性能消耗更大，因此在`put`方法的开头将`table`变量赋值给一个普通的本地变量目的是为了消除`volatile`带来的性能损耗。这里就有另外一个问题：那这样做会不会导致`table`的语义改变，让别的线程读取不到最新的值呢？
 
-**细节七：**
+### **细节七：**
 
 注意`put`方法中的这个方法：`entryAt()`:
 
-```
+```java
 static final <K,V> HashEntry<K,V> entryAt(HashEntry<K,V>[] tab, int i) {
     return (tab == null) ? null : (HashEntry<K,V>) UNSAFE.getObjectVolatile(tab, ((long)i << TSHIFT) + TBASE);
 }
 ```
 
-这个方法的底层会调用`UNSAFE.getObjectVolatile`，这个方法的目的就是对于普通变量读取也能像`volatile`修饰的变量那样读取到最新的值，在前文中我们分析过，由于变量`tab`现在是一个普通的临时变量，如果直接调用`tab[i]`不一定能拿到最新的首节点的。细心的读者读到这里可能会想：Doug Lea是不是糊涂了，兜兜转换不是回到了原点么，为啥不刚开始就操作`volatile`变量呢，费了这老大劲。我们继续往下看。
+这个方法的底层会调用`UNSAFE.getObjectVolatile`，这个方法的目的就是对于普通变量读取也能像`volatile`修饰的变量那样读取到最新的值，在前文中我们分析过，由于变量`tab`现在是一个普通的临时变量，如果直接调用`tab[i]`不一定能拿到最新的首节点的。细心的读者读到这里可能会想：为啥不刚开始就操作`volatile`变量呢?
 
-**细节八：**
+### **细节八：**
 
 在`put`方法的实现中，如果链表中没有`key`值相等的数据项，则会把新的数据项插入到链表头写入到数组中，其中调用的方法是：
 
@@ -310,7 +311,7 @@ static final <K,V> void setEntryAt(HashEntry<K,V>[] tab, int i, HashEntry<K,V> e
 
 我们在这里稍微总结一下`put`方法里面最重要的三个细节，首先将`volatile`变量转为普通变量提升性能，因为在`put`中需要读取到最新的数据，因此接下来调用`UNSAFE.getObjectVolatile`获取到最新的头结点，但是通过调用`UNSAFE.putOrderedObject`让变量写入主存的时间延迟到`put`方法的结尾，一来缩小临界区提升性能，而来也能保证其他线程读取到的是完整数据。
 
-**细节九：**
+### **细节九：**
 
 如果`put`真的需要往链表头插入数据项，那也得注意了，`ConcurrentHashMap`相应的语句是：
 
@@ -330,7 +331,7 @@ final void setNext(HashEntry<K,V> n) {
 
 ## `resize`扩容
 
-```
+```java
 private void rehash(HashEntry<K,V> node) {
     HashEntry<K,V>[] oldTable = table;
     int oldCapacity = oldTable.length;
@@ -377,7 +378,7 @@ private void rehash(HashEntry<K,V> node) {
 }
 ```
 
-如果大家看过我们上一篇分析`HashMap`的`rehash`的过程看这段代码就会比较轻松，在上一篇我们分析过，在整个桶数组长度为2的正整数幂的情况下，扩容前同一个桶中的元素在扩容后只会分布在两个桶中，其中一个桶的下标保持不变，我们称之为旧桶，另一个桶的下标为旧桶下标加上旧的容量，我们称之为新桶，其实第一个for循环的目的就是在一个链表中找到最后一个应该移到新桶的数据项，直接移到新桶中，这样做是为了保证后面调用`HashEntry<K,V> n = newTable[k];`的时候不会读取到`null`。第二个`for`就比较简单了，将所有的数据项移到新的桶数组中，当所有的操作完成之后才将`newTable`赋值给`table`。
+我们分析过，在整个桶数组长度为2的正整数幂的情况下，扩容前同一个桶中的元素在扩容后只会分布在两个桶中，其中一个桶的下标保持不变，我们称之为旧桶，另一个桶的下标为旧桶下标加上旧的容量，我们称之为新桶，其实第一个for循环的目的就是在一个链表中找到最后一个应该移到新桶的数据项，直接移到新桶中，这样做是为了保证后面调用`HashEntry<K,V> n = newTable[k];`的时候不会读取到`null`。第二个`for`就比较简单了，将所有的数据项移到新的桶数组中，当所有的操作完成之后才将`newTable`赋值给`table`。
 
 `rehash`方法中是没有加锁的，并不是说调用这个方法不需要加锁，作者是在外层加了锁，这一点需要注意。
 
@@ -385,7 +386,7 @@ private void rehash(HashEntry<K,V> node) {
 
 之前在分析`HashMap`方法的时候我们并没有去讲`size`方法，因为在单线程环境下这个方法可以使用一个全局的变量解决，同样的方案当然也可以在多线程场景下使用，不过要在多线程环境下读取全局变量又会陷入到无尽的“锁”中，这是我们不愿意看到的，那`ConcurrentHashMap`是如何解决这个问题的呢：
 
-```
+```java
 public int size() {
     final Segment<K,V>[] segments = this.segments;
     int size;
@@ -436,7 +437,7 @@ static final <K,V> Segment<K,V> segmentAt(Segment<K,V>[] ss, int j) {
 }
 ```
 
-**细节十：**
+### **细节十：**
 
 在`size`方法的设计上，`ConcurrentHashMap`先尝试无锁的方法，如果两次遍历所有`segment`数组的时候整个`ConcurrentHashMap`没有发生写入操作，则直接返回每个`segment`数组的`size()`之和，否则重新遍历，如果写入操作频繁，则不得已加锁处理，这里的加锁相当于是一个全局的锁，因为对`segment`数组的每一个元素都加了锁。那如何判断整个`ConcurrentHashMap`的写入是否频繁呢？就看无锁重试的次数，当无锁重试的次数超过阈值的话就全局加锁处理。
 
@@ -454,7 +455,7 @@ static final <K,V> Segment<K,V> segmentAt(Segment<K,V>[] ss, int j) {
 
 3. 在多线程的场景下调用`size（）`方法获取`ConcurrentHashMap`的大小有什么挑战？`ConcurrentHashMap`是怎么解决的？
 
-   答：`size()`具有全局的语义，如何能保证在不加全局锁的情况下读取到全局状态的值是一个很大的挑战，`ConcurrentHashMap`通过查看两次无锁读中间是否发生了写入操作来决定读取到的`size()`是否可信，如果写入操作频繁，则再退化为全局加锁读取。
+   答：`size()`具有全局的语义，如何能保证在不加全局锁的情况下读取到全局状态的值是一个很大的挑战，`ConcurrentHashMap`通过查看**两次无锁读**中间是否发生了写入操作来决定读取到的`size()`是否可信，如果写入操作频繁，则再退化为**全局加锁读取**。
 
 4. 在有`Segment`存在的前提下，是如何扩容的？
 
@@ -464,7 +465,7 @@ static final <K,V> Segment<K,V> segmentAt(Segment<K,V>[] ss, int j) {
 
 # Java 8 ConcurrentHashMap
 
-`Java 7`的`ConcurrenHashMap`的[源码](http://mp.weixin.qq.com/s?__biz=Mzk0NjExMjU3Mg==&mid=2247484661&idx=1&sn=0005cd08cf76c6bab5727ec532983415&chksm=c30a55a6f47ddcb04891349eef82f61830c6df7495944184fd98f1253913edd9e3187e73ddae&scene=21#wechat_redirect)我建议大家都看看，那个版本的源码就是`Java`多线程编程的教科书。在`Java 7`的源码中，作者对悲观锁的使用非常谨慎，大多都转换为自旋锁加`volatile`获得相同的语义，即使最后迫不得已要用，作者也会通过各种技巧减少锁的临界区。在上一篇文章中我们也有讲到，自旋锁在临界区比较小的时候是一个较优的选择是因为它避免了线程由于阻塞而切换上下文，但本质上它也是个锁，在自旋等待期间只有一个线程能进入临界区，其他线程只会自旋消耗`CPU`的时间片。`Java 8`中`ConcurrentHashMap`的实现通过一些巧妙的设计和技巧，避开了自旋锁的局限，提供了更高的并发性能。如果说`Java 7`版本的源码是在教我们如何将悲观锁转换为自旋锁，那么在`Java 8`中我们甚至可以看到如何将自旋锁转换为无锁的方法和技巧。
+在`Java 7`的源码中，作者对悲观锁的使用非常谨慎，大多都转换为自旋锁加`volatile`获得相同的语义，即使最后迫不得已要用，作者也会通过各种技巧减少锁的临界区。在上一篇文章中我们也有讲到，自旋锁在临界区比较小的时候是一个较优的选择是因为它避免了线程由于阻塞而切换上下文，但本质上它也是个锁，在自旋等待期间只有一个线程能进入临界区，其他线程只会自旋消耗`CPU`的时间片。`Java 8`中`ConcurrentHashMap`的实现通过一些巧妙的设计和技巧，避开了自旋锁的局限，提供了更高的并发性能。如果说`Java 7`版本的源码是在教我们如何将悲观锁转换为自旋锁，那么在`Java 8`中我们甚至可以看到如何将自旋锁转换为无锁的方法和技巧。
 
 
 
@@ -479,13 +480,13 @@ static final <K,V> Segment<K,V> segmentAt(Segment<K,V>[] ss, int j) {
 3. 尽管`size()`方法的实现中先尝试无锁读，但是如果在这个过程中有别的线程做写入操作，那调用`size()`的这个线程就会给整个`ConcurrentHashMap`加锁，这是整个`ConcurrrentHashMap`唯一一个全局锁，这点对底层的组件来说还是有性能隐患的
 4. 极端情况下（比如客户端实现了一个性能很差的哈希函数）`get()`方法的复杂度会退化到`O(n)`。
 
-针对1和2，在`Java 8`的设计是废弃了`Segment`的使用，将悲观锁的粒度降低至桶维度，因此调用`get`的时候也不需要再做两次哈希了。`size()`的设计是`Java 8`版本中最大的亮点，我们在后面的文章中会详细说明。至于红黑树，这篇文章仍然不做过多阐述。接下来的篇幅会深挖细节，把书读厚，涉及到的模块有：初始化，`put`方法, 扩容方法`transfer`以及`size()`方法，而其他模块，比如`hash`函数等改变较小，故不再深究。
+针对1和2，在`Java 8`的设计是废弃了`Segment`的使用，将悲观锁的粒度降低至桶维度，因此调用`get`的时候也不需要再做两次哈希了。`size()`的设计是`Java 8`版本中最大的亮点，我们在后面的文章中会详细说明。至于红黑树，这篇文章仍然不做过多阐述。
 
 ## 准备知识
 
 ### `ForwardingNode`
 
-```
+```java
 static final class ForwardingNode<K,V> extends Node<K,V> {
     final Node<K,V>[] nextTable;
     ForwardingNode(Node<K,V>[] tab) {
