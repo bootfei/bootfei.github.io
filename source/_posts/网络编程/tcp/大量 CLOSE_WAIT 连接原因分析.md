@@ -17,3 +17,11 @@ CLOSE_WAIT是tcp的四次挥手阶段的服务器状态
 # Dubbo服务器出现大量 CLOSE_WAIT
 
 https://mp.weixin.qq.com/s?__biz=MzU3Njk0MTc3Ng==&mid=2247486020&idx=1&sn=f7cf41aec28e2e10a46228a64b1c0a5c&scene=21#wechat_redirect
+
+
+
+
+
+# 参考文献
+
+1. https://www.zhihu.com/question/298214130
