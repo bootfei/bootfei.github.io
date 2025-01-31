@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-count">246</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -248,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-08-21/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E4%B9%8B%E9%97%B4%E8%B0%83%E7%94%A8-02-%E6%9C%8D%E5%8A%A1%E6%BC%94%E8%BF%9B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -262,7 +262,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-08-21/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/15/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E4%B9%8B%E9%97%B4%E8%B0%83%E7%94%A8-02-%E6%9C%8D%E5%8A%A1%E6%BC%94%E8%BF%9B/" class="post-title-link" itemprop="url">服务之间调用总结</a>
         </h2>
 
         <div class="post-meta-container">
@@ -273,14 +273,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+      <time title="Created: 2021-06-15 13:50:34" itemprop="dateCreated datePublished" datetime="2021-06-15T13:50:34+08:00">2021-06-15</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-08-26 21:07:26" itemprop="dateModified" datetime="2022-08-26T21:07:26+08:00">2022-08-26</time>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
       </span>
 
   
@@ -293,50 +293,75 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《哀叹诗篇》系列</p>
-<p>《诗篇》 42和43篇</p>
-<p>&lt;诗篇&gt;是人与上帝交通的指引，描述了人生的各种情景，通过诗篇，可以看到人内心的各种情感</p>
-<p>诗篇卷二：可拉后裔的诗。可拉背叛上帝，但是可拉的后裔服侍上帝。从中可以看到，上帝的恩典，所以可拉的后裔热心服侍上帝。</p>
-<p>42-43篇是同一个诗歌</p>
-<p>43篇：没有标题的诗，所以可能是42篇的后续</p>
+          <p>微服务是否适合小团队是个见仁见智的问题。</p>
+<p>回归现象看本质，随着业务复杂度的提高，单体应用越来越庞大，就好像一个类的代码行越来越多，分而治之，切成多个类应该是更好的解决方法，所以一个庞大的单体应用分出多个小应用也更符合这种分治的思想。</p>
+<p>当然微服务架构不应该是一个小团队一开始就该考虑的问题，而是慢慢演化的结果，谨慎过度设计尤为重要。</p>
+<p>公司的背景是提供SaaS服务，对于大客户也会有定制开发以及私有化部署。经过2年不到的时间，技术架构经历了从单体到微服务再到容器化的过程。</p>
+<h2 id="单体应用时代"><a href="#单体应用时代" class="headerlink" title="单体应用时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">单体应用时代</a></h2><p>多说一句，前后端分离也不一定就不能服务端渲染，例如电商系统或者一些匿名即可访问的系统，加一层薄薄的View层，无论是php还是用Thymeleaf都是不错的选择。</p>
+<p>部署架构上，我们使用Nginx代理前端HTML资源，在接收请求时根据路径反向代理到server的8080端口实现业务。</p>
+<p>[<img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlbgkXa228IFz1iazDgxyjrw8tYt9oICv7IlMklYjzGLLNialwiaCTWWdkA/640" alt="Image" style="zoom:67%;" /></p>
+<h3 id="接口定义"><a href="#接口定义" class="headerlink" title="接口定义"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">接口定义</a></h3><p>接口按照标准的Restful来定义，</p>
+<ul>
+<li>版本，统一跟在 /api/后面，例如 <code>/api/v2</code></li>
+<li>以资源为中心，使用复数表述，例如<code>/api/contacts</code>，也可以嵌套，如<code>/api/groups/1/contacts/100</code></li>
+<li>url中尽量不使用动词，实践中发现做到这一点真的比较难，每个研发人员的思路不一致，起的名字也千奇百怪，都需要在代码Review中覆盖。</li>
+<li>动作支持，<code>POST / PUT / DELELE / GET</code> ，这里有一个坑，PUT和PATCH都是更新，但是PUT是全量更新而PATCH是部分更新，前者如果传入的字段是空（未传也视为空）那么也会被更新到数据库中。目前我们虽然是使用PUT但是忽略空字段和未传字段，本质上是一种部分更新，这也带来了一些问题，比如确有置空的业务需要特殊处理。</li>
+<li>接口通过swagger生成文档供前端同事使用。</li>
+</ul>
+<h3 id="持续集成-CI"><a href="#持续集成-CI" class="headerlink" title="持续集成(CI)"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">持续集成(CI)</a></h3><p>团队初始成员之前都有在大团队共事的经历，所以对于质量管控和流程管理都有一些共同的要求。因此在开发之初就引入了集成测试的体系，可以直接开发针对接口的测试用例，统一执行并计算覆盖率。</p>
+<p>一般来说代码自动执行的都是单元测试(Unit Test)，我们之所以叫集成测试是因为测试用例是针对API的，并且包含了数据库的读写，MQ的操作等等，除了外部服务的依赖基本都是符合真实生产场景，相当于把Jmeter的事情直接在Java层面做掉了。</p>
+<p>这在开发初期为我们提供了非常大的便利性。但值得注意的是，由于数据库以及其他资源的引入，数据准备以及数据清理时要考虑的问题就会更多，例如如何控制并行任务之间的测试数据互不影响等等。</p>
+<p>为了让这一套流程可以自动化的运作起来， 引入Jenkins也是理所当然的事情了。</p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlOdhGfEsNbPPiaCAtBC4jjVjkz7yMu5T828ko9c6ESBfcQibmC0oEJ9ng/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
+<p>开发人员提交代码进入gerrit中，Jenkins被触发开始编译代码并执行集成测试，完成后生成测试报告，测试通过再由reviewer进行代码review。在单体应用时代这样的CI架构已经足够好用，由于有集成测试的覆盖，在保持API兼容性的前提下进行代码重构都会变得更有信心。</p>
+<h2 id="微服务时代"><a href="#微服务时代" class="headerlink" title="微服务时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">微服务时代</a></h2><h3 id="服务拆分原则"><a href="#服务拆分原则" class="headerlink" title="服务拆分原则"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">服务拆分原则</a></h3><p>从数据层面看，最简单的方式就是看数据库的表之间是否有比较少的关联。例如最容易分离的一般来说都是用户管理模块。如果从领域驱动设计（DDD）看，其实一个服务就是一个或几个相关联的领域模型，通过少量数据冗余划清服务边界。</p>
+<p>服务拆分是一个大工程，往往需要几个对业务以及数据最熟悉的人一起讨论，甚至要考虑到团队结构，最终的效果是服务边界清晰， 没有环形依赖和避免双向依赖。</p>
+<h3 id="框架选择"><a href="#框架选择" class="headerlink" title="框架选择"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">框架选择</a></h3><p>由于之前的单体服务使用的是spring boot，所以框架自然而的选择了spring cloud。其实个人认为微服务框架不应该限制技术与语言，但生产实践中发现无论dubbo还是spring cloud都具有侵入性，我们在将nodejs应用融入spring cloud体系时就发现了许多问题。也许未来的service mesh才是更合理的发展道路。</p>
+<p>这是典型的Spring Cloud的使用方法</p>
+<ul>
+<li>zuul作为gateway，分发不同客户端的请求到具体service</li>
+<li>erueka作为注册中心，完成了服务发现和服务注册</li>
+<li>每个service包括gateway都自带了Hystrix提供的限流和熔断功能</li>
+<li>service之间通过feign和ribbon互相调用，feign实际上是屏蔽了service对erueka的操作</li>
+</ul>
+<p>上文说的一旦要融入异构语言的service，那么服务注册，服务发现，服务调用，熔断和限流都需要自己处理。</p>
+<p>再有关于zuul要多说几句，Sprin Cloud提供的zuul对Netflix版本的做了裁剪，去掉了动态路由功能（Groovy实现），另外一点就是zuul的性能一般，由于采用同步编程模型，对于IO密集型等后台处理时间长的链路非常容易将servlet的线程池占满，所以如果将zuul与主要service放置在同一台物理机上，在流量大的情况下，zuul的资源消耗非常大。</p>
+<p>实际测试也发现经过zuul与直接调用service的性能损失在30%左右，并发压力大时更为明显。现在spring cloud gateway是pivotal的主推了，支持异步编程模型，后续架构优化也许会采用，或是直接使用Kong这种基于nginx的网关来提供性能。当然同步模型也有优点，编码更简单，后文将会提到使用ThreadLocal如何建立链路跟踪。</p>
+<h3 id="架构改造"><a href="#架构改造" class="headerlink" title="架构改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">架构改造</a></h3><p>经过大半年的改造以及新需求的加入，单体服务被不断拆分，最终形成了10余个微服务，并且搭建了Spark用于BI。初步形成两大体系，微服务架构的在线业务系统(OLTP) + Spark大数据分析系统(OLAP)。数据源从只有Mysql增加到了ES和Hive。多数据源之间的数据同步也是值得一说的话题，但内容太多不在此文赘述。</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlZLks9nIVHdtGHq3jKAO2Mibp4KfNouFa9icqd47MqicicRhMEcmvH9ETbw/640" alt="Image" style="zoom:67%;" />
+
+<h3 id="自动化部署"><a href="#自动化部署" class="headerlink" title="自动化部署"></a>自动化部署</h3><p>与CI比起来，持续交付（CD）实现更为复杂，在资源不足的情况我们尚未实现CD，只是实现执行了自动化部署。</p>
+<p>由于生产环境需要通过跳板机操作，所以我们通过Jenkins生成jar包传输到跳板机，之后再通过Ansible部署到集群。</p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlOweGzDvlgNpjyY80roRKrwprlP19WLSrgcUWbZ3kOqLrYghRZlfMdw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
+<p>简单粗暴的部署方式在小规模团队开发时还是够用的，只是需要在部署前保证测试（人工测试 + 自动化测试）到位。</p>
+<h3 id="链路跟踪"><a href="#链路跟踪" class="headerlink" title="链路跟踪"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">链路跟踪</a></h3><p>开源的全链路跟踪很多，比如<code>spring cloud sleuth + zipkin</code>，国内有美团的CAT等等。其目的就是当一个请求经过多个服务时，可以通过一个固定值获取整条请求链路的行为日志，基于此可以再进行耗时分析等，衍生出一些性能诊断的功能。不过对于我们而言，首要目的就是trouble shooting，出了问题需要快速定位异常出现在什么服务，整个请求的链路是怎样的。</p>
+<p>为了让解决方案轻量，我们在日志中打印RequestId以及TraceId来标记链路。RequestId在gateway生成表示唯一一次请求，TraceId相当于二级路径，一开始与RequestId一样，但进入线程池或者消息队列后，TraceId会增加标记来标识唯一条路径。</p>
+<p>举个例子，当一次请求会向MQ发送一个消息，那么这个消息可能会被多个消费者消费，此时每个消费线程都会自己生成一个TraceId来标记消费链路。加入TraceId的目的就是为了避免只用RequestId过滤出太多日志。实现如图所示，</p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlzAbXCTKK3mgB8tTUo6iarzNNrmAUErQv5rLTO2zondavooqv9XcOBiag/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
+<p>简单的说，通过ThreadLocal存放APIRequestContext串联单服务内的所有调用，当跨服务调用时，将APIRequestContext信息转化为Http Header，被调用方获取到Http Header后再次构建APIRequestContext放入ThreadLocal，重复循环保证RequestId和TraceId不丢失即可。如果进入MQ，那么APIRequestContext信息转化为Message Header即可（基于Rabbitmq实现）。</p>
+<p>当日志汇总到日志系统后，如果出现问题，只需要捕获发生异常的RequestId或是TraceId即可进行问题定位</p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlyvc2T2yiaUjDHk4ibibJweZrsHQZJhOWpObb9Q8TsE4JVUwBAvt7bRYYA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
+<h3 id="运维监控"><a href="#运维监控" class="headerlink" title="运维监控"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">运维监控</a></h3><p>在容器化之前，采用<code>telegraf + influxdb + grafana</code>的方案。telegraf作为探针收集jvm，system，mysql等资源的信息，写入influxdb，最终通过grafana做数据可视化。<code>spring boot actuator</code>可以配合jolokia暴露jvm的endpoint。整个方案零编码，只需要花时间配置。</p>
+<h2 id="容器化时代"><a href="#容器化时代" class="headerlink" title="容器化时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">容器化时代</a></h2><h3 id="架构改造-1"><a href="#架构改造-1" class="headerlink" title="架构改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">架构改造</a></h3><p>因为在做微服务之初就计划了容器化，所以架构并未大动，只是每个服务都会建立一个Dockerfile用于创建docker image</p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhliaibvn0lkdvGdRQ5dXiazh9VTmtIeoPO2f9ZVTHBCibFCymdwnkibEAfNCg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
+<p>涉及变化的部分包括：</p>
 <ol>
-<li>Thirsting for God</li>
-<li>弥撒山在哪里？根据诗篇中的内容，是回顾耶路撒冷的最后一眼<ul>
-<li>诗人可能是在大卫身边的利未人，逃避押沙龙</li>
-<li>诗人可能是被掳掠到巴比伦的其中一人</li>
-</ul>
-</li>
-<li>回忆：在上帝面前的聚集(4节)<ul>
-<li>聚集在一起，使我们的敬拜更真实</li>
-</ul>
-</li>
-<li>远离上帝更严重的原因：罪<ol>
-<li>不单单是远离上帝的殿，而且因为自己的罪，与上帝更远</li>
+<li>CI中多了构建docker image的步骤</li>
+<li>自动化测试过程中将数据库升级从应用中剥离单独做成docker image</li>
+<li>生产中用k8s自带的service替代了eruka</li>
 </ol>
-</li>
-<li>渴慕神，是免于世界诱惑的良药</li>
-<li>今天的应用，基督徒追求对生活的好处，远大于对上帝的荣耀</li>
-<li>沮丧心灵的盼望<ul>
-<li>沮丧（灵命低潮）的原因：<ul>
-<li>仇敌的耻笑：比如失业时同事的耻笑、约伯的妻子对他的耻笑。撒旦没有能力消灭上帝的儿女，所以他用耻笑来攻击我们</li>
-<li>仇敌恶意的压迫，不义的攻击：</li>
-<li>诗人坦诚的表明：恐怕上帝真的弃绝了他</li>
-</ul>
-</li>
-<li>以上帝为我们的盼望<ul>
-<li>诗人直接面对自己的心，直接提出怀疑</li>
-<li>以防假药（鸡汤）</li>
-<li>第一服良药：认识上帝（上帝的属性）</li>
-<li>第二服良药：认识上帝主权的恩典（上帝是根据自己的主权，怜悯信徒，必定托住他的信徒）（圣徒永蒙保守？）</li>
-<li>第三服良药：恩具（上帝的话、祷告、敬拜/圣餐）</li>
-</ul>
-</li>
-<li>诗人与自己的心辩论</li>
-</ul>
-</li>
-</ol>
-<p>基督徒要承认自己的沮丧，因为主耶稣也曾经历过</p>
-<p>成人主日学：</p>
+<p>理由下文一一道来。</p>
+<h3 id="Spring-Cloud与k8s的融合"><a href="#Spring-Cloud与k8s的融合" class="headerlink" title="Spring Cloud与k8s的融合"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">Spring Cloud与k8s的融合</a></h3><p>我们使用的是Redhat的Openshift，可以认为是k8s企业版，其本身就有service的概念。一个service下有多个pod，pod内即是一个可服务单元。service之间互相调用时k8s会提供默认的负载均衡控制，发起调用方只需要写被调用方的serviceId即可。这一点和spring cloud fegin使用ribbon提供的功能如出一辙。</p>
+<p>也就是说服务治理可以通过k8s来解决，那么为什么要替换呢？其实上文提到了，Spring Cloud技术栈对于异构语言的支持问题，我们有许多BFF（Backend for Frontend）是使用nodejs实现的，这些服务要想融合到Spring Cloud中，服务注册，负载均衡，心跳检查等等都要自己实现。</p>
+<p>如果以后还有其他语言架构的服务加入进来，这些轮子又要重造。基于此类原因综合考量后，决定采用Openshift所提供的网络能力替换eruka。</p>
+<p>由于本地开发和联调过程中依然依赖eruka，所以只在生产上通过配置参数来控制，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">eureka.client.enabled&#96; 设置为 false，停止各服务的eureka注册</span><br><span class="line">&#96;ribbon.eureka.enabled&#96; 设置为 false，让ribbon不从eureka获取服务列表</span><br><span class="line">以服务foo为例，&#96;foo.ribbon.listofservers&#96; 设置为 &#96;http:&#x2F;&#x2F;foo:8080&#96;，那么当一个服务需要使用服务foo的时候，就会直接调用到&#96;http:&#x2F;&#x2F;foo:8080</span><br></pre></td></tr></table></figure>
+
+<h3 id="CI的改造"><a href="#CI的改造" class="headerlink" title="CI的改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">CI的改造</a></h3><p>CI的改造主要是多了一部编译docker image并打包到Harbor的过程，部署时会直接从Harbor拉取镜像。另一个就是数据库的升级工具。之前我们使用flyway作为数据库升级工具，当应用启动时自动执行SQL脚本。</p>
+<p>随着服务实例越来越多，一个服务的多个实例同时升级的情况也时有发生，虽然flyway是通过数据库锁实现了升级过程不会有并发，但会导致被锁服务启动时间变长的问题。</p>
+<p>从实际升级过程来看，将可能发生的并发升级变为单一进程可能更靠谱。此外后期分库分表的架构也会使随应用启动自动升级数据库变的困难。综合考量，我们将升级任务做了拆分，每个服务都有自己的升级项目并会做容器化。</p>
+<p>在使用时，作为run once的工具来使用，即docker run -rm的方式。并且后续也支持了设定目标版本的功能，在私有化项目的跨版本升级中起到了非常好的效果。</p>
+<p>至于自动部署，由于服务之间存在上下游关系，例如config，eureka等属于基本服务被其他服务依赖，部署也产生了先后顺序。基于Jenkins做pipeline可以很好的解决这个问题。</p>
 
       
     </div>
@@ -363,7 +388,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-04/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E5%BC%80%E5%8F%91%E6%90%AD%E5%BB%BA-01-idea%E9%9B%86%E6%88%90go/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -377,7 +402,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-04/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E5%BC%80%E5%8F%91%E6%90%AD%E5%BB%BA-01-idea%E9%9B%86%E6%88%90go/" class="post-title-link" itemprop="url">golang的利弊</a>
         </h2>
 
         <div class="post-meta-container">
@@ -388,14 +413,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+      <time title="Created: 2021-06-15 13:41:14" itemprop="dateCreated datePublished" datetime="2021-06-15T13:41:14+08:00">2021-06-15</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-10-23 14:34:52" itemprop="dateModified" datetime="2022-10-23T14:34:52+08:00">2022-10-23</time>
+        <time title="Modified: 2021-11-13 11:02:50" itemprop="dateModified" datetime="2021-11-13T11:02:50+08:00">2021-11-13</time>
       </span>
 
   
@@ -408,66 +433,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>启示录 - 撒狄教会</p>
-<p>唐牧师</p>
-<p>七灵不代表神有7个灵，而是赐给人的7个大功用</p>
+          <p>推荐教程：</p>
 <ul>
-<li>以赛亚书11:2:  智慧、聪明、谋略、能力、知识</li>
-<li>圣灵所到的地方，就是为了让人敬畏神</li>
-</ul>
-<p>七星代表耶稣基督所牧养的教会，7代表完全</p>
-<p>撒狄教会，从外在是活的，从内在是死的。行为都是从死的内心做出来的，是没有生命的。</p>
-<ul>
-<li>提醒基督徒：没有重生得救、没有悔改，都是死的</li>
-</ul>
-<p>信道是从听道来的，听什么样的道，决定了信仰</p>
-<p>主对教会提了5次：悔改</p>
-<p>耶稣拿回自己想拿回的人</p>
-<p>蒙上帝悦纳，洁净自己，预备自己（衣服是洁净的）</p>
-<h2 id="主日学"><a href="#主日学" class="headerlink" title="主日学"></a>主日学</h2><p>中国教会历史</p>
-<p>历史：研究每个民族、文化面对挑战的回应</p>
-<p>课程目标：4个认识</p>
-<ul>
-<li>对史实和史识有认识，历史的见识、历史的眼光</li>
-<li>宣教学，了解他们的策略和结果</li>
-<li>继往开来，超越时空的眼光</li>
-<li>了解挑战和回应，观察上帝拆毁和重建的工作</li>
-</ul>
-<p>景教：638传入中国，捏斯多留派；</p>
-<p>福音对文化的影响从外到内的层次：内在的改变一定会影响到外在的</p>
-<ul>
-<li>行为</li>
-<li>礼仪</li>
-<li>人生观</li>
-<li>价值观：<ul>
-<li>从前努力赚钱，才是成功；</li>
-<li>在社会中进化成一个上层人，才是成功</li>
-<li>完成神的使命，才是“使命”，才是成功</li>
-<li>价值观影响到人生观</li>
-</ul>
-</li>
-<li>世界观：<ul>
-<li>这个世界运行的道理，神是我们生命的中心</li>
-<li>世界观会影响到价值观</li>
-</ul>
-</li>
-</ul>
-<p>景教传福音的果效失败原因：</p>
-<ul>
-<li>结交贵族阶，没有深入到民众当中。依赖政权</li>
-<li>落入【混合主义】当中，失去基督信仰的独特性。依赖其他宗教</li>
-<li>景教是异端。神必须管理</li>
-</ul>
-<p>基督信仰的独特性：</p>
-<ul>
-<li>神寻找人，不是人找神</li>
-<li>神来拯救人，不是人自救</li>
-<li>神来启示</li>
-<li>道成肉身，不是肉身成道</li>
-</ul>
-<p>如何屏蔽传福音的【混合主义】：</p>
-<ul>
-<li>旧词新意</li>
+<li><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/notebook/notebook-9gko2sjj.html">https://www.w3cschool.cn/notebook/notebook-9gko2sjj.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jpfss/p/11760012.html">https://www.cnblogs.com/jpfss/p/11760012.html</a></li>
 </ul>
 
       
@@ -495,7 +464,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-11/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E7%9A%84%E5%88%A9%E5%BC%8A/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -509,7 +478,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-11/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E7%9A%84%E5%88%A9%E5%BC%8A/" class="post-title-link" itemprop="url">golang的利弊</a>
         </h2>
 
         <div class="post-meta-container">
@@ -519,16 +488,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
+      
 
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+      <time title="Created: 2021-06-15 13:41:14 / Modified: 13:44:58" itemprop="dateCreated datePublished" datetime="2021-06-15T13:41:14+08:00">2021-06-15</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-09-11 11:21:01" itemprop="dateModified" datetime="2022-09-11T11:21:01+08:00">2022-09-11</time>
-      </span>
 
   
 </div>
@@ -540,27 +503,60 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>启示录 - 非拉铁非教会</p>
-<p>唐牧师</p>
-<p>耶稣没有吩咐他们”悔改”，不是因为他们没有错，而是主喜悦他们</p>
-<p>教会持守圣洁、存纯正的心</p>
-<p>大卫的钥匙：能够把福音的门打开</p>
-<ul>
-<li>大卫明白上帝的心（耶稣基督），大卫最明白上帝对基督的爱</li>
-<li>大卫提到了基督论</li>
-<li>亚伯拉罕和摩西没有基督论，但是登山宝训的时候，摩西和以利亚在讨论耶稣基督<ul>
-<li>摩西的5个祭，代表耶稣基督的献祭</li>
-<li>以利亚是借着献祭复兴以色列，代表耶稣基督的死</li>
-<li>罗马书3:23：有律法（摩西）和先知（以利亚）为证</li>
-</ul>
+          <h2 id="Go语言的优势"><a href="#Go语言的优势" class="headerlink" title="Go语言的优势"></a>Go语言的优势</h2><p>选择Go语言的原因可能会有很多，关于Go语言的特性、优势等，我们在之前的文档中也已经介绍了很多了。但是最主要的原因，应该是基于以下两方面的考虑：</p>
+<p><strong>执行性能</strong></p>
+<p>缩短API的响应时长，解决批量请求访问超时的问题。在Uwork的业务场景下，一次API批量请求，往往会涉及对另外接口服务的多次调用，而在之前的PHP实现模式下，要做到并行调用是非常困难的，串行处理却不能从根本上提高处理性能。而GO语言不一样，通过协程可以方便的实现API的并行处理，达到处理效率的最大化。依赖Golang的高性能HTTP Server，提升系统吞吐能力，由PHP的数百级别提升到数千里甚至过万级别。</p>
+<p><strong>开发效率</strong></p>
+<p>GO语言使用起来简单、代码描述效率高、编码规范统一、上手快。通过少量的代码，即可实现框架的标准化，并以统一的规范快速构建API业务逻辑。能快速的构建各种通用组件和公共类库，进一步提升开发效率，实现特定场景下的功能量产。</p>
+<h2 id="Go语言的业务场景"><a href="#Go语言的业务场景" class="headerlink" title="Go语言的业务场景"></a>Go语言的业务场景</h2><ul>
+<li><p>服务器编程，以前你如果使用C或者C++做的那些事情，用Go来做很合适，例如处理日志、数据打包、虚拟机处理、文件系统等。</p>
+</li>
+<li><p>分布式系统、数据库代理器、中间件等，例如Etcd。</p>
+</li>
+<li><p>网络编程，这一块目前应用最广，包括Web应用、API应用、下载应用，而且Go内置的net/http包基本上把我们平常用到的网络功能都实现了。</p>
+</li>
+<li><p>云平台，目前国外很多云平台在采用Go开发</p>
 </li>
 </ul>
-<p>略有一点的力量</p>
+<h2 id="国内外有哪些企业或项目使用Go语言"><a href="#国内外有哪些企业或项目使用Go语言" class="headerlink" title="国内外有哪些企业或项目使用Go语言"></a>国内外有哪些企业或项目使用Go语言</h2><p>Go发布之后，很多公司特别是云计算公司开始用Go重构他们的基础架构，很多都是直接采用Go进行了开发</p>
+<p>使用 Go 语言开发的开源项目非常多。早期的 Go 语言开源项目只是通过 Go 语言与传统项目进行C语言库绑定实现，例如 Qt、Sqlite 等；后期的很多项目都使用 Go 语言进行重新原生实现，这个过程相对于其他语言要简单一些，这也促成了大量使用 Go 语言原生开发项目的出现。</p>
+<p><strong>云计算基础设施领域</strong> 代表项目：docker、kubernetes、etcd、consul、cloudflare CDN、七牛云存储等。</p>
+<p><strong>基础软件</strong> 代表项目：tidb、influxdb、cockroachdb等。</p>
+<p><strong>微服务</strong> 代表项目：go-kit、micro、monzo bank的typhon、bilibili等。</p>
+<p><strong>Docker</strong> Docker 是一种操作系统层面的虚拟化技术，可以在操作系统和应用程序之间进行隔离，也可以称之为容器。Docker 可以在一台物理服务器上快速运行一个或多个实例。基于lxc的一个虚拟打包工具，能够实现PAAS平台的组建。例如，启动一个 CentOS 操作系统，并在其内部命令行执行指令后结束，整个过程就像自己在操作系统一样高效。</p>
+<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/docker/docker">https://github.com/docker/docker</a></p>
+<p><strong>go语言</strong> Go 语言自己的早期源码使用C语言和汇编语言写成。从 Go 1.5 版本后，完全使用 Go 语言自身进行编写。Go 语言的源码对了解 Go 语言的底层调度有极大的参考意义，建议希望对 Go 语言有深入了解的读者读一读。</p>
+<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/golang/go">https://github.com/golang/go</a></p>
+<p><strong>Kubernetes</strong> Google 公司开发的构建于 Docker 之上的容器调度服务，用户可以通过 Kubernetes 集群进行云端容器集群管理。</p>
+<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes">https://github.com/kubernetes/kubernetes</a></p>
+<p><strong>etcd</strong> 一款分布式、可靠的 KV 存储系统，可以快速进行云配置。</p>
+<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/coreos/etcd">https://github.com/coreos/etcd</a></p>
+<p><strong>beego</strong> beego 是一个类似 Python的 Tornado 框架，采用了 RESTFul 的设计思路，使用 Go 语言编写的一个极轻量级、高可伸缩性和高性能的 Web 应用框架。</p>
+<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/astaxie/beego">https://github.com/astaxie/beego</a></p>
+<p><strong>martini</strong> 一款快速构建模块化的 Web 应用的 Web 框架。项目链接：<a target="_blank" rel="noopener" href="https://github.com/go-martini/martini">https://github.com/go-martini/martini</a></p>
+<p><strong>codis</strong> 国产的优秀分布式 Redis 解决方案。项目链接：<a target="_blank" rel="noopener" href="https://github.com/CodisLabs/codis">https://github.com/CodisLabs/codis</a></p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>当然，一个技术能不能发展起来，关键还要看三点。</p>
+<p><strong>有没有一个比较好的社区。</strong> 像 C、C++、Java、Python 和 JavaScript 的生态圈都是非常丰富和火爆的。尤其是有很多商业机构参与的社区那就更为人气爆棚了，比如 Linux 的社区。</p>
+<p><strong>有没有一个工业化的标准。</strong> 像 C、C++、Java 都是有标准化组织的。尤其是 Java，其在架构上还搞出了像 J2EE 这样的企业级标准。</p>
+<p><strong>有没有一个或多个杀手级应用。</strong> C、C++ 和 Java 的杀手级应用不用多说了，就算是对于 PHP 这样还不能算是一个好的编程语言来说，因为是 Linux 时代的第一个杀手级解决方案 LAMP 中的关键技术，所以，也发展起来了。</p>
+<p>上述的这三点是非常关键的，新的技术只需要占到其中一到两点就已经很不错了，何况有的技术，比如 Java，是三点全占到了，所以，Java 的发展是如此好。当然，除了上面这三点重要的，还有一些其它的影响因素，比如：</p>
+<p><strong>学习曲线是否低，上手是否快。</strong> 这点非常重要，C++ 在这点上越做越不好了。<strong>有没有一个不错的提高开发效率的开发框架。</strong> 如：Java 的 Spring 框架，C++ 的 STL 等。<strong>是否有一个或多个巨型的技术公司作为后盾。</strong> 如：Java 和 Linux 后面的 IBM、Sun……<strong>有没有解决软件开发中的痛点。</strong> 如：Java 解决了 C 和 C++ 的内存管理问题。</p>
+<p>用这些标尺来量一下 Go 语言，我们可以清楚地看到：</p>
 <ul>
-<li>教会是没有力量的，但是不要低看自己；只有一点力量，也要拿出来，就会被神使用<ul>
-<li>以利亚去寡妇家吃饼，寡妇只剩下一点油、一点面，但是寡妇献上了最后的油和面</li>
+<li>Go 语言容易上手；</li>
+<li>Go 语言解决了并发编程和写底层应用开发效率的痛点；</li>
+<li>Go 语言有 Google 这个世界一流的技术公司在后面；</li>
+<li>Go 语言的杀手级应用是 Docker，而 Docker 的生态圈在这几年完全爆棚了。</li>
 </ul>
-</li>
+<p>所以，Go 语言的未来是不可限量的。当然，我个人觉得，Go 可能会吞食很多 C、C++、Java 的项目。不过，Go 语言所吞食主要的项目应该是中间层的项目，既不是非常底层也不会是业务层。</p>
+<p>也就是说，Go 语言不会吞食底层到 C 和 C++ 那个级别的，也不会吞食到高层如 Java 业务层的项目。Go 语言能吞食的一定是 PaaS 上的项目，比如一些消息缓存中间件、服务发现、服务代理、控制系统、Agent、日志收集等等，没有复杂的业务场景，也到不了特别底层（如操作系统）的中间平台层的软件项目或工具。而 C 和 C++ 会被打到更底层，Java 会被打到更上层的业务层。</p>
+<p>好了，我们再用上面的标尺来量一下 Go 语言的杀手级应用 Docker，你会发现基本是一样的。</p>
+<ul>
+<li>Docker 上手很容易。</li>
+<li>Docker 解决了运维中的环境问题以及服务调度的痛点。</li>
+<li>Docker 的生态圈中有大公司在后面助力。比如 Google。</li>
+<li>Docker 产出了工业界标准 OCI。</li>
+<li>Docker 的社区和生态圈已经出现像 Java 和 Linux 那样的态势。……</li>
 </ul>
 
       
@@ -588,7 +584,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-18/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm/GC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -602,7 +598,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-09-18/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm/GC/" class="post-title-link" itemprop="url">GC</a>
         </h2>
 
         <div class="post-meta-container">
@@ -612,16 +608,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
+      
 
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+      <time title="Created: 2021-06-15 08:49:58 / Modified: 08:50:34" itemprop="dateCreated datePublished" datetime="2021-06-15T08:49:58+08:00">2021-06-15</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-09-19 10:19:46" itemprop="dateModified" datetime="2022-09-19T10:19:46+08:00">2022-09-19</time>
-      </span>
 
   
 </div>
@@ -633,154 +623,73 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>将心意夺回，顺服基督</p>
-<p>刘海龙弟兄</p>
-<p>林后10:1-6</p>
+          <p>为了保留足够多的“现场证据”，最好是把 GC 相关的信息打印的<strong>足够完整</strong> 。<strong>而且你的程序真的不差你GC时打印日志I/O消耗的那点性能</strong></p>
+<h3 id="打印基本-GC-信息"><a href="#打印基本-GC-信息" class="headerlink" title="打印基本 GC 信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印基本 GC 信息</a></h3><p>打印 GC 日志的第一步，就是开启 GC 打印的参数了，也是最基本的参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintGCDetails -XX:+PrintGCDateStamps</span><br></pre></td></tr></table></figure>
 
-      
-    </div>
+<h3 id="打印对象分布"><a href="#打印对象分布" class="headerlink" title="打印对象分布"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印对象分布</a></h3><p>为了分析 GC 时的<strong>晋升情况和晋升导致的高暂停</strong> ，不看对象年龄分布日志怎么行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintTenuringDistribution</span><br></pre></td></tr></table></figure>
 
-    
-    
-    
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Desired survivor size 59244544 bytes, new threshold 15 (max 15)</span><br><span class="line">- age   1:     963176 bytes,     963176 total</span><br><span class="line">- age   2:     791264 bytes,    1754440 total</span><br><span class="line">- age   3:     210960 bytes,    1965400 total</span><br><span class="line">- age   4:     167672 bytes,    2133072 total</span><br><span class="line">- age   5:     172496 bytes,    2305568 total</span><br><span class="line">- age   6:     107960 bytes,    2413528 total</span><br><span class="line">- age   7:     205440 bytes,    2618968 total</span><br><span class="line">- age   8:     185144 bytes,    2804112 total</span><br><span class="line">- age   9:     195240 bytes,    2999352 total</span><br><span class="line">- age  10:     169080 bytes,    3168432 total</span><br><span class="line">- age  11:     114664 bytes,    3283096 total</span><br><span class="line">- age  12:     168880 bytes,    3451976 total</span><br><span class="line">- age  13:     167272 bytes,    3619248 total</span><br><span class="line">- age  14:     387808 bytes,    4007056 total</span><br><span class="line">- age  15:     168992 bytes,    4176048 total</span><br></pre></td></tr></table></figure>
 
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
+<h3 id="GC-后打印堆数据"><a href="#GC-后打印堆数据" class="headerlink" title="GC 后打印堆数据"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">GC 后打印堆数据</a></h3><p>每次发生 GC 时，对比一下 GC 前后的堆内存情况，更直观</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintHeapAtGC</span><br></pre></td></tr></table></figure>
 
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations&#x3D;0 (full 0):</span><br><span class="line"> garbage-first heap   total 1024000K, used 324609K [0x0000000781800000, 0x0000000781901f40, 0x00000007c0000000)</span><br><span class="line">  region size 1024K, 6 young (6144K), 0 survivors (0K)</span><br><span class="line"> Metaspace       used 3420K, capacity 4500K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 371K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">Heap after GC invocations&#x3D;1 (full 1):</span><br><span class="line"> garbage-first heap   total 1024000K, used 21755K [0x0000000781800000, 0x0000000781901f40, 0x00000007c0000000)</span><br><span class="line">  region size 1024K, 0 young (0K), 0 survivors (0K)</span><br><span class="line"> Metaspace       used 3420K, capacity 4500K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 371K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<h3 id="打印-STW-时间"><a href="#打印-STW-时间" class="headerlink" title="打印 STW 时间"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 STW 时间</a></h3><p>暂停时间是 GC 最重要的指标，肯定不能少</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br></pre></td></tr></table></figure>
 
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Total time for which application threads were stopped: 0.0254260 seconds, Stopping threads took: 0.0000218 seconds</span><br></pre></td></tr></table></figure>
 
-    
+<h3 id="打印-safepoint-信息"><a href="#打印-safepoint-信息" class="headerlink" title="打印 safepoint 信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 safepoint 信息</a></h3><p>进入STW阶段之前，需要要找到一个合适的 safepoint ，这个指标一样很重要（非必选，出现 GC 问题时最好加上此参数调试）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintSafepointStatistics -XX:PrintSafepointStatisticsCount&#x3D;1</span><br></pre></td></tr></table></figure>
 
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.371: ParallelGCFailedAllocation       [      10          0              0    ]      [     0     0     0     0     7    ]  0</span><br><span class="line">Execute full gc...dataList has been promoted to cms old space</span><br><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.379: ParallelGCSystemGC               [      10          0              0    ]      [     0     0     0     0    16    ]  0</span><br><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.396: no vm operation                  [       9          1              1    ]      [     0     0     0     0   341    ]  0</span><br></pre></td></tr></table></figure>
 
-<div class="post-block">
-  
-  
+<h3 id="打印-Reference-处理信息"><a href="#打印-Reference-处理信息" class="headerlink" title="打印 Reference 处理信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 Reference 处理信息</a></h3><p>强引用/弱引用/软引用/虚引用/finalize 方法万一有问题，不得打印出来看看？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintReferenceGC</span><br></pre></td></tr></table></figure>
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-02/">
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [SoftReference, 0 refs, 0.0000521 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [WeakReference, 0 refs, 0.0000069 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [FinalReference, 0 refs, 0.0000056 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [PhantomReference, 0 refs, 0 refs, 0.0000059 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [JNI Weak Reference, 0.0000131 secs], 0.4635293 secs]</span><br></pre></td></tr></table></figure>
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
+<h3 id="完整参数"><a href="#完整参数" class="headerlink" title="完整参数"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">完整参数</a></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">## requireds</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-XX:+PrintTenuringDistribution</span><br><span class="line">-XX:+PrintHeapAtGC</span><br><span class="line">-XX:+PrintReferenceGC</span><br><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br><span class="line"></span><br><span class="line">## optional</span><br><span class="line">-XX:+PrintSafepointStatistics</span><br><span class="line">-XX:PrintSafepointStatisticsCount&#x3D;1</span><br></pre></td></tr></table></figure>
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-02/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
-        </h2>
+<h2 id="输出方式"><a href="#输出方式" class="headerlink" title="输出方式"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">输出方式</a></h2><p>上面只是定义了打印的内容，默认情况下，这些日志会输出到控制台（标准输出）。那如果你的程序日志也输出到控制台呢，这个日志内容就会很乱，分析起来很麻烦。如果你是追加的方式（比如 tomcat 的 catalina.out 就是追加），这个文件会越来越大，分析起来就要命了。</p>
+<p>所以需要一种分割日志的机制，这个机制嘛……JVM自然是提供的。</p>
+<h3 id="JVM-的日志分割"><a href="#JVM-的日志分割" class="headerlink" title="JVM 的日志分割"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">JVM 的日志分割</a></h3><p>JVM提供了几个用于分割 GC 日志的参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
 
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-10-23 14:32:40" itemprop="dateModified" datetime="2022-10-23T14:32:40+08:00">2022-10-23</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>《教会纪律与福音》</p>
-<p>赫弟兄</p>
-<p>彼得前书02:9-10</p>
-<h2 id="往期回顾"><a href="#往期回顾" class="headerlink" title="往期回顾"></a>往期回顾</h2><ol>
-<li>教会纪律的定义<ul>
-<li>广义：门徒训练中的一部分，向门徒指出罪，指引他们认罪</li>
-<li>狭义：教会在执行教会纪律的最后一步骤</li>
-</ul>
-</li>
-<li>教会纪律的目的<ul>
-<li>曝光：因为罪喜欢隐藏</li>
-<li>警告：预示未来的大审判</li>
-<li>挽回：</li>
-<li>保护：保护其他教会成员，因为罪会蔓延</li>
-</ul>
-</li>
-<li>教会纪律是出于爱的<ul>
-<li>从上帝的角度：上帝是</li>
-<li>从教会的角度：</li>
-</ul>
-</li>
-</ol>
-<h2 id="今天的主题"><a href="#今天的主题" class="headerlink" title="今天的主题"></a>今天的主题</h2><p>为什么要设立教会纪律？</p>
-<p>教会纪律如何实施？</p>
-<p>福音框架：</p>
+<p>按照这个参数，每个GC日志只要超过20M就会进行分割，最多分割5个文件，文件名依次是<code>gc.log.0,gc.log.1,gc.log.2,gc.log.3,gc.log.4, .....</code></p>
+<p>看似很美好，几行配置就搞定了输出文件的问题。但是这种方式有一些问题：</p>
 <ol>
-<li>什么是福音<ol>
-<li>信主得救，得救以后活出耶稣的样式，宣扬基督的名</li>
+<li>-Xloggc 方式指定的日志文件，是覆盖写的方式，每次启动都会覆盖，历史日志会丢失</li>
+<li>当超过最大分割数后，会从第0个文件开始重新写入，而且是覆盖</li>
+<li>-XX:NumberOfGCLogFiles 并不能设置为无限</li>
 </ol>
-</li>
-<li>什么是基督徒<ol>
-<li>基督徒在地上代表耶稣</li>
-</ol>
-</li>
-<li>什么是地方教会</li>
-<li>什么是教会成员制</li>
-</ol>
-<h3 id="主日学"><a href="#主日学" class="headerlink" title="主日学"></a>主日学</h3><p>更正教（基督新教）来华</p>
-<p>313年：国教时期</p>
-<p>1517年：宗教改革，更正教</p>
-<ul>
-<li>因信称义</li>
-<li>圣徒都是祭司</li>
-<li>唯独圣经</li>
-</ul>
-<p>更正教(新教、复原教)分为3个宗派</p>
-<ol>
-<li><p>路德（信义）宗 -&gt; 重洗派、敬虔派</p>
-</li>
-<li><p>长老宗（改革）宗 -&gt; 亚米纽斯派（对加尔文提出了不同的看法）</p>
-</li>
-<li><p>英国国教（圣公）宗 -&gt; 清教徒、公理会（5月花号）、浸信会</p>
-</li>
-</ol>
-<p>莫拉维亚弟兄会、敬虔会开始宣教</p>
-<p>17世纪，由于当时黑奴、白奴，莫拉维亚弟兄会自愿成为黑奴，为要传福音</p>
-<p>18世纪，工业革命，约翰卫斯理打破英国国教传统，在街上讲道，在矿区讲道。最后成立了卫斯理（北美会？）公会，并宣教到中国；美国Edwards、芬妮、慕迪，带领了复兴</p>
-<p>马礼逊，英国人，1807年，更正教第一位来华的宣教士；《华英字典》、《文法字典》；翻译新约和旧约中文圣经</p>
-<p>他做的预备性工作</p>
-<ol>
-<li>印圣经，中文版的活字印刷</li>
-<li>翻译圣经</li>
-<li>办杂志</li>
-<li>办学堂，英华书院</li>
-</ol>
-<ul>
-<li><p>米连，1813年，更正教第二位来华的宣教士</p>
-</li>
-</ul>
-<p>伯驾医生：带来了眼科和麻醉，广东博济医院</p>
-<p>蔡高，1814年受洗，中国第一位更正教受洗的信徒，</p>
-<p>梁发，中国第一位更正教的传教人，《劝世良言》；洪秀全就是从这本书了解到基督教的</p>
-<p>恩格学院，提出观点，信主（属灵决志）不是single event，而是个process; 人虽然不明白福音，但是神的概念开始行成</p>
+<p>这个覆盖的问题就有点恶心了，每次启动覆盖之前的历史日志……这谁能忍？</p>
+<h3 id="使用时间戳命名文件"><a href="#使用时间戳命名文件" class="headerlink" title="使用时间戳命名文件"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">使用时间戳命名文件</a></h3><p>于是有另一种解决方案。不使用 JVM 提供的日志分割功能，而是每次启动用时间戳命名日志文件，这样可以每次启动都使用不同的文件，就不会出现覆盖的问题了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">## 使用-%t作为日志文件名</span><br><span class="line">-XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line"></span><br><span class="line">## 生成的文件名是这种：gc-2021-03-29_20-41-47.log</span><br></pre></td></tr></table></figure>
 
+<p>可是这样就完美吗？</p>
+<p>虽然没有覆盖的问题，但由于没有日志分割的功能，每次启动后只有一个GC日志文件，单个日志文件可能会非常巨大。过大的日志文件分析起来是很麻烦的，必须得分割。</p>
+<h3 id="二者结合"><a href="#二者结合" class="headerlink" title="二者结合"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">二者结合</a></h3><p>这里只需要稍微调整一下策略，将 JVM 分割和时间戳命名两种方案结合，就可以得到<strong>最优的方式</strong> 了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
+
+<p>配置时间戳作文 GC 日志文件名的同时，也配置JVM的GC日志分割策略。这样一来，既保证了 GC 文件不会被覆盖，又保证了单个 GC 文件的大小不会过大，完美！</p>
+<p>最终得到的日志文件名会像这个样子：</p>
+<ol>
+<li>gc-2021-03-29_20-41-47.log.0</li>
+<li>gc-2021-03-29_20-41-47.log.1</li>
+<li>gc-2021-03-29_20-41-47.log.2</li>
+<li>gc-2021-03-29_20-41-47.log.3</li>
+<li>….</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">## 必备</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-XX:+PrintTenuringDistribution</span><br><span class="line">-XX:+PrintHeapAtGC</span><br><span class="line">-XX:+PrintReferenceGC</span><br><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br><span class="line"></span><br><span class="line">## 可选</span><br><span class="line">-XX:+PrintSafepointStatistics</span><br><span class="line">-XX:PrintSafepointStatisticsCount&#x3D;1</span><br><span class="line"></span><br><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头文件开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -806,7 +715,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-09/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/database/redis/redis%E5%AE%9E%E8%B7%B5-01-%E5%AE%9E%E7%8E%B0%E7%A7%AF%E5%88%86%E6%8E%92%E8%A1%8C%E6%A6%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -820,7 +729,112 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-09/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/15/database/redis/redis%E5%AE%9E%E8%B7%B5-01-%E5%AE%9E%E7%8E%B0%E7%A7%AF%E5%88%86%E6%8E%92%E8%A1%8C%E6%A6%9C/" class="post-title-link" itemprop="url">redis实践-01-实现积分排行榜</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-15 08:22:22 / Modified: 08:48:36" itemprop="dateCreated datePublished" datetime="2021-06-15T08:22:22+08:00">2021-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>ZSet数据结构就很适合用于实现排行榜，但如何实现相同积分情况下再支持按时间排序呢？</p>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><blockquote>
+<p>分布式ID雪花算法的原理，即用一个long类型变量存储多个信息。一个long类型长度为8个字节（64bit），雪花算法使用其中41bit记录时间戳，其余bit位存储机房id、机器id、序列号。</p>
+</blockquote>
+<p>Redis的ZSet支持分值为double类型，也是8字节，那么我们也可以使用41位存储时间戳，其实位存储用户的实际积分。</p>
+<blockquote>
+<p>在雪花算法中最高位是不用的，目的是不允许生成负数ID</p>
+</blockquote>
+<p>而在实现排行榜中没有这个限制，因为我们最终要的只是用户的积分，而不是加上时间戳的分值。只不过ZSet已经支持倒序获取，最高位是0是1无所谓，所以最高位我们依然不使用。</p>
+<p>除去最高位和存储时间戳的41位后，剩余22位表示积分，这时我们还需要结合业务考虑，如果觉得22bit不够表示积分，那么还可以继续压缩时间戳占用的bit。</p>
+<p>由于排行榜是周期性的，如周榜、月榜，所以我们没必要存储完整的时间戳，可以取当前时间与周期开始时间相差的毫秒数，这样就可以将41bit压缩到32bit、16bit、或者更低</p>
+<p>如果是用41bit表示时间戳，22bit表示积分的话，那么score的组成就是这样的：<br>0（最高位不用）<code>|</code>0000000 00000000 0000000（22bit表示积分）<code>|</code>0<br>00000000 00000000 00000000 00000000 00000000（41bit表示时间戳）</p>
+<p>因为排序首先按积分排再按时间排，所以积分在高位，时间戳在低位。</p>
+<p>在积分相同的情况下，是不是时间戳越大64bit表示的数值就越大？而我们需要的是按时间升序排，也就是最先达到xx积分的用户排在最前面，所以我们不能单纯的使用41bit存储时间戳，而应该是存储一个随时间流逝而变小的数值。</p>
+<p>由于排行榜都会有一个周期，如周榜是一周，月榜是一个月，所以我们使用41bit存储的是一个周期的结束时间<code>yyy-MM-dd 23:59:59</code>对应的时间戳与用户积分更新时间的时间戳的差值，这个值会随着时间的推移而变小，而且不会出现负数的情况，刚好能够达到目的。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>1.实现积分+时间戳差值转score</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; periodEndTimestamp: 当前周期结束时间的时间戳 </span><br><span class="line">&#x2F;&#x2F; 需确保point不会超过22bit所能表示的数值：2097151</span><br><span class="line">private static long toScore(int point, long periodEndTimestamp) &#123;</span><br><span class="line">    long score &#x3D; 0L;</span><br><span class="line">    score &#x3D; (score | point) &lt;&lt; 41;</span><br><span class="line">    score &#x3D; score | (periodEndTimestamp - TimestampUtils.currentTimeMillis());</span><br><span class="line">    return score;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2.实现从score中获取积分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">private static int getPoint(long score) &#123;</span><br><span class="line">     return (int) (score &gt;&gt; 41);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3.更新积分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void updateRanking(Integer periodId, Long accountId, Integer addPoint) &#123;</span><br><span class="line">    String key &#x3D; String.format(RankingCacheKeys.REALTIME_POINT_RANKING_KEY, periodId);</span><br><span class="line">    Double score &#x3D; redisTemplate.opsForZSet().score(key, String.valueOf(accountId));</span><br><span class="line">    score &#x3D; (score &#x3D;&#x3D; null) ? 0d : score;</span><br><span class="line">    int curPoint &#x3D; getPoint(score.longValue());</span><br><span class="line">    long newScore &#x3D; toScore(curPoint + addPoint, getCurPeriodEndDateTimestamp(periodId));</span><br><span class="line">    redisTemplate.opsForZSet().add(key, String.valueOf(accountId), newScore);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>基于Redis ZSet实现积分排行榜（倒序）并支持按时间（升序）排序原理与注意事项：</p>
+<ul>
+<li>先按积分排序，再按时间排序，所以需要高位存储积分，低位存储时间戳，这样才能保证积分越高对应score越大；</li>
+<li>同分值情况下按时间升序排序，必然让达到当前积分时间最早的score越大；</li>
+<li>由于每次更新用户积分都需要重新计算score，updateRanking方法不能保证ZSet读和写复合操作命令的原子性，因此可能存在并发数据一致性问题</li>
+</ul>
+<h2 id="关于实现排行榜用到ZSet的几个命令"><a href="#关于实现排行榜用到ZSet的几个命令" class="headerlink" title="关于实现排行榜用到ZSet的几个命令"></a>关于实现排行榜用到ZSet的几个命令</h2><p>1.获取倒序排名：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREVRANGEBYSCORE key min max offset count</span><br></pre></td></tr></table></figure>
+
+<p>2.获取某个用户的score：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZSCORE key member</span><br></pre></td></tr></table></figure>
+
+<p>3.获取参与排名的总用户数（本期参与人数）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZCARD key</span><br></pre></td></tr></table></figure>
+
+<p>4.获取某个用户的当前排名(倒序排序，从大到小的排名)：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREVRANK key member</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/zdal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/zdal/" class="post-title-link" itemprop="url">zdal</a>
         </h2>
 
         <div class="post-meta-container">
@@ -831,14 +845,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+      <time title="Created: 2021-06-14 23:41:50" itemprop="dateCreated datePublished" datetime="2021-06-14T23:41:50+08:00">2021-06-14</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-10-09 20:47:00" itemprop="dateModified" datetime="2022-10-09T20:47:00+08:00">2022-10-09</time>
+        <time title="Modified: 2021-09-08 18:32:32" itemprop="dateModified" datetime="2021-09-08T18:32:32+08:00">2021-09-08</time>
       </span>
 
   
@@ -851,35 +865,59 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《主：你要什么呢》</p>
-<p>讲员：苏文峰牧师</p>
-<p>经文：马太 20:20-28</p>
-<p>问：我们要的是我们需要的？</p>
-<p>经文背景：耶稣最后一次上耶路撒冷，预言自己的死亡和复活</p>
-<ol>
-<li>西庇太的母亲所求的是什么？<ul>
-<li>两个儿子坐在耶稣的左边和右边，可以看到她所求的是权利和钱</li>
-<li>同样，一般人所要求的，钱、五子登科、世界和平、风调雨顺</li>
+          <h1 id="数据库中间件应用场景"><a href="#数据库中间件应用场景" class="headerlink" title="数据库中间件应用场景"></a>数据库中间件应用场景</h1><p>数据库中间件可以理解为是一种具有连接池功能，但比连接池更高级的、带很多附加功能的辅助组件</p>
+<h1 id="zdal整体架构"><a href="#zdal整体架构" class="headerlink" title="zdal整体架构"></a>zdal整体架构</h1><p>它提供分库分表，结果集合并，sql解析，数据库failover动态切换等数据访问层统一解决方案</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlsjBvGtjIvnBGkwo2aCk2RL8nkM3lOnYGUe7OiaviaD6tUvmmVSic5oc8g/640" alt="Image" style="zoom: 33%;" />
+
+
+
+<p>如上图所示，zdal有四个重要的组成部分：</p>
+<ul>
+<li><strong>价值体现–客户端Client包</strong>。对外暴露基本操作接口，用于业务层简单黑盒的操作数据源；业务只和client交互，动态切换/路由等逻辑只需要进行规则配置，相关逻辑由zdal实现。</li>
+<li><strong>核心功能–连接管理datasource包</strong>。最核心的能力，提供多种类型数据库的连接管理；</li>
+<li><strong>关键能力–SQL解析parser包</strong>。基础SQL解析能力；解析sql类型、字段名称、数据库等等，配合规则进行路由</li>
+<li><strong>扩展能力–库表路由rule包</strong>。根据parser解析出的字段确定逻辑库表和物理库表。</li>
 </ul>
-</li>
-<li>这样的祈求是否可以呢？<ul>
-<li>是可以的，也是正确的，也是正常的</li>
-<li>但是基督徒不能单单求这些，因为主祷文太6:31-33，不要只求吃什么，喝什么，要先求神的国和神的义</li>
+<p>组件图对整体架构和各组件及相互联系的理解可以起到很好的帮助。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlmiavmffCxvvYmNMSdJGm2ACSD6TaSia0NLzc1qJ7MoPib8ibia7YfVj3pwQ/640" alt="Image"></p>
+<ul>
+<li>Client对应用层暴露的数据源、负责监听配置动态变更的监听组件、负责加载组织各部分的配置组件、负责加载spring bean 和库表规则的配置组件；</li>
+<li>Client中加载了规则组件，实现逻辑表和数据库的路由规则。</li>
+<li>Client中的库表配置调用datasource中的数据源管理服务并构建连接池的连接池；</li>
+<li>Client中的SqlDispatcher服务调用SQL解析组件实现SQL解析。</li>
 </ul>
-</li>
-<li>他是谁-&gt;我是谁-&gt;我要什么<ul>
-<li>我们在祈求之前，得先知道上帝是谁；上帝是天上的父，这是亲近的感觉，所以我们需要祈求和神更亲近</li>
-<li>这个母亲没有求他的儿子更像耶稣基督，与神更亲近，同走十字架的道路<ul>
-<li>我们在世上的父亲和母亲，可能为了钱、权、娱乐疏忽了和儿女的亲近，但是这位神却给了我们亲近</li>
-<li>我们好像断奶的婴孩，在母亲怀里安息；即使我们长大了，也会怀念在母亲怀里的感觉</li>
-</ul>
-</li>
-<li>我们不要像小孩一样，只有自己有需要的时候，才找自己的父母要，而不是要和父母亲近</li>
-<li>上帝就是爱，在我们还是罪人的时候，爱了我们</li>
-<li>我们要服侍，服侍到一种舍命的地步；得生命，有使命！</li>
-</ul>
-</li>
-</ol>
+<h1 id="zdal运行原理"><a href="#zdal运行原理" class="headerlink" title="zdal运行原理"></a>zdal运行原理</h1><h2 id="配置加载和bean初始化"><a href="#配置加载和bean初始化" class="headerlink" title="配置加载和bean初始化"></a>配置加载和bean初始化</h2><p>大部分情况下，我们使用如mybatis这样的ORM框架来进行数据库操作，其实不管是ORM还是其他方式，应用层都需要对数据源进行配置。</p>
+<p>所以，client对外暴露了一个符合JDBC标准的datasource数据源，用来满足应用层ORM等框架配置数据源的要求–<strong>ZdalDataSource</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlr3yDerBNFgibYWn2f1TysZXualq6yxgsVEvwoF1ickSDWiaibEIOibRmWBA/640" alt="Image"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;只提供了一个init方法，这也是spring启动时时，必须要调用的初始化方法，所有功能，都从这里开始</span><br><span class="line">public class ZdalDataSource extends AbstractZdalDataSource implements DataSource&#123;</span><br><span class="line">    public void init() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            super.initZdalDataSource();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            CONFIG_LOGGER.error(&quot;...&quot;);</span><br><span class="line">            throw new ZdalClientException(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>ZdalDataSource#init()</strong> 方法即为配置加载的核心入口，init中负责加载spring配置，根据配置初始化数据源，并创建连接池，同时，将逻辑表和物理库的对应关系都维护起来供后续路由调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">    &#x2F;*父类的init方法*&#x2F;</span><br><span class="line">protected void initZdalDataSource() &#123;</span><br><span class="line">    &#x2F;*用FileSystemXmlApplicationContext方式加载配置文件中的数据源和规则，转化成zdalConfig对象*&#x2F;</span><br><span class="line">    this.zdalConfig &#x3D; ZdalConfigurationLoader.getInstance().getZdalConfiguration(appName,dbmode, appDsName, configPath);</span><br><span class="line">    this.dbConfigType &#x3D; zdalConfig.getDataSourceConfigType();</span><br><span class="line">   this.dbType &#x3D; zdalConfig.getDbType();</span><br><span class="line">   &#x2F;&#x2F;初始化数据源</span><br><span class="line">   this.initDataSources(zdalConfig);</span><br><span class="line">   this.inited.set(true);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的类图和这里的两个入口方法大概了解到zdal配置加载的启动流程。下面我们就来详细看一下，读写分离和分库分表的规则是怎么被加载，怎么起作用的。</p>
+<h2 id="读写分离"><a href="#读写分离" class="headerlink" title="读写分离"></a>读写分离</h2><h3 id="读写分离配置的加载"><a href="#读写分离配置的加载" class="headerlink" title="读写分离配置的加载"></a>读写分离配置的加载</h3><p>首先，我们需要有数据源的相关配置，如下图：<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlNXzP18BUjaOKovJbI1MGAzfvJJJfp8hncBuwAvE6QdkLicQwXE7B4icA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">此XML配置会在init方法被调用时，被初始化，解析成ZdalConfig类的属性，ZdalConfig类的主要成员见下面代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZdalConfig</span> </span>&#123;</span><br><span class="line">    <span class="comment">/** key=dsName;value=DataSourceParameter 所有物理数据源的配置项,比如用户名，密码，库名等 */</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, DataSourceParameter&gt; dataSourceParameters = <span class="keyword">new</span> ConcurrentHashMap&lt;String, DataSourceParameter&gt;();</span><br><span class="line">    <span class="comment">/** 逻辑数据源和物理数据源的对应关系:key=logicDsName,value=physicDsName */</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt;  logicPhysicsDsNames  = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">/** 数据源的读写规则，比如只读，或读写等配置*/</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; groupRules = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">/** 异常转移的数据源规则*/</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; failoverRules = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">//一份完整的读写分离和分库分表规则配置</span></span><br><span class="line">    <span class="keyword">private</span> AppRule appRootRule;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，xml中的规则，被解析到xxxRules里。这里以groupRules为例，failover同理。</p>
+<p>下一步则是通过解析得到的zdalConfig 来初始化数据源：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">protected final void initDataSources(ZdalConfig zdalConfig) &#123;</span><br><span class="line">    &#x2F;&#x2F;DataSourceParameter中存的是数据源参数，如用户名密码，最大最小连接数等</span><br><span class="line">    for (Entry&lt;String, DataSourceParameter&gt; entry : zdalConfig.getDataSourceParameters().entrySet()) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">           &#x2F;&#x2F;初始化连接池</span><br><span class="line">           ZDataSource zDataSource &#x3D; new ZDataSource(&#x2F;*设置最大最小连接数*&#x2F;createDataSourceDO(entry.getValue(),zdalConfig.getDbType(), appDsName + &quot;.&quot; + entry.getKey()));</span><br><span class="line">           this.dataSourcesMap.put(entry.getKey(), zDataSource);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            &#x2F;&#x2F;...</span><br><span class="line">        &#125;</span><br><span class="line">   &#125;</span><br><span class="line">  &#x2F;&#x2F;其他分支略，只看最简单的分组模式</span><br><span class="line">  if (dbConfigType.isGroup()) &#123;</span><br><span class="line">       &#x2F;&#x2F;读写配置赋值</span><br><span class="line">       this.rwDataSourcePoolConfig &#x3D; zdalConfig.getGroupRules();</span><br><span class="line">       &#x2F;&#x2F;初始化多份读库下的负载均衡</span><br><span class="line">       this.initForLoadBalance(zdalConfig.getDbType());</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;注册监听：为了满足动态切换</span><br><span class="line">  this.initConfigListener();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>initForLoadBalance的方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">private void initForLoadBalance(DBType dbType) &#123;</span><br><span class="line">    Map&lt;String, DBSelector&gt; dsSelectors &#x3D; this.buildRwDbSelectors(this.rwDataSourcePoolConfig);</span><br><span class="line">    this.runtimeConfigHolder.set(new ZdalRuntime(dsSelectors));</span><br><span class="line">    this.setDbTypeForDBSelector(dbType);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，首先构建出了DB选择器，然后赋值给了runtimeConfigHolder供运行时获取。而构建DB选择器的时候，其实是按读写两个维度，把所有数据源都构建了一遍，即group_r和group_w下都包含5个数据源，只不过各自的权重不一样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;比如按上面的配置写库只有一个，但是也会包含全数据源</span><br><span class="line"></span><br><span class="line">group_0_w_0 :&lt; bean:read0DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_1 :&lt; bean:writeDataSource , writeWeight:10&gt;</span><br><span class="line">group_0_w_2 :&lt; bean:read1DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_3 :&lt; bean:read2DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_4 :&lt; bean:read3DataSource , writeWeight:0&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;上述就是写相关的DBSelecter的内容。</span><br></pre></td></tr></table></figure>
+
+<h3 id="读写分离怎么起作用"><a href="#读写分离怎么起作用" class="headerlink" title="读写分离怎么起作用"></a>读写分离怎么起作用</h3><p>以delete为例，更新删除是要操作写库的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public void delete(ZdalDataSource dataSource) &#123;</span><br><span class="line">    String deleteSql &#x3D; &quot;delete from test&quot;;</span><br><span class="line">    Connection conn &#x3D; null;</span><br><span class="line">    PreparedStatement pst &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">       conn &#x3D; dataSource.getConnection();</span><br><span class="line">       pst &#x3D; conn.prepareStatement(deleteSql);</span><br><span class="line">       pst.execute();</span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line">           &#x2F;&#x2F;...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">          &#x2F;&#x2F;资源关闭</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>getConnection会从上文中提到的runtimeConfigHolder中获取DBSelecter，然后执行execute方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> public boolean execute() throws SQLException &#123;</span><br><span class="line">    SqlType sqlType &#x3D; getSqlType(sql);</span><br><span class="line">    &#x2F;&#x2F; SELECT相关的就选择group_r对应的DBSelecter</span><br><span class="line">   if (sqlType &#x3D;&#x3D; SqlType.SELECT || sqlType &#x3D;&#x3D; SqlType.SELECT_FOR_UPDATE|| sqlType &#x3D;&#x3D; SqlType.SELECT_FROM_DUAL) &#123;</span><br><span class="line">     &#x2F;&#x2F;略</span><br><span class="line">    return true;</span><br><span class="line">    &#x2F;&#x2F;update&#x2F;delete相关的就选择group_w对应的DBSelecter</span><br><span class="line">  &#125; else if (sqlType &#x3D;&#x3D; SqlType.INSERT || sqlType &#x3D;&#x3D; SqlType.UPDATE|| sqlType &#x3D;&#x3D; SqlType.DELETE) &#123;</span><br><span class="line">       if (super.dbConfigType &#x3D;&#x3D; DataSourceConfigType.GROUP) &#123;</span><br><span class="line">           executeUpdate0();</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           executeUpdate();</span><br><span class="line">      &#125;</span><br><span class="line">      return false;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是读取相关的，那就选_r的DBSelecter，如果是写相关的，那就选_W的DBSelecter。那么executeUpdate0中是怎么执行区分读写数据源的呢，其实就是把这一组的数据源根据权重筛选一遍。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; WeightRandom#select(int[], java.lang.String[])</span><br><span class="line">private String select(int[] areaEnds, String[] keys) &#123;</span><br><span class="line">   &#x2F;&#x2F;这里的areaEnds数组，是一个累加范围值数据</span><br><span class="line">   &#x2F;&#x2F;比如三个库权重    10   9   8</span><br><span class="line">   &#x2F;&#x2F;那么areaEnds就是  10  19  27 是对每个权重的累加，最后一个值是总和</span><br><span class="line">   int sum &#x3D; areaEnds[areaEnds.length - 1];</span><br><span class="line">   &#x2F;&#x2F;这样随机出来的数，是符合权重分布的</span><br><span class="line">   int rand &#x3D; random.nextInt(sum);</span><br><span class="line">   for (int i &#x3D; 0; i &lt; areaEnds.length; i++) &#123;</span><br><span class="line">       if (rand &lt; areaEnds[i]) &#123;</span><br><span class="line">           return keys[i];</span><br><span class="line">   &#125;</span><br><span class="line">   return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇文章，把阿里数据库中间件相关的组件和加载流程进行了总结，就一个最基本的分组读写分离的流程，对内部实现进行了阐述。看源码时，比如dubbo这些中间件其实是比较容易入手的，因为他们都依托于Spring进行JavaBean的装载，所有，对Spring容器暴露的那些init、load方法，就是很好的切入点。</p>
 
       
     </div>
@@ -906,7 +944,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/17/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-17/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E5%8D%8F%E8%AE%AE/%E5%86%85%E6%A0%B8%E8%B0%83%E4%BC%98%E5%8F%82%E6%95%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -920,7 +958,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/17/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-17/" class="post-title-link" itemprop="url">Sun Jul 17 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E5%8D%8F%E8%AE%AE/%E5%86%85%E6%A0%B8%E8%B0%83%E4%BC%98%E5%8F%82%E6%95%B0/" class="post-title-link" itemprop="url">内核调优参数</a>
         </h2>
 
         <div class="post-meta-container">
@@ -932,7 +970,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2022-07-17 10:22:31 / Modified: 11:41:32" itemprop="dateCreated datePublished" datetime="2022-07-17T10:22:31+08:00">2022-07-17</time>
+      <time title="Created: 2021-06-14 21:12:31 / Modified: 21:13:56" itemprop="dateCreated datePublished" datetime="2021-06-14T21:12:31+08:00">2021-06-14</time>
     </span>
 
   
@@ -945,17 +983,150 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《可爱的教会》方老师</p>
-<p>诗篇84</p>
-<p>可拉的后裔：是利未人，曾经背叛过摩西，后来在神殿中做守门的工作</p>
-<p>诗篇被整理的时期：是以色列被巴比伦掳走以后</p>
-<p>福：</p>
-<ul>
-<li>住在神殿中(4节)</li>
-<li>靠神的力量心中想往锡安大道的（5节）</li>
-<li>依靠神的人（12节）</li>
-</ul>
-<p>竭力做主工：</p>
+          <p>Linux作为一个强大的操作系统，提供了一系列内核参数供我们进行调优。光TCP的调优参数就有50多个。在和线上问题斗智斗勇的过程中，笔者积累了一些在内网环境应该进行调优的参数。在此分享出来，希望对大家有所帮助。</p>
+<h2 id="调优清单"><a href="#调优清单" class="headerlink" title="调优清单"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/nU31sYkEydL32T-qKvGNrg">调优清单</a></h2><p>好了，在这里先列出调优清单。请记住，这里只是笔者在内网进行TCP内核参数调优的经验，仅供参考。同时，笔者还会在余下的博客里面详细解释了为什么要进行这些调优！</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>内核参数</th>
+<th align="left">值</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.1</td>
+<td>/proc/sys/inet/ipv4/tcp_max_syn_backlog</td>
+<td align="left">2048</td>
+<td></td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>/proc/sys/net/core/somaxconn</td>
+<td align="left">2048</td>
+<td></td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>/proc/sys/net/ipv4/tcp_abort_on_overflow</td>
+<td align="left">1</td>
+<td></td>
+</tr>
+<tr>
+<td>2.1</td>
+<td>/proc/sys/net/ipv4/tcp_tw_recycle</td>
+<td align="left">0</td>
+<td>NAT环境必须为0</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td>/proc/sys/net/ipv4/tcp_tw_reuse</td>
+<td align="left">1</td>
+<td></td>
+</tr>
+<tr>
+<td>3.1</td>
+<td>/proc/sys/net/ipv4/tcp_syn_retries</td>
+<td align="left">3</td>
+<td></td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>/proc/sys/net/ipv4/tcp_retries2</td>
+<td align="left">5</td>
+<td></td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>/proc/sys/net/ipv4/tcp_slow_start_after_idle</td>
+<td align="left">0</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>当然了，这里只列出TCP的部分内核参数，更多web性能上的建议，请看</p>
+<p>Ad</p>
+<h2 id="Web性能权威指南-图灵出品"><a href="#Web性能权威指南-图灵出品" class="headerlink" title="Web性能权威指南(图灵出品)"></a>Web性能权威指南(图灵出品)</h2><p>作者：[加]Ilya Grigorik</p>
+<p>京东 </p>
+<h2 id="tcp-max-syn-backlog-somaxconn-tcp-abort-on-overflow"><a href="#tcp-max-syn-backlog-somaxconn-tcp-abort-on-overflow" class="headerlink" title="tcp_max_syn_backlog,somaxconn,tcp_abort_on_overflow"></a>tcp_max_syn_backlog,somaxconn,tcp_abort_on_overflow</h2><p>tcp_max_syn_backlog,somaxconn,tcp_abort_on_overflow这三个参数是关于<br>内核TCP连接缓冲队列的设置。如果应用层来不及将已经三次握手建立成功的TCP连接从队列中取出,溢出了这个缓冲队列(全连接队列)之后就会丢弃这个连接。如下图所示:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDArlJbELjXP7pDLGcQMF2ialyjz2JIPMic6plJhUBQnwbGIQb5LSKpQcWA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>从而产生一些诡异的现象,这个现象诡异之处就在于，是在TCP第三次握手的时候丢弃连接<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDAG76BTOc7VcteRFSibhI1UibmfUic6PibIKL7FD5QGKq3npUiahq973bHP7A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>就如图中所示,第二次握手的SYNACK发送给client端了。所以就会出现client端认为连接成功，而Server端确已经丢弃了这个连接的现象！由于无法感知到Server已经丢弃了连接。<br>所以如果没有心跳的话，只有在发出第一个请求后，Server才会发送一个reset端通知这个连接已经被丢弃了，建立连接后第二天再用，也会报错！所以我们要调大Backlog队列！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo 2048 &gt; &#x2F;proc&#x2F;sys&#x2F;inet&#x2F;ipv4&#x2F;tcp_max_syn_backlog</span><br><span class="line">echo 2048 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;core&#x2F;somaxconn</span><br></pre></td></tr></table></figure>
+
+<p>当然了，为了尽量避免第一笔调用失败问题，我们也同时要设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_abort_on_overflow</span><br></pre></td></tr></table></figure>
+
+<p>设置这个值以后，Server端内核就会在这个连接被溢出之后发送一个reset包给client端。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDAKKicAs5ziclVdpO8SQKSVaxjcPrKX7LrubWsv5cIFl1srm8Cf8tBb9QQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>如果我们的client端是NIO的话，就可以收到一个socket close的事件以感知到连接被关闭！<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDAde9s8RMR11B71N2C7CAzfXUc1wuuibnicVgXyCeHMxxZj0thCUlDv6HA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h3 id="注意Java默认的Backlog是50"><a href="#注意Java默认的Backlog是50" class="headerlink" title="注意Java默认的Backlog是50"></a>注意Java默认的Backlog是50</h3><p>这个TCP Backlog的队列大小值是min(tcp_max_syn_backlog,somaxconn,应用层设置的backlog),而Java如果不做额外设置，Backlog默认值仅仅只有50。C语言在使用listen调用的时候需要传进Backlog参数。</p>
+<h2 id="tcp-tw-recycle"><a href="#tcp-tw-recycle" class="headerlink" title="tcp_tw_recycle"></a>tcp_tw_recycle</h2><p>tcp_tw_recycle这个参数一般是用来抑制TIME_WAIT数量的,但是它有一个副作用。即在tcp_timestamps开启(Linux默认开启)，tcp_tw_recycle会经常导致下面这种现象。<br><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"><br>也即，如果你的Server开启了tcp_tw_recycle，那么别人如果通过NAT之类的调用你的Server的话，NAT后面的机器只有一台机器能正常工作，其它情况大概率失败。具体原因呢由下图所示:<br><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"><br>在tcp_tw_recycle=1同时tcp_timestamps(默认开启的情况下),对同一个IP的连接会做这样的限制，也即之前后建立的连接的时间戳必须要大于之前建立连接的最后时间戳，但是经过NAT的一个IP后面是不同的机器，时间戳相差极大，就会导致内核直接丢弃时间戳较低的连接的现象。由于这个参数导致的问题，高版本内核已经去掉了这个参数。如果考虑TIME_WAIT问题，可以考虑设置一下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_tw_reuse</span><br></pre></td></tr></table></figure>
+
+<h2 id="tcp-syn-retries"><a href="#tcp-syn-retries" class="headerlink" title="tcp_syn_retries"></a>tcp_syn_retries</h2><p>这个参数值得是client发送SYN如果server端不回复的话，重传SYN的次数。对我们的直接影响呢就是connet建立连接时的超时时间。当然Java通过一些C原生系统调用的组合使得我们可以进行超时时间的设置。在Linux里面默认设置是5,下面给出建议值3和默认值5之间的超时时间。</p>
+<table>
+<thead>
+<tr>
+<th>tcp_syn_retries</th>
+<th>timeout</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>min(so_sndtimeo,3s)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>min(so_sndtimeo,7s)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>min(so_sndtimeo,15s)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>min(so_sndtimeo,31s)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>min(so_sndtimeo,63s)</td>
+</tr>
+</tbody></table>
+<p>下图给出了，重传和超时情况的对应图:<br><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"><br>当然了，不同内核版本的超时时间可能不一样，因为初始RTO在内核小版本间都会有细微的变化。所以，有时候在抓包时候可能会出现（3,6,12……)这样的序列。当然Java的API有超时时间:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">java:</span><br><span class="line"> &#x2F;&#x2F; 函数调用中携带有超时时间</span><br><span class="line"> public void connect(SocketAddress endpoint, int timeout) ;</span><br></pre></td></tr></table></figure>
+
+<p>所以，对于Java而言，这个内核参数的设置没有那么重要。但是，有些代码可能会有忘了设置timeout的情况，例如某个版本的Kafka就是，所以它在我们一些混沌测试的情况下，容灾恢复的时间会达到一分多钟，主要时间就是卡在connect上面-_-!，而这时我们的tcp_syn_retries设置的是5，也即超时时间63s。减少这个恢复时间的手段就是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 3 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_syn_retries</span><br></pre></td></tr></table></figure>
+
+<h2 id="tcp-retries2"><a href="#tcp-retries2" class="headerlink" title="tcp_retries2"></a>tcp_retries2</h2><p>tcp_retries2这个参数表面意思是在传输过程中tcp的重传次数。但在某个版本之后Linux内核仅仅用这个tcp_retries2来计算超时时间，在这段时间的重传次数纯粹由RTO等环境因素决定，重传超时时间在5/15下的表现为:</p>
+<table>
+<thead>
+<tr>
+<th>tcp_retries2</th>
+<th align="left">对端无响应</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5</td>
+<td align="left">25.6s-51.2s根据动态rto定</td>
+</tr>
+<tr>
+<td>15</td>
+<td align="left">924.6s-1044.6s根据动态rto定</td>
+</tr>
+</tbody></table>
+<p>如果我们在应用层设置的Socket所有ReadTimeout都很小的话(例如3s),这个内核参数调整是没有必要的。但是，笔者经常发现有的系统，因为一两个慢的接口或者SQL，所以将ReadTimeout设的很大的情况。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDA2ccOvCYpgT8Xrm4JPB3sSibwYwh5icWeFacrNUzCNkpuBKt8tIt2rH3w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>平常这种情况是没有问题的，因为慢请求频率很低，不会对系统造成什么风险。但是，物理机突然宕机时候的情况就不一样了，由于ReadTimeOut设置的过大，导致所有落到这台宕机的机器都会在min(ReadTimeOut,(924.6s-1044.6s)(Linux默认tcp_retries2是15))后才能从read系统调用返回。假设ReadTimeout设置了个5min，系统总线程数是200，那么只要5min内有200个请求落到宕机的server就会使A系统失去响应！<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSqpvmGiboDDibLVnNtqicucDA7vKurFMDuicTZYibs18Nz9XfDlZUHtGKFrzqgkfKDCiaQGTLqZJv7L1SA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>但如果将tcp_retries2设置为5,那么超时返回时间即为min(ReadTimeOut 5min,25.6-51.2s),也就是30s左右，极大的缓解了这一情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 5 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_retries2</span><br></pre></td></tr></table></figure>
+
+<p>但是针对这种现象，最好要做资源上的隔离,例如线程上的隔离或者机器级的隔离。<br><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"></p>
+<p>golang的goroutine调度模型就可以很好的解决线程资源不够的问题，但缺点是goroutine里面不能有阻塞的系统调用，不然也会和上面一样，但仅仅对于系统之间互相调用而言，都是非阻塞IO,所以golang做微服务还是非常Nice的。当然了我大Java用纯IO事件触发编写代码也不会有问题，就是对心智负担太高-_-!</p>
+<h3 id="物理机突然宕机和进程宕不一样"><a href="#物理机突然宕机和进程宕不一样" class="headerlink" title="物理机突然宕机和进程宕不一样"></a>物理机突然宕机和进程宕不一样</h3><p>值得注意的是，物理机宕机和进程宕但内核还存在表现完全不一样。<br><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"><br>仅仅进程宕而内核存活，那么内核会立马发送reset给对端，从而不会卡住A系统的线程资源。</p>
+<h2 id="tcp-slow-start-after-idle"><a href="#tcp-slow-start-after-idle" class="headerlink" title="tcp_slow_start_after_idle"></a>tcp_slow_start_after_idle</h2><p>还有一个可能需要调整的参数是tcp_slow_start_after_idle，Linux默认是1，即开启状态。开启这个参数后，我们的TCP拥塞窗口会在一个RTO时间空闲之后重置为初始拥塞窗口(CWND)大小，这无疑大幅的减少了长连接的优势。对应Linux源码为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">static void tcp_event_data_sent(struct tcp_sock *tp,</span><br><span class="line">                struct sk_buff *skb, struct sock *sk)&#123;</span><br><span class="line">    &#x2F;&#x2F; 如果开启了start_after_idle,而且这次发送的时间-上次发送的时间&gt;一个rto，就重置tcp拥塞窗口</span><br><span class="line">    if (sysctl_tcp_slow_start_after_idle &amp;&amp;</span><br><span class="line">        (!tp-&gt;packets_out &amp;&amp; (s32)(now - tp-&gt;lsndtime) &gt; icsk-&gt;icsk_rto))</span><br><span class="line">        tcp_cwnd_restart(sk, __sk_dst_get(sk));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"><br>关闭这个参数后，无疑会提高某些请求的传输速度(在带宽够的情况下)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo 0 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_slow_start_after_idle</span><br></pre></td></tr></table></figure>
+
+<p>当然了，Linux启用这个参数也是有理由的，如果我们的网络情况是时刻在变化的，例如拿个手机到处移动，那么将拥塞窗口重置确实是个不错的选项。但是就我们内网系统间调用而言，是不太必要的了。</p>
+<h2 id="初始CWND大小"><a href="#初始CWND大小" class="headerlink" title="初始CWND大小"></a>初始CWND大小</h2><p>毫无疑问，新建连接之后的初始TCP拥塞窗口大小也直接影响到我们的请求速率。在Linux2.6.32源码中，其初始拥塞窗口是(2-4个)mss大小，对应于内网估计也就是(2.8-5.6K)(MTU 1500)，这个大小对于某些大请求可能有点捉襟见肘。<br>在Linux 2.6.39以上或者某些RedHat维护的小版本中已经把CWND<br>增大到RFC 6928所规定的的10段，也就是在内网里面估计14K左右(MTU 1500)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Linux 新版本</span><br><span class="line">&#x2F;* TCP initial congestion window *&#x2F;</span><br><span class="line">#define TCP_INIT_CWND        10</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Linux提供了一大堆内参参数供我们进行调优，其默认设置的参数在很多情况下并不是最佳实践，所以我们需要潜心研究，找到最适合当前环境的组合。    </p>
 
       
     </div>
@@ -982,7 +1153,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/03/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-03/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%88%86%E6%9E%90%E5%92%8C%E8%B0%83%E4%BC%98/%E4%BA%8B%E5%8A%A1%E5%BC%82%E5%B8%B8%E4%B8%8D%E5%9B%9E%E6%BB%9A/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -996,123 +1167,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/07/03/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-03/" class="post-title-link" itemprop="url">Sun Jul 03 2022 08:00:00 GMT+0800 (China Standard Time)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2022-07-03 10:22:31 / Modified: 11:21:22" itemprop="dateCreated datePublished" datetime="2022-07-03T10:22:31+08:00">2022-07-03</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>《启示录 - 推雅推拿教会》唐牧师</p>
-<p>推雅推喇教会的门徒，有人跟从了耶洗别的教训，走在了邪恶的道路上。</p>
-<ul>
-<li><p>上帝对此愤怒，若不悔改，必当审批；并且杀死耶洗别和他的子女</p>
-</li>
-<li><p>我们教会要注意，什么是神的真理，是否掺杂了假先知的真理，如果教会偏离了真道，并且不肯悔改，上帝愤怒</p>
-</li>
-<li><p>保罗在哥林多教会说，他已经把人许配给耶稣了。如果对耶稣不忠，就像夏娃被神诱惑，对神不忠心。</p>
-</li>
-</ul>
-<p>每间教会中有2种人：</p>
-<ul>
-<li>是跟随主，走圣洁道路、至死不渝的人</li>
-<li>不愿意顺从，随波逐流，没有根基，没有立场，随便讨好世界</li>
-</ul>
-<p>推雅推喇教会也有不顺从耶洗别的门徒，不接受她的教导，持守神的道；</p>
-<p>“<strong>撒旦奥秘之理</strong>“，因为撒旦用深奥的道理，去诱惑人，因为人喜欢深奥显得自己有学问、不喜欢浅显，但是人不区分是否是真理；真理也是要行出来的，不是单单讲出来的</p>
-<ul>
-<li>《圣经》太平常了，一看就懂；上帝的道就是让人明白，用容易的话来传讲出来<ul>
-<li>1914年，白话文《和合译本》，为了让大家都明白；</li>
-<li>49个宣教士，对希腊文、希伯来文非常懂，他们知道中国人最多，如果他们能明白圣经，就是全世界最大文化的人能懂圣经；</li>
-</ul>
-</li>
-<li>《孔子》的书，太难懂了，之乎者也，只有有”学问”的人才能读懂</li>
-</ul>
-<p>真理不是深浅的问题，如果深奥但是不是真理，宁可不要；</p>
-<p>如果有人非常有学问，但是没有良好的行为，那么宁可抛弃学问，追求伟大的生命；</p>
-<ul>
-<li>耶稣讲的浅，用简单的比喻讲清楚，耶稣能行出来（道成了肉身，简单化、普通化）</li>
-<li>保罗讲的深，但是保罗讲的道是从耶稣来的，保罗自己承认也不能完全行出来</li>
-</ul>
-<ul>
-<li>马丁路德改革前，天主教不允许普通人读圣经，因为他们认为圣经深奥、太难读懂了、容易出异端</li>
-<li>马丁路德改革，要把拉丁文、希腊文圣经翻译成浅显、正确的德文，要让所有普通的德国农夫，也能读懂圣经</li>
-</ul>
-<p>==&gt; 不能脱离群众，把道理传给平常的百姓</p>
-<p>耶稣基督不将<strong>别的担子</strong>放到不跟随耶洗别的推雅推喇教会的门徒。</p>
-<p>马太11:29：凡担劳担重担的，</p>
-<ul>
-<li>侍奉很疲倦，另一方面很轻松；我们责任越重，越开心</li>
-<li>一方面遵从上帝的旨意，一方面归荣耀给神</li>
-</ul>
-<p><strong>轭</strong>：牛拉车的时候，身上的木头；</p>
-<p>从天上看，轭就是十字架；说明上帝与我们同走恩典之路，没有一个基督徒在恩典之路上是孤独的。</p>
-<p>为什么上帝说简单和轻省的吗？因为耶稣是受苦的源头</p>
-<p>你所有的，但是要持守到永远。凡得胜的，</p>
-<p>教会有2种基督徒：失败和得胜</p>
-<p>凡是在耶稣基督救赎果效有份的，就是得胜的。</p>
-<ul>
-<li>耶稣为罪人死、为打败死亡、为打败撒旦，那么你与罪抗争、不被死亡吞噬、与撒旦抗争</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/03/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-10/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/03/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-10/" class="post-title-link" itemprop="url">Sun Jul 10 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/14/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%88%86%E6%9E%90%E5%92%8C%E8%B0%83%E4%BC%98/%E4%BA%8B%E5%8A%A1%E5%BC%82%E5%B8%B8%E4%B8%8D%E5%9B%9E%E6%BB%9A/" class="post-title-link" itemprop="url">事务异常不回滚</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1123,14 +1178,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-07-03 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-03T10:22:31+08:00">2022-07-03</time>
+      <time title="Created: 2021-06-14 21:02:50" itemprop="dateCreated datePublished" datetime="2021-06-14T21:02:50+08:00">2021-06-14</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-07-10 15:57:06" itemprop="dateModified" datetime="2022-07-10T15:57:06+08:00">2022-07-10</time>
+        <time title="Modified: 2021-06-15 13:31:23" itemprop="dateModified" datetime="2021-06-15T13:31:23+08:00">2021-06-15</time>
       </span>
 
   
@@ -1143,51 +1198,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《信心从头说起》林牧师</p>
-<p>现象：</p>
-<ul>
-<li>信主多年，失去了对耶稣的喜乐，甚至离开了教会；</li>
-<li>工作压力太大，就像以色列人在埃及</li>
-<li>人际关系</li>
-</ul>
-<p>箴言：</p>
-<ul>
-<li>不要去找“专注当下”、瑜伽</li>
-<li>没有灵丹妙药</li>
-<li>这些都是表面的</li>
-</ul>
-<p>内在：</p>
-<ul>
-<li><p>圣经启示我们，让你失望的消息：你没有什么特别</p>
-<ul>
-<li>上帝造我们，给了我们良心</li>
-<li>我们信主的，良心是清洁的。</li>
-<li>清洁的良心：不是不犯罪，而是称义成圣（I’m forgiven, and God not finish it yet）</li>
-</ul>
-</li>
-<li><p>圣经启示我们，好消息：</p>
-<ul>
-<li>你要不要有一颗清洁的良心？</li>
-<li>真的”信”耶稣：<ul>
-<li>你愿意面对自己的良心，良心：做出人内心的道德判断</li>
-<li>信：对神的话语有应有的回应</li>
-<li>撒种的比喻：<ul>
-<li>第一种，没有领受的</li>
-<li>第二种，没有根；根就是上帝的道在我们里面做工，就是上帝在我们良心层面做工<ul>
-<li>伏在权柄下才能自由（表面层次）</li>
-</ul>
-</li>
-<li>第三种，被忧虑、财富窒息了，经历人生患难的考验后失败了（表面层次）</li>
-</ul>
-</li>
-<li>一方面领受道，另一方面接受主耶稣</li>
-<li>立约：神先委身、从天上降下来</li>
-<li>只有饿了的人，才想要吃饭</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+          <h1 id="日常Bug排查-抛异常不回滚"><a href="#日常Bug排查-抛异常不回滚" class="headerlink" title="日常Bug排查-抛异常不回滚"></a>日常Bug排查-抛异常不回滚</h1><h2 id="Bug现场"><a href="#Bug现场" class="headerlink" title="Bug现场"></a>Bug现场</h2><p>最近有人反映java应用操作数据库的时候，抛异常不回滚</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@Transacion(value&#x3D;&quot;x&quot;) </span><br><span class="line">public void s1() throw MyException&#123; </span><br><span class="line">    update(1); </span><br><span class="line">    throwBusinessException();</span><br><span class="line">    update(2); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>乍看上去没啥问题。</p>
+<h2 id="翻下Spring源码"><a href="#翻下Spring源码" class="headerlink" title="翻下Spring源码"></a>翻下Spring源码</h2><p>Spring的源码，看下它在声明式事务中的处理逻辑到底是什么，于是翻到了这一段处理事务异常的代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">TransactionAspectSupport.java</span><br><span class="line">protected void completeTransactionAfterThrowing(TransactionInfo txInfo, Throwable ex) &#123;</span><br><span class="line">    if (txInfo.transactionAttribute.rollbackOn(ex)) &#123;</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        &#x2F;&#x2F; We don&#39;t roll back on this exception.</span><br><span class="line">        &#x2F;&#x2F; Will still roll back if TransactionStatus.isRollbackOnly() is true.</span><br><span class="line">        &#x2F;&#x2F; 在checkedException的时候,不会被rollBack,会commit!!!</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">@Override</span><br><span class="line">public boolean rollbackOn(Throwable ex) &#123;</span><br><span class="line">    return (ex instanceof RuntimeException || ex instanceof Error);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看代码逻辑就明白了，只有异常继承RuntimeException或者Error的时候才会回滚！</p>
+<h1 id="遇到异常，应用该如何回滚"><a href="#遇到异常，应用该如何回滚" class="headerlink" title="遇到异常，应用该如何回滚"></a>遇到异常，应用该如何回滚</h1><h2 id="应用Commit报错并不一定回滚"><a href="#应用Commit报错并不一定回滚" class="headerlink" title="应用Commit报错并不一定回滚"></a>应用Commit报错并不一定回滚</h2><p>阐述一下当我们在事务Commit报错时候，数据库中的数据并不一定会是我们以为的回滚状态。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRTx1JrBPXUHGoBRoicHK5gNHiaLyDP0Z3m3atpmibPxNPZXt4jgSLF4jSDvictrMjyW5lxCIwQZVJyqlw/640" alt="图片"><br>在这种情况下，很明显的DB的数据肯定是处于已经提交的状态。而如果App认为是回滚状态，并基于这个信息去做操作的话，很明显会导致数据不一致。</p>
+<h2 id="非-IO异常-or-超时异常-也不一定回滚"><a href="#非-IO异常-or-超时异常-也不一定回滚" class="headerlink" title="非 (IO异常 or 超时异常) 也不一定回滚"></a>非 (IO异常 or 超时异常) 也不一定回滚</h2><p>只有IO异常或者超时异常才会出现这种不一定回滚的问题呢？这里还真不一定，笔者在一次Case中，就发现Oracle在commit的时候返回死锁异常时候，数据库内部的commit竟然也成功了!这就牵涉到数据库内部的处理了。</p>
+<h2 id="应用应该怎么做呢？"><a href="#应用应该怎么做呢？" class="headerlink" title="应用应该怎么做呢？"></a>应用应该怎么做呢？</h2><p>事实上，由于数据库保证了原子性。所以我们在遇到这种情况时候，需要从数据库中重建状态,而不是依赖现在应用里面的信息。所以遇到异常直接将流程结束，然后等定时任务、等补单操作是个比较简单安全的做法。<br>当然，数据库中重建状态时候，也要考虑到上一个相应的commit还在commit的过程中,只不过这个commit非常慢而已。由于我们更新数据或者最终判断的时候往往会锁住数据,而数据库一般都是采用了二阶段锁(S2PL)。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRTx1JrBPXUHGoBRoicHK5gNHkR7NgO8BrRiaenicYHGmaENN70MHSpYRdOjLGm3MiayPCet0syU1eSXLA/640" alt="图片"><br>在上一个commit成功提交之后，我们对相应数据的操作才会执行下去。所以只要小心的控制好锁的范围，数据一致性还是能保证的。</p>
 
       
     </div>
@@ -1214,7 +1235,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/12/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-06-12/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E4%B8%8D%E6%B6%88%E8%B4%B9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1228,7 +1249,105 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/06/12/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-06-12/" class="post-title-link" itemprop="url">Sun Jun 12 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E4%B8%8D%E6%B6%88%E8%B4%B9/" class="post-title-link" itemprop="url">消息不消费</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-14 20:59:54" itemprop="dateCreated datePublished" datetime="2021-06-14T20:59:54+08:00">2021-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="日常Bug排查-消息不消费"><a href="#日常Bug排查-消息不消费" class="headerlink" title="日常Bug排查-消息不消费"></a>日常Bug排查-消息不消费</h2><h2 id="Bug现场"><a href="#Bug现场" class="headerlink" title="Bug现场"></a>Bug现场</h2><p>某天下午，在笔者研究某个问题正high的时候。开发突然找到笔者，线上某个系统突然消费不了queue了。Queue不消费也算是日常问题了。淡定的先把流量切到另一个机房，让问题先恢复再说。</p>
+<h2 id="消息累积"><a href="#消息累积" class="headerlink" title="消息累积"></a>消息累积</h2><p>然后就是看不消费的queue到哪去了，打开mq(消息中间件)控制台，全部累积到mq上了。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRRl5MlP774wCglMbQSgL5j9CicyAY4LQpibVzUtYDHos8UciaBicTIknamabPEYErCicMRwVTMUM3b3weg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>同时开发对笔者反映，只有这个queueu积累了，其它queue还是能正常消费的。</p>
+<h2 id="出问题时间点"><a href="#出问题时间点" class="headerlink" title="出问题时间点"></a>出问题时间点</h2><p>这时笔者还得到了一个关键信息，此问题是DBA对其关联的数据库进行操作后才发生的。当时由于操作灌入的数据库过大，导致数据库主从切换，漂了VIP。从时间点判断，这个应该是问题的诱因。</p>
+<h2 id="jstack"><a href="#jstack" class="headerlink" title="jstack"></a>jstack</h2><p>既然卡住了，那么老办法，jstack一下，看看我们的mq消费线程在干嘛:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ActiveMQ Session Task-1234</span><br><span class="line">    at java.net.SocketInputStream.socketRead0</span><br><span class="line">    ......</span><br><span class="line">    at com.mysql.jdbc.MysqlIO.readFully</span><br><span class="line">    ......</span><br><span class="line">    at org.apache.activemq.ActiveMQMessageConsumer.dispatch</span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
+
+<p>很明显的，都卡在MysqlIO.readFully也就是数据库读取上，再也不往下走了。</p>
+<h2 id="没配超时"><a href="#没配超时" class="headerlink" title="没配超时"></a>没配超时</h2><p>这就肯定是没配超时了，排查了下他们的配置，确实没配。之前系统梳理过好多次，但没想到还是有这种漏网之鱼。这个问题分析本身是很简单的。不过在这里笔者想多聊一下，为什么数据主从切换会形成这样的现象。</p>
+<h2 id="mha切换"><a href="#mha切换" class="headerlink" title="mha切换"></a>mha切换</h2><p><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRRl5MlP774wCglMbQSgL5j99hd51zgMoGyZqqxbj2hMSgQVwL2QDj9ia8mDFuTFWcQ0iacTyiaicFyJFQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>如图所示，mha切换逻辑是将vip从DB旧主上摘掉，然后将vip挂到DB新主上面。为了观察这种行为，笔者写了个python程序进行测试。观察得知，在vip被摘掉的那一刻，双方的通信已经不正常了。但是tcp连接状态依旧是ESTABLISHED。</p>
+<h2 id="为什么tcp状态依旧ESTABLISHED"><a href="#为什么tcp状态依旧ESTABLISHED" class="headerlink" title="为什么tcp状态依旧ESTABLISHED"></a>为什么tcp状态依旧ESTABLISHED</h2><p>因为ip摘掉并不会让已经存在的socket立马感知，那么socket什么时候能够感知到我们这个连接已经gg了呢。在当前这个场景下，应用没设置socket超时，会有这几种可能:</p>
+<ol>
+<li>如果这时候App正在发请求给此五元组</li>
+</ol>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRRl5MlP774wCglMbQSgL5j9hlTHWUHFuf0lul6XvjGTCRlDr7Rf8h0ttlPabRsh5HsdUEM1ib2ibhlQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<ol>
+<li>如果DB正在写回请求给此五元组<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRRl5MlP774wCglMbQSgL5j9MvaWDfk0vAvYqL4iaZF53foT01QibnAiaHaFPqZdu8B1FtoiaCxhTzMXSA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></li>
+</ol>
+<p>由上面两种情况，我们可以知道哪方作出发送动作，哪方就能够通过reset或者尝试次数过多来感知到这个连接已经gg了。<br>很明显的，由于我们的应用正卡在socket read,表明我们的App应用并没有发送数据，而是在等待MySQL的返回，那么在不设置超时的情况下，App怎么感知到连接实际上已经不好了呢。</p>
+<h2 id="tcp保活定时器"><a href="#tcp保活定时器" class="headerlink" title="tcp保活定时器"></a>tcp保活定时器</h2><p>由于应用不做发送动作，那这时就轮到我们的tcp保活定时器tcp_keepalive出马了。linux下默认的内核参数为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_keepalive_time 7200 两小时</span><br><span class="line">&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_keepalive_probes 9 探测9次</span><br><span class="line">&#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;tcp_keepalive_intvl 75s 每次探测间隔75s</span><br></pre></td></tr></table></figure>
+
+<p>tcp保活定时器默认在7200s也就是两小时后开启，探测9次，每次间隔75s，如果有明确失败或者9次都没返回则判定连接gg。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRRl5MlP774wCglMbQSgL5j9IZG7OGaeFPUsy1NOQm9eG7CiaYjhE8y7e3jG6TZuvY55fRb3qDfkHFQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>在我们的这个场景中，应用会在两个小时后开始保活，在第一次探测的时候对端发送reset从而应用感知到连接gg。这时候，应用才返回。也就是说，不设置超时时间，遇到这种情况，应用的线程要卡2小时！</p>
+<h2 id="如果是DB进程宕or重启"><a href="#如果是DB进程宕or重启" class="headerlink" title="如果是DB进程宕or重启"></a>如果是DB进程宕or重启</h2><p>如果不是mha切换，而是DB进程重启或者宕的话，由于Linux内核没宕还存在着。内核会自动将DB进程所属的socket进行close也就是发FIN报文回去。那么应用就可以立马从socket read系统调用中返回了。</p>
+<h2 id="物理机宕机"><a href="#物理机宕机" class="headerlink" title="物理机宕机"></a>物理机宕机</h2><p>物理机宕机而不漂VIP,应用在不设置超时的时候。如果是发送数据阶段，则tcp_reties2次重试后从socket read系统调用返回。如果不发送数据，和上面的描述基本一样，2个小时后开启保活定时器。唯一不同的是，这次是需要探活9次，所以需要会多花11分钟左右的时间感知。</p>
+<h2 id="线下演练为什么不出问题"><a href="#线下演练为什么不出问题" class="headerlink" title="线下演练为什么不出问题"></a>线下演练为什么不出问题</h2><p>VIP漂移这种操作，我们在线下演练过，当时应用很快就切换完了。为什么到了线上就会卡住呢？这是因为，线下没有加上IO hang住导致SQL处理时间过长这一条件。SQL很快就返回了，所以我们线下的线程只有很小的概率卡在socket read上面。况且有几十个线程在消费，卡一两个无关大局。</p>
+<p>而在我们这次上面，由于SQL处理时间超长，所以基本所有的线程都在VIP漂移的那一刻执行socket read即等待数据库返回阶段，就导致所有线程全部hang住等。这时候只能等待tcp_keepalive或者重启了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>要保证高可用，任何远程调用都需要设置超时。否则就会导致应用长时间无法响应这样的现象。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-01-%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-01-%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">Netty-01-心跳机制</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1240,7 +1359,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2022-06-12 10:22:31 / Modified: 10:53:37" itemprop="dateCreated datePublished" datetime="2022-06-12T10:22:31+08:00">2022-06-12</time>
+      <time title="Created: 2021-06-14 20:44:36 / Modified: 20:50:17" itemprop="dateCreated datePublished" datetime="2021-06-14T20:44:36+08:00">2021-06-14</time>
     </span>
 
   
@@ -1253,49 +1372,88 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="讲道-《诗篇》-73"><a href="#讲道-《诗篇》-73" class="headerlink" title="讲道 - 《诗篇》 73"></a>讲道 - 《诗篇》 73</h1><p>讲员林慈信牧师</p>
-<p>主题：悬崖勒马，重拾信心之路</p>
-<p>诗篇中的现象和教会的现象：</p>
+          <h2 id="如何实现心跳"><a href="#如何实现心跳" class="headerlink" title="如何实现心跳"></a>如何实现心跳</h2><p>我们可以通过两种方式实现心跳机制:</p>
 <ul>
-<li><p>信心缺失在教会是普遍现象</p>
-</li>
-<li><p>服侍有忠心，但是脸上没有喜乐</p>
-</li>
+<li>使用 TCP 协议层面的 keepalive 机制.</li>
+<li>在应用层上实现自定义的心跳机制.</li>
 </ul>
-<p>信徒可以对上帝发出疑问吗？</p>
-<ul>
-<li>约伯、耶利米、哈巴谷</li>
-</ul>
-<p>注意：要直接向神问；以信徒的身份向神问，不要放弃自己的身份</p>
-<p>有些解经家认为，人的信心是面临试探的</p>
-<p>我们尽力守神的律法，但是我们好像一直在吃亏</p>
-<p>试探的起点：</p>
-<p>信心的滑坡：</p>
-<p>重拾信心的上行之路：</p>
-<h4 id="诗人信心滑坡的步骤"><a href="#诗人信心滑坡的步骤" class="headerlink" title="诗人信心滑坡的步骤"></a>诗人信心滑坡的步骤</h4><h5 id="第一步：诗人妒忌（）"><a href="#第一步：诗人妒忌（）" class="headerlink" title="第一步：诗人妒忌（）"></a>第一步：诗人妒忌（）</h5><p>1st：神实在是恩待以色列中清心的人（圣经的基要，神实在是恩待我们）</p>
-<p>2nd: 诗人开始妒忌那些恶人：他们发财、他们死了也没疼痛、身体肥胖还健康、他们居住的环境很舒适、他们不受苦不遭灾、他们骄傲强暴欺压、他们毁谤神和全地</p>
-<p>3rd: 诗人继续从外表来看（诗人的信心滑落）</p>
-<h5 id="第二步：诗人得出错误结论：服侍主是没有用的"><a href="#第二步：诗人得出错误结论：服侍主是没有用的" class="headerlink" title="第二步：诗人得出错误结论：服侍主是没有用的"></a>第二步：诗人得出错误结论：服侍主是没有用的</h5><p>如何看待事物的观点？</p>
+<p>虽然在 TCP 协议层面上, 提供了 keepalive 保活机制, 但是使用它有几个缺点:</p>
 <ol>
-<li>传道书第一章</li>
-<li>愚蠢的</li>
+<li>它不是 TCP 的标准协议, 并且是默认关闭的.</li>
+<li>TCP keepalive 机制依赖于操作系统的实现, 默认的 keepalive 心跳时间是 两个小时, 并且对 keepalive 的修改需要系统调用(或者修改系统配置), 灵活性不够.</li>
+<li>TCP keepalive 与 TCP 协议绑定, 因此如果需要更换为 UDP 协议时, keepalive 机制就失效了.</li>
 </ol>
-<p>20节：</p>
-<p>21节、22节：我实在是愚昧无知</p>
-<h5 id="第三步：想想别人，对别人不好，悬崖勒马"><a href="#第三步：想想别人，对别人不好，悬崖勒马" class="headerlink" title="第三步：想想别人，对别人不好，悬崖勒马"></a>第三步：想想别人，对别人不好，悬崖勒马</h5><p>15节：</p>
-<p>雅各书1章：我们要慢慢地听，</p>
-<p>箴言4章：你要保守你们的心，胜过保守一切</p>
-<h5 id="第四步："><a href="#第四步：" class="headerlink" title="第四步："></a>第四步：</h5><p>信心一定是向外的，看向神，绝不是不是看自己的</p>
-<p>16节：</p>
-<p>17节：等我进入上帝的圣所（悔改）</p>
-<p>18节：诗人看待的角度不一样了，（我们如何）</p>
+<p>虽然使用 TCP 层面的 keepalive 机制比自定义的应用层心跳机制节省流量, 但是基于上面的几点缺点, 一般的实践中, 人们大多数都是选择在应用层上实现自定义的心跳.</p>
+<p>既然如此, 那么我们就来大致看看在在 Netty 中是怎么实现心跳的吧. 在 Netty 中, 实现心跳机制的关键是 IdleStateHandler, 它可以对一个 Channel 的 读/写设置定时器, 当 Channel 在一定事件间隔内没有数据交互时(即处于 idle 状态), 就会触发指定的事件.</p>
+<h2 id="使用-Netty-实现心跳"><a href="#使用-Netty-实现心跳" class="headerlink" title="使用 Netty 实现心跳"></a><strong>使用 Netty 实现心跳</strong></h2><p>上面我们提到了, 在 Netty 中, 实现心跳机制的关键是 IdleStateHandler, 那么这个 Handler 如何使用呢? 我们来看看它的构造器:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public IdleStateHandler(int readerIdleTimeSeconds, int writerIdleTimeSeconds, int allIdleTimeSeconds) &#123;</span><br><span class="line">    this((long)readerIdleTimeSeconds, (long)writerIdleTimeSeconds, (long)allIdleTimeSeconds, TimeUnit.SECONDS);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>实例化一个 IdleStateHandler 需要提供三个参数:</p>
 <ul>
-<li>我们信什么教义，就会有什么样的看法</li>
+<li>readerIdleTimeSeconds, 读超时. 即当在指定的时间间隔内没有从 Channel 读取到数据时, 会触发一个 READER_IDLE 的 IdleStateEvent 事件.</li>
+<li>writerIdleTimeSeconds, 写超时. 即当在指定的时间间隔内没有数据写入到 Channel 时, 会触发一个 WRITER_IDLE 的 IdleStateEvent 事件.</li>
+<li>allIdleTimeSeconds, 读/写超时. 即当在指定的时间间隔内没有读或写操作时, 会触发一个 ALL_IDLE 的 IdleStateEvent 事件.</li>
 </ul>
-<p>24节：服侍继续做，但是没有苦毒，有神的教导在</p>
-<ul>
-<li>什么是”满足”呢？无论上帝给了什么，都是最好的</li>
-</ul>
+<p>为了展示具体的 IdleStateHandler 实现的心跳机制, 下面我们来构造一个具体的EchoServer 的例子, 这个例子的行为如下:</p>
+<ol>
+<li>在这个例子中, 客户端和服务器通过 TCP 长连接进行通信.</li>
+<li>TCP 通信的报文格式是:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+--------+-----+---------------+ </span><br><span class="line">| Length |Type |   Content     |</span><br><span class="line">|   17   |  1  |&quot;HELLO, WORLD&quot; |</span><br><span class="line">+--------+-----+---------------+</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>客户端每隔一个随机的时间后, 向服务器发送消息, 服务器收到消息后, 立即将收到的消息原封不动地回复给客户端.</li>
+<li>若客户端在指定的时间间隔内没有读/写操作, 则客户端会自动向服务器发送一个 PING 心跳, 服务器收到 PING 心跳消息时, 需要回复一个 PONG 消息.</li>
+</ol>
+<h3 id="通用部分"><a href="#通用部分" class="headerlink" title="通用部分"></a>通用部分</h3><p>根据上面定义的行为, 我们接下来实现心跳的通用部分 CustomHeartbeatHandler:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler&lt;ByteBuf&gt; &#123;</span><br><span class="line">    public static final byte PING_MSG &#x3D; 1;</span><br><span class="line">    public static final byte PONG_MSG &#x3D; 2;</span><br><span class="line">    public static final byte CUSTOM_MSG &#x3D; 3;</span><br><span class="line">    protected String name;</span><br><span class="line">    private int heartbeatCount &#x3D; 0;</span><br><span class="line"></span><br><span class="line">    public CustomHeartbeatHandler(String name) &#123;</span><br><span class="line">        this.name &#x3D; name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void channelRead0(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception &#123;</span><br><span class="line">        if (byteBuf.getByte(4) &#x3D;&#x3D; PING_MSG) &#123;</span><br><span class="line">            sendPongMsg(context);</span><br><span class="line">        &#125; else if (byteBuf.getByte(4) &#x3D;&#x3D; PONG_MSG)&#123;</span><br><span class="line">            System.out.println(name + &quot; get pong msg from &quot; + context.channel().remoteAddress());</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            handleData(context, byteBuf);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void sendPingMsg(ChannelHandlerContext context) &#123;</span><br><span class="line">        ByteBuf buf &#x3D; context.alloc().buffer(5);</span><br><span class="line">        buf.writeInt(5);</span><br><span class="line">        buf.writeByte(PING_MSG);</span><br><span class="line">        context.writeAndFlush(buf);</span><br><span class="line">        heartbeatCount++;</span><br><span class="line">        System.out.println(name + &quot; sent ping msg to &quot; + context.channel().remoteAddress() + &quot;, count: &quot; + heartbeatCount);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void sendPongMsg(ChannelHandlerContext context) &#123;</span><br><span class="line">        ByteBuf buf &#x3D; context.alloc().buffer(5);</span><br><span class="line">        buf.writeInt(5);</span><br><span class="line">        buf.writeByte(PONG_MSG);</span><br><span class="line">        context.channel().writeAndFlush(buf);</span><br><span class="line">        heartbeatCount++;</span><br><span class="line">        System.out.println(name + &quot; sent pong msg to &quot; + context.channel().remoteAddress() + &quot;, count: &quot; + heartbeatCount);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf);</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception &#123;</span><br><span class="line">        &#x2F;&#x2F; IdleStateHandler 所产生的 IdleStateEvent 的处理逻辑.</span><br><span class="line">        if (evt instanceof IdleStateEvent) &#123;</span><br><span class="line">            IdleStateEvent e &#x3D; (IdleStateEvent) evt;</span><br><span class="line">            switch (e.state()) &#123;</span><br><span class="line">                case READER_IDLE:</span><br><span class="line">                    handleReaderIdle(ctx);</span><br><span class="line">                    break;</span><br><span class="line">                case WRITER_IDLE:</span><br><span class="line">                    handleWriterIdle(ctx);</span><br><span class="line">                    break;</span><br><span class="line">                case ALL_IDLE:</span><br><span class="line">                    handleAllIdle(ctx);</span><br><span class="line">                    break;</span><br><span class="line">                default:</span><br><span class="line">                    break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void channelActive(ChannelHandlerContext ctx) throws Exception &#123;</span><br><span class="line">        System.err.println(&quot;---&quot; + ctx.channel().remoteAddress() + &quot; is active---&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void channelInactive(ChannelHandlerContext ctx) throws Exception &#123;</span><br><span class="line">        System.err.println(&quot;---&quot; + ctx.channel().remoteAddress() + &quot; is inactive---&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void handleReaderIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        System.err.println(&quot;---READER_IDLE---&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void handleWriterIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        System.err.println(&quot;---WRITER_IDLE---&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void handleAllIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        System.err.println(&quot;---ALL_IDLE---&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>类 CustomHeartbeatHandler 负责心跳的发送和接收, 我们接下来详细地分析一下它的作用. 我们在前面提到, IdleStateHandler 是实现心跳的关键, 它会根据不同的 IO idle 类型来产生不同的 IdleStateEvent 事件, 而这个事件的捕获, 其实就是在 userEventTriggered 方法中实现的.</p>
+<p>我们来看看 CustomHeartbeatHandler.userEventTriggered 的具体实现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception &#123;</span><br><span class="line">    if (evt instanceof IdleStateEvent) &#123;</span><br><span class="line">        IdleStateEvent e &#x3D; (IdleStateEvent) evt;</span><br><span class="line">        switch (e.state()) &#123;</span><br><span class="line">            case READER_IDLE:</span><br><span class="line">                handleReaderIdle(ctx);</span><br><span class="line">                break;</span><br><span class="line">            case WRITER_IDLE:</span><br><span class="line">                handleWriterIdle(ctx);</span><br><span class="line">                break;</span><br><span class="line">            case ALL_IDLE:</span><br><span class="line">                handleAllIdle(ctx);</span><br><span class="line">                break;</span><br><span class="line">            default:</span><br><span class="line">                break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 userEventTriggered 中, 根据 IdleStateEvent 的 state() 的不同, 而进行不同的处理. 例如如果是读取数据 idle, 则 <code>e.state() == READER_IDLE</code>, 因此就调用 handleReaderIdle 来处理它.</p>
+<p>CustomHeartbeatHandler 提供了三个 idle 处理方法: handleReaderIdle, handleWriterIdle, handleAllIdle, 这三个方法目前只有默认的实现, 它需要在子类中进行重写, 现在我们暂时略过它们, 在具体的客户端和服务器的实现部分时再来看它们.</p>
+<p>知道了这一点后, 我们接下来看看数据处理部分:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">protected void channelRead0(ChannelHandlerContext context, ByteBuf byteBuf) throws Exception &#123;</span><br><span class="line">    if (byteBuf.getByte(4) &#x3D;&#x3D; PING_MSG) &#123;</span><br><span class="line">        sendPongMsg(context);</span><br><span class="line">    &#125; else if (byteBuf.getByte(4) &#x3D;&#x3D; PONG_MSG)&#123;</span><br><span class="line">        System.out.println(name + &quot; get pong msg from &quot; + context.channel().remoteAddress());</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        handleData(context, byteBuf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>CustomHeartbeatHandler.channelRead0</code> 中, 我们首先根据报文协议:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+--------+-----+---------------+ </span><br><span class="line">| Length |Type |   Content     |</span><br><span class="line">|   17   |  1  |&quot;HELLO, WORLD&quot; |</span><br><span class="line">+--------+-----+---------------+</span><br></pre></td></tr></table></figure>
+
+<p>来判断当前的报文类型, 如果是 PING_MSG 则表示是服务器收到客户端的 PING 消息, 此时服务器需要回复一个 PONG 消息, 其消息类型是 PONG_MSG.</p>
+<p>扔报文类型是 PONG_MSG, 则表示是客户端收到服务器发送的 PONG 消息, 此时<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247491704&idx=1&sn=60738828c02e3cc2e4ada24a8a8bc07a&chksm=ebd5df54dca25642b6e71daa96c7780ac3a6208ecc1d002d8d558ef28a8c3b2d91688de9d66d&scene=21#wechat_redirect">打印一个 log</a> 即可.</p>
+<h3 id="客户端部分"><a href="#客户端部分" class="headerlink" title="客户端部分"></a>客户端部分</h3><h4 id="客户端初始化"><a href="#客户端初始化" class="headerlink" title="客户端初始化"></a>客户端初始化</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">public class Client &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        NioEventLoopGroup workGroup &#x3D; new NioEventLoopGroup(4);</span><br><span class="line">        Random random &#x3D; new Random(System.currentTimeMillis());</span><br><span class="line">        try &#123;</span><br><span class="line">            Bootstrap bootstrap &#x3D; new Bootstrap();</span><br><span class="line">            bootstrap</span><br><span class="line">                    .group(workGroup)</span><br><span class="line">                    .channel(NioSocketChannel.class)</span><br><span class="line">                    .handler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                        protected void initChannel(SocketChannel socketChannel) throws Exception &#123;</span><br><span class="line">                            ChannelPipeline p &#x3D; socketChannel.pipeline();</span><br><span class="line">                            p.addLast(new IdleStateHandler(0, 0, 5));</span><br><span class="line">                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, -4, 0));</span><br><span class="line">                            p.addLast(new ClientHandler());</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line"></span><br><span class="line">            Channel ch &#x3D; bootstrap.remoteAddress(&quot;127.0.0.1&quot;, 12345).connect().sync().channel();</span><br><span class="line">            for (int i &#x3D; 0; i &lt; 10; i++) &#123;</span><br><span class="line">                String content &#x3D; &quot;client msg &quot; + i;</span><br><span class="line">                ByteBuf buf &#x3D; ch.alloc().buffer();</span><br><span class="line">                buf.writeInt(5 + content.getBytes().length);</span><br><span class="line">                buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);</span><br><span class="line">                buf.writeBytes(content.getBytes());</span><br><span class="line">                ch.writeAndFlush(buf);</span><br><span class="line"></span><br><span class="line">                Thread.sleep(random.nextInt(20000));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            throw new RuntimeException(e);</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            workGroup.shutdownGracefully();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码是 Netty 的客户端端的初始化代码, 使用过 Netty 的朋友对这个代码应该不会陌生. 别的部分我们就不再赘述, 我们来看看 <code>ChannelInitializer.initChannel</code> 部分即可:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.handler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">    protected void initChannel(SocketChannel socketChannel) throws Exception &#123;</span><br><span class="line">        ChannelPipeline p &#x3D; socketChannel.pipeline();</span><br><span class="line">        p.addLast(new IdleStateHandler(0, 0, 5));</span><br><span class="line">        p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, -4, 0));</span><br><span class="line">        p.addLast(new ClientHandler());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>我们给 pipeline 添加了三个 Handler, IdleStateHandler 这个 handler 是心跳机制的核心, 我们为客户端端设置了读写 idle 超时, 时间间隔是5s, 即如果客户端在间隔 5s 后都没有收到服务器的消息或向服务器发送消息, 则产生 ALL_IDLE 事件.</p>
+<p>接下来我们添加了 LengthFieldBasedFrameDecoder, 它是负责解析我们的 TCP 报文, 因为和本文的目的无关, 因此这里不详细展开.</p>
+<p>最后一个 Handler 是 ClientHandler, 它继承于 CustomHeartbeatHandler, 是我们处理业务逻辑部分.</p>
+<h4 id="客户端-Handler"><a href="#客户端-Handler" class="headerlink" title="客户端 Handler"></a>客户端 Handler</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public class ClientHandler extends CustomHeartbeatHandler &#123;</span><br><span class="line">    public ClientHandler() &#123;</span><br><span class="line">        super(&quot;client&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) &#123;</span><br><span class="line">        byte[] data &#x3D; new byte[byteBuf.readableBytes() - 5];</span><br><span class="line">        byteBuf.skipBytes(5);</span><br><span class="line">        byteBuf.readBytes(data);</span><br><span class="line">        String content &#x3D; new String(data);</span><br><span class="line">        System.out.println(name + &quot; get content: &quot; + content);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleAllIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        super.handleAllIdle(ctx);</span><br><span class="line">        sendPingMsg(ctx);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ClientHandler 继承于 CustomHeartbeatHandler, 它重写了两个方法, 一个是 handleData, 在这里面实现 <a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzI4Njc5NjM1NQ==&mid=2247491704&idx=1&sn=60738828c02e3cc2e4ada24a8a8bc07a&chksm=ebd5df54dca25642b6e71daa96c7780ac3a6208ecc1d002d8d558ef28a8c3b2d91688de9d66d&scene=21#wechat_redirect">仅仅打印</a>收到的消息.</p>
+<p>第二个重写的方法是 handleAllIdle. 我们在前面提到, 客户端负责发送心跳的 PING 消息, 当客户端产生一个 ALL_IDLE 事件后, 会导致父类的 CustomHeartbeatHandler.userEventTriggered 调用, 而 userEventTriggered 中会根据 e.state() 来调用不同的方法, 因此最后调用的是 ClientHandler.handleAllIdle, 在这个方法中, 客户端调用 sendPingMsg 向服务器发送一个 PING 消息.</p>
+<h3 id="服务器部分"><a href="#服务器部分" class="headerlink" title="服务器部分"></a>服务器部分</h3><h4 id="服务器初始化"><a href="#服务器初始化" class="headerlink" title="服务器初始化"></a>服务器初始化</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class Server &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        NioEventLoopGroup bossGroup &#x3D; new NioEventLoopGroup(1);</span><br><span class="line">        NioEventLoopGroup workGroup &#x3D; new NioEventLoopGroup(4);</span><br><span class="line">        try &#123;</span><br><span class="line">            ServerBootstrap bootstrap &#x3D; new ServerBootstrap();</span><br><span class="line">            bootstrap</span><br><span class="line">                    .group(bossGroup, workGroup)</span><br><span class="line">                    .channel(NioServerSocketChannel.class)</span><br><span class="line">                    .childHandler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                        protected void initChannel(SocketChannel socketChannel) throws Exception &#123;</span><br><span class="line">                            ChannelPipeline p &#x3D; socketChannel.pipeline();</span><br><span class="line">                            p.addLast(new IdleStateHandler(10, 0, 0));</span><br><span class="line">                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, -4, 0));</span><br><span class="line">                            p.addLast(new ServerHandler());</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line"></span><br><span class="line">            Channel ch &#x3D; bootstrap.bind(12345).sync().channel();</span><br><span class="line">            ch.closeFuture().sync();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            throw new RuntimeException(e);</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            bossGroup.shutdownGracefully();</span><br><span class="line">            workGroup.shutdownGracefully();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>服务器的初始化部分也没有什么好说的, 它也和客户端的初始化一样, 为 pipeline 添加了三个 Handler.</p>
+<h4 id="服务器-Handler"><a href="#服务器-Handler" class="headerlink" title="服务器 Handler"></a>服务器 Handler</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public class ServerHandler extends CustomHeartbeatHandler &#123;</span><br><span class="line">    public ServerHandler() &#123;</span><br><span class="line">        super(&quot;server&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf buf) &#123;</span><br><span class="line">        byte[] data &#x3D; new byte[buf.readableBytes() - 5];</span><br><span class="line">        ByteBuf responseBuf &#x3D; Unpooled.copiedBuffer(buf);</span><br><span class="line">        buf.skipBytes(5);</span><br><span class="line">        buf.readBytes(data);</span><br><span class="line">        String content &#x3D; new String(data);</span><br><span class="line">        System.out.println(name + &quot; get content: &quot; + content);</span><br><span class="line">        channelHandlerContext.write(responseBuf);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleReaderIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        super.handleReaderIdle(ctx);</span><br><span class="line">        System.err.println(&quot;---client &quot; + ctx.channel().remoteAddress().toString() + &quot; reader timeout, close it---&quot;);</span><br><span class="line">        ctx.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ServerHandler 继承于 CustomHeartbeatHandler, 它重写了两个方法, 一个是 handleData, 在这里面实现 EchoServer 的功能: 即收到客户端的消息后, 立即原封不动地将消息回复给客户端.</p>
+<p>第二个重写的方法是 handleReaderIdle, 因为服务器仅仅对客户端的读 idle 感兴趣, 因此只重新了这个方法. 若服务器在指定时间后没有收到客户端的消息, 则会触发 READER_IDLE 消息, 进而会调用 handleReaderIdle 这个方法.</p>
+<p>我们在前面提到, 客户端负责发送心跳的 PING 消息, 并且服务器的 READER_IDLE 的超时时间是客户端发送 PING 消息的间隔的两倍, 因此当服务器 READER_IDLE 触发时, 就可以确定是客户端已经掉线了, 因此服务器直接关闭客户端连接即可.</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ol>
+<li>使用 Netty 实现心跳机制的关键就是利用 IdleStateHandler 来产生对应的 idle 事件.</li>
+<li>一般是客户端负责发送心跳的 PING 消息, 因此客户端注意关注 ALL_IDLE 事件, 在这个事件触发后, 客户端需要向服务器发送 PING 消息, 告诉服务器”我还存活着”.</li>
+<li>服务器是接收客户端的 PING 消息的, 因此服务器关注的是 READER_IDLE 事件, 并且服务器的 READER_IDLE 间隔需要比客户端的 ALL_IDLE 事件间隔大(例如客户端ALL_IDLE 是5s 没有读写时触发, 因此服务器的 READER_IDLE 可以设置为10s)</li>
+<li>当服务器收到客户端的 PING 消息时, 会发送一个 PONG 消息作为回复. 一个 PING-PONG 消息对就是一个心跳交互.</li>
+</ol>
+<h2 id="实现客户端的断线重连"><a href="#实现客户端的断线重连" class="headerlink" title="实现客户端的断线重连"></a><strong>实现客户端的断线重连</strong></h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">public class Client &#123;</span><br><span class="line">    private NioEventLoopGroup workGroup &#x3D; new NioEventLoopGroup(4);</span><br><span class="line">    private Channel channel;</span><br><span class="line">    private Bootstrap bootstrap;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws Exception &#123;</span><br><span class="line">        Client client &#x3D; new Client();</span><br><span class="line">        client.start();</span><br><span class="line">        client.sendData();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void sendData() throws Exception &#123;</span><br><span class="line">        Random random &#x3D; new Random(System.currentTimeMillis());</span><br><span class="line">        for (int i &#x3D; 0; i &lt; 10000; i++) &#123;</span><br><span class="line">            if (channel !&#x3D; null &amp;&amp; channel.isActive()) &#123;</span><br><span class="line">                String content &#x3D; &quot;client msg &quot; + i;</span><br><span class="line">                ByteBuf buf &#x3D; channel.alloc().buffer(5 + content.getBytes().length);</span><br><span class="line">                buf.writeInt(5 + content.getBytes().length);</span><br><span class="line">                buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);</span><br><span class="line">                buf.writeBytes(content.getBytes());</span><br><span class="line">                channel.writeAndFlush(buf);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            Thread.sleep(random.nextInt(20000));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void start() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            bootstrap &#x3D; new Bootstrap();</span><br><span class="line">            bootstrap</span><br><span class="line">                    .group(workGroup)</span><br><span class="line">                    .channel(NioSocketChannel.class)</span><br><span class="line">                    .handler(new ChannelInitializer&lt;SocketChannel&gt;() &#123;</span><br><span class="line">                        protected void initChannel(SocketChannel socketChannel) throws Exception &#123;</span><br><span class="line">                            ChannelPipeline p &#x3D; socketChannel.pipeline();</span><br><span class="line">                            p.addLast(new IdleStateHandler(0, 0, 5));</span><br><span class="line">                            p.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 4, -4, 0));</span><br><span class="line">                            p.addLast(new ClientHandler(Client.this));</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">            doConnect();</span><br><span class="line"></span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            throw new RuntimeException(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void doConnect() &#123;</span><br><span class="line">        if (channel !&#x3D; null &amp;&amp; channel.isActive()) &#123;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ChannelFuture future &#x3D; bootstrap.connect(&quot;127.0.0.1&quot;, 12345);</span><br><span class="line"></span><br><span class="line">        future.addListener(new ChannelFutureListener() &#123;</span><br><span class="line">            public void operationComplete(ChannelFuture futureListener) throws Exception &#123;</span><br><span class="line">                if (futureListener.isSuccess()) &#123;</span><br><span class="line">                    channel &#x3D; futureListener.channel();</span><br><span class="line">                    System.out.println(&quot;Connect to server successfully!&quot;);</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    System.out.println(&quot;Failed to connect to server, try connect after 10s&quot;);</span><br><span class="line"></span><br><span class="line">                    futureListener.channel().eventLoop().schedule(new Runnable() &#123;</span><br><span class="line">                        @Override</span><br><span class="line">                        public void run() &#123;</span><br><span class="line">                            doConnect();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;, 10, TimeUnit.SECONDS);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中, 我们抽象出 doConnect 方法, 它负责客户端和服务器的 TCP 连接的建立, 并且当 TCP 连接失败时, doConnect 会 通过 <code>channel().eventLoop().schedule</code> 来延时10s 后尝试重新连接.</p>
+<h3 id="客户端-Handler-1"><a href="#客户端-Handler-1" class="headerlink" title="客户端 Handler"></a>客户端 Handler</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class ClientHandler extends CustomHeartbeatHandler &#123;</span><br><span class="line">    private Client client;</span><br><span class="line">    public ClientHandler(Client client) &#123;</span><br><span class="line">        super(&quot;client&quot;);</span><br><span class="line">        this.client &#x3D; client;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) &#123;</span><br><span class="line">        byte[] data &#x3D; new byte[byteBuf.readableBytes() - 5];</span><br><span class="line">        byteBuf.skipBytes(5);</span><br><span class="line">        byteBuf.readBytes(data);</span><br><span class="line">        String content &#x3D; new String(data);</span><br><span class="line">        System.out.println(name + &quot; get content: &quot; + content);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    protected void handleAllIdle(ChannelHandlerContext ctx) &#123;</span><br><span class="line">        super.handleAllIdle(ctx);</span><br><span class="line">        sendPingMsg(ctx);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void channelInactive(ChannelHandlerContext ctx) throws Exception &#123;</span><br><span class="line">        super.channelInactive(ctx);</span><br><span class="line">        client.doConnect();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>断线重连的关键一点是检测连接是否已经断开. 因此我们改写了 ClientHandler, 重写了 channelInactive 方法. 当 TCP 连接断开时, 会回调 channelInactive 方法, 因此我们在这个方法中调用 client.doConnect() 来进行重连</p>
 
       
     </div>
@@ -1317,7 +1475,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

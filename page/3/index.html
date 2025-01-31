@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-count">246</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -248,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2023/01/08/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2023-01-08/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Exception/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -262,7 +262,76 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2023/01/08/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2023-01-08/" class="post-title-link" itemprop="url">Sun Jan 08 2023 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/09/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Exception/" class="post-title-link" itemprop="url">JDK-lang-Exception</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-09-07 18:28:08 / Modified: 18:36:37" itemprop="dateCreated datePublished" datetime="2021-09-07T18:28:08+08:00">2021-09-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="RuntimeException应用"><a href="#RuntimeException应用" class="headerlink" title="RuntimeException应用"></a>RuntimeException应用</h3><p>RuntimeException不需要<strong>显示</strong>的写在方法的末尾，而且可以被<strong>任意</strong>的上层方法栈try…catch…捕获。所以可以在业务应用代码中抛出自定义的RuntimeException，最终统一在拦截器中对异常进行拦截。</p>
+<p>如下图所示</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">拦截器 -&gt; 类1的方法1-&gt;类2的方法2-&gt; .....-&gt;类3的方法3抛出Runtime异常</span><br><span class="line"></span><br><span class="line">拦截器捕获异常 &lt;-类1的方法1捕获异常&lt;-类2的方法2捕获异常&lt;- .....&lt;-类3的方法3抛出Runtime异常</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">重试机制-01-使用Redis实现</a>
         </h2>
 
         <div class="post-meta-container">
@@ -273,14 +342,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2023-01-08 10:22:31" itemprop="dateCreated datePublished" datetime="2023-01-08T10:22:31+08:00">2023-01-08</time>
+      <time title="Created: 2021-09-02 13:54:44" itemprop="dateCreated datePublished" datetime="2021-09-02T13:54:44+08:00">2021-09-02</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-01-10 23:03:09" itemprop="dateModified" datetime="2023-01-10T23:03:09+08:00">2023-01-10</time>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
       </span>
 
   
@@ -293,90 +362,504 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《启示录：7间教会》</p>
-<p>讲员：唐崇荣</p>
-<p>老底嘉教会：3:19-22</p>
-<p>复兴家：信仰、圣洁生活、异象</p>
+          <p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A">https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A</a></p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
+<li>超时重试，一方面保障业务成功，另一方面保障重试操作不会积压</li>
+</ul>
+<h2 id="Redis实现方式"><a href="#Redis实现方式" class="headerlink" title="Redis实现方式"></a>Redis实现方式</h2><h3 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h3><ul>
+<li><p>将<strong>回调任务</strong>丢入一个<strong>回调队列</strong>中，由指定的线程去处理队列中的<strong>回调任务</strong>。</p>
+</li>
+<li><p>为了避免本地内存的丢失，所以队列可以使用<strong>高可用</strong>的redis集群。</p>
+</li>
+<li><p>就绪队列</p>
+</li>
+</ul>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolmjWs1XAFicqE1Wtc8cLMsIxeuUM6xiau1wCLuCJn8tU4MWLrNN9OFhO4w/640" alt="Image"></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolm57lXIGDCsusx8eUDCV6UTkCScChtpTAiaGuHgB96dK6GVfooqPrTNoA/640" alt="Image"></p>
+<h3 id="设计锚点"><a href="#设计锚点" class="headerlink" title="设计锚点"></a>设计锚点</h3><h4 id="回调任务失败如何处理，直接重新丢入回调队列吗？"><a href="#回调任务失败如何处理，直接重新丢入回调队列吗？" class="headerlink" title="回调任务失败如何处理，直接重新丢入回调队列吗？"></a><strong>回调任务失败如何处理，直接重新丢入回调队列吗？</strong></h4><p>一般出现回调失败的原因大部分都是因为系统存在一定的bug因素导致的，需要人工介入手工修复的机率较大，所以回调的间隔一般不会是连续性的立即回调，而是呈现一个阶段性的回调处理，例如分别间隔3秒，30秒，1min，3min，9min，30min，60min…的间隔进行回调尝试，如果经过多次回调都始终处于失败状态，则需要进行专门的记录。</p>
+<h4 id="回调队列的任务获取到之后，什么时候执行任务？"><a href="#回调队列的任务获取到之后，什么时候执行任务？" class="headerlink" title="回调队列的任务获取到之后，什么时候执行任务？"></a><strong>回调队列的任务获取到之后，什么时候执行任务？</strong></h4><p>这里可以利用到一个redis的zset数据结构。zset结构中基本存储信息和set结构类似，但是会给每个元素都有一个排分的score标示，根据排分的大小会在内存中进行排序操作。所以可以将时间戳作为排分的计数项，时间戳靠前的排在zset的前头，那么在进行回调任务处理的时候就会被优先读取出来。</p>
+<p>从回调队列取出的任务，判断当前的时间戳是否小于或等于预期的执行时间：是，进行业务回调了。否，？</p>
+<h4 id="回调队列的任务，什么时候删除？"><a href="#回调队列的任务，什么时候删除？" class="headerlink" title="回调队列的任务，什么时候删除？"></a><strong>回调队列的任务，什么时候删除？</strong></h4><p><strong>回调任务</strong>必须在<strong>回调成功</strong>之后再去进行删除。但是如果回调过程中如果网络通信较慢，可能会导致回调队列的消费效率较低，容易出现堵塞的情况发生。</p>
+<p>所以这里引入了一个<strong>就绪队列</strong>的设计  <!--这里过度设计了，因为实际情况中，回调队列的长度是正常业务的千分之一--></p>
+<p>当回调队列中的任务的执行时间达到预期的时候，就将其放入到就绪队列中，这份转移的工作交给了专门的就绪线程去处理。并且一旦转移到就绪队列之后，便将其从回调队列移除。</p>
+<p>就绪队列是采用了redis的queue队列进行存储，满足了先进先出的优先级设计需求。</p>
+<h3 id="代码设计"><a href="#代码设计" class="headerlink" title="代码设计"></a>代码设计</h3><h4 id="回调任务"><a href="#回调任务" class="headerlink" title="回调任务"></a>回调任务</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskInfo</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">1003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskSortItem</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="回调队列-RedisDelayQueue"><a href="#回调队列-RedisDelayQueue" class="headerlink" title="回调队列 RedisDelayQueue"></a>回调队列 RedisDelayQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RedisQueue</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 弹出任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">T <span class="title">pop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 放入任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">put</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除队列中的一项内容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(T item)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisDelayQueue&quot;)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskSortItem</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String redisDelayQueueKey = <span class="string">&quot;redis:delay:pay:notify&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object mutex = <span class="keyword">new</span> Object();</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskSortItem <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (mutex) &#123;</span><br><span class="line">            Set&lt;Tuple&gt; rangeSet = redisService.zRangeWithScores(redisDelayQueueKey, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">for</span> (Tuple tuple : rangeSet) &#123;</span><br><span class="line">                <span class="keyword">long</span> currentTimeMillis = System.currentTimeMillis();</span><br><span class="line">                <span class="keyword">double</span> expireTime = tuple.getScore();</span><br><span class="line">                <span class="keyword">if</span> ((currentTimeMillis - expireTime) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    DelayTaskSortItem delayTaskInfo = JSON.parseObject(tuple.getElement(), DelayTaskSortItem.class);</span><br><span class="line">                    <span class="keyword">return</span> delayTaskInfo;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zAdd(redisDelayQueueKey, delayTaskSortItem.getExecuteTime(), JSON.toJSONString(delayTaskSortItem));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zRem(redisDelayQueueKey, Arrays.asList(String.valueOf(JSON.toJSONString(delayTaskSortItem))));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="回调线程-RedisDelayQueueHandler"><a href="#回调线程-RedisDelayQueueHandler" class="headerlink" title="回调线程 RedisDelayQueueHandler"></a>回调线程 RedisDelayQueueHandler</h4><p>将回调队列中的元素转换到就绪队列的专门处理线程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisDelayQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskSortItem&gt; redisDelayQueue;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisReadyQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskInfo&gt; redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> IDistributionLock distributionLock;</span><br><span class="line">   </span><br><span class="line">  <span class="comment">/*@SneakyThrows - Project Lombok</span></span><br><span class="line"><span class="comment">@SneakyThrows can be used to sneakily throw checked exceptions without actually declaring this in your method&#x27;s throws clause.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                DelayTaskSortItem delayTaskSortItem= redisDelayQueue.pop();</span><br><span class="line">                <span class="keyword">if</span> (delayTaskSortItem == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                String lockKey = <span class="string">&quot;pay:notify:dequeue:lock&quot;</span> + delayTaskSortItem.getTaskId();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">boolean</span> lockStatus = distributionLock.tryLockTimeOut(lockKey, <span class="number">3000</span>);</span><br><span class="line">                    <span class="keyword">if</span> (!lockStatus) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span>(delayTaskSortItem.getExecuteTime() &gt; System.currentTimeMillis())&#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"> </span><br><span class="line">                    <span class="keyword">if</span>(delayTaskInfo.getExecuteTime() &gt; System.currentTimeMillis()) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">//推入任务到达就绪队列之前需要检查是否符合条件：执行任务时间，任务池和延迟队列任务是否一致，任务id是否一致</span></span><br><span class="line">                    log.info(<span class="string">&quot;推入任务：&quot;</span>+delayTaskInfo);</span><br><span class="line">                    redisReadyQueue.put(delayTaskInfo);</span><br><span class="line">                    redisDelayQueue.delete(delayTaskSortItem);</span><br><span class="line">                   </span><br><span class="line">                &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付的延迟队列出现异常情况1：&quot;</span>, e);</span><br><span class="line">                &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">                    distributionLock.releaseLock(lockKey);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.info(<span class="string">&quot;支付的延迟队列出现异常情况2：&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="就绪队列-RedisReadyQueue"><a href="#就绪队列-RedisReadyQueue" class="headerlink" title="就绪队列 RedisReadyQueue"></a>就绪队列 RedisReadyQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisReadyQueue&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskInfo</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String REDIS_READY_QUEUE_KEY = <span class="string">&quot;redis:ready:queue:pay&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskInfo <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String item = redisService.rpop(REDIS_READY_QUEUE_KEY);</span><br><span class="line">        <span class="keyword">return</span> JSON.parseObject(item,DelayTaskInfo.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        Long id = -<span class="number">1L</span>;</span><br><span class="line">        id = redisService.lpush(REDIS_READY_QUEUE_KEY, JSON.toJSONString(delayTaskInfo));</span><br><span class="line">        <span class="keyword">return</span> id &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="就绪线程-RedisReadyQueueHandler"><a href="#就绪线程-RedisReadyQueueHandler" class="headerlink" title="就绪线程 RedisReadyQueueHandler"></a>就绪线程 RedisReadyQueueHandler</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisReadyQueue redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisDelayQueue redisDelayQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            DelayTaskInfo delayTaskInfo = redisReadyQueue.pop();</span><br><span class="line">            log.info(<span class="string">&quot;弹出任务：delayTaskInfo is &#123;&#125;&quot;</span>,delayTaskInfo);</span><br><span class="line">            ResponseEntity&lt;String&gt; responseEntity = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (HttpStatus.OK.equals(responseEntity.getStatusCode())) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付回调成功！====== &quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;支付业务回调失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                retryAgain(delayTaskInfo);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 进入重试，放入回调队列</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">retryAgain</span><span class="params">(DelayTaskInfo delayTaskInfo)</span></span>&#123;</span><br><span class="line">        <span class="comment">//进入重试环节，放入回调队列</span></span><br><span class="line">        DelayTaskSortItem delayTaskSortItem = <span class="keyword">new</span> DelayTaskSortItem(delayTaskInfo.getTaskId(),PAY_TOPIC,delayTaskInfo.getExecuteTime());</span><br><span class="line">      </span><br><span class="line">        redisDelayQueue.put(delayTaskSortItem);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign/" class="post-title-link" itemprop="url">spring-cloud-03-REST请求框架Feign</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-08-31 13:26:15" itemprop="dateCreated datePublished" datetime="2021-08-31T13:26:15+08:00">2021-08-31</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-24 08:33:38" itemprop="dateModified" datetime="2021-09-24T08:33:38+08:00">2021-09-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://book.itheima.net/course/1265899443273850881/1275268490151862274/1275304099226591234">推荐教程网站</a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><img src="https://book.itheima.net/uploads/course/images/java/5.4/image-20200623135343793.png"></p>
+<p>Feign是Netflix开发的声明式、模板化的HTTP客户端，它可以帮助我们更快捷、优雅地调用HTTP API。Feign支持多种注解，包括Feign自带注解以及JAX-RS注解等。</p>
+<p>当Feign与Eureka和Ribbon组合使用时，Feign就具有了负载均衡的功能。在Feign的实现下，我们只需要定义一个接口并使用注解方式配置，即可完成服务接口的绑定，不需要使用RestTemple的方式，从而简化了Ribbon自动封装服务调用客户端的开发工作量。如此看来，我们可以把Feign理解为一个Spring Cloud远程服务的框架或者工具，它能够帮助开发者用更少的代码，更好的兼容方式对远程服务进行调用。</p>
+<blockquote>
+<p>Feign在流程中其实与Ribbon没有任何关系，Feign封装了Http请求和RPC请求，交给Feign.client发送具体的REST请求</p>
+<p>比如使用<a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/740.html">OpenFeign调用下游第三方接口</a></p>
+</blockquote>
+<h2 id="快速入门"><a href="#快速入门" class="headerlink" title="快速入门"></a>快速入门</h2><h3 id="引进依赖"><a href="#引进依赖" class="headerlink" title="引进依赖"></a>引进依赖</h3><p>Feign提供了接口，仍然需要具体的client实现，那么openFeign提供此实现</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--feign 依赖--&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-openfeign<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="全局配置"><a href="#全局配置" class="headerlink" title="全局配置"></a>全局配置</h3><p>注意：如果是配合Eureka搭建分布式系统，那么需要配置Eureka，在此不再赘述；如果只是使用Fegin作为调用第三方接口的REST框架，那么不需要任何配置，和RestTemplate一样。</p>
+<h3 id="开启Feign"><a href="#开启Feign" class="headerlink" title="开启Feign"></a>开启Feign</h3><p>在启动类EurekaFeignClientApplication中添加@EnableFeignClients开启Feign Client功能</p>
+<blockquote>
+<p>注意：如果是和Eureka配合使用，添加@EnableEurekaClient开启Eureka Client功能</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.netflix.eureka.EnableEurekaClient;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.openfeign.EnableFeignClients;</span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="meta">@EnableFeignClients</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaFeignClientApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      SpringApplication.run(EurekaFeignClientApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="用法1：和Eureka搭配"><a href="#用法1：和Eureka搭配" class="headerlink" title="用法1：和Eureka搭配"></a>用法1：和Eureka搭配</h3><p>实现一个简单的Feign Client <!--可以看到Feign只是接口，需要具体的实现类client-->。首先在eureka-feign-client中创建service包，并在该包下创建接口FeignService，通过添加@FeignClient注解指定要调用的<a href="">服务提供者</a>。</p>
+<p>提供者服务的url：Get <a target="_blank" rel="noopener" href="http://eureka-provider/hello">http://eureka-provider/hello</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.cloud.openfeign.FeignClient;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Service;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMethod;</span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@FeignClient(name = &quot;eureka-provider&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FeignService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/hello&quot;,method = RequestMethod.GET)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>@FeignClient注解的name属性指定FeignService接口要调用的是eureka-provider。需要注意的是，这里name属性的值，必须是<a href="">服务提供者</a>application.yml全局配置文件中指定的服务提供者的名称，而不是项目的名称。</p>
+<p>测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> test&#123;</span><br><span class="line">	feignService.sayHello(); <span class="comment">//通过feing client调用服务提供者的url</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="用法2：只使用此REST-HTTP框架"><a href="#用法2：只使用此REST-HTTP框架" class="headerlink" title="用法2：只使用此REST HTTP框架"></a>用法2：只使用此REST HTTP框架</h3><p><a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/740.html">OpenFeign调用下游第三方接口</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/739">OpenFeign请求动态url</a></p>
+<h2 id="工程使用"><a href="#工程使用" class="headerlink" title="工程使用"></a>工程使用</h2><h3 id="拦截Feign请求的RequestInterceptor"><a href="#拦截Feign请求的RequestInterceptor" class="headerlink" title="拦截Feign请求的RequestInterceptor"></a>拦截Feign请求的RequestInterceptor</h3><p>微服务之间的Feign调用，也需要在请求头添加身份认证，那么使用此方法对所有Feign请求添加身份认证</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jiahao1186/article/details/102747166">https://blog.csdn.net/jiahao1186/article/details/102747166</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03.1-Feign%E4%BD%BF%E7%94%A8%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8%E4%B9%8B%E4%BA%8CSentinel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03.1-Feign%E4%BD%BF%E7%94%A8%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8%E4%B9%8B%E4%BA%8CSentinel/" class="post-title-link" itemprop="url">spring-cloud-03-负载均衡器Ribbon</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-08-31 13:25:34" itemprop="dateCreated datePublished" datetime="2021-08-31T13:25:34+08:00">2021-08-31</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-12-24 08:27:42" itemprop="dateModified" datetime="2021-12-24T08:27:42+08:00">2021-12-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03.2-Feign%E4%BD%BF%E7%94%A8%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8%E4%B9%8B%E4%B8%80Ribbon/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03.2-Feign%E4%BD%BF%E7%94%A8%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8%E4%B9%8B%E4%B8%80Ribbon/" class="post-title-link" itemprop="url">spring-cloud-03-负载均衡器Ribbon</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-08-31 13:25:34" itemprop="dateCreated datePublished" datetime="2021-08-31T13:25:34+08:00">2021-08-31</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-12-24 08:27:34" itemprop="dateModified" datetime="2021-12-24T08:27:34+08:00">2021-12-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04.%E9%97%AE%E7%AD%94%E7%8E%AF%E8%8A%82-Feign%E4%B8%8EHystrix%E7%9A%84%E5%85%B3%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-04.%E9%97%AE%E7%AD%94%E7%8E%AF%E8%8A%82-Feign%E4%B8%8EHystrix%E7%9A%84%E5%85%B3%E7%B3%BB/" class="post-title-link" itemprop="url">spring-cloud-03-负载均衡器Ribbon</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-08-31 13:25:34" itemprop="dateCreated datePublished" datetime="2021-08-31T13:25:34+08:00">2021-08-31</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-12-24 08:30:43" itemprop="dateModified" datetime="2021-12-24T08:30:43+08:00">2021-12-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>ref: <a target="_blank" rel="noopener" href="http://zhongpan.tech/2020/03/23/029-hystrix-ribbon-feign-relationship/">http://zhongpan.tech/2020/03/23/029-hystrix-ribbon-feign-relationship/</a></p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E4%B8%8EHystrix%E5%8C%BA%E5%88%AB.png" alt="Ribbon与Hystrix区别"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/02/database/redis/redis%E9%9B%86%E7%BE%A4-01-Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E9%9C%80%E8%A6%81Leader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/02/database/redis/redis%E9%9B%86%E7%BE%A4-01-Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E9%9C%80%E8%A6%81Leader/" class="post-title-link" itemprop="url">redis集群-01-Redis为什么不需要Leader</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-08-02 13:57:58" itemprop="dateCreated datePublished" datetime="2021-08-02T13:57:58+08:00">2021-08-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-08-05 10:03:43" itemprop="dateModified" datetime="2021-08-05T10:03:43+08:00">2021-08-05</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="为什么同样是分布式架构的Kafka需要Leader而Redis不需要"><a href="#为什么同样是分布式架构的Kafka需要Leader而Redis不需要" class="headerlink" title="为什么同样是分布式架构的Kafka需要Leader而Redis不需要"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/u6w0jVqHqQlWborfZbw8Uw">为什么同样是分布式架构的Kafka需要Leader而Redis不需要</a></h1><p>Redis不需要Leader这个观点其实有歧义，是不准确的，这个问题本质其实是涉及数据分片、数据副本一致性</p>
+<h2 id="Redis-Cluster-架构"><a href="#Redis-Cluster-架构" class="headerlink" title="Redis Cluster 架构"></a>Redis Cluster 架构</h2><p>在Redis3.0版本开始，Redis引入了一种去中心化的集群架构，采用预分片的模式，一个集群中所有节点总共对应16384个槽位(2^32)，在对一个key进行写入时，首先对key取hashcode，然后求模来映射到具体的某一个节点，其部署架构如下图所示：</p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/database/redis/redis3.0-%E9%A2%84%E5%88%86%E7%89%87%E6%A8%A1%E5%BC%8F.png" alt="Image"></p>
+<p>上述每一个节点中存储的数据都不一样，即每一个节点存储整体数据的一部分，<strong>并且为了实现去中心化</strong>每一个节点需要存储集群中所有key所对应存档的节点信息(即Key的路由信息)，这样当客户端将查询key1的请求发送到redisA节点，但该key1实际存储在redisB节点，此时A节点需将该节点路由到实际存储该key的节点，内部实现一个重定向，从而实现访问任意一个节点都能查询到存储的值。</p>
+<p>在<strong>上述架构中是不需要存在Leader的，这也是所谓的集群去中心化设计思想的关键</strong>，但问题来了，如果集群中任意一个节点宕机不可用，存储在该节点中的数据就会丢失，为了解决这个问题，通常会引入主从架构，架构图如下所示：</p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/database/redis/redis%E9%A2%84%E5%88%86%E7%89%87%E7%9A%84%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%BC%8F.png" alt="Image"></p>
+<p>具体的做法是为每一个主节点引入一个或多个从节点，用来拷贝主节点的数据，上<strong>图中的每一个虚线框表示一个复制组，也称之为副本，副本之间的数据期望完全一致。</strong></p>
+<p>在主从架构中如何保证数据一致性呢？通常主从集群与客户端之间的交互方式有如下几种：</p>
 <ul>
-<li><p>宋尚节：过圣洁的生活</p>
-</li>
-<li><p>奥古斯丁：信仰复兴</p>
-</li>
-<li><p>有异象，清楚上帝的带领</p>
-</li>
+<li>客户端发送写请求到Master，在Master节点写入成功就返回给客户端，同时从节点异步复制数据，<strong>主从存在延迟，并且当主节点宕机存在丢数据的风险</strong>。</li>
+<li><a href="">同步双写</a>：客户端发送写请求到Master，Master节点写入成功后，需要等待从从节点同样写入成功后才会向客户端返回成功，该方式会<strong>增大延迟，增加主从数据延迟</strong>，但还是<strong>无法避免主从数据不一致</strong>。</li>
 </ul>
-<p>“看呐” “听见我声音就开门的”</p>
-<ul>
-<li>耳朵聋的，无法听见叩门的声音</li>
-<li>古代没有玻璃门，怎么能看到呢？<ul>
-<li>看到比听见更重要，是因为异象</li>
-</ul>
-</li>
-<li>为什么主在门外呢？因为教会把主赶到门外<ul>
-<li>虽然主在门外，但是若教会能听到主的声音，主还是会进来</li>
-</ul>
-</li>
-</ul>
-<p>上帝对7间教会的批评</p>
-<p>以弗所：起初的爱心</p>
-<ul>
-<li>比如第一次恋爱、傻里傻气、没有经验，但是是真的、纯洁的</li>
-</ul>
-<p>士每拿：居住的地方是撒旦的地方</p>
-<p>别迦摩：随从尼格拉党、耶洗别</p>
-<p>撒狄：看起来活着，实际上已经死了</p>
-<h2 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h2><p>中国家庭教会</p>
-<p>99年</p>
-<p>优势：</p>
+<p>上述两种情况，<strong>都无法确保数据在主从两个节点上的一致性</strong>。</p>
+<p>为什么<a href="">同步双写</a>也无法保证数据的一致性呢？</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFsTOohXaWk3gSlDiaD0rkuiccgucT7nj8ENpdBvju1Uw9enQ5SiavazGvuldEoVt3dcj9cFvC5N1icHTA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>客户端只有在master,slave同步写入成功后才会收到响应，乍一看，能提供一致性，其实不然</p>
 <ol>
-<li>注重火热、迫切、持久祷告，因为没有组织，所以轻组织</li>
-<li>渴慕真道，在圣经上下功夫，学习真理<ul>
-<li>下死功夫读：不依靠参考书和讲员，按照圣经的字词、专题来读</li>
-</ul>
-</li>
-<li>火热传福音，同文化、不同文化</li>
-<li>生活简朴，带来心里的单纯和清心</li>
-<li>愿意开放家庭，接待传道人</li>
-<li>为主受苦和殉道的心志</li>
-<li>没有教会以外势力的束缚，单单顺服神</li>
+<li>例如将key1的数据先写入到Master节点</li>
+<li>在写入从节点的过程中出现错误，客户端会收到写入失败</li>
+<li>但此时去master中查询key1的数据，却能查询出上一次请求失败的数据，即客户端虽然收到了写入失败，但主节点却写入成功，造成了<strong>数据语义上的不一致性</strong>。</li>
 </ol>
-<p>弊端：</p>
+<aside class="notice">
+即主从同步这种架构，主从节点、客户端的确认机制存在天然的不足，为了解决该问题，Raft等分布式副本数据强一致性协议就闪亮登场了。
+</aside>
+
+
+
+<h2 id="副本之间强一致性协议"><a href="#副本之间强一致性协议" class="headerlink" title="副本之间强一致性协议"></a>副本之间强一致性协议</h2><p>为了解决数据的高可用性，避免单点故障，通常会将数据同步为多份，高可用性是解决了，但带来了另外一个问题，多个副本数据之间如何保证一致性，为了解决该问题出现了诸如 raft、paxos等一致性协议。</p>
+<p>Raft协议的数据复制说明图如下：</p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/database/redis/Raft%E5%8D%8F%E8%AE%AE%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6.png" alt="Image"></p>
+<p>图中客户端向Raft协议集群发起一个写请求，集群中的 <strong>Leader 节点</strong>来处理写请求</p>
 <ol>
-<li><p>神学基础薄弱，虽然渴慕追求神，但是神学训练不够</p>
-</li>
-<li><p>普遍文化水平比较低</p>
-</li>
-<li><p>教导和牧养跟不上，信主的人很太多，工人太少</p>
-</li>
-<li><p>生命的程度会参差不齐</p>
-</li>
-<li><p>组织管理不完善，导致财务凌乱和其他问题（<strong>让我想起来教会观</strong>）</p>
-<ol>
-<li>组织并不是世俗的东西</li>
+<li>首先数据先存入 Leader 节点，然后需要广播给它的所有从节点</li>
+<li>从节点接收到 Leader 节点的数据推送对数据进行存储，然后向主节点汇报存储的结果</li>
+<li><strong>Leader 节点会对该日志的存储结果进行仲裁，如果超过集群数量的一半都成功存储了该数据</strong>，主节点则向客户端返回写入成功，否则向客户端写入写入失败。</li>
 </ol>
+<p><strong>如果只有主节点写入成功，但其他从节点没有写入成功，就算数据被写入到Leader节点，但这部分数据对客户端来说是不可见的。</strong></p>
+<p>Raft协议主要分为两个部分：<strong>Leader节点选举与日志复制</strong>。</p>
+<ul>
+<li><p>Leader节点选举：从集群中选举一个Leader节点用于<strong>处理数据的读写</strong>，从节点只负责从Leader节点同步数据，并且Leader节点宕机，会自动触发选举，选举出一个新的Leader节点。</p>
 </li>
-<li><p>教会之间缺少合一，各自为政</p>
+<li><p>日志复制：数据写入主节点后，主节点需要将数据转发给从节点，只有集群中<strong>超过半数节点</strong>都成功将一条数据写入才向客户端返回成功。</p>
 </li>
-<li><p>超脱世俗，消极处世</p>
-</li>
-<li><p>改革开放后的试探，贪爱世界</p>
-</li>
-<li><p>来自国外的异端邪说、势力</p>
-</li>
-</ol>
-<p>展望：</p>
-<ol>
-<li>彼此相爱、彼此接纳</li>
-<li>圣经真理要加强训练，抵挡异端邪说</li>
-<li>提高教会领袖的程度</li>
-<li>教会经济要依赖自己，尽量不要依赖外在</li>
-<li>培养本地的写作人才，语言符合要本地化</li>
-<li>提倡社会关怀，在社会上有好的见证</li>
-<li>训练青年信徒</li>
-<li></li>
-<li></li>
-<li>中国教会要承担普世宣教的大使命</li>
-</ol>
+</ul>
+<p>本文只从<strong>设计层面剖析为什么Raft协议能实现数据的一致性</strong>。</p>
+<p><strong>笔者认为Raft协议能确保数据的一致性，主要是引入了全局日志序号与已提交指针。</strong> <!--还有一点，我认为是因为对于写操作，Follower不再响应客户端，而是Leader响应客户端--></p>
+<h3 id="引入了全局日志序号"><a href="#引入了全局日志序号" class="headerlink" title="引入了全局日志序号"></a>引入了全局日志序号</h3><p>为了方便对日志进行管理与辨别，raft 协议为一条一条的消息进行编号，每一条消息达到主节点时会生成一个全局唯一的递增号，这样可以根据日志序号来快速的判断数据在主从复制过程中数据是否一致。</p>
+<h3 id="已提交指针"><a href="#已提交指针" class="headerlink" title="已提交指针"></a>已提交指针</h3><p>我们知道，日志先写入主节点，然后再进行传播，在集群中超过半数节点的写入成功之前，这条日志都不能认为<strong>写入成功</strong>，尽管已经存储到了主节点中，为了让客户端对这条日志不可见，Raft协议引入了<strong>已提交指针，只有小于等于已提交的数据才能被客户端感知</strong>。</p>
+<p>一条日志要能被提交的充分必要条件是日志得到了集群内超过半数节点成功追加，才能被认为已提交，才会向客户端返回成功，<strong>这样就实现了数据在集群内、客户端与集群之间的数据一致性语义</strong>。</p>
+<p>为了让大家更加深入的理解Raft协议数据性一致性问题，给出如下<strong>思考题</strong>，主从切换会导致Raft丢失数据吗？</p>
+<p>例如一个Raft协议中有3个节点，各个节点的写入情况如下：</p>
+<p>Node1：100</p>
+<p>Node2：89</p>
+<p>Node3：88</p>
+<p>其中Node1为Leader节点，如果Node1节点宕机，整个集群触发重新选举，会丢失数据吗？</p>
+<p><strong>答案是肯定不会的</strong>。</p>
+<p>首先我们要先明白，在上面的状态下，已提交指针为89，因为集群有两个节点都成功写入了89，即向客户端返回成功的数据也是序号为89的数据，在选举过程中，Node3不可能会被选举为Leader，因为Node3中存储的数据小于Node2存储的数据，当Node2选举为新的Leader时，Node3会向Node2同步数据。</p>
+<h2 id="3、总结"><a href="#3、总结" class="headerlink" title="3、总结"></a>3、总结</h2><hr>
+<p>挖掘该问题的本质：分布式数据存储的数据分片与高可用(避免单点故障)，从而又引发新的问题（数据副本之间的一致性）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">我稍微补充一下作者。1. 日志的唯一性是由 leader term + index 保证的。2. 选举时参与投票的节点会判断候选人的日志情况，不会投票给日志比自己少的节点，由此保证新 leader 一定有所有 commit 的日志。3. 实际主从复制也可以保证强一致性，在发生错误时不返回即可。但是这么做的问题是，引入了从节点，系统的可用性反而降低，因为一个节点挂了系统就不工作了。所以才有了多节点的一致性算法。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">威总好，上面你对redis主从数据一致性无法保证举得例子不是很清晰，首先分布式节点要保证数据一致性，一般都是同步过半多阶段提交  +  过半选举配合实现的，说一致性应该需要从系统和用户两个角度分析，总结一句话就是：系统一致，不一定用户一致，系统不一致，用户肯定不一致。</span><br><span class="line"> -- 嗯，所以后面引入了raft协议，举redis主从同步只是展示主从同步的缺陷</span><br><span class="line"> </span><br><span class="line">100不就丢了吗</span><br><span class="line"> -- 100只有leader写入成功，其他节点没有成功，此时不满足超过集群半数节点，故不会向客户端返回成功</span><br><span class="line"></span><br><span class="line">“Raft协议引入了已提交指针，只有小于等于已提交的数据才能被客户端感知”这句话不是很理解，，望解答</span><br><span class="line"> --就是数据要大部分节点都写入成功，才会告知客户端成功，但数据是先写入到leader，例如文末的例子中，leader节点写入了100条，但序号为100的数据是无法被客户端查询的，因为还未提交</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -403,7 +886,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/25/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-25/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/23/%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/mac/brew%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -417,7 +900,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/12/25/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-25/" class="post-title-link" itemprop="url">Sun Dec 25 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/07/23/%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/mac/brew%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">brew使用</a>
         </h2>
 
         <div class="post-meta-container">
@@ -429,7 +912,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2022-12-25 10:22:31 / Modified: 10:18:39" itemprop="dateCreated datePublished" datetime="2022-12-25T10:22:31+08:00">2022-12-25</time>
+      <time title="Created: 2021-07-23 18:39:04 / Modified: 18:43:23" itemprop="dateCreated datePublished" datetime="2021-07-23T18:39:04+08:00">2021-07-23</time>
     </span>
 
   
@@ -442,16 +925,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《为什么要信耶稣》</p>
-<p>讲员：赫传道</p>
-<p>耶稣是谁？</p>
-<ul>
-<li>道成肉身的神</li>
-</ul>
-<p>耶稣做了什么？</p>
-<ul>
-<li>人子来，为要寻找、拯救失丧的人（路19：10）</li>
-</ul>
+          <p>brew update提示unshallow失败</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git -C &quot;&#x2F;usr&#x2F;local&#x2F;Homebrew&#x2F;Library&#x2F;Taps&#x2F;homebrew&#x2F;homebrew-cask&quot; fetch --unshallow</span><br><span class="line">git -C &quot;&#x2F;usr&#x2F;local&#x2F;Homebrew&#x2F;Library&#x2F;Taps&#x2F;homebrew&#x2F;homebrew-core&quot; fetch --unshallow</span><br></pre></td></tr></table></figure>
+
+
+
+<p><a target="_blank" rel="noopener" href="https://timemachine.icu/posts/c670d00d/">https://timemachine.icu/posts/c670d00d/</a></p>
 
       
     </div>
@@ -478,7 +957,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/11/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-11/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -492,7 +971,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/12/11/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-11/" class="post-title-link" itemprop="url">Sun Dec 11 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
         </h2>
 
         <div class="post-meta-container">
@@ -503,14 +982,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-12-11 10:22:31" itemprop="dateCreated datePublished" datetime="2022-12-11T10:22:31+08:00">2022-12-11</time>
+      <time title="Created: 2021-07-21 08:34:42" itemprop="dateCreated datePublished" datetime="2021-07-21T08:34:42+08:00">2021-07-21</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-01-01 14:43:38" itemprop="dateModified" datetime="2023-01-01T14:43:38+08:00">2023-01-01</time>
+        <time title="Modified: 2021-08-16 16:33:49" itemprop="dateModified" datetime="2021-08-16T16:33:49+08:00">2021-08-16</time>
       </span>
 
   
@@ -523,107 +1002,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《播撒天国的种子》</p>
-<p>马太13:18-23</p>
-<p>讲员：方磊弟兄</p>
-<p>接受耶稣做我们的主，期待主耶稣接我们回天家；</p>
-<p>接受主，会得到神的礼物</p>
-<ul>
-<li>永生：约3:16</li>
-<li>赦罪：西14</li>
-<li>神儿女：约1:12</li>
-</ul>
-<p>福音（天国的种子）</p>
-<ul>
-<li>路加2:10-11</li>
-</ul>
-<p>马太福音的原读者是犹太人，包括法利赛人</p>
-<p>种子（福音的核心）：必须要有生命力</p>
-<h3 id="成人主人学：31年-49年"><a href="#成人主人学：31年-49年" class="headerlink" title="成人主人学：31年~49年"></a>成人主人学：31年~49年</h3><p>希伯来书12:12：我们既有这许多的见证人，如同…</p>
-<p>信心伟人</p>
-<ol>
-<li>布道团</li>
-</ol>
-<p>1910年10月：山东潍坊，丁立美成立《中华学生立志布道团》</p>
-<p>《中华国内布道会》，由中国自己组建的</p>
-<p>《河南布道团》，珠江以南</p>
-<p>1927年~1937年：</p>
-<ul>
-<li>10年大复兴：</li>
-<li>1937年，抗日战争</li>
-<li>1931：《伯特利布道团》，到全国各地布道<ul>
-<li>计志文，宋尚节：2个主要的讲员</li>
-<li>有些同工做翻译，翻译当地的方言</li>
-<li>天主教：吴经熊的译本，思高译本</li>
-<li>更正教：马礼逊译本（文言文），楼李睿（），官话译本</li>
-<li>贡献<ul>
-<li>文字工作<ul>
-<li>注音圣经，未来</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol start="2">
-<li>自立的贡献</li>
-</ol>
-<ul>
-<li>中国真耶稣教会：比较接近灵恩派。</li>
-<li>中华基督教会（山东青岛）：做医疗方向的</li>
-<li>耶稣家庭（山东马庄）：就像初代教会一样，凡物公用；破家出世<ul>
-<li>以色列的合作农场，就是凡物公用</li>
-</ul>
-</li>
-<li>基督徒会堂：1937年王明道在北京建会堂，强调羊生羊，才能成为会友</li>
-<li>教会聚会所：</li>
-<li>徐胜魔：靠主戒掉鸦片，成立戒烟管；成立《福音堂》</li>
-</ul>
-<ol start="3">
-<li>本土布道家：</li>
-</ol>
-<ul>
-<li>石美玉：第一个留美归国的学医的女医生，也是一个布道家</li>
-<li>丁立美：《学生立志布道团》第一个干事</li>
-<li>贾玉铭：山东，1936年10月创建  中国基督教灵修院，写了《圣经要义》，主编《灵光报》</li>
-<li>刘廷芳：<ul>
-<li>翻译了《祷告良辰》、《平安夜》、《快乐崇拜》</li>
-<li>强调“我们同意见解相歧，但决心彼此相爱”</li>
-</ul>
-</li>
-<li>王载：福州人，走方宣教者，后来和  倪柝声等人，<ul>
-<li>每次讲道不超过30min</li>
-<li>no breakfast, no bible</li>
-</ul>
-</li>
-<li>宋尚节：福建莆田，<ul>
-<li>1927年圣灵特殊的浇灌，虽然他早已信主，他称那天为他的属灵生日。旷野时期。</li>
-<li>1931年加入《伯特利布道团》，他强调不仅认罪，而且要悔罪，更要改罪，最后要赔罪，必须具体、必须要细节。</li>
-<li>讲道的时候声嘶力竭、衣服都湿了（我感觉像施洗约翰）</li>
-<li>发财、发财、发棺材</li>
-</ul>
-</li>
-<li>倪柝声：福州，1922年开始家庭聚会，他们叫“小群”（或者聚会所）<ul>
-<li>在教会路线强调“走出宗派，回归圣经”</li>
-<li>由长老治理教会</li>
-<li>“福音移民”</li>
-<li>1952年被捕获，入狱，1972年6月离世</li>
-</ul>
-</li>
-<li>王明道：北京人，福音基要派的带领人。<ul>
-<li>读事、读书、读人，对罪恶特别痛恶。</li>
-<li>教会路线，强调生命改变的人才能参加洗礼。</li>
-<li>1952年被捕，妥协政府，但是出来后，非常后悔，觉得背叛主，所以他悔改，批评中国的三自，所以1958年再被捕，</li>
-</ul>
-</li>
-</ul>
-<p>校园工作：</p>
-<ul>
-<li>1938年，赵君影在1944年带领属灵复兴运动，1945年再重庆举办，《学联会》</li>
-<li>《学联会》经常唱一首诗歌，《赞父奇爱》</li>
-</ul>
+          <p>controller使用无注解的参数</p>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam">https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam</a></p>
+<p>@RequestParam不是必须使用的，默认spring mvc使用的handler会对参数做映射</p>
 
       
     </div>
@@ -650,7 +1031,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/11/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-18/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-01-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -664,7 +1045,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/12/11/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-18/" class="post-title-link" itemprop="url">Sun Dec 11 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-01-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
         </h2>
 
         <div class="post-meta-container">
@@ -675,14 +1056,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2022-12-11 10:22:31" itemprop="dateCreated datePublished" datetime="2022-12-11T10:22:31+08:00">2022-12-11</time>
+      <time title="Created: 2021-07-21 08:34:42" itemprop="dateCreated datePublished" datetime="2021-07-21T08:34:42+08:00">2021-07-21</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-12-18 11:27:09" itemprop="dateModified" datetime="2022-12-18T11:27:09+08:00">2022-12-18</time>
+        <time title="Modified: 2021-12-10 13:59:16" itemprop="dateModified" datetime="2021-12-10T13:59:16+08:00">2021-12-10</time>
       </span>
 
   
@@ -695,548 +1076,87 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>《启示录-老底嘉教会2》</p>
-<p>启示录3：17-24</p>
-<p>讲员：唐牧师</p>
-<p>前提回顾：老底嘉教会是末日教会的写照，不冷不热</p>
-<p>【17：你说：我是富足，已经发了财，一样都不缺；却不知道你是那困苦、可怜、贫穷、瞎眼的、赤身露体的】</p>
+          <h1 id="servlet演进到spring-mvc"><a href="#servlet演进到spring-mvc" class="headerlink" title="servlet演进到spring mvc"></a>servlet演进到spring mvc</h1><p>servlet的原理以及不足</p>
 <ul>
-<li>你自己在心里对自己说的话，会决定你自己的做人</li>
-<li>人是有人格：主和次。所以自己能对自己说话</li>
-<li>老底嘉对自己说，是自己对自己的欣赏、自己对自己讲的骄傲的话和错话，反而害了自己</li>
-<li>【罗12】不要看自己过于所当看的。老底嘉自己高估自己</li>
-<li>老底嘉自己估价自己，但是上帝估价老底嘉，却是贫穷的</li>
+<li>开发者为每个servlet重写其doGet(HttpServletRequest，HttpServletResponse)与doPost(HttpServletRequest，HttpServletResponse)方法，<strong>需要手动从HttpServletRequest解析出来业务参数</strong></li>
+<li>Servlet使用的是模板方法的设计模式，在Servlet顶层将会调用service方法，<strong>开发者需要把业务逻辑重写service()方法</strong></li>
+<li>将自定义Servlet注册到web.xml中，在web.xml中配置servlet-mapping来存储映射关系，<strong>缺乏灵活性</strong></li>
+<li>每个servlet只能处理一个请求，业务情景复杂的话，<strong>需要写众多servlet</strong></li>
 </ul>
-<p>【18：我劝你向我买火炼的金子，叫你富足；又买白衣穿上，叫你赤身的羞辱】</p>
+<p>Spring架构优化:</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/3.0.0.M4/spring-framework-reference/html/ch15.html#mvc-introduction">https://docs.spring.io/spring-framework/docs/3.0.0.M4/spring-framework-reference/html/ch15.html#mvc-introduction</a></p>
+<p>The Spring Web model-view-controller (MVC) framework is designed around a <code>DispatcherServlet</code> that dispatches requests to handlers, with configurable handler mappings, view resolution, locale and theme resolution as well as support for uploading files. The default handler is based on the <code>@Controller</code> and <code>@RequestMapping</code> annotations, offering a wide range of flexible handling methods. With the introduction of Spring 3.0, the <code>@Controller</code> mechanism also allows you to create RESTful Web sites and applications, through the <code>@PathVarariable</code> annotation and other features.</p>
+</blockquote>
 <ul>
-<li>先知们讲真实的话，虽然遭到逼迫，但是真金不怕火炼</li>
-<li>一个人没有受过苦，是遇到困难站立不住的</li>
-<li>教会要有纯正的信仰，就像火炼的金子；教会需要有圣洁的生活和行为，就像白衣一样；教会要有异象，就像有眼药一样看见主让我们看见的，不要被自己认为重要的遮盖了<ul>
-<li>没有异象，民就放肆</li>
-<li>习惯给别人，而不是习惯被给；附上代价</li>
+<li>省略众多Servlet，只用一个超级Servlet — <em>DispatcherServlet</em>。并且把和业务无关的处理都交个它。</li>
+<li>和业务有关的servlet，用业务模型进行抽象，</li>
+</ul>
+<h1 id="官网的流程图"><a href="#官网的流程图" class="headerlink" title="官网的流程图"></a>官网的流程图</h1><p><img src="https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/images/mvc.png" alt="img"></p>
+<h3 id="FrontController-抽象-，DispatcherServlet-实现"><a href="#FrontController-抽象-，DispatcherServlet-实现" class="headerlink" title="FrontController(抽象)，DispatcherServlet(实现)"></a>FrontController(抽象)，DispatcherServlet(实现)</h3><ul>
+<li>接收请求</li>
+<li>响应结果</li>
+<li>请求分发，包括获取处理类、执行处理类方法、获取处理类的处理结果</li>
+</ul>
+<h3 id="业务模型Handler-抽象-Controller-实现"><a href="#业务模型Handler-抽象-Controller-实现" class="headerlink" title="业务模型Handler(抽象), Controller(实现)"></a>业务模型Handler(抽象), Controller(实现)</h3><ul>
+<li>处理业务，需要用户自定义</li>
+<li>常见的SpringMVC提供的业务模型<ul>
+<li>注解的@Controller</li>
+<li>HttpRequestHandler</li>
+<li>SimpleControllerHandler</li>
+<li>自定义的Bean。。。。。</li>
 </ul>
 </li>
 </ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
+<h3 id="V-视图类，view"><a href="#V-视图类，view" class="headerlink" title="V: 视图类，view"></a>V: 视图类，view</h3><p><img src="https://www.fatalerrors.org/images/blog/a432f0a05dd94c9b6d0700446c5c1e81.jpg" alt="img"></p>
+<h2 id="HandlerMapping和HandlerAdapter"><a href="#HandlerMapping和HandlerAdapter" class="headerlink" title="HandlerMapping和HandlerAdapter"></a>HandlerMapping和HandlerAdapter</h2><p>handler的种类繁多，需要做映射：</p>
+<p>HanlderMapping负责返回给Controller一个Handler</p>
+<p>HandlerAdapter负责把handler转为对应的HandlerApater，然后执行</p>
+<h2 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h2><p>DispatchServlet类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private HandlerMapping hm;</span><br><span class="line">public void doDispatch(req, resp)&#123;</span><br><span class="line">	&#x2F;&#x2F;查找Handler, 交给HandlerMapping处理</span><br><span class="line">	Object handler &#x3D; hm.getHandler(req);</span><br><span class="line">	</span><br><span class="line">	&#x2F;&#x2F;执行处理器方法，交给HandlerAdpater处理</span><br><span class="line">	HandlerAdpater ha &#x3D; getHandlerAdpater(handler);</span><br><span class="line">	</span><br><span class="line">	&#x2F;&#x2F;执行方法</span><br><span class="line">	ha.handlerRequest(req,resp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-01-%E5%87%BD%E6%95%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-01-%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-16 10:40:03" itemprop="dateModified" datetime="2023-02-16T10:40:03+08:00">2023-02-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-02-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-02-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-16 10:40:00" itemprop="dateModified" datetime="2023-02-16T10:40:00+08:00">2023-02-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-03-%E7%A7%BB%E5%8A%A8%E5%92%8C%E5%A4%8D%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-03-%E7%A7%BB%E5%8A%A8%E5%92%8C%E5%A4%8D%E5%88%B6/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-02 12:33:50" itemprop="dateModified" datetime="2023-03-02T12:33:50+08:00">2023-03-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="2-所有权"><a href="#2-所有权" class="headerlink" title="2.所有权"></a>2.所有权</h2><p>变量A “【拥有】” 对象B：</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h3 id="DispachServlet类"><a href="#DispachServlet类" class="headerlink" title="DispachServlet类:"></a>DispachServlet类:</h3><p>初始化流程</p>
 <ul>
-<li>只有A可以释放B</li>
-<li>当A变成不可访问时，A必须释放B</li>
+<li>集成了FrameworkServlet实现类，实现了init()方法，<ul>
+<li>init()方法调用了自身的initWebApplication()方法，<ul>
+<li>initWebApplication()方法调用AbstarctApplicationContext的refresh()方法，<!--和spring的高级容器关联上了--></li>
 </ul>
-<p>rust中</p>
+</li>
+</ul>
+</li>
+<li><h2 id="父子容器的概念"><a href="#父子容器的概念" class="headerlink" title="父子容器的概念"></a>父子容器的概念</h2></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#servlet被Tomat加载以后，会被调用init方法</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="comment">//从web.xml中读取Bean配置文件config.xml，创建SpringIOC容器</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">//HandlerMapping类被封装为Bean, 比如BeanNameUrlHandlerMappingBean: name = urlBeanName，比如RequestHandlerMappingBean:</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">//HandlerAdapter被封装为Bean</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>C: DispatchServlet类</p>
+<p>M: @Controller标记的类+method ， 所以@Controller不是C，而是M</p>
+</blockquote>
+<p>执行流程</p>
 <ul>
-<li><p>引用失效了，必须释放拥有的对象，如变量a拥有对象4，在变量a失效后必须释放对象3（4）</p>
-</li>
-<li><p>引用不一定拥有某个对象，如变量a_ref，那么这个引用属于”借用”</p>
-</li>
-<li><p>引用失效了，如果没有拥有对象，则不释放对象，比如变量a_ref，并不拥有对象3（4），在括号末尾超出了【作用域】，也不能释放对象3（4）</p>
-</li>
-<li><p>【向量】是有【标头】和【缓冲区】，比如变量b只拥有向量【标头】，但是向量【标头】中的指针拥有【缓冲区】，所以b超出【作用域】时，只释放向量【标头】-&gt; 向量【标头】释放时，向量【标头】不可访问 -&gt;指针拥有【缓冲区】会被释放</p>
-</li>
+<li>doDispatch()</li>
 </ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> a = <span class="number">3</span>; <span class="comment">// a拥有对象3</span></span><br><span class="line">a=<span class="number">4</span>; <span class="comment">// a把对象3的值改成了4，仍然拥有这个变量</span></span><br><span class="line"><span class="keyword">let</span> b=<span class="built_in">vec!</span>[<span class="number">1</span>,<span class="number">23</span>,<span class="number">3</span>,<span class="number">4</span>]; <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> a_ref  = &amp;a <span class="comment">//a_ref不拥有对象3</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">print!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>,a);</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="4-赋值语义"><a href="#4-赋值语义" class="headerlink" title="4.赋值语义"></a>4.赋值语义</h2><h3 id="赋值语义"><a href="#赋值语义" class="headerlink" title="赋值语义"></a>赋值语义</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">let</span> v1 = <span class="built_in">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">let</span> v2 = v1;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>在栈中分配变量v1，指向向量标头；由于向量具有内容，所以堆中也要分配缓冲区</li>
-<li>在栈中分配变量v2， 希望使用变量v1初始化变量v2，该如何实现呢？</li>
-</ol>
-<h3 id="3种实现"><a href="#3种实现" class="headerlink" title="3种实现"></a>3种实现</h3><ul>
-<li><p>共享语义：java</p>
-<ul>
-<li>v1和v2引用同一个堆中的对象，但是在栈中是2个不同的标头</li>
-<li>若2个线程同时写一个对象，会造成读到脏数据</li>
-<li>若2个线程同时释放一个对象，或造成内存问题；所以引入GC</li>
+<h3 id="HandlerMapping类"><a href="#HandlerMapping类" class="headerlink" title="HandlerMapping类"></a>HandlerMapping类</h3><ul>
+<li>BeanNameUrlHandlerMapping</li>
+<li>RequestMappingHandlerMapping：对于使用@Controller注解和@RequestBody的注解，所以在init()方法中要扫描到这些注解对应的类</li>
+<li>SimpleHanlderMapping</li>
 </ul>
-</li>
-<li><p>复制语义：c/c++（默认语义）、rust</p>
-<ul>
-<li>v1和v2引用不同的对象</li>
+<blockquote>
+<p>在init()方法中，将config.xml中的url映射关系，交给Spring的beanFactory，所以HandlerMapping都会实现Spring的Aware()接口</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void init()&#123;</span><br><span class="line">	&#x2F;&#x2F;在config.xml中配置的bean（init-methods）</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="HandlerAdapter"><a href="#HandlerAdapter" class="headerlink" title="HandlerAdapter"></a>HandlerAdapter</h3><ul>
+<li>RequestMappingHandlerAdapter：调用RequestMappingHandlerMapping中（@Controller类）的方法</li>
 </ul>
-</li>
-<li><p>移动语义：rust（默认语义）、c/c++</p>
-<ul>
-<li>v1不再指向对象，而是移交给v2</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;c++复制语义</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;c++移动语义</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-04-%E5%80%9F%E7%94%A8%E5%92%8C%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-04-%E5%80%9F%E7%94%A8%E5%92%8C%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-02 12:35:11" itemprop="dateModified" datetime="2023-03-02T12:35:11+08:00">2023-03-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="1-所有权和借用"><a href="#1-所有权和借用" class="headerlink" title="1. 所有权和借用"></a>1. 所有权和借用</h2><p>我们已经知道，使用变量”a”赋值给变量”b”，有2种情况</p>
-<ul>
-<li>他们的类型是可复制的，即它实现了clone trait 和 copy trait。2个变量拥有2个不同的对象。这种情况就是**”复制语义”。**</li>
-<li>他们的类型是不可复制，即没有实现copy trait。只有一个变量（从a到b）拥有这个对象。这种情况就是**”移动语义”。**</li>
-</ul>
-<p>上述情况都可以保证内存的安全性，但是，如果使用了<strong>引用</strong>，情况就变得复杂</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> n = <span class="number">12</span>;</span><br><span class="line"><span class="keyword">let</span> ref_to_n = &amp;n</span><br></pre></td></tr></table></figure>
-
-<p>n和ref_to_n引用了同一个对象，<strong>但只有n有【所有权】，ref_to_n可以访问，但是无【所有权】，这是【借用】</strong></p>
-<p>关于可变性，</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> n = <span class="number">12</span>;</span><br><span class="line"><span class="keyword">let</span> ref1_to_n = &amp;<span class="keyword">mut</span> n; <span class="comment">//可变借用，只能从可变变量执行可变借用</span></span><br><span class="line"><span class="keyword">let</span> ref2_to_n = &amp;n;  <span class="comment">//不可变借用</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="2-对象生命周期"><a href="#2-对象生命周期" class="headerlink" title="2. 对象生命周期"></a>2. 对象生命周期</h2><p>【作用域】只适用于编译时变量，而不适用于运行时的对象；运行时的对象的相应概念，是【生命周期】</p>
-<h3 id="2者的开始时间不同"><a href="#2者的开始时间不同" class="headerlink" title="2者的开始时间不同"></a>2者的开始时间不同</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a; <span class="comment">//变量a的作用域开始</span></span><br><span class="line">a = <span class="number">12</span>; <span class="comment">//对象12的生命周期开始</span></span><br><span class="line"><span class="built_in">print!</span>(a);</span><br></pre></td></tr></table></figure>
-
-<h3 id="2者的结束时间不同"><a href="#2者的结束时间不同" class="headerlink" title="2者的结束时间不同"></a>2者的结束时间不同</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> a = <span class="string">&quot;hello&quot;</span>.to_string() <span class="comment">//a的作用域开始，&quot;hello&quot;的对象生命周期开始</span></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> b = a;  <span class="comment">//a的作用域暂停，b的作用域开始，因为a所有权移动到b了，a不再能被访问</span></span><br><span class="line"><span class="built_in">print!</span>(b) <span class="comment">//错误 print!(a); </span></span><br><span class="line">a = <span class="string">&quot;cat&quot;</span>.to_string(); <span class="comment">//a的作用域恢复，&quot;cat&quot;的对象生命周期开始</span></span><br><span class="line"><span class="built_in">print!</span>(a)</span><br><span class="line">b = a <span class="comment">// a的作用域暂停, b从前拥有的&quot;hello&quot;对象被丢弃，生命周期结束，如果实现了&#x27;drop&#x27;trait，则被调用;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//首先b的作用域退出, 然后是a</span></span><br><span class="line"><span class="comment">//b拥有的&#x27;cat&#x27;对象被丢弃，生命周期结束</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="3-关于借用的错误"><a href="#3-关于借用的错误" class="headerlink" title="3.关于借用的错误"></a>3.关于借用的错误</h2><h3 id="错误1：丢弃后使用"><a href="#错误1：丢弃后使用" class="headerlink" title="错误1：丢弃后使用"></a>错误1：丢弃后使用</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> ref_to_n;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">let</span> n = <span class="number">12</span>; <span class="comment">//n变量作用域开始，12这个对象生命周期开始，并且在栈中</span></span><br><span class="line">  ref_to_n = &amp;n; <span class="comment">//ref_to_n借用12</span></span><br><span class="line">  <span class="built_in">print!</span>(*ref_to_n)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//失败 print!(*ref_to_n) //n doesn&#x27;t live enough</span></span><br></pre></td></tr></table></figure>
-
-<p>line7: n的变量死亡，其拥有的对象也已经丢弃，但是存在 ref_to_n还引用这个对象。因为ref_to_n的生命周期应该比对象12少一点</p>
-<p>c++就无法避免这种错误</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>* ref_to_n;</span><br><span class="line">&#123;</span><br><span class="line">	let n = <span class="number">12</span>; </span><br><span class="line">  ref_to_n = &amp;n; </span><br><span class="line">  print!(*ref_to_n)</span><br><span class="line">&#125;</span><br><span class="line">print!(*ref_to_n)</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="避免错误"><a href="#避免错误" class="headerlink" title="避免错误"></a>避免错误</h4>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/wasm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/wasm/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-12-05 09:56:15" itemprop="dateModified" datetime="2022-12-05T09:56:15+08:00">2022-12-05</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/WebAssembly/Rust_to_wasm">https://developer.mozilla.org/zh-CN/docs/WebAssembly/Rust_to_wasm</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cargo new --lib hello-w</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust%E5%9F%BA%E7%A1%80-%E6%89%80%E6%9C%89%E6%9D%83%E5%92%8C%E8%A7%84%E5%88%99/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust%E5%9F%BA%E7%A1%80-%E6%89%80%E6%9C%89%E6%9D%83%E5%92%8C%E8%A7%84%E5%88%99/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-13 17:37:52" itemprop="dateModified" datetime="2023-02-13T17:37:52+08:00">2023-02-13</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="Value-in-a-scope"><a href="#Value-in-a-scope" class="headerlink" title="Value in a scope"></a>Value in a scope</h3><h4 id="Rule-1"><a href="#Rule-1" class="headerlink" title="Rule 1:"></a>Rule 1:</h4><ul>
-<li>You can have only one owner in a scope; When the owner of the value left the scope, the value droped;</li>
-<li>When passing a value to another scope, the owner moves to this scope;</li>
-</ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> arr = <span class="built_in">vec!</span>[<span class="number">1</span>]; <span class="comment">// this scope owns vec![1]</span></span><br><span class="line">  <span class="keyword">let</span> arr2= <span class="built_in">vec!</span>[<span class="number">2</span>];</span><br><span class="line">  sum(arr);  <span class="comment">//move occors so sum is the new owner of value vec![1]</span></span><br><span class="line">  <span class="built_in">println!</span>(arr); <span class="comment">// fail, </span></span><br><span class="line">&#125; <span class="comment">//arr2 dropped the value vec1[2]</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="Rule-2"><a href="#Rule-2" class="headerlink" title="Rule 2:"></a>Rule 2:</h4><ul>
-<li>A value can have multipe immutable referrences</li>
-</ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> arr = <span class="built_in">vec!</span>[<span class="number">1</span>]; <span class="comment">// this scope owns vec![1] </span></span><br><span class="line">  sum(&amp;arr); <span class="comment">//1st borrower: sum scope</span></span><br><span class="line">  max(&amp;arr); <span class="comment">//2nd borrower: max scope</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<blockquote>
+<p>注意：</p>
+<p>在底层反射实现中，compiler会把arguments编译为obj1 … （class文件），这就会丧失意义，所以需要在pom的maven插件中，添加</p>
+</blockquote>
 
       
     </div>
@@ -1258,7 +1178,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
