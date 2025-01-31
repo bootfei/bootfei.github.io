@@ -248,6 +248,114 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.2-obtainFreshBeanFactory()/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.2-obtainFreshBeanFactory()/" class="post-title-link" itemprop="url">springboot启动流程-01-启动流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-16 09:30:13" itemprop="dateCreated datePublished" datetime="2021-04-16T09:30:13+08:00">2021-04-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-25 19:10:27" itemprop="dateModified" datetime="2021-11-25T19:10:27+08:00">2021-11-25</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>obtainFreshBeanFactory()方法会解析所有Spring配置文件（通常我们会放在 resources 目录下），将所有 Spring 配置文件中的 bean 定义封装成 BeanDefinition，加载到 BeanFactory中。</p>
+<blockquote>
+<p>比如扫描xxx.xml文件，如果解析到&lt;context:component-scan base-package=”” /&gt; 注解时，会扫描 base-package 指定的目录，将该目录下使用指定注解（@Controller、@Service、@Component、@Repository）的 bean 定义也同样封装成 BeanDefinition，加载到 BeanFactory 中。</p>
+</blockquote>
+<h2 id="AbstractApplicationContext-obtainFreshBeanFactory"><a href="#AbstractApplicationContext-obtainFreshBeanFactory" class="headerlink" title="AbstractApplicationContext#obtainFreshBeanFactory"></a>AbstractApplicationContext#obtainFreshBeanFactory</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> ConfigurableListableBeanFactory <span class="title">obtainFreshBeanFactory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//初始化BeanFactory</span></span><br><span class="line">        <span class="keyword">this</span>.refreshBeanFactory();</span><br><span class="line">        <span class="comment">//返回初始化之后的BeanFactory</span></span><br><span class="line">        ConfigurableListableBeanFactory beanFactory = getBeanFactory();</span><br><span class="line">        <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">            logger.debug(<span class="string">&quot;Bean factory for &quot;</span> + getDisplayName() + <span class="string">&quot;: &quot;</span> + beanFactory);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> beanFactory;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">refreshBeanFactory</span><span class="params">()</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">        <span class="comment">//判断是否已经存在BeanFactory，存在则销毁所有Beans，并且关闭BeanFactory</span></span><br><span class="line">        <span class="keyword">if</span> (hasBeanFactory()) &#123;</span><br><span class="line">            <span class="comment">//销毁所有的bean</span></span><br><span class="line">            destroyBeans();</span><br><span class="line">            <span class="comment">//关闭并销毁BeanFactory</span></span><br><span class="line">            closeBeanFactory();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="comment">//创建具体的beanFactory，这里创建的是DefaultListableBeanFactory，最重要的beanFactory spring注册及加载bean就靠它</span></span><br><span class="line">            DefaultListableBeanFactory beanFactory = createBeanFactory();</span><br><span class="line">            beanFactory.setSerializationId(getId());</span><br><span class="line">            <span class="comment">//定制BeanFactory，包括是否允许覆盖同名称的不同定义的对象以及循环依赖</span></span><br><span class="line">            customizeBeanFactory(beanFactory);</span><br><span class="line">            <span class="comment">//这个就是最重要的了，加载所有的Bean配置信息（属于模版方法，由子类去实现加载的方式）</span></span><br><span class="line">            loadBeanDefinitions(beanFactory);</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>.beanFactoryMonitor) &#123;</span><br><span class="line">                <span class="keyword">this</span>.beanFactory = beanFactory;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> (IOException ex) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ApplicationContextException(<span class="string">&quot;I/O error parsing bean definition source for &quot;</span> + getDisplayName(), ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">customizeBeanFactory</span><span class="params">(DefaultListableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//allowBeanDefinitionOverriding属性是指是否允对一个名字相同但definition不同进行重新注册，默认是true。</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.allowBeanDefinitionOverriding != <span class="keyword">null</span>) &#123;</span><br><span class="line">            beanFactory.setAllowBeanDefinitionOverriding(<span class="keyword">this</span>.allowBeanDefinitionOverriding);</span><br><span class="line">        &#125;</span><br><span class="line">         <span class="comment">//allowCircularReferences属性是指是否允许Bean之间循环引用，默认是true.</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.allowCircularReferences != <span class="keyword">null</span>) &#123;</span><br><span class="line">            beanFactory.setAllowCircularReferences(<span class="keyword">this</span>.allowCircularReferences);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">refreshBeanFactory</span><span class="params">()</span> <span class="keyword">throws</span> BeansException, IllegalStateException</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="AbstractApplicationContext-refreshBeanFactory"><a href="#AbstractApplicationContext-refreshBeanFactory" class="headerlink" title="AbstractApplicationContext#refreshBeanFactory"></a>AbstractApplicationContext#refreshBeanFactory</h3><p>![image-20211125190407914](/Users/qifei/Library/Application Support/typora-user-images/image-20211125190407914.png)</p>
+<p>由于在我们当前容器<code>AnnotationConfigServletWebServerApplicationContext</code>的所有父类（或者父类的父类）中，只有<code>GenericApplicationContext</code>重写了这个方法，所以实际调用的是<code>GenericApplicationContext</code>的<code>refreshBeanFactory</code>。</p>
+<p><code>refreshBeanFactory</code>方法中其实就做了两件事，一个是设置<code>refreshed</code>的值，这里用到了<code>java</code>的<code>CAS</code>机制，是线程安全的一个机制，如果实际值与预期值（<code>expect</code>）一致，则将值设置为更新值（<code>update</code>），这一块属于多线程线程安全领域的内容；另一个操作就是设置<code>beanFactory</code>的<code>serializationId</code>，这个值默认设置的是<code>spring.application.name</code>的值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#GenericApplicationContext</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">refreshBeanFactory</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.refreshed.compareAndSet(<span class="keyword">false</span>, <span class="keyword">true</span>)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;GenericApplicationContext does not support multiple refresh attempts: just call &#x27;refresh&#x27; once&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.beanFactory.setSerializationId(<span class="keyword">this</span>.getId());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="实现loadBeanDefinitions-的子类有多种，"><a href="#实现loadBeanDefinitions-的子类有多种，" class="headerlink" title="实现loadBeanDefinitions()的子类有多种，"></a>实现loadBeanDefinitions()的子类有多种，</h3><ul>
+<li>AbstractXmlApplicationContext类提供了基于XML的加载实现</li>
+<li>AnnotationConfigWebApplicationContext类提供了在webapp的场景下基于注解配置的加载实现，</li>
+<li>XmlWebApplicationContext类提供了在webapp场景下基于xml配置的加载实现，</li>
+<li>XmlPortletApplicationContext提供了在portalet下基于xml配置的加载实现，</li>
+<li>GroovyWebApplicationContext类提供了基于groovy脚本配置的加载实现。</li>
+<li><img src="https://segmentfault.com/img/bVbx9Iv" alt="clipboard.png"></li>
+</ul>
+<p>下面以AnnotationConfigWebApplicationContext#loadBeanDefinitions()方法为例看下代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">loadBeanDefinitions</span><span class="params">(DefaultListableBeanFactory beanFactory)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//初始化这个脚手架 其实就是直接new出实例</span></span><br><span class="line">       AnnotatedBeanDefinitionReader reader = getAnnotatedBeanDefinitionReader(beanFactory);</span><br><span class="line">        ClassPathBeanDefinitionScanner scanner = getClassPathBeanDefinitionScanner(beanFactory);</span><br><span class="line">        <span class="comment">// 生成Bean的名称的生成器，如果自己没有setBeanNameGenerator（可以自定义）,这里目前为null</span></span><br><span class="line">        BeanNameGenerator beanNameGenerator = getBeanNameGenerator();</span><br><span class="line">        <span class="keyword">if</span> (beanNameGenerator != <span class="keyword">null</span>) &#123;</span><br><span class="line">            reader.setBeanNameGenerator(beanNameGenerator);</span><br><span class="line">            scanner.setBeanNameGenerator(beanNameGenerator);</span><br><span class="line">            <span class="comment">//若我们注册了beanName生成器，那么就会注册进容器里面</span></span><br><span class="line">            	beanFactory.registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//这是给reader和scanner注册scope的解析器  此处为null</span></span><br><span class="line">        ScopeMetadataResolver scopeMetadataResolver = getScopeMetadataResolver();</span><br><span class="line">        <span class="keyword">if</span> (scopeMetadataResolver != <span class="keyword">null</span>) &#123;</span><br><span class="line">            reader.setScopeMetadataResolver(scopeMetadataResolver);</span><br><span class="line">            scanner.setScopeMetadataResolver(scopeMetadataResolver);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//我们可以自己指定annotatedClasses 配置文件,同时也可以交给下面扫描</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.annotatedClasses.isEmpty()) &#123;</span><br><span class="line">            <span class="comment">// 这里会把所有的配置文件输出=======info日志  请注意观察控制台</span></span><br><span class="line">            <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">                logger.debug(<span class="string">&quot;Registering annotated classes: [&quot;</span> +</span><br><span class="line">                        StringUtils.collectionToCommaDelimitedString(<span class="keyword">this</span>.annotatedClasses) + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 若是指明的Bean，就交给reader去处理</span></span><br><span class="line">            reader.register(ClassUtils.toClassArray(<span class="keyword">this</span>.annotatedClasses));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 也可以是包扫描的方式，扫描配置文件的Bean</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.basePackages.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">                logger.debug(<span class="string">&quot;Scanning base packages: [&quot;</span> +</span><br><span class="line">                        StringUtils.collectionToCommaDelimitedString(<span class="keyword">this</span>.basePackages) + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            scanner.scan(StringUtils.toStringArray(<span class="keyword">this</span>.basePackages));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 此处的意思是，也可以以全类名的形式注册。比如可以调用setConfigLocations设置（这在xml配置中使用较多）  可以是全类名，也可以是包路径</span></span><br><span class="line">        String[] configLocations = getConfigLocations();</span><br><span class="line">        <span class="keyword">if</span> (configLocations != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span> (String configLocation : configLocations) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Class&lt;?&gt; clazz = ClassUtils.forName(configLocation, getClassLoader());</span><br><span class="line">                    <span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">                        logger.trace(<span class="string">&quot;Registering [&quot;</span> + configLocation + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                    reader.register(clazz);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">catch</span> (ClassNotFoundException ex) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">                        logger.trace(<span class="string">&quot;Could not load class for config location [&quot;</span> + configLocation +</span><br><span class="line">                                <span class="string">&quot;] - trying package scan. &quot;</span> + ex);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">int</span> count = scanner.scan(configLocation);</span><br><span class="line">                   <span class="comment">// 发现不是全类名，那就当作包扫描</span></span><br><span class="line">                    <span class="keyword">if</span> (count == <span class="number">0</span> &amp;&amp; logger.isDebugEnabled()) &#123;</span><br><span class="line">                        logger.debug(<span class="string">&quot;No annotated classes found for specified class/package [&quot;</span> + configLocation + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>该方法主要是解析我们项目配置的 application.xml、xxx.xml 定义的import、bean、resource、profile或扫描注解 将其属性封装到BeanDefinition 对象中。</p>
+<p>上面提到的 “加载到 BeanFactory 中” 的内容主要指的是添加到以下3个缓存：</p>
+<ul>
+<li><p>beanDefinitionNames缓存：所有被加载到 BeanFactory 中的 bean 的 beanName 集合。</p>
+</li>
+<li><p>beanDefinitionMap缓存：所有被加载到 BeanFactory 中的 bean 的 beanName 和 BeanDefinition 映射 Map&lt;String, BeanDefinition&gt; (beanName, beanDefinition）</p>
+</li>
+<li><p>aliasMap缓存：所有被加载到 BeanFactory 中的 bean 的 beanName 和别名映射。</p>
+</li>
+</ul>
+<p>现在BeanFactory已经创建完成了，并且Config配置文件的Bean定义已经注册完成了（备注：其它单例Bean是还没有解析的），下面的步骤大都把BeanFactory传进去了，都是基于此Bean工厂的操作。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.5-invokeBeanFactoryPostProcessors(beanFactory)/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -390,77 +498,6 @@
 
 
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.1-prepareRefresh()/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.1-prepareRefresh()/" class="post-title-link" itemprop="url">springboot启动流程-01-启动流程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-04-16 09:30:13" itemprop="dateCreated datePublished" datetime="2021-04-16T09:30:13+08:00">2021-04-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-10-05 09:27:47" itemprop="dateModified" datetime="2022-10-05T09:27:47+08:00">2022-10-05</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
       
     </div>
 
