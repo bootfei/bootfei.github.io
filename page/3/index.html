@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">246</span>
+          <span class="site-state-item-count">218</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -208,7 +208,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -240,297 +240,6 @@
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Exception/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Exception/" class="post-title-link" itemprop="url">JDK-lang-Exception</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-09-07 18:28:08 / Modified: 18:36:37" itemprop="dateCreated datePublished" datetime="2021-09-07T18:28:08+08:00">2021-09-07</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="RuntimeException应用"><a href="#RuntimeException应用" class="headerlink" title="RuntimeException应用"></a>RuntimeException应用</h3><p>RuntimeException不需要<strong>显示</strong>的写在方法的末尾，而且可以被<strong>任意</strong>的上层方法栈try…catch…捕获。所以可以在业务应用代码中抛出自定义的RuntimeException，最终统一在拦截器中对异常进行拦截。</p>
-<p>如下图所示</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">拦截器 -&gt; 类1的方法1-&gt;类2的方法2-&gt; .....-&gt;类3的方法3抛出Runtime异常</span><br><span class="line"></span><br><span class="line">拦截器捕获异常 &lt;-类1的方法1捕获异常&lt;-类2的方法2捕获异常&lt;- .....&lt;-类3的方法3抛出Runtime异常</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">重试机制-01-使用Redis实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-09-02 13:54:44" itemprop="dateCreated datePublished" datetime="2021-09-02T13:54:44+08:00">2021-09-02</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A">https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A</a></p>
-<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
-<li>超时重试，一方面保障业务成功，另一方面保障重试操作不会积压</li>
-</ul>
-<h2 id="Redis实现方式"><a href="#Redis实现方式" class="headerlink" title="Redis实现方式"></a>Redis实现方式</h2><h3 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h3><ul>
-<li><p>将<strong>回调任务</strong>丢入一个<strong>回调队列</strong>中，由指定的线程去处理队列中的<strong>回调任务</strong>。</p>
-</li>
-<li><p>为了避免本地内存的丢失，所以队列可以使用<strong>高可用</strong>的redis集群。</p>
-</li>
-<li><p>就绪队列</p>
-</li>
-</ul>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolmjWs1XAFicqE1Wtc8cLMsIxeuUM6xiau1wCLuCJn8tU4MWLrNN9OFhO4w/640" alt="Image"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolm57lXIGDCsusx8eUDCV6UTkCScChtpTAiaGuHgB96dK6GVfooqPrTNoA/640" alt="Image"></p>
-<h3 id="设计锚点"><a href="#设计锚点" class="headerlink" title="设计锚点"></a>设计锚点</h3><h4 id="回调任务失败如何处理，直接重新丢入回调队列吗？"><a href="#回调任务失败如何处理，直接重新丢入回调队列吗？" class="headerlink" title="回调任务失败如何处理，直接重新丢入回调队列吗？"></a><strong>回调任务失败如何处理，直接重新丢入回调队列吗？</strong></h4><p>一般出现回调失败的原因大部分都是因为系统存在一定的bug因素导致的，需要人工介入手工修复的机率较大，所以回调的间隔一般不会是连续性的立即回调，而是呈现一个阶段性的回调处理，例如分别间隔3秒，30秒，1min，3min，9min，30min，60min…的间隔进行回调尝试，如果经过多次回调都始终处于失败状态，则需要进行专门的记录。</p>
-<h4 id="回调队列的任务获取到之后，什么时候执行任务？"><a href="#回调队列的任务获取到之后，什么时候执行任务？" class="headerlink" title="回调队列的任务获取到之后，什么时候执行任务？"></a><strong>回调队列的任务获取到之后，什么时候执行任务？</strong></h4><p>这里可以利用到一个redis的zset数据结构。zset结构中基本存储信息和set结构类似，但是会给每个元素都有一个排分的score标示，根据排分的大小会在内存中进行排序操作。所以可以将时间戳作为排分的计数项，时间戳靠前的排在zset的前头，那么在进行回调任务处理的时候就会被优先读取出来。</p>
-<p>从回调队列取出的任务，判断当前的时间戳是否小于或等于预期的执行时间：是，进行业务回调了。否，？</p>
-<h4 id="回调队列的任务，什么时候删除？"><a href="#回调队列的任务，什么时候删除？" class="headerlink" title="回调队列的任务，什么时候删除？"></a><strong>回调队列的任务，什么时候删除？</strong></h4><p><strong>回调任务</strong>必须在<strong>回调成功</strong>之后再去进行删除。但是如果回调过程中如果网络通信较慢，可能会导致回调队列的消费效率较低，容易出现堵塞的情况发生。</p>
-<p>所以这里引入了一个<strong>就绪队列</strong>的设计  <!--这里过度设计了，因为实际情况中，回调队列的长度是正常业务的千分之一--></p>
-<p>当回调队列中的任务的执行时间达到预期的时候，就将其放入到就绪队列中，这份转移的工作交给了专门的就绪线程去处理。并且一旦转移到就绪队列之后，便将其从回调队列移除。</p>
-<p>就绪队列是采用了redis的queue队列进行存储，满足了先进先出的优先级设计需求。</p>
-<h3 id="代码设计"><a href="#代码设计" class="headerlink" title="代码设计"></a>代码设计</h3><h4 id="回调任务"><a href="#回调任务" class="headerlink" title="回调任务"></a>回调任务</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskInfo</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">1003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskSortItem</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="回调队列-RedisDelayQueue"><a href="#回调队列-RedisDelayQueue" class="headerlink" title="回调队列 RedisDelayQueue"></a>回调队列 RedisDelayQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RedisQueue</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 弹出任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">T <span class="title">pop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 放入任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">put</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除队列中的一项内容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(T item)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisDelayQueue&quot;)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskSortItem</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String redisDelayQueueKey = <span class="string">&quot;redis:delay:pay:notify&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object mutex = <span class="keyword">new</span> Object();</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskSortItem <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (mutex) &#123;</span><br><span class="line">            Set&lt;Tuple&gt; rangeSet = redisService.zRangeWithScores(redisDelayQueueKey, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">for</span> (Tuple tuple : rangeSet) &#123;</span><br><span class="line">                <span class="keyword">long</span> currentTimeMillis = System.currentTimeMillis();</span><br><span class="line">                <span class="keyword">double</span> expireTime = tuple.getScore();</span><br><span class="line">                <span class="keyword">if</span> ((currentTimeMillis - expireTime) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    DelayTaskSortItem delayTaskInfo = JSON.parseObject(tuple.getElement(), DelayTaskSortItem.class);</span><br><span class="line">                    <span class="keyword">return</span> delayTaskInfo;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zAdd(redisDelayQueueKey, delayTaskSortItem.getExecuteTime(), JSON.toJSONString(delayTaskSortItem));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zRem(redisDelayQueueKey, Arrays.asList(String.valueOf(JSON.toJSONString(delayTaskSortItem))));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="回调线程-RedisDelayQueueHandler"><a href="#回调线程-RedisDelayQueueHandler" class="headerlink" title="回调线程 RedisDelayQueueHandler"></a>回调线程 RedisDelayQueueHandler</h4><p>将回调队列中的元素转换到就绪队列的专门处理线程：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisDelayQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskSortItem&gt; redisDelayQueue;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisReadyQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskInfo&gt; redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> IDistributionLock distributionLock;</span><br><span class="line">   </span><br><span class="line">  <span class="comment">/*@SneakyThrows - Project Lombok</span></span><br><span class="line"><span class="comment">@SneakyThrows can be used to sneakily throw checked exceptions without actually declaring this in your method&#x27;s throws clause.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                DelayTaskSortItem delayTaskSortItem= redisDelayQueue.pop();</span><br><span class="line">                <span class="keyword">if</span> (delayTaskSortItem == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                String lockKey = <span class="string">&quot;pay:notify:dequeue:lock&quot;</span> + delayTaskSortItem.getTaskId();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">boolean</span> lockStatus = distributionLock.tryLockTimeOut(lockKey, <span class="number">3000</span>);</span><br><span class="line">                    <span class="keyword">if</span> (!lockStatus) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span>(delayTaskSortItem.getExecuteTime() &gt; System.currentTimeMillis())&#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"> </span><br><span class="line">                    <span class="keyword">if</span>(delayTaskInfo.getExecuteTime() &gt; System.currentTimeMillis()) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">//推入任务到达就绪队列之前需要检查是否符合条件：执行任务时间，任务池和延迟队列任务是否一致，任务id是否一致</span></span><br><span class="line">                    log.info(<span class="string">&quot;推入任务：&quot;</span>+delayTaskInfo);</span><br><span class="line">                    redisReadyQueue.put(delayTaskInfo);</span><br><span class="line">                    redisDelayQueue.delete(delayTaskSortItem);</span><br><span class="line">                   </span><br><span class="line">                &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付的延迟队列出现异常情况1：&quot;</span>, e);</span><br><span class="line">                &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">                    distributionLock.releaseLock(lockKey);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.info(<span class="string">&quot;支付的延迟队列出现异常情况2：&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="就绪队列-RedisReadyQueue"><a href="#就绪队列-RedisReadyQueue" class="headerlink" title="就绪队列 RedisReadyQueue"></a>就绪队列 RedisReadyQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisReadyQueue&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskInfo</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String REDIS_READY_QUEUE_KEY = <span class="string">&quot;redis:ready:queue:pay&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskInfo <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String item = redisService.rpop(REDIS_READY_QUEUE_KEY);</span><br><span class="line">        <span class="keyword">return</span> JSON.parseObject(item,DelayTaskInfo.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        Long id = -<span class="number">1L</span>;</span><br><span class="line">        id = redisService.lpush(REDIS_READY_QUEUE_KEY, JSON.toJSONString(delayTaskInfo));</span><br><span class="line">        <span class="keyword">return</span> id &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="就绪线程-RedisReadyQueueHandler"><a href="#就绪线程-RedisReadyQueueHandler" class="headerlink" title="就绪线程 RedisReadyQueueHandler"></a>就绪线程 RedisReadyQueueHandler</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisReadyQueue redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisDelayQueue redisDelayQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            DelayTaskInfo delayTaskInfo = redisReadyQueue.pop();</span><br><span class="line">            log.info(<span class="string">&quot;弹出任务：delayTaskInfo is &#123;&#125;&quot;</span>,delayTaskInfo);</span><br><span class="line">            ResponseEntity&lt;String&gt; responseEntity = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (HttpStatus.OK.equals(responseEntity.getStatusCode())) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付回调成功！====== &quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;支付业务回调失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                retryAgain(delayTaskInfo);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 进入重试，放入回调队列</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">retryAgain</span><span class="params">(DelayTaskInfo delayTaskInfo)</span></span>&#123;</span><br><span class="line">        <span class="comment">//进入重试环节，放入回调队列</span></span><br><span class="line">        DelayTaskSortItem delayTaskSortItem = <span class="keyword">new</span> DelayTaskSortItem(delayTaskInfo.getTaskId(),PAY_TOPIC,delayTaskInfo.getExecuteTime());</span><br><span class="line">      </span><br><span class="line">        redisDelayQueue.put(delayTaskSortItem);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign/" class="post-title-link" itemprop="url">spring-cloud-03-REST请求框架Feign</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-08-31 13:26:15" itemprop="dateCreated datePublished" datetime="2021-08-31T13:26:15+08:00">2021-08-31</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-09-24 08:33:38" itemprop="dateModified" datetime="2021-09-24T08:33:38+08:00">2021-09-24</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://book.itheima.net/course/1265899443273850881/1275268490151862274/1275304099226591234">推荐教程网站</a></p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><img src="https://book.itheima.net/uploads/course/images/java/5.4/image-20200623135343793.png"></p>
-<p>Feign是Netflix开发的声明式、模板化的HTTP客户端，它可以帮助我们更快捷、优雅地调用HTTP API。Feign支持多种注解，包括Feign自带注解以及JAX-RS注解等。</p>
-<p>当Feign与Eureka和Ribbon组合使用时，Feign就具有了负载均衡的功能。在Feign的实现下，我们只需要定义一个接口并使用注解方式配置，即可完成服务接口的绑定，不需要使用RestTemple的方式，从而简化了Ribbon自动封装服务调用客户端的开发工作量。如此看来，我们可以把Feign理解为一个Spring Cloud远程服务的框架或者工具，它能够帮助开发者用更少的代码，更好的兼容方式对远程服务进行调用。</p>
-<blockquote>
-<p>Feign在流程中其实与Ribbon没有任何关系，Feign封装了Http请求和RPC请求，交给Feign.client发送具体的REST请求</p>
-<p>比如使用<a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/740.html">OpenFeign调用下游第三方接口</a></p>
-</blockquote>
-<h2 id="快速入门"><a href="#快速入门" class="headerlink" title="快速入门"></a>快速入门</h2><h3 id="引进依赖"><a href="#引进依赖" class="headerlink" title="引进依赖"></a>引进依赖</h3><p>Feign提供了接口，仍然需要具体的client实现，那么openFeign提供此实现</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--feign 依赖--&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-openfeign<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="全局配置"><a href="#全局配置" class="headerlink" title="全局配置"></a>全局配置</h3><p>注意：如果是配合Eureka搭建分布式系统，那么需要配置Eureka，在此不再赘述；如果只是使用Fegin作为调用第三方接口的REST框架，那么不需要任何配置，和RestTemplate一样。</p>
-<h3 id="开启Feign"><a href="#开启Feign" class="headerlink" title="开启Feign"></a>开启Feign</h3><p>在启动类EurekaFeignClientApplication中添加@EnableFeignClients开启Feign Client功能</p>
-<blockquote>
-<p>注意：如果是和Eureka配合使用，添加@EnableEurekaClient开启Eureka Client功能</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.boot.SpringApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.netflix.eureka.EnableEurekaClient;</span><br><span class="line"><span class="keyword">import</span> org.springframework.cloud.openfeign.EnableFeignClients;</span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="meta">@EnableFeignClients</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaFeignClientApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      SpringApplication.run(EurekaFeignClientApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="用法1：和Eureka搭配"><a href="#用法1：和Eureka搭配" class="headerlink" title="用法1：和Eureka搭配"></a>用法1：和Eureka搭配</h3><p>实现一个简单的Feign Client <!--可以看到Feign只是接口，需要具体的实现类client-->。首先在eureka-feign-client中创建service包，并在该包下创建接口FeignService，通过添加@FeignClient注解指定要调用的<a href="">服务提供者</a>。</p>
-<p>提供者服务的url：Get <a target="_blank" rel="noopener" href="http://eureka-provider/hello">http://eureka-provider/hello</a></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.springframework.cloud.openfeign.FeignClient;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Service;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMethod;</span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="meta">@FeignClient(name = &quot;eureka-provider&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FeignService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/hello&quot;,method = RequestMethod.GET)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>@FeignClient注解的name属性指定FeignService接口要调用的是eureka-provider。需要注意的是，这里name属性的值，必须是<a href="">服务提供者</a>application.yml全局配置文件中指定的服务提供者的名称，而不是项目的名称。</p>
-<p>测试：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> test&#123;</span><br><span class="line">	feignService.sayHello(); <span class="comment">//通过feing client调用服务提供者的url</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="用法2：只使用此REST-HTTP框架"><a href="#用法2：只使用此REST-HTTP框架" class="headerlink" title="用法2：只使用此REST HTTP框架"></a>用法2：只使用此REST HTTP框架</h3><p><a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/740.html">OpenFeign调用下游第三方接口</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.yanzuoguang.com/article/739">OpenFeign请求动态url</a></p>
-<h2 id="工程使用"><a href="#工程使用" class="headerlink" title="工程使用"></a>工程使用</h2><h3 id="拦截Feign请求的RequestInterceptor"><a href="#拦截Feign请求的RequestInterceptor" class="headerlink" title="拦截Feign请求的RequestInterceptor"></a>拦截Feign请求的RequestInterceptor</h3><p>微服务之间的Feign调用，也需要在请求头添加身份认证，那么使用此方法对所有Feign请求添加身份认证</p>
-<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jiahao1186/article/details/102747166">https://blog.csdn.net/jiahao1186/article/details/102747166</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
     
 
 
@@ -957,80 +666,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-07-21 08:34:42" itemprop="dateCreated datePublished" datetime="2021-07-21T08:34:42+08:00">2021-07-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-08-16 16:33:49" itemprop="dateModified" datetime="2021-08-16T16:33:49+08:00">2021-08-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>controller使用无注解的参数</p>
-<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam">https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam</a></p>
-<p>@RequestParam不是必须使用的，默认spring mvc使用的handler会对参数做映射</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-01-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1175,10 +810,378 @@
 
 
 
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-21 08:34:42" itemprop="dateCreated datePublished" datetime="2021-07-21T08:34:42+08:00">2021-07-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-08-16 16:33:49" itemprop="dateModified" datetime="2021-08-16T16:33:49+08:00">2021-08-16</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>controller使用无注解的参数</p>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam">https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam</a></p>
+<p>@RequestParam不是必须使用的，默认spring mvc使用的handler会对参数做映射</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%8A%A0%E5%AF%86%E8%AE%BE%E8%AE%A1/%E5%85%AC%E9%92%A5%E7%A7%81%E9%92%A5-%E5%8A%A0%E5%AF%86%E8%A7%A3%E5%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%8A%A0%E5%AF%86%E8%AE%BE%E8%AE%A1/%E5%85%AC%E9%92%A5%E7%A7%81%E9%92%A5-%E5%8A%A0%E5%AF%86%E8%A7%A3%E5%AF%86/" class="post-title-link" itemprop="url">公钥私钥-加密解密</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-08 21:00:10" itemprop="dateCreated datePublished" datetime="2021-07-08T21:00:10+08:00">2021-07-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">既然是加密，那肯定是不希望别人知道我的消息，所以只有我才能解密，所以可得出公钥负责加密，私钥负责解密；同理，既然是签名，那肯定是不希望有人冒充我发消息，只有我才能发布这个签名，所以可得出私钥负责签名，公钥负责验证。</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zk%E8%B0%83%E4%BC%98%E4%B8%8E%E5%88%86%E6%9E%90-01-%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E9%80%89%E4%B8%BE%E5%87%BAleader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/05/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zk%E8%B0%83%E4%BC%98%E4%B8%8E%E5%88%86%E6%9E%90-01-%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E9%80%89%E4%B8%BE%E5%87%BAleader/" class="post-title-link" itemprop="url">zk调优与分析-01-集群无法选举出leader</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-05 19:01:00" itemprop="dateCreated datePublished" datetime="2021-07-05T19:01:00+08:00">2021-07-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ZooKeeper作为dubbo的注册中心，可谓是重中之重，线上ZK的任何风吹草动都会牵动心弦。最近笔者就碰到线上ZK Leader宕机后，选主无法成功导致ZK集群拒绝服务的现象，于是把这个case写出来分享给大家(基于ZooKeeper 3.4.5)。</p>
+<h2 id="Bug现场"><a href="#Bug现场" class="headerlink" title="Bug现场"></a>Bug现场</h2><p>一天早上，突然接到电话，说是ZooKeeper物理机宕机了，而剩余几台机器状态都是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh zkServer.sh status</span><br><span class="line">it is probably not running</span><br></pre></td></tr></table></figure>
+
+<p>笔者看了下监控，物理机宕机的正好是ZK的leader。3节点的ZK，leader宕了后，其余两台一直未能成为leader，把宕机的那台紧急拉起来之后，依旧无法选主，<br>导致ZK集群整体拒绝服务！<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0m4ibVmN3CGPSxKJJdcVq2u6cHK6chnCicGLRXE5pLPt5czKt0mcPsx4w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h2 id="业务影响"><a href="#业务影响" class="headerlink" title="业务影响"></a>业务影响</h2><p>Dubbo如果连接不上ZK，其调用元信息会一直缓存着，所以并不会对请求调用造成实际影响。麻烦的是，如果在ZK拒绝服务期间，应用无法重启或者发布，一旦遇到紧急事件而重启(发布)不能，就会造成比较重大的影响。<br>好在我们为了高可用，做了对等机房建设，所以非常淡定的将流量切到B机房，<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er04xonZeWUwegNic2KQHH3jJJGgoz1ltQRxY86ajADNBCYdaAqUd5WU5g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>双机房建设就是好啊,一键切换！<br>切换过后就可以有充裕的时间来恢复A机房的集群了。在紧张恢复的同时，笔者也开始了分析工作。</p>
+<h2 id="日志表现"><a href="#日志表现" class="headerlink" title="日志表现"></a>日志表现</h2><p>首先，查看日志，期间有大量的client连接报错，自然是直接过滤掉，以免干扰。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat zookeeper.out | grep -v &#39;client xxx&#39; | &gt; &#x2F;tmp&#x2F;1.txt</span><br></pre></td></tr></table></figure>
+
+<p>首先看到的是下面这样的日志:</p>
+<h3 id="ZK-A机器日志"><a href="#ZK-A机器日志" class="headerlink" title="ZK-A机器日志"></a>ZK-A机器日志</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Zk-A机器:</span><br><span class="line">2021-06-16 03:32:35 ... New election. My id&#x3D;3</span><br><span class="line">2021-06-16 03:32:46 ... QuoeumPeer] LEADING  &#x2F;&#x2F; 注意，这里选主成功</span><br><span class="line">2021-06-16 03:32:46 ... QuoeumPeer] LEADING - LEADER ELECTION TOOK - 7878&#39;</span><br><span class="line">2021-06-16 03:32:48 ... QuoeumPeer] Reading snapshot &#x2F;xxx&#x2F;snapshot.xxx</span><br><span class="line">2021-06-16 03:32:54 ... QuoeumPeer] Snahotting xxx to &#x2F;xxx&#x2F;snapshot.xxx</span><br><span class="line">2021-06-16 03:33:08 ... Follower sid ZK-B.IP</span><br><span class="line">2021-06-16 03:33:08 ... Unexpected exception causing shutdown while sock still open</span><br><span class="line">java.io.EOFException </span><br><span class="line">    at java.io.DataInputStream.readInt</span><br><span class="line">    ......</span><br><span class="line">    at quorum.LearnerHandler.run</span><br><span class="line">2021-06-16 03:33:08 ******* GOODBYE ZK-B.IP *******</span><br><span class="line">2021-06-16 03:33:27 Shutting down</span><br></pre></td></tr></table></figure>
+
+<p>这段日志看上去像选主成功了，但是和其它机器的通信出问题了，导致Shutdown然后重新选举。</p>
+<h2 id="ZK-B机器日志"><a href="#ZK-B机器日志" class="headerlink" title="ZK-B机器日志"></a>ZK-B机器日志</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:32:48 New election. My id&#x3D;2</span><br><span class="line">2021-06-16 03:32:48 QuoeumPeer] FOLLOWING</span><br><span class="line">2021-06-16 03:32:48 QuoeumPeer] FOLLOWING - LEADER ELECTION TOOK - 222</span><br><span class="line">2021-06-16 03:33:08.833 QuoeumPeer] Exception when following the leader</span><br><span class="line">java.net.SocketTimeoutException: Read time out</span><br><span class="line">    at java.net.SocketInputStream.socketRead0</span><br><span class="line">    ......</span><br><span class="line">    at org.apache.zookeeper.server.quorum.Follower.followLeader</span><br><span class="line">2021-06-16 03:33:08.380 Shutting down</span><br></pre></td></tr></table></figure>
+
+<p>这段日志也表明选主成功了，而且自己是Following状态，只不过Leader迟迟不返回，导致超时进而Shutdown</p>
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><p>笔者将上面的日志画成时序图，以便分析:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0YyjZOzPPZ1H1iatv0dJIWewJmt33kt7bSrMMhiciasLBtdsniaq8HpACSg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>从ZK-B的日志可以看出，其在成为follower之后，一直等待leader，直到Read time out。<br>从ZK-A的日志可以看出,其在成为LEADING后，在33:08,803才收到Follower也就是ZK-B发出的包。而这时，ZK-B已经在33:08,301的时候Read timed out了。</p>
+<h3 id="首先分析follower-ZK-B-的情况"><a href="#首先分析follower-ZK-B-的情况" class="headerlink" title="首先分析follower(ZK-B)的情况"></a>首先分析follower(ZK-B)的情况</h3><p>我们知道其在03:32:48成为follower,然后在03:33:08出错Read time out，其间正好是20s。于是笔者先从Zookeeper源码中找下其设置Read time out是多长时间。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Learner</span><br><span class="line">protected void connectToLeader(InetSocketAddress addr) &#123;</span><br><span class="line">    ......</span><br><span class="line">    sock &#x3D; new Socket()</span><br><span class="line">    &#x2F;&#x2F; self.tockTime 2000 self.initLimit 10</span><br><span class="line">    sock.setSoTimeout(self.tickTime * self.initLimit);</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其Read time out是按照zoo.cfg中的配置项而设置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tickTime&#x3D;2000 self.tickTime</span><br><span class="line">initLimit&#x3D;10 self.initLimit</span><br><span class="line">syncLimit&#x3D;5</span><br></pre></td></tr></table></figure>
+
+<p>很明显的，ZK-B在成为follower后，由于某种原因leader在20s后才响应。那么接下来对leader进行分析。</p>
+<h3 id="对leader-ZK-A-进行分析"><a href="#对leader-ZK-A-进行分析" class="headerlink" title="对leader(ZK-A)进行分析"></a>对leader(ZK-A)进行分析</h3><p>首先我们先看下Leader的初始化逻辑:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">quorumPeer</span><br><span class="line">    |-&gt;打印 LEADING</span><br><span class="line">    |-&gt;makeLeader</span><br><span class="line">        |-&gt; new ServerSocket listen and bind </span><br><span class="line">    |-&gt;leader.lead()</span><br><span class="line">        |-&gt;打印 LEADER ELECTION TOOK</span><br><span class="line">        |-&gt;loadData</span><br><span class="line">            |-&gt;loadDataBase </span><br><span class="line">                |-&gt;resore 打印Reading snapshot</span><br><span class="line">            |-&gt;takeSnapshot</span><br><span class="line">                |-&gt;save 打印Snapshotting</span><br><span class="line">            |-&gt;cnxAcceptor 处理请求Accept</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，在我们的ZK启动监听端口到正式处理请求之间，还有Reading Snapshot和Snapshotting(写)动作。从日志可以看出一个花了6s多,一个花了14s多。然后就有20s的处理空档期。如下图所示:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0H8iawNnVj63Ic0JWnlB7EMohfSktibyMNic1ZSfa6trDQbLLoxz3rLyPg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>由于在socket listen 20s之后才开始处理数据，所以ZK-B建立成功的连接实际还放在tcp的内核全连接队列(backlog)里面，由于在内核看来三次握手是成功的，所以能够正常接收ZK-B发送的follower ZK-B数据。在20s，ZK-A真正处理后，从buffer里面拿出来20s前ZK-B发送的数据，处理完回包的时候，发现ZK-B连接已经断开。<br>同样的，另一台follower(这时候我们已经把宕机的拉起来了，所以是3台)也是由于此原因gg,而leader迟迟收不到其它机器的响应，认为自己的leader没有达到1/2的票数，而Shutdown重新选举。</p>
+<h2 id="Snapshot耗时"><a href="#Snapshot耗时" class="headerlink" title="Snapshot耗时"></a>Snapshot耗时</h2><p>那么是什么导致Snapshotting读写这么耗时呢？笔者查看了下Snapshot文件大小,有将近一个G左右。</p>
+<h2 id="调大initLimit"><a href="#调大initLimit" class="headerlink" title="调大initLimit"></a>调大initLimit</h2><p>针对这种情况，其实我们只要调大initLimit，应该就可以越过这道坎。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000 &#x2F;&#x2F; 这个不要动，因为和ZK心跳机制有关</span><br><span class="line">initLimit&#x3D;100 &#x2F;&#x2F; 直接调成100,200s!</span><br></pre></td></tr></table></figure>
+
+<h2 id="这么巧就20s么？"><a href="#这么巧就20s么？" class="headerlink" title="这么巧就20s么？"></a>这么巧就20s么？</h2><p>难道就这么巧，每次选举流程都刚好卡在20s不过？反复选举了好多次，应该有一次要&lt;20s成功吧，不然运气也太差了。如果是每次需要处理Snapshot 30s也就算了，但这个20s太接近极限值了，是否还有其它因素导致选主不成功？</p>
+<h2 id="第二种情况"><a href="#第二种情况" class="headerlink" title="第二种情况"></a>第二种情况</h2><p>于是笔者翻了下日志，还真有！这次leader这边处理Snapshot快了，但是follower又拉跨了!日志如下:</p>
+<h3 id="leader-ZK-A-第二种情况"><a href="#leader-ZK-A-第二种情况" class="headerlink" title="leader(ZK-A)第二种情况"></a>leader(ZK-A)第二种情况</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:38:03 New election. My id&#x3D; 3</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] LEADING</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] LEADING - LEADER ELECTION TOOK 25703</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] Reading snapshot</span><br><span class="line">2021-06-16 03:38:29 QuorumPeer] Snapshotting</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Follower sid 1</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Follower sid 3</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Sending DIFF</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Sending DIFF</span><br><span class="line">2021-06-16 03:38:54 LearnerHandler] Have quorum of supporters</span><br><span class="line">2021-06-16 03:38:55 client attempting to establsh new session 到这开始接收client请求了</span><br><span class="line">......</span><br><span class="line">2021-06-16 03:38:58 Shutdown callsed</span><br><span class="line">java.lang.Exception: shutdown Leader! reason: Only 1 followers,need 1</span><br><span class="line">    at org.apache.zookeeper.server.quorum.Leader.shutdown</span><br></pre></td></tr></table></figure>
+
+<p>从日志中我们可以看到选举是成功了的，毕竟处理Snapshot只处理了13s(可能是pagecache的原因处理变快)。其它两个follower顺利连接，同时给他们发送DIFF包，但是情况没好多久，又爆了一个follower不够的报错，这里的报错信息比较迷惑。<br>我们看下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Leader.lead</span><br><span class="line">void lead() &#123;</span><br><span class="line">    while(true)&#123;</span><br><span class="line">                 Thread.sleep(self.tickTime&#x2F;2);</span><br><span class="line">                 ......</span><br><span class="line">                 syncedSet.add(self.getId())</span><br><span class="line">                 for(LearnerHandler f:getLearners())&#123;</span><br><span class="line">                     if(f.synced() &amp;&amp; f.getLearnerType()&#x3D;&#x3D;LearnerType.PARTICIPANT)&#123;</span><br><span class="line">                         syncedSet.add(f.getSid());</span><br><span class="line">                     &#125;</span><br><span class="line">                     f.ping();</span><br><span class="line">                 &#125;</span><br><span class="line">                  &#x2F;&#x2F; syncedSet只有1个也就是自身，不符合&gt;1&#x2F;2的条件，报错并跳出</span><br><span class="line">                if (!tickSkip &amp;&amp; !self.getQuorumVerifier().containsQuorum(syncedSet)) &#123;</span><br><span class="line">                    shutdown(&quot;Only&quot; + syncedSet.size() + &quot; followers, need&quot; + (self.getVotingView().size()&#x2F;2));</span><br><span class="line">                    return;</span><br><span class="line">              &#125; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>报错的实质就是和leader同步的syncedSet小于固定的1/2集群，所以shutdown了。同时在代码里面我们又可以看到syncedSet的判定是通过learnerHander.synced()来决定。我们继续看下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LearnerHandler</span><br><span class="line">    public boolean synced()&#123;</span><br><span class="line">        &#x2F;&#x2F; 这边isAlive是线程的isAlive</span><br><span class="line">        return isAlive() &amp;&amp; tickOfLastAck &gt;&#x3D; leader.self.tick - leader.self.syncLimit;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显的，follower和leader的同步时间超过了leader.self.syncLimit也就是5 * 2 = 10s</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime &#x3D; 2000</span><br><span class="line">syncLimit &#x3D; 5</span><br></pre></td></tr></table></figure>
+
+<p>那么我们的tick是怎么更新的呢,答案是在follower响应UPTODATE包,也就是已经和leader同步后，follower每个包过来就更新一次，在此之前并不更新。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0tttT7icMDVASzFJWML5XkY093c94IgvFkt8b1QaibWQMDGRlEbVIzbOA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>进一步推理，也就是我们的follower处理leader的包超过了10s，导致tick未及时更新，进而syncedSet小于数量，导致leader shutdown。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0yhedbofHiaNsJib1Lg7ePTiboiaO03k5AC5SpfOpMo2AgnL6E9kvtR5mWA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h3 id="follower-ZK-B-第二种情况"><a href="#follower-ZK-B-第二种情况" class="headerlink" title="follower(ZK-B)第二种情况"></a>follower(ZK-B)第二种情况</h3><p>带着这个结论，笔者去翻了follower(ZK-B)的日志(注:ZK-C也是如此)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:38:24 New election. My id &#x3D; 3</span><br><span class="line">2021-06-16 03:38:24 FOLLOWING</span><br><span class="line">2021-06-16 03:38:24 FOLLOWING - LEADER ELECTION TOOK - 8004</span><br><span class="line">2021-06-16 03:38:42 Getting a diff from the leader</span><br><span class="line">2021-06-16 03:38:42 Snapshotting</span><br><span class="line">2021-06-16 03:38:57 Snapshotting</span><br><span class="line">2021-06-16 03:39:12 Got zxid xxx</span><br><span class="line">2021-06-16 03:39:12 Exception when following the leader</span><br><span class="line">java.net.SocketException: Broken pipe</span><br></pre></td></tr></table></figure>
+
+<p>又是Snapshot,这次我们可以看到每次Snapshot会花15s左右，远超了syncLimit。<br>从源码中我们可以得知，每次Snapshot之后都会立马writePacket(即响应)，但是第一次回包有由于不是处理的UPTODATE包,所以并不会更新Leader端对应的tick:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">learner:</span><br><span class="line">proteced void syncWithLeader(...)&#123;</span><br><span class="line">outerloop:</span><br><span class="line">    while(self.isRunning())&#123;</span><br><span class="line">        readPacket(qp);</span><br><span class="line">        switch(qp.getType())&#123;</span><br><span class="line">            case Leader.UPTODATE</span><br><span class="line">            if(!snapshotTaken)&#123;</span><br><span class="line">                zk.takeSnapshot();</span><br><span class="line">                ......</span><br><span class="line">            &#125;</span><br><span class="line">            break outerloop;</span><br><span class="line">        &#125;</span><br><span class="line">        case Leader.NEWLEADER:</span><br><span class="line">            zk.takeSnapshot();</span><br><span class="line">            ......</span><br><span class="line">            writePacket(......) &#x2F;&#x2F; leader收到后会更新tick</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">    writePacket(ack,True); &#x2F;&#x2F; leader收到后会更新tick</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，ZK-B的日志里面表明会两次Snapshotting。至于为什么两次，应该是一个微妙的Bug,(在3.4.5的官方注释里面做了fix,但看日志依旧打了两次)，笔者并没有深究。好了，整个时序图就如下所示:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0JdoibkzrcpBvl1GH9RCIqtbDdlZepmmFBZ4N3Vdr2KSU8oWebetd7Qg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>好了，第二种情况也gg了。这一次时间就不是刚刚好出在边缘了，得将近30s才能Okay, 而synedSet只有10s(2*5)。ZK集群就在这两种情况中反复选举，直到人工介入。</p>
+<h2 id="调大syncLimit"><a href="#调大syncLimit" class="headerlink" title="调大syncLimit"></a>调大syncLimit</h2><p>针对这种情况，其实我们只要调大syncLimit，应该就可以越过这道坎。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000 &#x2F;&#x2F; 这个不要动，因为和ZK心跳机制有关</span><br><span class="line">syncLimit&#x3D;50  &#x2F;&#x2F; 直接调成50,100s!</span><br></pre></td></tr></table></figure>
+
+<h2 id="线下复现"><a href="#线下复现" class="headerlink" title="线下复现"></a>线下复现</h2><p>当然了，有了分析还是不够的。我们还需要通过测试去复现并验证我们的结论。我们在线下构造了一个1024G Snapshot的ZookKeeper进行测试，在initLimit=10以及syncLimit=5的情况下确实和线上出现一模一样的那两种现象。在笔者将参数调整后:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000</span><br><span class="line">initLimit&#x3D;100 &#x2F;&#x2F; 200s</span><br><span class="line">syncLimit&#x3D;50  &#x2F;&#x2F; 100s</span><br></pre></td></tr></table></figure>
+
+<p>Zookeeper集群终于正常了。</p>
+<h2 id="线下用新版本3-4-13尝试复现"><a href="#线下用新版本3-4-13尝试复现" class="headerlink" title="线下用新版本3.4.13尝试复现"></a>线下用新版本3.4.13尝试复现</h2><p>我们在线下还用比较新的版本3.4.13尝试复现，发现Zookeeper在不调整参数的情况下，很快的就选主成功并正常提供服务了。笔者翻了翻源码，发现其直接在Leader.lead()阶段和SyncWithLeader阶段(如果是用Diff的话)将takeSnapshot去掉了。这也就避免了处理snapshot时间过长导致无法提供服务的现象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Zookeeper 3.4.13</span><br><span class="line"></span><br><span class="line">ZookeeperServer.java</span><br><span class="line">public void loadData()&#123;</span><br><span class="line">    ...</span><br><span class="line">    &#x2F;&#x2F; takeSnapshot() 删掉了最后一行的takeSnapshot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">learner.java</span><br><span class="line">protected void syncWithLeader(...)&#123;</span><br><span class="line">    boolean snapshotNeeded&#x3D;true</span><br><span class="line">    if(qp.getType() &#x3D;&#x3D; Leader.DIFF)&#123;</span><br><span class="line">        ......</span><br><span class="line">        snapshotNeeded &#x3D; false</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">    if(snapshotNeeded)&#123;</span><br><span class="line">        zk.takeSnapshot();</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是升级到高版本靠谱呀，这个版本的代码顺带把那个迷惑性的日志也改了！</p>
+<h2 id="为何Dubbo-ZK有那么多的数据"><a href="#为何Dubbo-ZK有那么多的数据" class="headerlink" title="为何Dubbo-ZK有那么多的数据"></a>为何Dubbo-ZK有那么多的数据</h2><p>最后的问题就是一个dubbo相关的ZK为什么有那么多数据了!笔者利用ZK使用的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">org.apache.zookeeper.server.SnapshotFormatter</span><br></pre></td></tr></table></figure>
+
+<p>工具dump出来并用shell(awk|unique)聚合了一把，发现dubbo的数据只占了其中的1/4。<br>有1/2是Solar的Zookeeper(已经迁移掉，遗留在上面的)。还有1/4是由于某个系统的分布式锁Bug不停的写入进去并且不删除的(已让他们修改)。所以将dubbo-zk和其它ZK数据分离是多么的重要！随便滥用就有可能导致重大事件！</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/23/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-url-%E8%87%AA%E5%8A%A8%E8%BD%AC%E8%AF%91%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7%E4%B8%BA%E7%A9%BA%E6%A0%BC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/23/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-url-%E8%87%AA%E5%8A%A8%E8%BD%AC%E8%AF%91%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7%E4%B8%BA%E7%A9%BA%E6%A0%BC/" class="post-title-link" itemprop="url">http-url自动转译特殊符号为空格</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-23 20:17:10" itemprop="dateCreated datePublished" datetime="2021-06-23T20:17:10+08:00">2021-06-23</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-06-24 17:54:04" itemprop="dateModified" datetime="2021-06-24T17:54:04+08:00">2021-06-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>调试客户端向服务器传递参数时，url出现+，空格，/，?，%，#，&amp;，=等特殊符号的时候就自动变成空格，可能在服务器端无法获得正确的参数值</p>
+<p>解决方法如下：</p>
+<p>URL字符转义</p>
+<ol>
+<li>URL 中+号表示空格 %2B </li>
+<li>空格 URL中的空格可以用+号或者编码 %20 </li>
+<li>分隔目录和子目录 %2F </li>
+<li>分隔实际的URL和参数 %3F </li>
+<li>指定特殊字符 %25</li>
+</ol>
+<p><img src="https://yqfile.alicdn.com/img_d5780acb990734be5e2ccbd163376ef5.png" alt="img"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

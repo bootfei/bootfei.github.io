@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">246</span>
+          <span class="site-state-item-count">218</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -208,7 +208,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -240,342 +240,6 @@
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E4%B9%8B%E9%97%B4%E8%B0%83%E7%94%A8-02-%E6%9C%8D%E5%8A%A1%E6%BC%94%E8%BF%9B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/15/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%BE%AE%E6%9C%8D%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E4%B9%8B%E9%97%B4%E8%B0%83%E7%94%A8-02-%E6%9C%8D%E5%8A%A1%E6%BC%94%E8%BF%9B/" class="post-title-link" itemprop="url">服务之间调用总结</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-06-15 13:50:34" itemprop="dateCreated datePublished" datetime="2021-06-15T13:50:34+08:00">2021-06-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>微服务是否适合小团队是个见仁见智的问题。</p>
-<p>回归现象看本质，随着业务复杂度的提高，单体应用越来越庞大，就好像一个类的代码行越来越多，分而治之，切成多个类应该是更好的解决方法，所以一个庞大的单体应用分出多个小应用也更符合这种分治的思想。</p>
-<p>当然微服务架构不应该是一个小团队一开始就该考虑的问题，而是慢慢演化的结果，谨慎过度设计尤为重要。</p>
-<p>公司的背景是提供SaaS服务，对于大客户也会有定制开发以及私有化部署。经过2年不到的时间，技术架构经历了从单体到微服务再到容器化的过程。</p>
-<h2 id="单体应用时代"><a href="#单体应用时代" class="headerlink" title="单体应用时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">单体应用时代</a></h2><p>多说一句，前后端分离也不一定就不能服务端渲染，例如电商系统或者一些匿名即可访问的系统，加一层薄薄的View层，无论是php还是用Thymeleaf都是不错的选择。</p>
-<p>部署架构上，我们使用Nginx代理前端HTML资源，在接收请求时根据路径反向代理到server的8080端口实现业务。</p>
-<p>[<img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlbgkXa228IFz1iazDgxyjrw8tYt9oICv7IlMklYjzGLLNialwiaCTWWdkA/640" alt="Image" style="zoom:67%;" /></p>
-<h3 id="接口定义"><a href="#接口定义" class="headerlink" title="接口定义"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">接口定义</a></h3><p>接口按照标准的Restful来定义，</p>
-<ul>
-<li>版本，统一跟在 /api/后面，例如 <code>/api/v2</code></li>
-<li>以资源为中心，使用复数表述，例如<code>/api/contacts</code>，也可以嵌套，如<code>/api/groups/1/contacts/100</code></li>
-<li>url中尽量不使用动词，实践中发现做到这一点真的比较难，每个研发人员的思路不一致，起的名字也千奇百怪，都需要在代码Review中覆盖。</li>
-<li>动作支持，<code>POST / PUT / DELELE / GET</code> ，这里有一个坑，PUT和PATCH都是更新，但是PUT是全量更新而PATCH是部分更新，前者如果传入的字段是空（未传也视为空）那么也会被更新到数据库中。目前我们虽然是使用PUT但是忽略空字段和未传字段，本质上是一种部分更新，这也带来了一些问题，比如确有置空的业务需要特殊处理。</li>
-<li>接口通过swagger生成文档供前端同事使用。</li>
-</ul>
-<h3 id="持续集成-CI"><a href="#持续集成-CI" class="headerlink" title="持续集成(CI)"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">持续集成(CI)</a></h3><p>团队初始成员之前都有在大团队共事的经历，所以对于质量管控和流程管理都有一些共同的要求。因此在开发之初就引入了集成测试的体系，可以直接开发针对接口的测试用例，统一执行并计算覆盖率。</p>
-<p>一般来说代码自动执行的都是单元测试(Unit Test)，我们之所以叫集成测试是因为测试用例是针对API的，并且包含了数据库的读写，MQ的操作等等，除了外部服务的依赖基本都是符合真实生产场景，相当于把Jmeter的事情直接在Java层面做掉了。</p>
-<p>这在开发初期为我们提供了非常大的便利性。但值得注意的是，由于数据库以及其他资源的引入，数据准备以及数据清理时要考虑的问题就会更多，例如如何控制并行任务之间的测试数据互不影响等等。</p>
-<p>为了让这一套流程可以自动化的运作起来， 引入Jenkins也是理所当然的事情了。</p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlOdhGfEsNbPPiaCAtBC4jjVjkz7yMu5T828ko9c6ESBfcQibmC0oEJ9ng/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
-<p>开发人员提交代码进入gerrit中，Jenkins被触发开始编译代码并执行集成测试，完成后生成测试报告，测试通过再由reviewer进行代码review。在单体应用时代这样的CI架构已经足够好用，由于有集成测试的覆盖，在保持API兼容性的前提下进行代码重构都会变得更有信心。</p>
-<h2 id="微服务时代"><a href="#微服务时代" class="headerlink" title="微服务时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">微服务时代</a></h2><h3 id="服务拆分原则"><a href="#服务拆分原则" class="headerlink" title="服务拆分原则"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">服务拆分原则</a></h3><p>从数据层面看，最简单的方式就是看数据库的表之间是否有比较少的关联。例如最容易分离的一般来说都是用户管理模块。如果从领域驱动设计（DDD）看，其实一个服务就是一个或几个相关联的领域模型，通过少量数据冗余划清服务边界。</p>
-<p>服务拆分是一个大工程，往往需要几个对业务以及数据最熟悉的人一起讨论，甚至要考虑到团队结构，最终的效果是服务边界清晰， 没有环形依赖和避免双向依赖。</p>
-<h3 id="框架选择"><a href="#框架选择" class="headerlink" title="框架选择"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">框架选择</a></h3><p>由于之前的单体服务使用的是spring boot，所以框架自然而的选择了spring cloud。其实个人认为微服务框架不应该限制技术与语言，但生产实践中发现无论dubbo还是spring cloud都具有侵入性，我们在将nodejs应用融入spring cloud体系时就发现了许多问题。也许未来的service mesh才是更合理的发展道路。</p>
-<p>这是典型的Spring Cloud的使用方法</p>
-<ul>
-<li>zuul作为gateway，分发不同客户端的请求到具体service</li>
-<li>erueka作为注册中心，完成了服务发现和服务注册</li>
-<li>每个service包括gateway都自带了Hystrix提供的限流和熔断功能</li>
-<li>service之间通过feign和ribbon互相调用，feign实际上是屏蔽了service对erueka的操作</li>
-</ul>
-<p>上文说的一旦要融入异构语言的service，那么服务注册，服务发现，服务调用，熔断和限流都需要自己处理。</p>
-<p>再有关于zuul要多说几句，Sprin Cloud提供的zuul对Netflix版本的做了裁剪，去掉了动态路由功能（Groovy实现），另外一点就是zuul的性能一般，由于采用同步编程模型，对于IO密集型等后台处理时间长的链路非常容易将servlet的线程池占满，所以如果将zuul与主要service放置在同一台物理机上，在流量大的情况下，zuul的资源消耗非常大。</p>
-<p>实际测试也发现经过zuul与直接调用service的性能损失在30%左右，并发压力大时更为明显。现在spring cloud gateway是pivotal的主推了，支持异步编程模型，后续架构优化也许会采用，或是直接使用Kong这种基于nginx的网关来提供性能。当然同步模型也有优点，编码更简单，后文将会提到使用ThreadLocal如何建立链路跟踪。</p>
-<h3 id="架构改造"><a href="#架构改造" class="headerlink" title="架构改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">架构改造</a></h3><p>经过大半年的改造以及新需求的加入，单体服务被不断拆分，最终形成了10余个微服务，并且搭建了Spark用于BI。初步形成两大体系，微服务架构的在线业务系统(OLTP) + Spark大数据分析系统(OLAP)。数据源从只有Mysql增加到了ES和Hive。多数据源之间的数据同步也是值得一说的话题，但内容太多不在此文赘述。</p>
-<img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlZLks9nIVHdtGHq3jKAO2Mibp4KfNouFa9icqd47MqicicRhMEcmvH9ETbw/640" alt="Image" style="zoom:67%;" />
-
-<h3 id="自动化部署"><a href="#自动化部署" class="headerlink" title="自动化部署"></a>自动化部署</h3><p>与CI比起来，持续交付（CD）实现更为复杂，在资源不足的情况我们尚未实现CD，只是实现执行了自动化部署。</p>
-<p>由于生产环境需要通过跳板机操作，所以我们通过Jenkins生成jar包传输到跳板机，之后再通过Ansible部署到集群。</p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlOweGzDvlgNpjyY80roRKrwprlP19WLSrgcUWbZ3kOqLrYghRZlfMdw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
-<p>简单粗暴的部署方式在小规模团队开发时还是够用的，只是需要在部署前保证测试（人工测试 + 自动化测试）到位。</p>
-<h3 id="链路跟踪"><a href="#链路跟踪" class="headerlink" title="链路跟踪"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">链路跟踪</a></h3><p>开源的全链路跟踪很多，比如<code>spring cloud sleuth + zipkin</code>，国内有美团的CAT等等。其目的就是当一个请求经过多个服务时，可以通过一个固定值获取整条请求链路的行为日志，基于此可以再进行耗时分析等，衍生出一些性能诊断的功能。不过对于我们而言，首要目的就是trouble shooting，出了问题需要快速定位异常出现在什么服务，整个请求的链路是怎样的。</p>
-<p>为了让解决方案轻量，我们在日志中打印RequestId以及TraceId来标记链路。RequestId在gateway生成表示唯一一次请求，TraceId相当于二级路径，一开始与RequestId一样，但进入线程池或者消息队列后，TraceId会增加标记来标识唯一条路径。</p>
-<p>举个例子，当一次请求会向MQ发送一个消息，那么这个消息可能会被多个消费者消费，此时每个消费线程都会自己生成一个TraceId来标记消费链路。加入TraceId的目的就是为了避免只用RequestId过滤出太多日志。实现如图所示，</p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlzAbXCTKK3mgB8tTUo6iarzNNrmAUErQv5rLTO2zondavooqv9XcOBiag/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
-<p>简单的说，通过ThreadLocal存放APIRequestContext串联单服务内的所有调用，当跨服务调用时，将APIRequestContext信息转化为Http Header，被调用方获取到Http Header后再次构建APIRequestContext放入ThreadLocal，重复循环保证RequestId和TraceId不丢失即可。如果进入MQ，那么APIRequestContext信息转化为Message Header即可（基于Rabbitmq实现）。</p>
-<p>当日志汇总到日志系统后，如果出现问题，只需要捕获发生异常的RequestId或是TraceId即可进行问题定位</p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhlyvc2T2yiaUjDHk4ibibJweZrsHQZJhOWpObb9Q8TsE4JVUwBAvt7bRYYA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
-<h3 id="运维监控"><a href="#运维监控" class="headerlink" title="运维监控"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">运维监控</a></h3><p>在容器化之前，采用<code>telegraf + influxdb + grafana</code>的方案。telegraf作为探针收集jvm，system，mysql等资源的信息，写入influxdb，最终通过grafana做数据可视化。<code>spring boot actuator</code>可以配合jolokia暴露jvm的endpoint。整个方案零编码，只需要花时间配置。</p>
-<h2 id="容器化时代"><a href="#容器化时代" class="headerlink" title="容器化时代"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">容器化时代</a></h2><h3 id="架构改造-1"><a href="#架构改造-1" class="headerlink" title="架构改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">架构改造</a></h3><p>因为在做微服务之初就计划了容器化，所以架构并未大动，只是每个服务都会建立一个Dockerfile用于创建docker image</p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&chksm=fa496f8ecd3ee698f4954c00efb80fe955ec9198fff3ef4011e331aa37f55a6a17bc8c0335a8&scene=21&token=899450012&lang=zh_CN#wechat_redirect"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JdLkEI9sZfdgoeEN1mmBx8UOp1v5zhhliaibvn0lkdvGdRQ5dXiazh9VTmtIeoPO2f9ZVTHBCibFCymdwnkibEAfNCg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></a></p>
-<p>涉及变化的部分包括：</p>
-<ol>
-<li>CI中多了构建docker image的步骤</li>
-<li>自动化测试过程中将数据库升级从应用中剥离单独做成docker image</li>
-<li>生产中用k8s自带的service替代了eruka</li>
-</ol>
-<p>理由下文一一道来。</p>
-<h3 id="Spring-Cloud与k8s的融合"><a href="#Spring-Cloud与k8s的融合" class="headerlink" title="Spring Cloud与k8s的融合"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">Spring Cloud与k8s的融合</a></h3><p>我们使用的是Redhat的Openshift，可以认为是k8s企业版，其本身就有service的概念。一个service下有多个pod，pod内即是一个可服务单元。service之间互相调用时k8s会提供默认的负载均衡控制，发起调用方只需要写被调用方的serviceId即可。这一点和spring cloud fegin使用ribbon提供的功能如出一辙。</p>
-<p>也就是说服务治理可以通过k8s来解决，那么为什么要替换呢？其实上文提到了，Spring Cloud技术栈对于异构语言的支持问题，我们有许多BFF（Backend for Frontend）是使用nodejs实现的，这些服务要想融合到Spring Cloud中，服务注册，负载均衡，心跳检查等等都要自己实现。</p>
-<p>如果以后还有其他语言架构的服务加入进来，这些轮子又要重造。基于此类原因综合考量后，决定采用Openshift所提供的网络能力替换eruka。</p>
-<p>由于本地开发和联调过程中依然依赖eruka，所以只在生产上通过配置参数来控制，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">eureka.client.enabled&#96; 设置为 false，停止各服务的eureka注册</span><br><span class="line">&#96;ribbon.eureka.enabled&#96; 设置为 false，让ribbon不从eureka获取服务列表</span><br><span class="line">以服务foo为例，&#96;foo.ribbon.listofservers&#96; 设置为 &#96;http:&#x2F;&#x2F;foo:8080&#96;，那么当一个服务需要使用服务foo的时候，就会直接调用到&#96;http:&#x2F;&#x2F;foo:8080</span><br></pre></td></tr></table></figure>
-
-<h3 id="CI的改造"><a href="#CI的改造" class="headerlink" title="CI的改造"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">CI的改造</a></h3><p>CI的改造主要是多了一部编译docker image并打包到Harbor的过程，部署时会直接从Harbor拉取镜像。另一个就是数据库的升级工具。之前我们使用flyway作为数据库升级工具，当应用启动时自动执行SQL脚本。</p>
-<p>随着服务实例越来越多，一个服务的多个实例同时升级的情况也时有发生，虽然flyway是通过数据库锁实现了升级过程不会有并发，但会导致被锁服务启动时间变长的问题。</p>
-<p>从实际升级过程来看，将可能发生的并发升级变为单一进程可能更靠谱。此外后期分库分表的架构也会使随应用启动自动升级数据库变的困难。综合考量，我们将升级任务做了拆分，每个服务都有自己的升级项目并会做容器化。</p>
-<p>在使用时，作为run once的工具来使用，即docker run -rm的方式。并且后续也支持了设定目标版本的功能，在私有化项目的跨版本升级中起到了非常好的效果。</p>
-<p>至于自动部署，由于服务之间存在上下游关系，例如config，eureka等属于基本服务被其他服务依赖，部署也产生了先后顺序。基于Jenkins做pipeline可以很好的解决这个问题。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E5%BC%80%E5%8F%91%E6%90%AD%E5%BB%BA-01-idea%E9%9B%86%E6%88%90go/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E5%BC%80%E5%8F%91%E6%90%AD%E5%BB%BA-01-idea%E9%9B%86%E6%88%90go/" class="post-title-link" itemprop="url">golang的利弊</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-06-15 13:41:14" itemprop="dateCreated datePublished" datetime="2021-06-15T13:41:14+08:00">2021-06-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-11-13 11:02:50" itemprop="dateModified" datetime="2021-11-13T11:02:50+08:00">2021-11-13</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>推荐教程：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/notebook/notebook-9gko2sjj.html">https://www.w3cschool.cn/notebook/notebook-9gko2sjj.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jpfss/p/11760012.html">https://www.cnblogs.com/jpfss/p/11760012.html</a></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E7%9A%84%E5%88%A9%E5%BC%8A/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E7%9A%84%E5%88%A9%E5%BC%8A/" class="post-title-link" itemprop="url">golang的利弊</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-06-15 13:41:14 / Modified: 13:44:58" itemprop="dateCreated datePublished" datetime="2021-06-15T13:41:14+08:00">2021-06-15</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="Go语言的优势"><a href="#Go语言的优势" class="headerlink" title="Go语言的优势"></a>Go语言的优势</h2><p>选择Go语言的原因可能会有很多，关于Go语言的特性、优势等，我们在之前的文档中也已经介绍了很多了。但是最主要的原因，应该是基于以下两方面的考虑：</p>
-<p><strong>执行性能</strong></p>
-<p>缩短API的响应时长，解决批量请求访问超时的问题。在Uwork的业务场景下，一次API批量请求，往往会涉及对另外接口服务的多次调用，而在之前的PHP实现模式下，要做到并行调用是非常困难的，串行处理却不能从根本上提高处理性能。而GO语言不一样，通过协程可以方便的实现API的并行处理，达到处理效率的最大化。依赖Golang的高性能HTTP Server，提升系统吞吐能力，由PHP的数百级别提升到数千里甚至过万级别。</p>
-<p><strong>开发效率</strong></p>
-<p>GO语言使用起来简单、代码描述效率高、编码规范统一、上手快。通过少量的代码，即可实现框架的标准化，并以统一的规范快速构建API业务逻辑。能快速的构建各种通用组件和公共类库，进一步提升开发效率，实现特定场景下的功能量产。</p>
-<h2 id="Go语言的业务场景"><a href="#Go语言的业务场景" class="headerlink" title="Go语言的业务场景"></a>Go语言的业务场景</h2><ul>
-<li><p>服务器编程，以前你如果使用C或者C++做的那些事情，用Go来做很合适，例如处理日志、数据打包、虚拟机处理、文件系统等。</p>
-</li>
-<li><p>分布式系统、数据库代理器、中间件等，例如Etcd。</p>
-</li>
-<li><p>网络编程，这一块目前应用最广，包括Web应用、API应用、下载应用，而且Go内置的net/http包基本上把我们平常用到的网络功能都实现了。</p>
-</li>
-<li><p>云平台，目前国外很多云平台在采用Go开发</p>
-</li>
-</ul>
-<h2 id="国内外有哪些企业或项目使用Go语言"><a href="#国内外有哪些企业或项目使用Go语言" class="headerlink" title="国内外有哪些企业或项目使用Go语言"></a>国内外有哪些企业或项目使用Go语言</h2><p>Go发布之后，很多公司特别是云计算公司开始用Go重构他们的基础架构，很多都是直接采用Go进行了开发</p>
-<p>使用 Go 语言开发的开源项目非常多。早期的 Go 语言开源项目只是通过 Go 语言与传统项目进行C语言库绑定实现，例如 Qt、Sqlite 等；后期的很多项目都使用 Go 语言进行重新原生实现，这个过程相对于其他语言要简单一些，这也促成了大量使用 Go 语言原生开发项目的出现。</p>
-<p><strong>云计算基础设施领域</strong> 代表项目：docker、kubernetes、etcd、consul、cloudflare CDN、七牛云存储等。</p>
-<p><strong>基础软件</strong> 代表项目：tidb、influxdb、cockroachdb等。</p>
-<p><strong>微服务</strong> 代表项目：go-kit、micro、monzo bank的typhon、bilibili等。</p>
-<p><strong>Docker</strong> Docker 是一种操作系统层面的虚拟化技术，可以在操作系统和应用程序之间进行隔离，也可以称之为容器。Docker 可以在一台物理服务器上快速运行一个或多个实例。基于lxc的一个虚拟打包工具，能够实现PAAS平台的组建。例如，启动一个 CentOS 操作系统，并在其内部命令行执行指令后结束，整个过程就像自己在操作系统一样高效。</p>
-<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/docker/docker">https://github.com/docker/docker</a></p>
-<p><strong>go语言</strong> Go 语言自己的早期源码使用C语言和汇编语言写成。从 Go 1.5 版本后，完全使用 Go 语言自身进行编写。Go 语言的源码对了解 Go 语言的底层调度有极大的参考意义，建议希望对 Go 语言有深入了解的读者读一读。</p>
-<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/golang/go">https://github.com/golang/go</a></p>
-<p><strong>Kubernetes</strong> Google 公司开发的构建于 Docker 之上的容器调度服务，用户可以通过 Kubernetes 集群进行云端容器集群管理。</p>
-<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes">https://github.com/kubernetes/kubernetes</a></p>
-<p><strong>etcd</strong> 一款分布式、可靠的 KV 存储系统，可以快速进行云配置。</p>
-<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/coreos/etcd">https://github.com/coreos/etcd</a></p>
-<p><strong>beego</strong> beego 是一个类似 Python的 Tornado 框架，采用了 RESTFul 的设计思路，使用 Go 语言编写的一个极轻量级、高可伸缩性和高性能的 Web 应用框架。</p>
-<p>项目链接：<a target="_blank" rel="noopener" href="https://github.com/astaxie/beego">https://github.com/astaxie/beego</a></p>
-<p><strong>martini</strong> 一款快速构建模块化的 Web 应用的 Web 框架。项目链接：<a target="_blank" rel="noopener" href="https://github.com/go-martini/martini">https://github.com/go-martini/martini</a></p>
-<p><strong>codis</strong> 国产的优秀分布式 Redis 解决方案。项目链接：<a target="_blank" rel="noopener" href="https://github.com/CodisLabs/codis">https://github.com/CodisLabs/codis</a></p>
-<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>当然，一个技术能不能发展起来，关键还要看三点。</p>
-<p><strong>有没有一个比较好的社区。</strong> 像 C、C++、Java、Python 和 JavaScript 的生态圈都是非常丰富和火爆的。尤其是有很多商业机构参与的社区那就更为人气爆棚了，比如 Linux 的社区。</p>
-<p><strong>有没有一个工业化的标准。</strong> 像 C、C++、Java 都是有标准化组织的。尤其是 Java，其在架构上还搞出了像 J2EE 这样的企业级标准。</p>
-<p><strong>有没有一个或多个杀手级应用。</strong> C、C++ 和 Java 的杀手级应用不用多说了，就算是对于 PHP 这样还不能算是一个好的编程语言来说，因为是 Linux 时代的第一个杀手级解决方案 LAMP 中的关键技术，所以，也发展起来了。</p>
-<p>上述的这三点是非常关键的，新的技术只需要占到其中一到两点就已经很不错了，何况有的技术，比如 Java，是三点全占到了，所以，Java 的发展是如此好。当然，除了上面这三点重要的，还有一些其它的影响因素，比如：</p>
-<p><strong>学习曲线是否低，上手是否快。</strong> 这点非常重要，C++ 在这点上越做越不好了。<strong>有没有一个不错的提高开发效率的开发框架。</strong> 如：Java 的 Spring 框架，C++ 的 STL 等。<strong>是否有一个或多个巨型的技术公司作为后盾。</strong> 如：Java 和 Linux 后面的 IBM、Sun……<strong>有没有解决软件开发中的痛点。</strong> 如：Java 解决了 C 和 C++ 的内存管理问题。</p>
-<p>用这些标尺来量一下 Go 语言，我们可以清楚地看到：</p>
-<ul>
-<li>Go 语言容易上手；</li>
-<li>Go 语言解决了并发编程和写底层应用开发效率的痛点；</li>
-<li>Go 语言有 Google 这个世界一流的技术公司在后面；</li>
-<li>Go 语言的杀手级应用是 Docker，而 Docker 的生态圈在这几年完全爆棚了。</li>
-</ul>
-<p>所以，Go 语言的未来是不可限量的。当然，我个人觉得，Go 可能会吞食很多 C、C++、Java 的项目。不过，Go 语言所吞食主要的项目应该是中间层的项目，既不是非常底层也不会是业务层。</p>
-<p>也就是说，Go 语言不会吞食底层到 C 和 C++ 那个级别的，也不会吞食到高层如 Java 业务层的项目。Go 语言能吞食的一定是 PaaS 上的项目，比如一些消息缓存中间件、服务发现、服务代理、控制系统、Agent、日志收集等等，没有复杂的业务场景，也到不了特别底层（如操作系统）的中间平台层的软件项目或工具。而 C 和 C++ 会被打到更底层，Java 会被打到更上层的业务层。</p>
-<p>好了，我们再用上面的标尺来量一下 Go 语言的杀手级应用 Docker，你会发现基本是一样的。</p>
-<ul>
-<li>Docker 上手很容易。</li>
-<li>Docker 解决了运维中的环境问题以及服务调度的痛点。</li>
-<li>Docker 的生态圈中有大公司在后面助力。比如 Google。</li>
-<li>Docker 产出了工业界标准 OCI。</li>
-<li>Docker 的社区和生态圈已经出现像 Java 和 Linux 那样的态势。……</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
     
 
 
@@ -1472,10 +1136,413 @@
 
 
 
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-00-%E5%85%A5%E9%97%A8%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-00-%E5%85%A5%E9%97%A8%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">Netty-00-入门简介</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-14 20:44:36" itemprop="dateCreated datePublished" datetime="2021-06-14T20:44:36+08:00">2021-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2024-05-13 12:23:35" itemprop="dateModified" datetime="2024-05-13T12:23:35+08:00">2024-05-13</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="BIO-vs-NIO-vs-AIO"><a href="#BIO-vs-NIO-vs-AIO" class="headerlink" title="BIO vs  NIO vs AIO"></a>BIO vs  NIO vs AIO</h3><p><strong>BIO: 同步阻塞式IO</strong>  打个比喻您打了专车，在您没有到之前司机就在出发地等您上车。您上车之后司机专门送您到目的地。在这个例子中您扮演着IO中的网络事件，司机扮演着处理网络事件的线程。整个过程中您如果没有任何事件发生司机一直都在等待这就是同步阻塞﻿。</p>
+<p><strong>NIO:同步非阻塞IO</strong>  银行柜员在等待人办理银行业务，人们去银行后首先要到取号机上取号然后等待对应的柜台叫号。在这个例子中银行柜员扮演着selector，办理银行业务的人扮演者网络事件，而取号机扮演者register的作用，银行柜台就是channel。整个过程中当没有人来办业务时，柜员是可以去做其他事情这就是非阻塞。</p>
+<p><strong>AIO:异步非阻塞IO</strong>  您点外卖后就去忙其他的事情了，等骑手把外卖送达后打电话告诉您外卖放外卖柜子里了；您闲下来的时候去取外卖。在这个例子里您扮演着处理网络事件线的程，外卖是网络事件；在这个过程中您可以在外卖还没有送来的时候做些其他的事情，等外卖送达后只是向您发送了一个外卖送达的事件。这就是异步和非阻塞。﻿</p>
+<p>通过网络服务端代码的编写来让我们直观感受一下他们的区别：</p>
+<p>BIOServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class Server &#123;  &#x2F;&#x2F;定义一个循环接收客户端的Socket连接请求。初始化一个线程池对象  private static ExecutorService poolHandler &#x3D; new ThreadPoolExecutor(5, 5,                120, TimeUnit.SECONDS, new ArrayBlockingQueue&lt;&gt;(10));    public static void main(String[] args) &#123;        try &#123;            &#x2F;&#x2F; 注册端口            ServerSocket ss &#x3D; new ServerSocket(9999);            while (true) &#123;                Socket socket &#x3D; ss.accept();                &#x2F;&#x2F; 把Socket封装成一个任务对象交给线程池处理                Runnable target &#x3D; new ServerRunnable(socket);                poolHandler.execute(target);            &#125;        &#125; catch (IOException e) &#123;            e.printStackTrace();        &#125;    &#125;</span><br><span class="line">    public static class ServerRunnable implements Runnable &#123;      private Socket socket;      public ServerRunnable(Socket socket) &#123;          this.socket &#x3D; socket;      &#125;      @Override      public void run() &#123;          &#x2F;&#x2F; 处理接收的客户端Socket通信需求          try &#123;              InputStream is &#x3D; socket.getInputStream();              BufferedReader br &#x3D; new BufferedReader(new InputStreamReader(is));              String msg;              while ((msg &#x3D; br.readLine()) !&#x3D; null) &#123;</span><br><span class="line">                &#x2F;&#x2F;处理数据的粘包拆包                &#x2F;&#x2F;对完整的数据包进行解码操作                &#x2F;&#x2F;得到客户端消息                &#x2F;&#x2F;触发各种统计类事件如心跳检测 信息统计                 &#x2F;&#x2F;处理客户端的消息                &#x2F;&#x2F;得到响应消息                &#x2F;&#x2F;对响应消息进行编码              &#125;          &#125; catch (IOException e) &#123;              e.printStackTrace();            &#x2F;&#x2F;处理网络断开事件            &#x2F;&#x2F;处理其他异常事件          &#125;      &#125;  &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>NIOServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public class Server &#123;    public static void main(String[] args) throws IOException &#123;        &#x2F;&#x2F;获取ServerSocketChannel        ServerSocketChannel ssChannel &#x3D; ServerSocketChannel.open();        &#x2F;&#x2F;设置非阻塞模式        ssChannel.configureBlocking(false);        &#x2F;&#x2F;绑定端口        ssChannel.bind(new InetSocketAddress(9999));        &#x2F;&#x2F;获取选择器        Selector selector &#x3D; Selector.open();        &#x2F;&#x2F;将ServerSocketChannel注册到选择器上，并且监听建立连接事件        ssChannel.register(selector, SelectionKey.OP_ACCEPT);        &#x2F;&#x2F; 使用Selector选择器轮询已经就绪好的事件        while (selector.select() &gt; 0) &#123;            &#x2F;&#x2F; 获取选择器就绪事件            Iterator&lt;SelectionKey&gt; it &#x3D; selector.selectedKeys().iterator();            &#x2F;&#x2F;遍历事件            while (it.hasNext()) &#123;                SelectionKey sk &#x3D; it.next();                &#x2F;&#x2F;判断事件类型                if (sk.isAcceptable()) &#123;                    &#x2F;&#x2F; 获取客户端channel                    SocketChannel channel &#x3D; ssChannel.accept();                    &#x2F;&#x2F;切换非阻塞模式                    channel.configureBlocking(false);                    &#x2F;&#x2F;将该channel注册到选择器上                    channel.register(selector, SelectionKey.OP_READ);                &#125; else if (sk.isReadable()) &#123;                    &#x2F;&#x2F;获取channel                    SocketChannel sChannel &#x3D; (SocketChannel) sk.channel();                    &#x2F;&#x2F;读取网络数据                    ByteBuffer buf &#x3D; ByteBuffer.allocate(1024);                    int len &#x3D; 0;                    while ((len &#x3D; sChannel.read(buf)) &gt; 0) &#123;                        &#x2F;&#x2F;处理数据的粘包拆包                        &#x2F;&#x2F;对完整的数据包进行解码操作                        &#x2F;&#x2F;得到客户端消息                        &#x2F;&#x2F;触发各种统计类事件如心跳检测 信息统计                     &#125;                &#125;else if(sk.isWritable())&#123;                        &#x2F;&#x2F;得到响应消息                        &#x2F;&#x2F;对响应消息进行编码                &#125;                &#x2F;&#x2F; 15.取消选择键SelectionKey                it.remove();            &#125;        &#125;    &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用Netty进行网络编程时代码是这样的：</p>
+<p>NettyServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class NettyServer &#123;    public static void main(String[] args) throws Exception&#123;        &#x2F;&#x2F;设置接受网络连接线程池        NioEventLoopGroup bossGroup &#x3D; new NioEventLoopGroup(1);        &#x2F;&#x2F;设置处理网络除连接外所有事件线程的线程池        NioEventLoopGroup workerGroup &#x3D; new NioEventLoopGroup();        ServerBootstrap serverBootstrap &#x3D; new ServerBootstrap();</span><br><span class="line">        serverBootstrap.group(bossGroup,workerGroup)                .channel(NioServerSocketChannel.class)&#x2F;&#x2F;设置Channel类型                .option(ChannelOption.SO_BACKLOG,1024)                .handler(new ChannelInitializer&lt;ServerSocketChannel&gt;() &#123;                    @Override                    protected void initChannel(ServerSocketChannel ch) throws Exception &#123;                      &#x2F;&#x2F;设置处理网络连接的Handler                        ch.pipeline().addLast(&quot;serverBindHandler&quot;,                         new NettyBindHandler(NettyTcpServer.this,serverStreamLifecycleListeners));                    &#125;                &#125;)                .childHandler(new ChannelInitializer&lt;NioSocketChannel&gt;() &#123;                    @Override                    protected void initChannel(NioSocketChannel ch) throws Exception &#123;                        ch.pipeline()                                .addLast(&quot;protocolHandler&quot;, new NettyProtocolHandler())&#x2F;&#x2F;设置编解码器                                .addLast(&quot;serverIdleHandler&quot;,                                        new IdleStateHandler(0, 0, serverIdleTimeInSeconds))&#x2F;&#x2F;设置心跳检测                                .addLast(&quot;serverHandler&quot;,new NettyServerStreamHandler(NettyTcpServer.this, false,                                        serverStreamLifecycleListeners,                                          serverStreamMessageListeners));&#x2F;&#x2F;设置业务处理逻辑                    &#125;                &#125;);</span><br><span class="line">        ChannelFuture channelFuture &#x3D; serverBootstrap.bind(9000).sync();        channelFuture.channel().closeFuture().sync();    &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>BIO和NIO编程在网络事件发生后都需要进行处理数据的粘包拆包、对完整的数据包进行解码、触发各种统计类事件、对响应消息进行编码、监听各种网络异常、需要对底层网络和通信协议有一定的了解。﻿</p>
+<p>用Netty编程时只需要设置Handler就能快速的进行业务开发而不用关心数据的读取及网络事件的分发处理.让开发者从底层网络通信中解放出来。</p>
+<p>从这些对比中我们可以看出Netty开发网络程序要求低，使用者无需太多关心和业务无关的信息。</p>
+<p><strong>定制能力强</strong></p>
+<p><strong>通过ChannelHandler灵活扩展</strong></p>
+<p>多数情况下我们自定义的Handler会有多个，那么他们是怎么进行协调合作的呢？接下一起探索handler之间的协调合作。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSPBDsriaSyCRnSzWNxvdXt7mnxoSZvspbP5mBLq87byzGa2F5vN9IZyQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">﻿﻿</p>
+<p>通过上图我们可以知道我们定义的handler在Netty里是通过双向链表进行关联的。﻿</p>
+<p>介绍一下读网络事件发生后Handler事件流：</p>
+<ul>
+<li>假如每个handler都会把读事件向下一个InboundHandler类型的节点进行传递，此时的调用链路为head-&gt;A-&gt;B-&gt;C-&gt;tail；</li>
+<li>假如B业务handler处理数据后不把读事件继续向下传递,此时B可以在自己内部选择不向下一个节点传递读事件.此时调用链路变为head-&gt;A-&gt;B；</li>
+</ul>
+<p>当服务端有数据需要写入时又会发生什么呢？</p>
+<ul>
+<li>假如每个handler都会把读事件向下一个OutboundHandler类型的节点进行传递,当C业务handler发送响应数据时此时调用链路为C-&gt;B-&gt;head；</li>
+<li>假如业务B是参数校验的的headler,当校验失败就响应客户端.此时调用的链路为B-&gt;head﻿；</li>
+</ul>
+<p>我们可以看出Netty通过控制InboundHandler节点的调用来决定读事件响应链路；通过控制OutboundHandler节点的调用来决定写事件调用链路。</p>
+<p><strong>Handler强大</strong></p>
+<p>Netty通过内置多种Handler让你在不了解底层网络、通信协议、编解码的背景下也可进行网络应用程序。它都内置有哪些Handler呢？</p>
+<h3 id="编解码"><a href="#编解码" class="headerlink" title="编解码"></a>编解码</h3><p>当你通过Netty发送或者接受一个消息的时候，就将会发生一次数据转换。入站消息会被解码，从字节转换为另一种格式（比如java对象）。如果是出站消息，它会被编码成字节。</p>
+<h4 id="TCP粘包拆包"><a href="#TCP粘包拆包" class="headerlink" title="TCP粘包拆包"></a><strong>TCP粘包拆包</strong></h4><p>大多数基于Netty通信底层都会使用TCP进行的通信。TCP在发送数据流的时一定会把整条数据流单独发送吗？答案是否定的。TCP在发送数据包的时会存在拆包和粘包问题。什么是TCP的粘包和拆包呢？</p>
+<p><strong>TCP拆包:</strong> 产生的原因就是消息体太大了,一个数据包里只能发送消息体的一部分；</p>
+<p><strong>TCP粘包:</strong> 产生的原因就是有多条消息体需要发送,一个数据包可以存放多个消息体；</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS4WVoHfAiaHuiaKicXmq9lhADmwAek4OXvYd4H5X5eqZvRXicCZgiadKUic9Q/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>由于篇幅有限关于TCP拆包和粘包只是大致说明了一些。</p>
+<h4 id="编解码Handler"><a href="#编解码Handler" class="headerlink" title="编解码Handler"></a><strong>编解码Handler</strong></h4><p>Netty提供了三种解码器来解决TCP的拆包和粘包,他们分别是：</p>
+<ul>
+<li>LineBasedFrameDecoder(回车换行分包);</li>
+<li>DelimiterBasedFrameDecoder(特殊分隔符分包);</li>
+<li>FixedLengthFrameDecoder(固定长度报文来分包)</li>
+</ul>
+<p>此外Netty还提供了N：</p>
+<ul>
+<li>编解码字符串的StringEncoder和StringDecoder;</li>
+<li>用于处理HTTP协议编解码HttpObjectDecoder和HttpObjectEncoder;</li>
+<li>用于处理protobuf编解码ProtobufVarint32FrameDecoder和ProtobufDecoder；</li>
+</ul>
+<p>除了以上介绍的编解码Netty内部还有很多内置编解码器,当您使用Netty开发时如果有用到编解码的时候可以首先查询一下Netty内部是否有实现。</p>
+<h3 id="支持多种主流协议"><a href="#支持多种主流协议" class="headerlink" title="支持多种主流协议"></a>支持多种主流协议</h3><p>从Netty源码包上可以看出Netty基本上覆盖了主流协议的编解码实现，如HTTP、Protobuf、WebSocket、二进制等主流协议。</p>
+<h4 id=""><a href="#" class="headerlink" title="﻿﻿"></a>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS0AOkj10sEic1TOgOU3Nz3OibVExRDnHl1Gc5PqH7Qic7s4qukyA1y1ibFg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></h4><h3 id="idle-心跳检测"><a href="#idle-心跳检测" class="headerlink" title="idle(心跳检测)"></a>idle(心跳检测)</h3><p>当需要监听网络连接是否长时间没有数据交换（如发送心跳包、关闭连接等）就可以使用内置的IdleStateHandler。</p>
+<p>IdleStateHandler接收三个参数：</p>
+<ul>
+<li>readerIdleTimeSeconds: 读取空闲时间，即从上次读取数据到现在的秒数。</li>
+<li>writerIdleTimeSeconds: 写入空闲时间，即从上次写入数据到现在的秒数。</li>
+<li>allIdleTimeSeconds: 读写都空闲的时间，即从上次读写数据到现在的秒数。</li>
+</ul>
+<p>当达到设定的空闲时间阈值时，IdleStateHandler会触发对应的IdleState事件，这些事件包括READ_IDLE、WRITE_IDLE和ALL_IDLE。你可以通过实现ChannelInboundHandler的channelIdle方法来监听这些事件，并在事件发生时执行相应的操作。</p>
+<p><strong>高性能</strong></p>
+<h3 id="一次网络通信都发生了什么"><a href="#一次网络通信都发生了什么" class="headerlink" title="一次网络通信都发生了什么"></a>一次网络通信都发生了什么</h3><p>1.客户端确定需要发送的数据；</p>
+<p>2.数据从程序到系统然后通过网卡发送；</p>
+<p>3.服务端收到读事件后把数据从系统读取到应用中；</p>
+<p>4.应用处理客户端信息；</p>
+<h3 id="Netty怎么提高通信性能"><a href="#Netty怎么提高通信性能" class="headerlink" title="Netty怎么提高通信性能"></a>Netty怎么提高通信性能</h3><ul>
+<li>数据在系统中的存储Netty使用<strong>ByteBuf</strong>内存池来减少申请内存耗时；</li>
+<li>数据在用户态到内核态的传输Netty采用了<strong>内存零拷贝</strong>（减少用户态到内核态的两次拷贝）来<strong>减少传输耗时；</strong></li>
+</ul>
+<p><strong><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSQbtEAPTNMt5GICMyCvgGicuicHXZB4Htm75JHFaKs5xNgWE6JolgIGrQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></strong></p>
+<ul>
+<li>﻿﻿数据在网络中的传输  数据传输时间取决于数据传输速度、数据包数量。对于传输速度无法优化，Netty内置了许多<strong>编码器</strong>，可以选择对数据压缩比较好的解码器来减少数据包的数量，以此来减少耗时；</li>
+<li>服务端对网络事件的处理Netty采用主次<strong>Reactor多线程模型来加快对网络事件的处理</strong>，传统的BIO不能支持太多网络连接以及对系统资源使用率比较低。传统的NIO当网络连接数超多时网络事件得不到快速响应,造成大量客户端进行重试。</li>
+</ul>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSzWEibh5E65kPBoibdTKprwakA6RRX2DVyVZHqkMK1vFLC7pQHPeNzN1g/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><strong>reactor单线程模型：</strong> 有一个线程负责处理所有的网络事件。</p>
+<p>﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS1cl44RlPrA4W4061kHgS4FYgfJ3dHnnIjJOt1lHthlnUic4Wjz8rlow/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><strong>Reactor多线程模型：</strong>有一个线程单独处理建立网络事件，另外一个线程负责处理其他的网络事件。</p>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSZFCLWyVgA4OVRlBGy6BuyQM6ON49RQNWdH8bQ1FEr7icFnseLYOqiabg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>主次<strong>Reactor多线程模型：</strong>有一个线程单独处理建立网络事件,把建立网络连接放到线程池中的某一个线程中，这个线程负责大量网络连接的其他请求.</p>
+<p>从reactor线程模型上我们可以看出主次Reactor多线程模型可以快速对大量的网络事件进行响应,因此也会缩短网络事件处理时间.</p>
+<ul>
+<li>客户端消息处理上，Netty采用了无锁串行化设计思想结合volatile的大量使用;通过读写锁提升并发性能来大大缩短了消息处理时间。</li>
+</ul>
+<p>我们可以看到Netty针对网络传输的各个节点都做到了尽可能的缩短时间，这也是Netty高性能的原因所在。</p>
+<p>Netty运行原理</p>
+<p>通过以上对Netty是什么，优势有哪些已经有了初步了解。那么它内部是怎么工作的呢？接下来让我们一起看一下它内部的原理。</p>
+<p><strong>整体结构</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS2zydhafxsdJySlGIC2LncGBcxCz9ibliaso4lIrr8KRmwzZJBjAuiaic4w/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>上面这张图就是在官网首页的架构图，我们从上到下分析一下。</p>
+<ul>
+<li><strong>Core</strong>核心层：核心层里Netty最精华的部分，它提供了底层网络通信的通用抽象和实现，包括事件模型、通用API、支持零拷贝的ByteBuf 等；</li>
+<li><strong>Protocol Support 协议支持层</strong>：协议支持层基本上覆盖了主流协议的编解码实现，Netty 丰富的协议支持降低了用户的开发成本；</li>
+<li><strong>Transport Service 传输服务层：</strong>传输服务层提供了网络传输能力的定义和实现方法。它支持 Socket、HTTP 隧道等传输方式。Netty 对 TCP、UDP 等数据传输做了抽象和封装，让开发者可以更聚焦在业务逻辑实现上，而不必关系底层数据传输的细节；</li>
+</ul>
+<p>以上可看出Netty的功能、协议、传输方式都比较全，比较强大。</p>
+<p><strong>逻辑架构</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS72UajWyyFsVEePGL9BWFY9otrysdlXUNbhaRUJFF3mb3CCVfVgHgWA/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>从图中可以Netty通过网络通信层、事件调度层、服务编排层协调合作来运行程序</p>
+<h3 id="网络通信层"><a href="#网络通信层" class="headerlink" title="网络通信层"></a>网络通信层</h3><p>网络通信层的职责是执行网络 I/O 的操作。当网络数据读取到内核缓冲区后，会触发各种网络事件。这些网络事件会分发给事件调度层进行处理。接下来分别看一下Netty服务端和客户端在网络通信层是怎么运行的：</p>
+<ul>
+<li>Netty服务端：程序启动时会生成一个ServerBootstrap对象，该对象会生成一个NioServerSocketChannel来监听某一个端口的建立网络连接的事件，当网络连接建立后会监听网络连接的各种事件并通知到事件调度层。</li>
+<li>﻿Netty客户端：程序启动的时会生成一个Bootstrap对象，该对象会生成一个NioSocketChannel来与服务端建立网络连接的事件，当网络连接建立后会监听网络连接的各种事件并通知到事件调度层。</li>
+</ul>
+<h3 id="事件调度层"><a href="#事件调度层" class="headerlink" title="事件调度层"></a>事件调度层</h3><p>事件调度层的职责是通过 Reactor 线程模型对各类事件进行聚合处理，通过 Selector 主循环线程集成多种事件(I/O 事件,信号事件,定时事件等)，实际的业务处理逻辑是交由服务编排层中相关的 Handler 完成。事件调度层主要由EventLoopGroup和EventLoop构成。﻿</p>
+<ul>
+<li>EventLoop 负责处理 I/O 事件和调度任务。每一个NioEventLoop内部都有唯一一个Selector，通过这个Selector可以对注册的channel进行网络事件的读取；NioEventLoop 还有一个内部的任务队列，可以用来提交 Runnable 任务。这些任务会在 NioEventLoop 的线程上下文中执行，确保了任务的顺序执行。</li>
+<li>EventLoopGroup  本质是一个线程池，负责管理EventLoop。其主要作用有从线程池挑选一个EventLoop进行channe的注册或者提交一个任务、关闭不再使用的 Channel、释放 Selector 和其他相关资源确保应用程序的干净退出。</li>
+</ul>
+<h3 id="服务编排层"><a href="#服务编排层" class="headerlink" title="服务编排层"></a>服务编排层</h3><p>服务编排层的职责是通过组装各类handler来实现网络数据流的处理。它是 Netty 的核心处理链，用以实现网络事件的动态编排和有序传播。</p>
+<p>服务编排层的核心组件包括 <strong>ChannelHandler、ChannelHandlerContext、ChannelPipeline</strong>。他们之间的关系如下图所示：</p>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS3EkyiaKtmgjichNyttyDSG1OtHFibic2DKmKI1ibfP1FgJtGiba9cXzxibdgg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<ul>
+<li><p>﻿<strong>ChannelHandler</strong>主要分为两类，InboundHandler和OutboundHandler</p>
+</li>
+<li><p>InboundHandler用于处理从网络流入(inbound)的数据和事件。帮助我们处理接收的数据、连接建立、断开等事件。核心方法有channelActive(网络连接建立成功时会调用)、channelInactive(网络连接断连时调用)、channelRead(接受到数据时调用)、exceptionCaught(如果在处理事件或数据时发生异常，该方法会被调用。可以在这里捕获并处理异常，防止应用程序崩溃。)</p>
+</li>
+<li><p>OutboundHandler用于处理从应用程序流向网络的出站(outbound)操作,如写入数据,发起连接,关闭连接等核心方法有。</p>
+<p>write(写入数据到channel时调用),flush(将缓冲区所有未写入数据立即发送出去),connect(尝试建立网络连接时调用)。</p>
+</li>
+<li><p>﻿<strong>ChannelHandlerContext</strong>是handler与Netty内部机制交互的主要方式，它使得 handler 可以在不直接访问其他handler的情况下，协同处理I/O事件和数据。同时也是每个ChannelHandler在处理事件时的上下文环境，可以获取到Pipeline、Channel、Allocator等对象。</p>
+</li>
+<li><p>﻿<strong>ChannelPipeline  Netty</strong>中的关键组件，是一个处理网络I/O事件和数据的有序链表。ChannelPipeline负责将入站（inbound）和出站（outbound）事件分发给链中的各个ChannelHandler，实现了事件驱动的网络编程模型。每个ChannelHandler都有一个唯一的ChannelHandlerContext，用于与ChannelPipeline交互。</p>
+</li>
+</ul>
+<p><strong>运行流程</strong></p>
+<p>我们已经从宏观上了解了Netty，接下来我们从服务端的视角简要的看一下Netty整个的运行流程。</p>
+<p>1.服务端启动的时把ServerSocketChannel注册到boss EventLoopGroup中某一个EventLoop上，暂时把这个EventLoop叫做server EventLoop；</p>
+<p>2.当 serverEventLoop中监听到有建立网络连接的事件后会把底层的SocketChannel和serverSocketChannel封装成为NioSocketChannel；</p>
+<p>3.开始把自定义的ChannelHandler加载到NioSocketChannel 里的pipeline中，然后把该NioSocketChannel注册到worker EventLoopGroup中某一个EventLoop上，暂时把这个EventLoop叫做worker  EventLoop；</p>
+<p>4.worker  EventLoop开始监听NioSocketChannel上所有网络事件；</p>
+<p>5.当有读事件后就会调用pipeline中第一个InboundHandler的channelRead方法进行处理；</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>Nettry入门：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/52iS3RxIO_to29IG_JoOpw">https://mp.weixin.qq.com/s/52iS3RxIO_to29IG_JoOpw</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-starter-05-tomcat/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-starter-05-tomcat/" class="post-title-link" itemprop="url">springboot-starter-05-tomcat</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-13 23:28:38 / Modified: 23:37:09" itemprop="dateCreated datePublished" datetime="2021-06-13T23:28:38+08:00">2021-06-13</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="Spring-Boot是如何创建Tomcat的"><a href="#Spring-Boot是如何创建Tomcat的" class="headerlink" title="Spring Boot是如何创建Tomcat的"></a>Spring Boot是如何创建Tomcat的</h3><p>SpringBoot启动只有一个main方法的入口，只需要运行main方法就能把web项目部署到tomcat容器中，在main方法中，tomcat到底是如何启动的（本文基于SpringBoot 2.2.2.RELEASE） 我们从SpringBoot的main方法一路进去，就会进入到以下的run方法<img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-01.png" alt="img"></p>
+<p>当Spring的环境和参数初始化设置好以后，创建ConfigurableApplicationContext成功后会调用refreshContext()方法来刷新上下文  <!--又是ApplicationContext的refresh()方法，果然是重中之重啊--><img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-02.png" alt="img"></p>
+<p>发现里面还是继续调用了 onRefresh() 方法，我们进一步找到它的实现类 ServletWebServerApplicationContext，</p>
+<p><img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-03.png" alt="img"></p>
+<p>发现这里有一行代码：createWebServer();</p>
+<p>很明显是创建Web服务器的意思，点进去查看<img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-04.png" alt="img"></p>
+<p>我们来分析一下这一小段代码，如果webServer 和 serverletContext不存在，则从工厂中创建webServer</p>
+<p>下面看一下webServer的创建过程，发现该方法有几个实现类，有TomcatServerlet、JettyServerlet、UndertowServlet，这里我们看一下Tomcat的实现<img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-05.png" alt="img"></p>
+<p>Tomcat其实就是通过new出来的一个对象而已，然后给Tomcat进行一些参数的设置，启动Tomcat容器设置监听等待连接</p>
+<h3 id="内嵌Tomcat的启动"><a href="#内嵌Tomcat的启动" class="headerlink" title="内嵌Tomcat的启动"></a>内嵌Tomcat的启动</h3><p>我们回到之前的onRefresh入口，容器刷新后，有一个完成刷新的finishRefresh()操作，这里就是容器启动的入口，如下图<img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-06.png" alt="img"></p>
+<p>我们发现Tomcat里面也有这个完成刷新的finishRefresh()方法<img src="https://lenjor.github.io/images/posts/myBlog/2019-12-23-Spring-Boot-Tomcat-06.png" alt="img"></p>
+<h3 id="手写main方法创建并启动Tomcat容器"><a href="#手写main方法创建并启动Tomcat容器" class="headerlink" title="手写main方法创建并启动Tomcat容器"></a>手写main方法创建并启动Tomcat容器</h3><p>SpringBoot也是通过new来创建Tomcat容器的，那么就意味着，我们可以不使用SpringBoot的run方法来启动web项目，我们自己也可以手写一个main方法来启动web项目，下面我们就来实现一下这个过程。</p>
+<p>首先我们想一下，我们如果需要部署一个web项目，我们需要哪些操作：</p>
+<ol>
+<li>初始化Spring容器</li>
+<li>扫描实例化Bean</li>
+<li>配置DispatchServerlet，其实容器默认只有一个serverlet，就是DispatchServerlet，默认是 / ，自己写得Controller都是由DispatchServerlet进行分发的</li>
+<li>使用main方法启动</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/07/database/Mybatis/mybatis-%E6%96%B9%E6%B3%95%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD%E7%9A%84%E5%8E%9F%E5%9B%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/07/database/Mybatis/mybatis-%E6%96%B9%E6%B3%95%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD%E7%9A%84%E5%8E%9F%E5%9B%A0/" class="post-title-link" itemprop="url">mybatis-方法不能重载的原因</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-07 18:28:59 / Modified: 18:43:04" itemprop="dateCreated datePublished" datetime="2021-06-07T18:28:59+08:00">2021-06-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="为什么不能重载？"><a href="#为什么不能重载？" class="headerlink" title="为什么不能重载？"></a>为什么不能重载？</h2><ul>
+<li>Springboot与Mybatis会有一个启动器的自动配置类<code>MybatisAutoConfiguration</code>，其中有一段代码就是创建<code>sqlSessionFactory</code>，如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzIucG5n.jpg" alt="img"></li>
+<li>既然是创建失败，那么肯定是这里出现异常了，这里的<strong>「大致思路」</strong>就是：</li>
+</ul>
+<blockquote>
+<p>❝</p>
+<p>解析<code>XML</code>文件和<code>Mapper</code>接口，将Mapper中的方法与XML文件中<code>&lt;select&gt;</code>、<code>&lt;insert&gt;</code>等标签一一对应，那么Mapper中的方法如何与XML中<code>&lt;select&gt;</code>这些标签对应了，当然是唯一的<code>id</code>对应了，具体如何这个<code>id</code>的值是什么，如何对应？下面一一讲解。</p>
+<p>❞</p>
+</blockquote>
+<ul>
+<li>如上图的<code>SqlSessionFactory</code>的创建过程中，前面的部分代码都是设置一些配置，并没有涉及到解析XML的内容，因此答案肯定是在最后一行<code>return factory.getObject();</code>，于是此处打上断点，一点点看。于是一直到了<code>org.mybatis.spring.SqlSessionFactoryBean#buildSqlSessionFactory</code>这个方法中，其中一段代码如下：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzMucG5n.jpg" alt="img"></li>
+<li>略过不重要的代码，在<code>org.apache.ibatis.builder.xml.XMLMapperBuilder#configurationElement</code>这个方法中有一行重要的代码，如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzQucG5n.jpg" alt="img"></li>
+<li>到<code>org.apache.ibatis.builder.MapperBuilderAssistant#addMappedStatement</code>这个方法返回值就是<code>MappedStatement</code>，不用多说，肯定是这个方法了，仔细一看，很清楚的看到了构建<code>id</code>的代码，如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzUucG5n.jpg" alt="img"></li>
+<li>从上图可以知道，创建<code>id</code>的代码就是<code>id = applyCurrentNamespace(id, false);</code>，具体实现如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzYucG5n.jpg" alt="img"></li>
+</ul>
+<blockquote>
+<p>❝</p>
+<p>上图的代码已经很清楚了，<code>MappedStatement</code>中的<code>id=Mapper的全类名+&#39;.&#39;+方法名</code>。如果重载话，肯定会存在<code>id</code>相同的<code>MappedStatement</code>。</p>
+<p>❞</p>
+</blockquote>
+<ul>
+<li>到了这其实并不能说明方法不能重载啊，重复就重复呗，并没有冲突啊。这里需要看一个结构，如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">protected final Map&lt;String, MappedStatement&gt; mappedStatements &#x3D; new StrictMap&lt;MappedStatement&gt;(&quot;Mapped Statements collection&quot;)</span><br><span class="line">      .conflictMessageProducer((savedValue, targetValue) -&gt;</span><br><span class="line">          &quot;. please check &quot; + savedValue.getResource() + &quot; and &quot; + targetValue.getResource());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>构建好的<code>MappedStatement</code>都会存入<code>mappedStatements</code>中，如下代码：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void addMappedStatement(MappedStatement ms) &#123;</span><br><span class="line">    &#x2F;&#x2F;key 是id</span><br><span class="line">    mappedStatements.put(ms.getId(), ms);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>StrictMap</code>的<code>put(k,v)</code>方法如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzcucG5n.jpg" alt="img"></li>
+</ul>
+<h2 id="如何找到XML中对应的SQL？"><a href="#如何找到XML中对应的SQL？" class="headerlink" title="如何找到XML中对应的SQL？"></a>如何找到XML中对应的SQL？</h2><ul>
+<li>在使用Mybatis的时候只是简单的调用Mapper中的方法就可以执行SQL，如下代码：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;UserInfo&gt; userInfos &#x3D; userMapper.selectList(Arrays.asList(&quot;192&quot;,&quot;198&quot;));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>一行简单的调用到底如何找到对应的SQL呢？其实就是根据<code>id</code>从<code>Map&lt;String, MappedStatement&gt; mappedStatements</code>中查找对应的<code>MappedStatement</code>。</p>
+</blockquote>
+<ul>
+<li>在<code>org.apache.ibatis.session.defaults.DefaultSqlSession#selectList</code>方法有这一行代码如下图：<br><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHBzL2dpdGVlLmNvbS9jaGVuamlhYmluZzY2Ni9CbG9nLWZpbGUvcmF3L21hc3Rlci9NeWJhaXRzJUU0JUI4JUFEJUU3JTlBJTg0JUU2JTk2JUI5JUU2JUIzJTk1JUU0JUI4JUJBJUU0JUJCJTgwJUU0JUI5JTg4JUU0JUI4JThEJUU4JTgzJUJEJUU5JTg3JThEJUU4JUJEJUJEJUVGJUJDJTlGLzgucG5n.jpg" alt="img"></li>
+<li><code>MappedStatement ms = configuration.getMappedStatement(statement);</code>这行代码就是根据<code>id</code>从<code>mappedStatements</code>获取对应的<code>MappedStatement</code>，源码如下:</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public MappedStatement getMappedStatement(String id) &#123;</span><br><span class="line">    return this.getMappedStatement(id, true);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
