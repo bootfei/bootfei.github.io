@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">218</span>
+          <span class="site-state-item-count">215</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -240,95 +240,6 @@
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2-run()%E8%BF%94%E5%9B%9Econtext%E6%B5%81%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2-run()%E8%BF%94%E5%9B%9Econtext%E6%B5%81%E7%A8%8B/" class="post-title-link" itemprop="url">springboot启动流程-01-启动流程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-04-16 09:30:13" itemprop="dateCreated datePublished" datetime="2021-04-16T09:30:13+08:00">2021-04-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-11-22 13:34:10" itemprop="dateModified" datetime="2021-11-22T13:34:10+08:00">2021-11-22</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="SpringApplication-class源码"><a href="#SpringApplication-class源码" class="headerlink" title="SpringApplication.class源码"></a>SpringApplication.class源码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SpringApplication.class</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//run()方法链路：3nd step</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ConfigurableApplicationContext <span class="title">run</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 此类通常用于监控开发过程中的性能，而不是生产应用程序的一部分。</span></span><br><span class="line">  StopWatch stopWatch = <span class="keyword">new</span> StopWatch();</span><br><span class="line">  stopWatch.start();</span><br><span class="line">  </span><br><span class="line"> </span><br><span class="line">  ConfigurableApplicationContext context = <span class="keyword">null</span>;</span><br><span class="line">  Collection&lt;SpringBootExceptionReporter&gt; exceptionReporters = <span class="keyword">new</span> ArrayList();</span><br><span class="line">  </span><br><span class="line">   <span class="comment">// 设置java.awt.headless系统属性，默认为true </span></span><br><span class="line">    <span class="comment">// Headless模式是系统的一种配置模式。在该模式下，系统缺少了显示设备、键盘或鼠标。</span></span><br><span class="line">  <span class="keyword">this</span>.configureHeadlessProperty();</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//key-1: 获取SpringApplicationRunListeners</span></span><br><span class="line">  SpringApplicationRunListeners listeners = <span class="keyword">this</span>.getRunListeners(args);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 通知监听者，开始启动</span></span><br><span class="line">  listeners.starting();</span><br><span class="line"></span><br><span class="line">  Collection exceptionReporters;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    ApplicationArguments applicationArguments = <span class="keyword">new</span> DefaultApplicationArguments(args);</span><br><span class="line">    </span><br><span class="line">     <span class="comment">// KEY-2: 根据SpringApplicationRunListeners以及参数来准备环境env</span></span><br><span class="line">    ConfigurableEnvironment environment = <span class="keyword">this</span>.prepareEnvironment(listeners, applicationArguments);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.configureIgnoreBeanInfo(environment);</span><br><span class="line">    Banner printedBanner = <span class="keyword">this</span>.printBanner(environment);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//key-3:  创建`应用配置上下文ConfigurableApplicationContext(即run方法的返回对象)</span></span><br><span class="line">    context = <span class="keyword">this</span>.createApplicationContext();</span><br><span class="line">    </span><br><span class="line">    exceptionReporters = <span class="keyword">this</span>.getSpringFactoriesInstances(SpringBootExceptionReporter.class, <span class="keyword">new</span> Class[]&#123;ConfigurableApplicationContext.class&#125;, context);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// KEY 4 - Spring上下文前置处理, prepareContext方法将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联</span></span><br><span class="line">    <span class="keyword">this</span>.prepareContext(context, environment, listeners, applicationArguments, printedBanner);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// KEY 5 - Spring上下文刷新, 实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作</span></span><br><span class="line">    <span class="keyword">this</span>.refreshContext(context);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// KEY 6 - Spring上下文后置处理</span></span><br><span class="line">    <span class="keyword">this</span>.afterRefresh(context, applicationArguments);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 发出结束执行的事件</span></span><br><span class="line">    stopWatch.stop();</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.logStartupInfo) &#123;</span><br><span class="line">      (<span class="keyword">new</span> StartupInfoLogger(<span class="keyword">this</span>.mainApplicationClass)).logStarted(<span class="keyword">this</span>.getApplicationLog(), stopWatch);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    listeners.started(context);</span><br><span class="line">    <span class="keyword">this</span>.callRunners(context, applicationArguments);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Throwable var10) &#123;</span><br><span class="line">    <span class="keyword">this</span>.handleRunFailure(context, var10, exceptionReporters, listeners);</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(var10);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    listeners.running(context);</span><br><span class="line">    <span class="keyword">return</span> context;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Throwable var9) &#123;</span><br><span class="line">    <span class="keyword">this</span>.handleRunFailure(context, var9, exceptionReporters, (SpringApplicationRunListeners)<span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(var9);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="Key1-获取listeners"><a href="#Key1-获取listeners" class="headerlink" title="Key1: 获取listeners"></a>Key1: 获取listeners</h3><h3 id="Key2-prepareEnvironment-准备env"><a href="#Key2-prepareEnvironment-准备env" class="headerlink" title="Key2: prepareEnvironment()准备env"></a>Key2: prepareEnvironment()准备env</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//SpringApplicaiton.class</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//key-2详情</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> ConfigurableEnvironment <span class="title">prepareEnvironment</span><span class="params">(SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments)</span> </span>&#123;</span><br><span class="line">  ConfigurableEnvironment environment = <span class="keyword">this</span>.getOrCreateEnvironment();</span><br><span class="line">  <span class="keyword">this</span>.configureEnvironment((ConfigurableEnvironment)environment, applicationArguments.getSourceArgs());</span><br><span class="line">  <span class="comment">// 配置`变量environment对象`加入到监听器对象中`SpringApplicationRunListeners`</span></span><br><span class="line">  listeners.environmentPrepared((ConfigurableEnvironment)environment);</span><br><span class="line">  <span class="keyword">this</span>.bindToSpringApplication((ConfigurableEnvironment)environment);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>.webApplicationType == WebApplicationType.NONE) &#123;</span><br><span class="line">    environment = (<span class="keyword">new</span> EnvironmentConverter(<span class="keyword">this</span>.getClassLoader())).convertToStandardEnvironmentIfNecessary((ConfigurableEnvironment)environment);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ConfigurationPropertySources.attach((Environment)environment);</span><br><span class="line">  <span class="keyword">return</span> (ConfigurableEnvironment)environment;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Key3-创建ConfigurableApplicationContext"><a href="#Key3-创建ConfigurableApplicationContext" class="headerlink" title="Key3: 创建ConfigurableApplicationContext"></a>Key3: 创建ConfigurableApplicationContext</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">//SpringApplicaiton.class</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> ConfigurableApplicationContext <span class="title">createApplicationContext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">//首先获取显式设置的应用上下文applicationContextClass</span></span><br><span class="line">  Class&lt;?&gt; contextClass = <span class="keyword">this</span>.applicationContextClass;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//如果不存在，再加载默认的环境配置（通过是否是web environment判断）</span></span><br><span class="line">  <span class="keyword">if</span> (contextClass == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">switch</span>(<span class="keyword">this</span>.webApplicationType) &#123;</span><br><span class="line">        <span class="keyword">case</span> SERVLET:</span><br><span class="line">          contextClass = Class.forName(<span class="string">&quot;org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext&quot;</span>);</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> REACTIVE:</span><br><span class="line">          contextClass = Class.forName(<span class="string">&quot;org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext&quot;</span>);</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">          contextClass = Class.forName(<span class="string">&quot;org.springframework.context.annotation.AnnotationConfigApplicationContext&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (ClassNotFoundException var3) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Unable create a default ApplicationContext, please specify an ApplicationContextClass&quot;</span>, var3);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//最后通过BeanUtils实例化上下文对象</span></span><br><span class="line">  <span class="keyword">return</span> (ConfigurableApplicationContext)BeanUtils.instantiateClass(contextClass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>方法会先获取显式设置的应用上下文(applicationContextClass)，</li>
-<li>如果不存在，再加载默认的环境配置（通过是否是web environment判断），默认选择AnnotationConfigApplicationContext注解上下文（通过扫描所有注解类来加载bean），</li>
-<li>最后通过BeanUtils实例化context并返回context</li>
-</ol>
-<p>ConfigurableApplicationContext类图如下：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/6912735-797f3d2c57b625bc.png" alt="img"></p>
-<p>主要看其继承的两个方向：</p>
-<p>LifeCycle：生命周期类，定义了start启动、stop结束、isRunning是否运行中等生命周期空值方法</p>
-<p>ApplicationContext：应用上下文类，其主要继承了beanFactory(bean的工厂类)</p>
-<h3 id="Key4-prepareContext-将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联"><a href="#Key4-prepareContext-将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联" class="headerlink" title="Key4:prepareContext()将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联"></a>Key4:prepareContext()将listeners、environment、applicationArguments、banner等重要组件与上下文对象关联</h3><h3 id="Key5-refresh-Spring上下文刷新-实现spring-boot-starter-mybatis、redis等-自动化配置的关键，包括spring-factories的加载，bean的实例化等核心工作"><a href="#Key5-refresh-Spring上下文刷新-实现spring-boot-starter-mybatis、redis等-自动化配置的关键，包括spring-factories的加载，bean的实例化等核心工作" class="headerlink" title="Key5: refresh() Spring上下文刷新, 实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作"></a>Key5: refresh() Spring上下文刷新, 实现spring-boot-starter-(mybatis、redis等)自动化配置的关键，包括spring.factories的加载，bean的实例化等核心工作</h3>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
     
 
 
@@ -479,6 +390,77 @@
 
 
 
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.1-prepareRefresh()/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/16/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B-1.2.5.1-prepareRefresh()/" class="post-title-link" itemprop="url">springboot启动流程-01-启动流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-16 09:30:13" itemprop="dateCreated datePublished" datetime="2021-04-16T09:30:13+08:00">2021-04-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-10-05 09:27:47" itemprop="dateModified" datetime="2022-10-05T09:27:47+08:00">2022-10-05</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
       
     </div>
 
@@ -828,6 +810,78 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/15/database/redis/redis%E6%BA%90%E7%A0%81-10-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%8D%95%E7%BA%BF%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/15/database/redis/redis%E6%BA%90%E7%A0%81-10-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%8D%95%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">redis源码-LRU实现</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-15 13:24:31" itemprop="dateCreated datePublished" datetime="2021-04-15T13:24:31+08:00">2021-04-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2023-03-15 11:24:37" itemprop="dateModified" datetime="2023-03-15T11:24:37+08:00">2023-03-15</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><a target="_blank" rel="noopener" href="https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Redis%20%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/09%20%20Redis%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8select%E3%80%81poll%E3%80%81epoll%EF%BC%9F.md">https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Redis%20%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/09%20%20Redis%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8select%E3%80%81poll%E3%80%81epoll%EF%BC%9F.md</a></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/15/database/redis/redis%E6%BA%90%E7%A0%81-LRU%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -929,78 +983,6 @@
 
 <p>%5左右的miss率，在这个测试下,LFU比LRU的预测准确率略微高一些。</p>
 <p>在实际生产环境中,不同的redis访问模式需要配置不同的LRU策略， 然后可以通过lru test工具验证效果。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/15/database/redis/redis%E6%BA%90%E7%A0%81-10-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%8D%95%E7%BA%BF%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/15/database/redis/redis%E6%BA%90%E7%A0%81-10-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E5%8D%95%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">redis源码-LRU实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-04-15 13:24:31" itemprop="dateCreated datePublished" datetime="2021-04-15T13:24:31+08:00">2021-04-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-15 11:24:37" itemprop="dateModified" datetime="2023-03-15T11:24:37+08:00">2023-03-15</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Redis%20%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/09%20%20Redis%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8select%E3%80%81poll%E3%80%81epoll%EF%BC%9F.md">https://learn.lianglianglee.com/%E4%B8%93%E6%A0%8F/Redis%20%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E4%B8%8E%E5%AE%9E%E6%88%98/09%20%20Redis%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%EF%BC%88%E4%B8%8A%EF%BC%89%EF%BC%9A%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8select%E3%80%81poll%E3%80%81epoll%EF%BC%9F.md</a></p>
 
       
     </div>

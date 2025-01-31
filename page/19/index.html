@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">218</span>
+          <span class="site-state-item-count">215</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1403,104 +1403,6 @@ public class Application&#123;&#125;
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-02-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-02-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/" class="post-title-link" itemprop="url">springboot-02-自动配置</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-12-03 12:12:59" itemprop="dateCreated datePublished" datetime="2020-12-03T12:12:59+08:00">2020-12-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-01-11 13:46:47" itemprop="dateModified" datetime="2022-01-11T13:46:47+08:00">2022-01-11</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="配置文件application-yml的加载"><a href="#配置文件application-yml的加载" class="headerlink" title="配置文件application.yml的加载"></a>配置文件application.yml的加载</h3><p>application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重要，那么，该文件是 如何加载到内存的呢?需要从启动类的 run()方法开始跟踪。</p>
-<ul>
-<li>xxxApplication: <ul>
-<li>SpringApplication.run(DemoApplication.class, args);</li>
-</ul>
-</li>
-<li>SpringApplication:  <ul>
-<li>(new SpringApplication(primarySources)).run(args);</li>
-<li>this.prepareEnvironment(listeners, bootstrapContext, applicationArguments);</li>
-<li>listeners.environmentPrepared(bootstrapContext, (ConfigurableEnvironment)environment);</li>
-</ul>
-</li>
-<li>SpringApplicationRunListeners<ul>
-<li>listener.environmentPrepared(environment);</li>
-</ul>
-</li>
-<li>EventPublishingRunListener<ul>
-<li>initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));</li>
-</ul>
-</li>
-<li>SimpleApplicationEventMulticaster<ul>
-<li>this.invokeListener(listener, event);</li>
-<li>this.doInvokeListener(listener, event);</li>
-</ul>
-</li>
-<li>ConfigFileApplicationListener</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-01-%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1818,6 +1720,104 @@ public class WrapController &#123;
 </li>
 </ul>
 </li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-02-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/03/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE-02-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B/" class="post-title-link" itemprop="url">springboot-02-自动配置</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-12-03 12:12:59" itemprop="dateCreated datePublished" datetime="2020-12-03T12:12:59+08:00">2020-12-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-01-11 13:46:47" itemprop="dateModified" datetime="2022-01-11T13:46:47+08:00">2022-01-11</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="配置文件application-yml的加载"><a href="#配置文件application-yml的加载" class="headerlink" title="配置文件application.yml的加载"></a>配置文件application.yml的加载</h3><p>application.yml 文件对于 Spring Boot 来说是核心配置文件，至关重要，那么，该文件是 如何加载到内存的呢?需要从启动类的 run()方法开始跟踪。</p>
+<ul>
+<li>xxxApplication: <ul>
+<li>SpringApplication.run(DemoApplication.class, args);</li>
+</ul>
+</li>
+<li>SpringApplication:  <ul>
+<li>(new SpringApplication(primarySources)).run(args);</li>
+<li>this.prepareEnvironment(listeners, bootstrapContext, applicationArguments);</li>
+<li>listeners.environmentPrepared(bootstrapContext, (ConfigurableEnvironment)environment);</li>
+</ul>
+</li>
+<li>SpringApplicationRunListeners<ul>
+<li>listener.environmentPrepared(environment);</li>
+</ul>
+</li>
+<li>EventPublishingRunListener<ul>
+<li>initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));</li>
+</ul>
+</li>
+<li>SimpleApplicationEventMulticaster<ul>
+<li>this.invokeListener(listener, event);</li>
+<li>this.doInvokeListener(listener, event);</li>
+</ul>
+</li>
+<li>ConfigFileApplicationListener</li>
 </ul>
 
       

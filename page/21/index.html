@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">218</span>
+          <span class="site-state-item-count">215</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -240,521 +240,6 @@
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-ThreadPool/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-ThreadPool/" class="post-title-link" itemprop="url">jdk线程池源码解析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-09-15 13:19:44" itemprop="dateModified" datetime="2021-09-15T13:19:44+08:00">2021-09-15</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="类图"><a href="#类图" class="headerlink" title="类图"></a>类图</h3><ul>
-<li><p>ThreadPoolExecutor继承AbstractExecutorService, 提供了execute(Runnable)方法的实现</p>
-</li>
-<li><p>AbstractExecutorService实现ExecutorService，提供了submit(Runnable)方法和submit(Callable)方法的实现</p>
-</li>
-<li><p>ExecutorService继承了Executor接口，定义了submit(Runnable)方法和submit(Callable)方法</p>
-</li>
-<li><p>Executor接口，定义execute(Runnable)方法</p>
-</li>
-</ul>
-<p><img src="https://filescdn.proginn.com/335ad046a09617ef5054d1336967556e/2ffc7547e74b396c2adc6cf790e4c316.webp" alt="img"></p>
-<h3 id="创建线程池"><a href="#创建线程池" class="headerlink" title="创建线程池"></a>创建线程池</h3><p>无论哪种类型的线程池，最终都是直接或者间接通过ThreadPoolExecutor这个类来实现的。而ThreadPoolExecutor的有多个构造方法，最终都是调用含有7个参数的构造函数。</p>
-<p>在这个构造方法中：</p>
-<ul>
-<li>首先对corePoolSize（核心线程数）、maximumPoolSize（最大线程数）、keepAliveTime（核心线程以外的线程空闲时,存活的最大时间）、workQueue（线程队列）、threadFactory（线程工厂）、handler（拒绝策略）参数做了合法性校验；</li>
-<li>给线程池的属性赋值；</li>
-</ul>
-<h3 id="提交任务"><a href="#提交任务" class="headerlink" title="提交任务"></a>提交任务</h3><p>一个线程池可以接受任务类型有Runnable和Callable，我们以Runnable为例</p>
-<h4 id="ExecutorService-submit-Runnable-提交任务"><a href="#ExecutorService-submit-Runnable-提交任务" class="headerlink" title="ExecutorService.submit(Runnable)提交任务"></a>ExecutorService.submit(Runnable)提交任务</h4><p>AbstractExecutorService实现了submit方法</p>
-<img src="https://pic1.zhimg.com/80/v2-56cc90e0ec1c64ae28709ba2aba2dc34_720w.jpg" alt="img" style="zoom: 67%;" />
-
-<blockquote>
-<p>RunnableFuture是Runnable的一个子类</p>
-</blockquote>
-<p><strong>补充知识：线程状态的表示</strong></p>
-<p>Doug Lea 采用一个 32 位的整数来存放线程池的状态和当前池中的线程数，其中高 3 位用于存放线程池状态，低 29 位表示线程数。我们知道，java 语言在整数编码上是统一的，都是采用补码的形式</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AtomicInteger ctl = <span class="keyword">new</span> AtomicInteger(ctlOf(RUNNING, <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里 COUNT_BITS 设置为 29(32-3)，意味着前三位用于存放线程状态，后29位用于存放线程数</span></span><br><span class="line"><span class="comment">// 很多初学者很喜欢在自己的代码中写很多 29 这种数字，或者某个特殊的字符串，然后分布在各个地方，这是非常糟糕的</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> COUNT_BITS = Integer.SIZE - <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 000 11111111111111111111111111111</span></span><br><span class="line"><span class="comment">// 这里得到的是 29 个 1，也就是说线程池的最大线程数是 2^29-1=536870911</span></span><br><span class="line"><span class="comment">// 以我们现在计算机的实际情况，这个数量还是够用的</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CAPACITY   = (<span class="number">1</span> &lt;&lt; COUNT_BITS) - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 我们说了，线程池的状态存放在高 3 位中</span></span><br><span class="line"><span class="comment">// 运算结果为 111跟29个0：111 00000000000000000000000000000</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RUNNING    = -<span class="number">1</span> &lt;&lt; COUNT_BITS;</span><br><span class="line"><span class="comment">// 000 00000000000000000000000000000</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SHUTDOWN   =  <span class="number">0</span> &lt;&lt; COUNT_BITS;</span><br><span class="line"><span class="comment">// 001 00000000000000000000000000000</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> STOP       =  <span class="number">1</span> &lt;&lt; COUNT_BITS;</span><br><span class="line"><span class="comment">// 010 00000000000000000000000000000</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TIDYING    =  <span class="number">2</span> &lt;&lt; COUNT_BITS;</span><br><span class="line"><span class="comment">// 011 00000000000000000000000000000</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TERMINATED =  <span class="number">3</span> &lt;&lt; COUNT_BITS;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将整数 c 的低 29 位修改为 0，就得到了线程池的状态</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">runStateOf</span><span class="params">(<span class="keyword">int</span> c)</span>     </span>&#123; <span class="keyword">return</span> c &amp; ~CAPACITY; &#125;</span><br><span class="line"><span class="comment">// 将整数 c 的高 3 为修改为 0，就得到了线程池中的线程数</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">workerCountOf</span><span class="params">(<span class="keyword">int</span> c)</span>  </span>&#123; <span class="keyword">return</span> c &amp; CAPACITY; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">ctlOf</span><span class="params">(<span class="keyword">int</span> rs, <span class="keyword">int</span> wc)</span> </span>&#123; <span class="keyword">return</span> rs | wc; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Bit field accessors that don&#x27;t require unpacking ctl.</span></span><br><span class="line"><span class="comment"> * These depend on the bit layout and on workerCount being never negative.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">runStateLessThan</span><span class="params">(<span class="keyword">int</span> c, <span class="keyword">int</span> s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> c &lt; s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">runStateAtLeast</span><span class="params">(<span class="keyword">int</span> c, <span class="keyword">int</span> s)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> c &gt;= s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isRunning</span><span class="params">(<span class="keyword">int</span> c)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> c &lt; SHUTDOWN;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在这里，介绍下线程池中的各个状态和状态变化的转换过程：</p>
-<ul>
-<li>RUNNING：这个没什么好说的，这是最正常的状态：接受新的任务，处理等待队列中的任务</li>
-<li>SHUTDOWN：不接受新的任务提交，但是会继续处理等待队列中的任务</li>
-<li>STOP：不接受新的任务提交，不再处理等待队列中的任务，中断正在执行任务的线程</li>
-<li>TIDYING：所有的任务都销毁了，workCount 为 0。线程池的状态在转换为 TIDYING 状态时，会执行钩子方法 terminated()</li>
-<li>TERMINATED：terminated() 方法结束后，线程池的状态就会变成这个</li>
-</ul>
-<blockquote>
-<p>RUNNING 定义为 -1，SHUTDOWN 定义为 0，其他的都比 0 大，所以等于 0 的时候不能提交任务，大于 0 的话，连正在执行的任务也需要中断。</p>
-</blockquote>
-<p>各个状态的转换过程有以下几种：</p>
-<ul>
-<li>RUNNING -&gt; SHUTDOWN：当调用了 shutdown() 后，会发生这个状态转换，这也是最重要的</li>
-<li>(RUNNING or SHUTDOWN) -&gt; STOP：当调用 shutdownNow() 后，会发生这个状态转换，这下要清楚 shutDown() 和 shutDownNow() 的区别了</li>
-<li>SHUTDOWN -&gt; TIDYING：当任务队列和线程池都清空后，会由 SHUTDOWN 转换为 TIDYING</li>
-<li>STOP -&gt; TIDYING：当任务队列清空后，发生这个转换</li>
-<li>TIDYING -&gt; TERMINATED：这个前面说了，当 terminated() 方法结束后</li>
-</ul>
-<h4 id="Executor-execute-Runnnable-执行任务"><a href="#Executor-execute-Runnnable-执行任务" class="headerlink" title="Executor.execute(Runnnable )执行任务"></a>Executor.execute(Runnnable )执行任务</h4><p>ThreadPoolExecutor实现了execute(Runnable)方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (command == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 前面说的那个表示 “线程池状态” 和 “线程数” 的整数</span></span><br><span class="line">    <span class="keyword">int</span> c = ctl.get();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// step1: 如果当前线程数少于核心线程数，那么直接添加一个 worker 来执行任务，</span></span><br><span class="line">    <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">        <span class="comment">// 添加任务成功，那么就结束了；返回 false 代表线程池不允许提交任务</span></span><br><span class="line">        <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        c = ctl.get();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 到这里说明，要么当前线程数大于等于核心线程数，要么刚刚 addWorker 失败了</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// step2: 如果线程池处于 RUNNING 状态，把这个任务添加到任务队列 workQueue 中</span></span><br><span class="line">    <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">        <span class="comment">/* 这里面说的是，如果任务进入了 workQueue，我们是否需要开启新的线程</span></span><br><span class="line"><span class="comment">         * 因为线程数在 [0, corePoolSize) 是无条件开启新的线程</span></span><br><span class="line"><span class="comment">         * 如果线程数已经大于等于 corePoolSize，那么将任务添加到队列中，然后进到这里</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">int</span> recheck = ctl.get();</span><br><span class="line">        <span class="comment">// 如果线程池已不处于 RUNNING 状态，那么移除已经入队的这个任务，并且执行拒绝策略</span></span><br><span class="line">        <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">            reject(command);</span><br><span class="line">        <span class="comment">// 如果线程池还是 RUNNING 的，并且线程数为 0，那么开启新的线程</span></span><br><span class="line">        <span class="comment">// 到这里，我们知道了，这块代码的真正意图是：担心任务提交到队列中了，但是线程都关闭了</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">            addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// step3:如果 workQueue 队列满了，创建新的非核心worker</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">        reject(command); <span class="comment">// addWorker失败，说明当前线程数已经达到 maximumPoolSize，执行拒绝策略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>step1：当一个任务被提交时，若线程池中的工作线程 &lt; 核心线程，调用addWorker方法创建新的线程</p>
-<p>step2：当前线程池中核心线程已满，但是任务队列workQueue未满，则添加;</p>
-<p>step3：当前线程池中核心线程已满，任务队列也满了，就尝试调用addWorker创建新的线程（非核心），如果创建线程失败则执行拒绝策略；</p>
-<h5 id="step1：addWorker创建核心worker线程"><a href="#step1：addWorker创建核心worker线程" class="headerlink" title="step1：addWorker创建核心worker线程"></a>step1：addWorker创建核心worker线程</h5><p>addWorker()所创建的线程Worker，会在KeepLive销毁之前，一直调用循环方法getTask()，从workQueue队列获取任务。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一个参数是准备提交给这个线程执行的任务，之前说了，可以为 null</span></span><br><span class="line"><span class="comment">// 第二个参数为 true 代表使用核心线程数 corePoolSize 作为创建线程的界限，也就说创建这个线程的时候，</span></span><br><span class="line"><span class="comment">//         如果线程池中的线程总数已经达到 corePoolSize，那么不能响应这次创建线程的请求</span></span><br><span class="line"><span class="comment">//         如果是 false，代表使用最大线程数 maximumPoolSize 作为界限</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">addWorker</span><span class="params">(Runnable firstTask, <span class="keyword">boolean</span> core)</span> </span>&#123;</span><br><span class="line">    retry:</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">int</span> rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 这个非常不好理解</span></span><br><span class="line">        <span class="comment">// 如果线程池已关闭，并满足以下条件之一，那么不创建新的 worker：</span></span><br><span class="line">        <span class="comment">// 1. 线程池状态大于 SHUTDOWN，其实也就是 STOP, TIDYING, 或 TERMINATED</span></span><br><span class="line">        <span class="comment">// 2. firstTask != null</span></span><br><span class="line">        <span class="comment">// 3. workQueue.isEmpty()</span></span><br><span class="line">        <span class="comment">// 简单分析下：</span></span><br><span class="line">        <span class="comment">// 还是状态控制的问题，当线程池处于 SHUTDOWN 的时候，不允许提交任务，但是已有的任务继续执行</span></span><br><span class="line">        <span class="comment">// 当状态大于 SHUTDOWN 时，不允许提交任务，且中断正在执行的任务</span></span><br><span class="line">        <span class="comment">// 多说一句：如果线程池处于 SHUTDOWN，但是 firstTask 为 null，且 workQueue 非空，那么是允许创建 worker 的</span></span><br><span class="line">        <span class="comment">// 这是因为 SHUTDOWN 的语义：不允许提交新的任务，但是要把已经进入到 workQueue 的任务执行完，所以在满足条件的基础上，是允许创建新的 Worker 的</span></span><br><span class="line">        <span class="keyword">if</span> (rs &gt;= SHUTDOWN &amp;&amp;</span><br><span class="line">            ! (rs == SHUTDOWN &amp;&amp;</span><br><span class="line">               firstTask == <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">               ! workQueue.isEmpty()))</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">int</span> wc = workerCountOf(c);</span><br><span class="line">            <span class="keyword">if</span> (wc &gt;= CAPACITY ||</span><br><span class="line">                wc &gt;= (core ? corePoolSize : maximumPoolSize))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            <span class="comment">// 如果成功，那么就是所有创建线程前的条件校验都满足了，准备创建线程执行任务了</span></span><br><span class="line">            <span class="comment">// 这里失败的话，说明有其他线程也在尝试往线程池中创建线程</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndIncrementWorkerCount(c))</span><br><span class="line">                <span class="keyword">break</span> retry;</span><br><span class="line">            <span class="comment">// 由于有并发，重新再读取一下 ctl</span></span><br><span class="line">            c = ctl.get();</span><br><span class="line">            <span class="comment">// 正常如果是 CAS 失败的话，进到下一个里层的for循环就可以了</span></span><br><span class="line">            <span class="comment">// 可是如果是因为其他线程的操作，导致线程池的状态发生了变更，如有其他线程关闭了这个线程池</span></span><br><span class="line">            <span class="comment">// 那么需要回到外层的for循环</span></span><br><span class="line">            <span class="keyword">if</span> (runStateOf(c) != rs)</span><br><span class="line">                <span class="keyword">continue</span> retry;</span><br><span class="line">            <span class="comment">// else CAS failed due to workerCount change; retry inner loop</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 到这里，我们认为在当前这个时刻，可以开始创建线程来执行任务了，</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// worker 是否已经启动</span></span><br><span class="line">    <span class="keyword">boolean</span> workerStarted = <span class="keyword">false</span>;</span><br><span class="line">    <span class="comment">// 是否已将这个 worker 添加到 workers 这个 HashSet 中</span></span><br><span class="line">    <span class="keyword">boolean</span> workerAdded = <span class="keyword">false</span>;</span><br><span class="line">    Worker w = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> ReentrantLock mainLock = <span class="keyword">this</span>.mainLock;</span><br><span class="line">        <span class="comment">// 把 firstTask 传给 worker 的构造方法</span></span><br><span class="line">        w = <span class="keyword">new</span> Worker(firstTask);</span><br><span class="line">        <span class="comment">// 取 worker 中的线程对象，Worker的构造方法会调用 ThreadFactory 来创建一个新的线程</span></span><br><span class="line">        <span class="keyword">final</span> Thread t = w.thread;</span><br><span class="line">        <span class="keyword">if</span> (t != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 整个线程池的全局锁，因为关闭一个线程池需要这个锁，至少持有锁的期间，线程池不会被关闭</span></span><br><span class="line">            mainLock.lock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">                <span class="keyword">int</span> rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 小于 SHUTTDOWN 那就是 RUNNING，这个自不必说，是最正常的情况</span></span><br><span class="line">                <span class="comment">// 如果等于 SHUTDOWN，前面说了，不接受新的任务，但是会继续执行等待队列中的任务</span></span><br><span class="line">                <span class="keyword">if</span> (rs &lt; SHUTDOWN ||</span><br><span class="line">                    (rs == SHUTDOWN &amp;&amp; firstTask == <span class="keyword">null</span>)) &#123;</span><br><span class="line">                    <span class="comment">// worker 里面的 thread 可不能是已经启动的</span></span><br><span class="line">                    <span class="keyword">if</span> (t.isAlive())</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalThreadStateException();</span><br><span class="line">                    <span class="comment">// 加到 workers 这个 HashSet 中</span></span><br><span class="line">                    workers.add(w);</span><br><span class="line">                    <span class="keyword">int</span> s = workers.size();</span><br><span class="line">                    <span class="comment">// largestPoolSize 用于记录 workers 中的个数的最大值</span></span><br><span class="line">                    <span class="comment">// 因为 workers 是不断增加减少的，通过这个值可以知道线程池的大小曾经达到的最大值</span></span><br><span class="line">                    <span class="keyword">if</span> (s &gt; largestPoolSize)</span><br><span class="line">                        largestPoolSize = s;</span><br><span class="line">                    workerAdded = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                mainLock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 添加成功的话，启动这个线程</span></span><br><span class="line">            <span class="keyword">if</span> (workerAdded) &#123;</span><br><span class="line">                <span class="comment">// 启动线程</span></span><br><span class="line">                t.start();</span><br><span class="line">                workerStarted = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="comment">// 如果线程没有启动，需要做一些清理工作，如前面 workCount 加了 1，将其减掉</span></span><br><span class="line">        <span class="keyword">if</span> (! workerStarted)</span><br><span class="line">            addWorkerFailed(w);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 返回线程是否启动成功</span></span><br><span class="line">    <span class="keyword">return</span> workerStarted;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>三个关键点：</p>
-<ul>
-<li><p>创建一个worker对象</p>
-<ul>
-<li><pre><code> w = new Worker(firstTask);
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 创建成功后，对线程池状态判断成功后，就去执行该worker对象的thread的启动。也就是说在这个方法里面启动了一个关联到worker的线程</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;</span><br><span class="line">    final Thread t &#x3D; w.thread;</span><br></pre></td></tr></table></figure></code></pre>
-</li>
-</ul>
-</li>
-<li><p>线程启动</p>
-<ul>
-<li><pre><code>t.start();
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">###### ThreadPoolExecutor的内部类worker：真正干活的线程</span><br><span class="line"></span><br><span class="line">ThreadPoolExecutor的内部类 Worker，因为 Doug Lea 把线程池中的线程包装成了一个个 Worker，放在HashSet&lt;Worker&gt; workers中。所以worker中，任务是 Runnable（内部变量名叫 task 或 command），线程是 Thread。</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;java</span><br><span class="line">private final class Worker extends AbstractQueuedSynchronizer implements Runnable&#123;</span><br><span class="line">    private static final long serialVersionUID &#x3D; 6138294804551838833L;</span><br><span class="line"></span><br><span class="line">    final Thread thread; &#x2F;&#x2F; 这个是真正的线程，任务靠你啦!!!</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 前面说了，这里的 Runnable 是任务。为什么叫 firstTask？因为在创建线程的时候，如果同时指定了</span><br><span class="line">    &#x2F;&#x2F; 这个线程起来以后需要执行的第一个任务，那么第一个任务就是存放在这里的(线程可不止执行这一个任务)</span><br><span class="line">    &#x2F;&#x2F; 当然了，也可以为 null，这样线程起来了，自己到任务队列workQueue中取任务（getTask 方法）就行了</span><br><span class="line">    Runnable firstTask;</span><br><span class="line"></span><br><span class="line">    volatile long completedTasks; &#x2F;&#x2F; 用于存放此线程完成的任务数，注意了，这里用了 volatile，保证可见性</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; Worker 只有这一个构造方法，传入 firstTask，也可以传 null</span><br><span class="line">    Worker(Runnable firstTask) &#123;</span><br><span class="line">        setState(-1); &#x2F;&#x2F; inhibit interrupts until runWorker</span><br><span class="line">        this.firstTask &#x3D; firstTask;</span><br><span class="line">        this.thread &#x3D; getThreadFactory().newThread(this); &#x2F;&#x2F; 调用 ThreadFactory 来创建一个新的线程</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 这里调用了外部类的 runWorker 方法</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        runWorker(this);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...&#x2F;&#x2F; 其他几个方法没什么好看的，就是用 AQS 操作，来获取这个线程的执行权，用了独占锁</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-<p>Worker 这里又用到了抽象类 AbstractQueuedSynchronizer。<!--题外话，AQS 在并发中真的是到处出现，而且非常容易使用，写少量的代码就能实现自己需要的同步方式--></p>
-<p>从源码上看Worker这个类实现了Runnable接口</p>
-<ul>
-<li>构造函数：线程工厂创建线程，把自己这个Worker实例传给线程 <!--因为worker就是一个Runnable--></li>
-<li><a href="">addWorder</a>这个方法会调用Worker的执行线程t ==&gt; t.start(), 那么就会启动<a href="">Worker中的run()方法</a> <!--废话--></li>
-<li><a href="">Worker封装了任务Runnable和执行线程t</a>！！！</li>
-</ul>
-<h6 id="ThreadPoolExecutor-runWorker-真正干活的方法"><a href="#ThreadPoolExecutor-runWorker-真正干活的方法" class="headerlink" title="ThreadPoolExecutor.runWorker(): 真正干活的方法"></a>ThreadPoolExecutor.runWorker(): 真正干活的方法</h6><p>worker中的run()：委托给ThreadPoolExecutor.runWorker()方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">runWorker</span><span class="params">(Worker w)</span> </span>&#123;</span><br><span class="line">        Thread wt = Thread.currentThread();</span><br><span class="line">        Runnable task = w.firstTask;</span><br><span class="line">        w.firstTask = <span class="keyword">null</span>;</span><br><span class="line">        w.unlock(); <span class="comment">// allow interrupts</span></span><br><span class="line">        <span class="keyword">boolean</span> completedAbruptly = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (task != <span class="keyword">null</span> || (task = getTask()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                w.lock();</span><br><span class="line">                <span class="comment">// If pool is stopping, ensure thread is interrupted;</span></span><br><span class="line">                <span class="comment">// if not, ensure thread is not interrupted.  This</span></span><br><span class="line">                <span class="comment">// requires a recheck in second case to deal with</span></span><br><span class="line">                <span class="comment">// shutdownNow race while clearing interrupt</span></span><br><span class="line">                <span class="keyword">if</span> ((runStateAtLeast(ctl.get(), STOP) ||</span><br><span class="line">                     (Thread.interrupted() &amp;&amp;</span><br><span class="line">                      runStateAtLeast(ctl.get(), STOP))) &amp;&amp;</span><br><span class="line">                    !wt.isInterrupted())</span><br><span class="line">                    wt.interrupt();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    beforeExecute(wt, task);</span><br><span class="line">                    Throwable thrown = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        task.run(); <span class="comment">//task运行在当前线程中！！！</span></span><br><span class="line">                    &#125; <span class="keyword">catch</span> (RuntimeException x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> x;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Error x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> x;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Throwable x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> <span class="keyword">new</span> Error(x);</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        afterExecute(task, thrown);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    task = <span class="keyword">null</span>;</span><br><span class="line">                    w.completedTasks++;</span><br><span class="line">                    w.unlock();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            completedAbruptly = <span class="keyword">false</span>;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            processWorkerExit(w, completedAbruptly);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>3个关键点：</p>
-<ul>
-<li>里面有个循环，循环的条件是</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (task != <span class="keyword">null</span> || (task = getTask()) != <span class="keyword">null</span>) </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>假如task不为空，进入循环会执行任务，并且可以看到，是在当前线程执行task</li>
-</ul>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">task.run();</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>继续再往下finally代码块：代码的中task被重新赋值为空，然后执行下一循环；</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">finally</span> &#123;</span><br><span class="line">    task = <span class="keyword">null</span>;</span><br><span class="line">    w.completedTasks++;</span><br><span class="line">    w.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h6 id="runWorker-中的循环判断getTask-真正从任务队列消费任务和复用线程"><a href="#runWorker-中的循环判断getTask-真正从任务队列消费任务和复用线程" class="headerlink" title="runWorker()中的循环判断getTask(): 真正从任务队列消费任务和复用线程"></a>runWorker()中的循环判断getTask(): 真正从任务队列消费任务和复用线程</h6><p>getTask()方法才是工作线程Worker能够不断从任务队列消费任务的原因，保证Worker不断运行。</p>
-<blockquote>
-<p>此方法有三种可能：</p>
-<ol>
-<li>take方式取任务的特点是从缓存队列中取任务，若队列为空,则进入阻塞状态，阻塞直到获取到任务返回。默认 corePoolSize 之内的线程是不会被回收的，它们会一直等待任务</li>
-<li>poll方式取任务的特点是从缓存队列中取任务,最长等待keepAliveTime的时长，取不到返回null。keepAliveTime 起作用的时候，也就是如果这么多时间内都没有任务，那么应该执行关闭</li>
-<li>如果发生了以下条件，此方法必须返回 null:<ul>
-<li>池中有大于 maximumPoolSize 个 workers 存在(通过调用 setMaximumPoolSize 进行设置)<ul>
-<li>线程池处于 SHUTDOWN，而且 workQueue 是空的，这种不再接受新的任务</li>
-<li>线程池处于 STOP，不仅不接受新的线程，连 workQueue 中的线程也不再执行</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Runnable <span class="title">getTask</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> timedOut = <span class="keyword">false</span>; <span class="comment">// Did the last poll() time out?</span></span><br><span class="line"></span><br><span class="line">    retry:</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">int</span> rs = runStateOf(c);</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">if</span> (rs &gt;= SHUTDOWN &amp;&amp; (rs &gt;= STOP || workQueue.isEmpty())) &#123;</span><br><span class="line">            <span class="comment">// CAS 操作，减少工作线程数</span></span><br><span class="line">            decrementWorkerCount();</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> timed;      <span class="comment">// Are workers subject to culling?</span></span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">int</span> wc = workerCountOf(c);</span><br><span class="line">            <span class="comment">// 允许核心线程数内的线程回收，或当前线程数超过了核心线程数，那么有可能发生超时关闭</span></span><br><span class="line">            timed = allowCoreThreadTimeOut || wc &gt; corePoolSize;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 这里 break，是为了不往下执行后一个 if (compareAndDecrementWorkerCount(c))</span></span><br><span class="line">            <span class="comment">// 两个 if 一起看：如果当前线程数 wc &gt; maximumPoolSize，或者超时，都返回 null</span></span><br><span class="line">            <span class="comment">// 那这里的问题来了，wc &gt; maximumPoolSize 的情况，返回 null 意味着关闭线程，因为有可能开发者调用了 setMaximumPoolSize() 将线程池的 maximumPoolSize 调小了，那么多余的 Worker 就需要被关闭</span></span><br><span class="line">            <span class="keyword">if</span> (wc &lt;= maximumPoolSize &amp;&amp; ! (timedOut &amp;&amp; timed))</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">if</span> (compareAndDecrementWorkerCount(c))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            c = ctl.get();  <span class="comment">// Re-read ctl</span></span><br><span class="line">            <span class="comment">// compareAndDecrementWorkerCount(c) 失败，线程池中的线程数发生了改变</span></span><br><span class="line">            <span class="keyword">if</span> (runStateOf(c) != rs)</span><br><span class="line">                <span class="keyword">continue</span> retry;</span><br><span class="line">            <span class="comment">// else CAS failed due to workerCount change; retry inner loop</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// wc &lt;= maximumPoolSize 同时没有超时</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 到 workQueue 中获取任务</span></span><br><span class="line">            Runnable r = timed ?</span><br><span class="line">                workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :</span><br><span class="line">                workQueue.take();</span><br><span class="line">            <span class="keyword">if</span> (r != <span class="keyword">null</span>)</span><br><span class="line">                <span class="keyword">return</span> r;</span><br><span class="line">            timedOut = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException retry) &#123;</span><br><span class="line">            <span class="comment">// 如果此 worker 发生了中断，采取的方案是重试</span></span><br><span class="line">            <span class="comment">// 解释下为什么会发生中断，这个读者要去看 setMaximumPoolSize 方法。</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 如果开发者将 maximumPoolSize 调小了，导致其小于当前的 workers 数量，</span></span><br><span class="line">            <span class="comment">// 那么意味着超出的部分线程要被关闭。重新进入 for 循环，自然会有部分线程会返回 null</span></span><br><span class="line">            timedOut = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个方法中重点看下Runnable getTask()中的这段代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Runnable r = timed ?</span><br><span class="line">                   workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :</span><br><span class="line">                   workQueue.take();</span><br><span class="line">               <span class="keyword">if</span> (r != <span class="keyword">null</span>)</span><br><span class="line">                   <span class="keyword">return</span> r;</span><br></pre></td></tr></table></figure>
-
-<p>从队列中获取任务：<a href="">循环从队列中获取任务并赋值给task,然后调用task的run方法，以此循环</a>。这样对于处理队列里的任务就不需要重新new 一个线程来处理了，因此实现了线程的重复利用！！！</p>
-<h5 id="step2：新的任务被提交到了队列中"><a href="#step2：新的任务被提交到了队列中" class="headerlink" title="step2：新的任务被提交到了队列中"></a>step2：新的任务被提交到了队列中</h5><p> 执行workQueue.offer(command)</p>
-<h5 id="step3-addWorker创建非核心worker线程"><a href="#step3-addWorker创建非核心worker线程" class="headerlink" title="step3: addWorker创建非核心worker线程"></a>step3: addWorker创建非核心worker线程</h5><h5 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h5><table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>execute()</td>
-<td>1. coreSize未达到，addWorker(command)</td>
-</tr>
-<tr>
-<td></td>
-<td>2. 超过coreSize, addWorker(null)</td>
-</tr>
-<tr>
-<td></td>
-<td>3. 超过队列，addWorker(null)</td>
-</tr>
-<tr>
-<td>addWorker()</td>
-<td>1. 判断线程池状态</td>
-</tr>
-<tr>
-<td></td>
-<td>2. new Worker(commad); w.start()</td>
-</tr>
-<tr>
-<td>Worker.class</td>
-<td>1. 构造方法: new Thread(Worker);</td>
-</tr>
-<tr>
-<td></td>
-<td>2. runWorker(Worker);</td>
-</tr>
-<tr>
-<td>runWorker(Worker)</td>
-<td>1.Runnable = Worker.firstTask</td>
-</tr>
-<tr>
-<td></td>
-<td>2.  While(task = getTask() != null); task.run()</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<p>Worker本质上是个工作线程Thread + 任务Runnable。我一开始以为Worker是个干活的，就应该只是个Thread，没有必要封装任务Runnable。 再者，由于受到之前的固化思维，以为Thread和Runnable必须在同一行代码中，<code>new Thread(Runnable).start()</code>，所以Worker作为一个Thread，已经运行过<code>new Thread(Runnable).start()</code>，这个Thread和一个Runnbale已经绑定了，怎么还能获取到其他Runnable，并且运行呢？其实，这就是对 <code>Thread(Runnable).start()</code>和 <code>Runnable().run()</code>没有理解透彻。虽然Worker已经被运行了Thread(Runnable).start()，该worker的Thread已经和自己的Runnbale已经绑定了（这个Runnable其实就是firstTask，就是submit(Runnable)的时候那个Runnable），但是该worker的Runnable.run()方法，包含了getTask()方法从而获取其他Runnable, 然后执行<code>Runnable().run()</code>，这样Runnable就运行在当前线程了，当前线程是谁呢？当然是该worker的Thread了。</p>
-<table>
-<thead>
-<tr>
-<th>线程池pool所在的主线程</th>
-<th>worker所在的子线程</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>submit(Runnable)</td>
-<td></td>
-</tr>
-<tr>
-<td>addWorker(Runnable)</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td>worker.start()调用worker.run()</td>
-</tr>
-<tr>
-<td></td>
-<td>worker.run() 调用 ThreadPoolExecutor.runWorker(Worker this)</td>
-</tr>
-<tr>
-<td></td>
-<td>ThreadPoolExecutor.runWorkerr(Worker this)调用getTask()获取task</td>
-</tr>
-<tr>
-<td></td>
-<td>task.run()在当前线程执行，即worker线程</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-AQS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-AQS/" class="post-title-link" itemprop="url">jdk线程池源码解析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-20 15:11:24" itemprop="dateModified" datetime="2023-03-20T15:11:24+08:00">2023-03-20</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/" class="post-title-link" itemprop="url">jdk线程池源码解析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-20 15:17:25" itemprop="dateModified" datetime="2023-03-20T15:17:25+08:00">2023-03-20</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>ava语言直接提供了<code>synchronized</code>关键字用于加锁，但这种锁一是很重，二是获取时必须一直等待，没有额外的尝试机制。</p>
-<p><code>java.util.concurrent.locks</code>包提供的<code>ReentrantLock</code>用于替代<code>synchronized</code>加锁，我们来看一下传统的<code>synchronized</code>代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        synchronized(this) &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果用<code>ReentrantLock</code>替代，可以把代码改造为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>因为<code>synchronized</code>是Java语言层面提供的语法，所以我们不需要考虑异常，而<code>ReentrantLock</code>是Java代码实现的锁，我们就必须先获取锁，然后在<code>finally</code>中正确释放锁。</p>
-<p>顾名思义，<code>ReentrantLock</code>是可重入锁，它和<code>synchronized</code>一样，一个线程可以多次获取同一个锁。</p>
-<p>和<code>synchronized</code>不同的是，<code>ReentrantLock</code>可以尝试获取锁：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (lock.tryLock(1, TimeUnit.SECONDS)) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述代码在尝试获取锁的时候，最多等待1秒。如果1秒后仍未获取到锁，<code>tryLock()</code>返回<code>false</code>，程序就可以做一些额外处理，而不是无限等待下去。</p>
-<p>所以，使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，线程在<code>tryLock()</code>失败的时候不会导致死锁。</p>
-<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p><code>ReentrantLock</code>可以替代<code>synchronized</code>进行同步；</p>
-<p><code>ReentrantLock</code>获取锁更安全；</p>
-<p>必须先获取到锁，再进入<code>try &#123;...&#125;</code>代码块，最后使用<code>finally</code>保证释放锁；</p>
-<p>可以使用<code>tryLock()</code>尝试获取锁。</p>
-<h3 id="condition"><a href="#condition" class="headerlink" title="condition"></a>condition</h3><p>使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，可以替代<code>synchronized</code>进行线程同步。</p>
-<p>但是，<code>synchronized</code>可以配合<code>wait</code>和<code>notify</code>实现线程在条件不满足时等待，条件满足时唤醒，用<code>ReentrantLock</code>我们怎么编写<code>wait</code>和<code>notify</code>的功能呢？</p>
-<p>答案是使用<code>Condition</code>对象来实现<code>wait</code>和<code>notify</code>的功能。</p>
-<p>我们仍然以<code>TaskQueue</code>为例，把前面用<code>synchronized</code>实现的功能通过<code>ReentrantLock</code>和<code>Condition</code>来实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">class TaskQueue &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private final Condition condition &#x3D; lock.newCondition();</span><br><span class="line">    private Queue&lt;String&gt; queue &#x3D; new LinkedList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public void addTask(String s) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            queue.add(s);</span><br><span class="line">            condition.signalAll();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getTask() &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            while (queue.isEmpty()) &#123;</span><br><span class="line">                condition.await();</span><br><span class="line">            &#125;</span><br><span class="line">            return queue.remove();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见，使用<code>Condition</code>时，引用的<code>Condition</code>对象必须从<code>Lock</code>实例的<code>newCondition()</code>返回，这样才能获得一个绑定了<code>Lock</code>实例的<code>Condition</code>实例。</p>
-<p><code>Condition</code>提供的<code>await()</code>、<code>signal()</code>、<code>signalAll()</code>原理和<code>synchronized</code>锁对象的<code>wait()</code>、<code>notify()</code>、<code>notifyAll()</code>是一致的，并且其行为也是一样的：</p>
-<ul>
-<li><code>await()</code>会释放当前锁，进入等待状态；</li>
-<li><code>signal()</code>会唤醒某个等待线程；</li>
-<li><code>signalAll()</code>会唤醒所有等待线程；</li>
-<li>唤醒线程从<code>await()</code>返回后需要重新获得锁。</li>
-</ul>
-<p>此外，和<code>tryLock()</code>类似，<code>await()</code>可以在等待指定时间后，如果还没有被其他线程通过<code>signal()</code>或<code>signalAll()</code>唤醒，可以自己醒来：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (condition.await(1, TimeUnit.SECOND)) &#123;</span><br><span class="line">    &#x2F;&#x2F; 被其他线程唤醒</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    &#x2F;&#x2F; 指定时间内没有被其他线程唤醒</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见，使用<code>Condition</code>配合<code>Lock</code>，我们可以实现更灵活的线程同步。</p>
-<h4 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h4><p><code>Condition</code>可以替代<code>wait</code>和<code>notify</code>；</p>
-<p><code>Condition</code>对象必须从<code>Lock</code>对象获取。</p>
-<h3 id="公平锁和非公平锁"><a href="#公平锁和非公平锁" class="headerlink" title="公平锁和非公平锁"></a>公平锁和非公平锁</h3><p>学习AQS的时候，了解到AQS依赖于内部的FIFO同步队列来完成同步状态的管理，当前线程获取同步状态失败时，同步器会将当前线程以及等待状态等信息构造成一个Node对象并将其加入到同步队列，同时会阻塞当前线程，当同步状态释放时，会把首节点中的线程唤醒，使其再次尝试获取同步状态。</p>
-<p>这时，我有了一个疑问，AQS的同步队列是FIFO的，就是先来排队的先走。那怎么实现非公平锁呢？查阅了一些资料，总算知道了。</p>
-<p>首先从公平锁开始看起。</p>
-<h2 id="ReentrantLock-的公平锁"><a href="#ReentrantLock-的公平锁" class="headerlink" title="ReentrantLock 的公平锁"></a>ReentrantLock 的公平锁</h2><p>ReentrantLock 默认采用非公平锁，除非在构造方法中传入参数 true 。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//默认</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//传入true or false</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">(<span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    sync = fair ? <span class="keyword">new</span> FairSync() : <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="公平锁的-lock-方法："><a href="#公平锁的-lock-方法：" class="headerlink" title="公平锁的 lock 方法："></a>公平锁的 lock 方法：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">FairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">        <span class="keyword">int</span> c = getState();</span><br><span class="line">        <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 1. 和非公平锁相比，这里多了一个判断：是否有线程在等待</span></span><br><span class="line">            <span class="keyword">if</span> (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">                setExclusiveOwnerThread(current);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">            <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">            <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">            setState(nextc);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以看到，在注释1的位置，有个<code>!hasQueuedPredecessors()</code>条件，意思是说当前同步队列没有前驱节点（也就是没有线程在等待）时才会去<code>compareAndSetState(0, acquires)</code>使用CAS修改同步状态变量。所以就实现了公平锁，根据线程发出请求的顺序获取锁。</p>
-<h2 id="非公平锁的lock方法"><a href="#非公平锁的lock方法" class="headerlink" title="非公平锁的lock方法"></a>非公平锁的lock方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 2. 和公平锁相比，这里会直接先进行一次CAS，成功就返回了</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, <span class="number">1</span>))</span><br><span class="line">            setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nonfairTryAcquire(acquires);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Performs non-fair tryLock.  tryAcquire is implemented in</span></span><br><span class="line"><span class="comment"> * subclasses, but both need nonfair try for trylock method.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">nonfairTryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">    <span class="keyword">int</span> c = getState();</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//3.这里也是直接CAS，没有判断前面是否还有节点。</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">            setExclusiveOwnerThread(current);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">        <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">        <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">        setState(nextc);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>非公平锁的实现在刚进入lock方法时会直接使用一次CAS去尝试获取锁，不成功才会到acquire方法中，如注释2。而在nonfairTryAcquire方法中并没有判断是否有前驱节点在等待，直接CAS尝试获取锁，如注释3。由此实现了非公平锁。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>非公平锁和公平锁的两处不同：</strong></p>
-<ol>
-<li>非公平锁在调用 lock 后，首先就会调用 CAS 进行一次抢锁，如果这个时候恰巧锁没有被占用，那么直接就获取到锁返回了。</li>
-<li>非公平锁在 CAS 失败后，和公平锁一样都会进入到 tryAcquire 方法，在 tryAcquire 方法中，如果发现锁这个时候被释放了（state == 0），非公平锁会直接 CAS 抢锁，但是公平锁会判断等待队列是否有线程处于等待状态，如果有则不去抢锁，乖乖排到后面。</li>
-</ol>
-<p>公平锁和非公平锁就这两点区别，如果这两次 CAS 都不成功，那么后面非公平锁和公平锁是一样的，都要进入到阻塞队列等待唤醒。</p>
-<p>相对来说，非公平锁会有更好的性能，因为它的吞吐量比较大。当然，非公平锁让获取锁的时间变得更加不确定，可能会导致在阻塞队列中的线程长期处于饥饿状态。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
     
 
 
@@ -822,95 +307,6 @@
     
     <div class="post-body" itemprop="articleBody">
           
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-CompletableFuture/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-CompletableFuture/" class="post-title-link" itemprop="url">JDK-JUC-CompletableFuture</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-06 14:35:36" itemprop="dateModified" datetime="2023-02-06T14:35:36+08:00">2023-02-06</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/juc/" itemprop="url" rel="index"><span itemprop="name">juc</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/juc/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>接口批量查询</p>
-
       
     </div>
 
@@ -1134,6 +530,95 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">class ParallelProcessor&lt;T&gt; &#123;</span><br><span class="line">    </span><br><span class="line">    private String session;</span><br><span class="line">    </span><br><span class="line">    public ParallelProcessor(String session) &#123;</span><br><span class="line">        this.session &#x3D; session;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public void process(List&lt;T&gt; dataList) &#123;</span><br><span class="line">        &#x2F;&#x2F; 先校验参数，篇幅限制先省略不写</span><br><span class="line">        dataList.parallelStream().forEach(entry -&gt; &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                ContextHolder.set(session);</span><br><span class="line">                &#x2F;&#x2F; 业务处理</span><br><span class="line">                doIt();</span><br><span class="line">            &#125; catch (Exception e) &#123;</span><br><span class="line">                &#x2F;&#x2F; log it</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                ContextHolder.remove();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    private void doIt() &#123;</span><br><span class="line">        String session &#x3D; ContextHolder.get();</span><br><span class="line">        &#x2F;&#x2F; do something</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>修改完后的这段代码可以工作吗？如果运气好，你会发现这样改又有问题，运气不好，这段代码在线下运行良好，这段代码就顺利上线了。不久你就会发现系统中会有一些其他很诡异的bug。原因在于并行流的设计比较特殊，父线程也有可能参与到并行流线程池的调度，那如果上面的<code>process</code>方法被父线程执行，那么父线程的上下文会被清理。导致后续拷贝到子线程的上下文都为<code>null</code>，同样产生丢失上下文的问题，关于并行流的实现可以参考文章<a target="_blank" rel="noopener" href="http://mp.weixin.qq.com/s?__biz=MzkyMjIzOTQ3NA==&mid=2247484618&idx=1&sn=c83c0d8927dd650e25f548cd6a2b0df3&chksm=c1f62c57f681a541ebcdb4ae25d5007e73747fc8514916f3233c40c848d2b96ebc442b74b72d&scene=21#wechat_redirect">啥？用了并行流还更慢了</a>。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-CompletableFuture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-CompletableFuture/" class="post-title-link" itemprop="url">JDK-JUC-CompletableFuture</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2023-02-06 14:35:36" itemprop="dateModified" datetime="2023-02-06T14:35:36+08:00">2023-02-06</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/juc/" itemprop="url" rel="index"><span itemprop="name">juc</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/juc/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>接口批量查询</p>
 
       
     </div>
@@ -2035,6 +1520,277 @@
 <li><p>使用next的theme主题进行分类，见ref 2</p>
 </li>
 </ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-2-internet-connection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-2-internet-connection/" class="post-title-link" itemprop="url">virtual machine - 2. internet connection</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-08 17:56:19" itemprop="dateCreated datePublished" datetime="2020-10-08T17:56:19+08:00">2020-10-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-03-14 10:22:17" itemprop="dateModified" datetime="2021-03-14T10:22:17+08:00">2021-03-14</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>Ref:</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://cnblogs.com/wish123/p/9277995.html">https://cnblogs.com/wish123/p/9277995.html</a></li>
+</ol>
+<ol>
+<li>NAT模式<ol>
+<li>原理:<ol>
+<li>虚拟机和主机之间有NAT Engine</li>
+<li>虚拟机发送请求，实际上是传给NAT Engine，由它利用主机进行网络访问</li>
+<li>虚拟机收到的请求,</li>
+</ol>
+</li>
+<li>特点:</li>
+<li>配置:</li>
+</ol>
+</li>
+</ol>
+<h1 id="配置网络ipv4"><a href="#配置网络ipv4" class="headerlink" title="配置网络ipv4"></a>配置网络ipv4</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-xxx</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>我们需要修改 BOOTPROTO=dhcp 中的dhcp改为static（静态），同时在文字下方添加：</p>
+<p>IPADDR=192.168.1.152      #静态IP  </p>
+<p>GATEWAY=192.168.1.1      #默认网关  </p>
+<p>NETMASK=255.255.255.0  #子网掩码  </p>
+<p>DNS1=192.168.1.1              #DNS 配置  </p>
+<p>DNS2=8.8.8.8 </p>
+</blockquote>
+<p>重启：service network restart </p>
+<p>验证：ip addr</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">virtual machine -3-常用工具</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-08 17:56:19" itemprop="dateCreated datePublished" datetime="2020-10-08T17:56:19+08:00">2020-10-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-06-23 11:25:03" itemprop="dateModified" datetime="2021-06-23T11:25:03+08:00">2021-06-23</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="jdk"><a href="#jdk" class="headerlink" title="jdk"></a>jdk</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum search java</span><br><span class="line">yum install -y java-1.8.0-openjdk-devel.x86_64</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">java -version #</span><br><span class="line"></span><br><span class="line">1rpm -ql java-1.8.0-openjdk #查看安装目录</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="ifconfig网络工具"><a href="#ifconfig网络工具" class="headerlink" title="ifconfig网络工具"></a>ifconfig网络工具</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum search ifconfig</span><br></pre></td></tr></table></figure>
+
+<p><strong><em><img src="https://www.linuxidc.com/upload/2018_10/181011090563194.png" alt="img"></em></strong></p>
+<p>以上运行结果，我们只要分析最好一行就可以。<strong>Matched:</strong> ifconfig 这个 分割行 是用来显示 匹配结果的。</p>
+<p>最后一行 中 冒号（：）前面的数据， （<strong>net-tools.x86_64</strong> ） 是匹配的软件包；冒号（：）后面的数据，（<strong>Basic networking tools</strong> ） 是对前面包的描述。</p>
+<p>结合上面的信息， 安装ifconfig 包 只需要安装 net-tools.x86_64 即可。</p>
+<p>所以，我们执行 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install net-tools.x86_64</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="vim编辑器"><a href="#vim编辑器" class="headerlink" title="vim编辑器"></a>vim编辑器</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install vim*</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-1-install-CentOS7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-1-install-CentOS7/" class="post-title-link" itemprop="url">virtual machine - 1. install CentOS7</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-08 16:11:57" itemprop="dateCreated datePublished" datetime="2020-10-08T16:11:57+08:00">2020-10-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-01-22 09:49:11" itemprop="dateModified" datetime="2021-01-22T09:49:11+08:00">2021-01-22</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/133094497">https://zhuanlan.zhihu.com/p/133094497</a></li>
+<li><a target="_blank" rel="noopener" href="https://mirrors.163.com/centos/7/isos/x86_64/%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD">https://mirrors.163.com/centos/7/isos/x86_64/镜像下载</a></li>
+<li><a target="_blank" rel="noopener" href="https://lintut.com/how-to-setup-network-after-rhelcentos-7-minimal-installation/">https://lintut.com/how-to-setup-network-after-rhelcentos-7-minimal-installation/</a> 解决centos镜像没有network的问题</li>
+</ol>
 
       
     </div>
