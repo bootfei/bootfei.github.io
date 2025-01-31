@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="保证幂等的手段保证幂等需要理清楚两件事情：幂等条件和期望结果。  保证幂等的手段有token令牌、分布式锁、去重表、数据库唯一索引等，这些所谓的幂等手段实际上防重手段。防重本质是防止一个相同的请求被当成多个不同的请求来处理。  幂等的条件是知道这是一个相同的请求。防重和幂等本质上是两个不同的阶段。   使用幂等的场景前端重复提交用户注册，用户创建商品等操作，前端都会提交一些数据给后台服务，后台需要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发下保证接口的幂等性">
+<meta property="og:url" content="http://example.com/2021/04/28/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%B9%82%E7%AD%89%E6%80%A7-01-%E9%98%B2%E9%87%8D%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="保证幂等的手段保证幂等需要理清楚两件事情：幂等条件和期望结果。  保证幂等的手段有token令牌、分布式锁、去重表、数据库唯一索引等，这些所谓的幂等手段实际上防重手段。防重本质是防止一个相同的请求被当成多个不同的请求来处理。  幂等的条件是知道这是一个相同的请求。防重和幂等本质上是两个不同的阶段。   使用幂等的场景前端重复提交用户注册，用户创建商品等操作，前端都会提交一些数据给后台服务，后台需要">
+<meta property="og:locale">
+<meta property="og:image" content="https://filescdn.proginn.com/863953bbd02d158b7d726d78b269339e/47e6218040f85184d170ef253514ca59.webp">
+<meta property="og:image" content="https://tallate.top/imgs/%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E2%80%94%E2%80%94%E5%B9%82%E7%AD%89/%E5%B9%82%E7%AD%89%E6%A3%80%E6%9F%A5%E5%92%8C%E6%8E%A5%E5%8F%A3%E9%87%8D%E8%AF%95%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%B2%E7%AA%81.png">
+<meta property="article:published_time" content="2021-04-28T04:12:34.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.168Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://filescdn.proginn.com/863953bbd02d158b7d726d78b269339e/47e6218040f85184d170ef253514ca59.webp">
+
+
+<link rel="canonical" href="http://example.com/2021/04/28/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%B9%82%E7%AD%89%E6%80%A7-01-%E9%98%B2%E9%87%8D%E6%96%B9%E5%BC%8F/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>高并发下保证接口的幂等性 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%9D%E8%AF%81%E5%B9%82%E7%AD%89%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">保证幂等的手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%B9%82%E7%AD%89%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">使用幂等的场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%AB%AF%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4"><span class="nav-number">2.1.</span> <span class="nav-text">前端重复提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E8%B6%85%E6%97%B6%E9%87%8D%E8%AF%95"><span class="nav-number">2.2.</span> <span class="nav-text">接口超时重试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9"><span class="nav-number">2.3.</span> <span class="nav-text">消息重复消费</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B2%E9%87%8D%E6%89%8B%E6%AE%B5%E5%AE%9E%E7%8E%B0%E5%B9%82%E7%AD%89"><span class="nav-number">3.</span> <span class="nav-text">防重手段实现幂等</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%9F%E5%8A%A9%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">3.1.</span> <span class="nav-text">借助数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%88select%E5%86%8Dupdate-insert%E4%BD%BF%E7%94%A8%E6%82%B2%E8%A7%82%E9%94%81"><span class="nav-number">3.1.1.</span> <span class="nav-text">先select再update&#x2F;insert使用悲观锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#update%E4%BD%BF%E7%94%A8%E5%A4%9A%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%EF%BC%88%E4%B9%90%E8%A7%82%E9%94%81%EF%BC%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">update使用多版本控制（乐观锁）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#insert%E4%BD%BF%E7%94%A8%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95"><span class="nav-number">3.1.3.</span> <span class="nav-text">insert使用唯一索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%9F%E5%8A%A9web-api%E5%85%A5%E5%8F%A3"><span class="nav-number">3.2.</span> <span class="nav-text">借助web api入口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">3.2.1.</span> <span class="nav-text">使用Redis实现分布式锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96token"><span class="nav-number">3.2.2.</span> <span class="nav-text">获取token</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/28/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%B9%82%E7%AD%89%E6%80%A7-01-%E9%98%B2%E9%87%8D%E6%96%B9%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高并发下保证接口的幂等性
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-28 12:12:34" itemprop="dateCreated datePublished" datetime="2021-04-28T12:12:34+08:00">2021-04-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="保证幂等的手段"><a href="#保证幂等的手段" class="headerlink" title="保证幂等的手段"></a><strong>保证幂等的手段</strong></h2><p>保证幂等需要理清楚两件事情：幂等条件和期望结果。</p>
+<ul>
+<li><p>保证幂等的手段有<a href="">token令牌</a>、<a href="">分布式锁</a>、<a href="">去重表</a>、<a href="">数据库唯一索引</a>等，这些所谓的幂等手段实际上防重手段。防重本质是防止一个相同的请求被当成多个不同的请求来处理。</p>
+</li>
+<li><p>幂等的条件是知道这是一个相同的请求。防重和幂等本质上是两个不同的阶段。</p>
+</li>
+</ul>
+<h2 id="使用幂等的场景"><a href="#使用幂等的场景" class="headerlink" title="使用幂等的场景"></a>使用幂等的场景</h2><h3 id="前端重复提交"><a href="#前端重复提交" class="headerlink" title="前端重复提交"></a>前端重复提交</h3><p>用户注册，用户创建商品等操作，前端都会提交一些数据给后台服务，后台需要根据用户提交的数据在数据库中创建记录。如果用户不小心多点了几次，后端收到了好几次提交，这时就会在数据库中重复创建了多条记录。这就是接口没有幂等性带来的 bug。</p>
+<h3 id="接口超时重试"><a href="#接口超时重试" class="headerlink" title="接口超时重试"></a>接口超时重试</h3><p>对于给第三方调用的接口，有可能会因为网络原因而调用失败，这时，一般在设计的时候会对接口调用加上失败重试的机制。如果第一次调用已经执行了一半时，发生了网络异常。这时再次调用时就会因为脏数据的存在而出现调用异常。</p>
+<h3 id="消息重复消费"><a href="#消息重复消费" class="headerlink" title="消息重复消费"></a>消息重复消费</h3><p>在使用消息中间件来处理消息队列，且手动 ack 确认消息被正常消费时。如果消费者突然断开连接，那么已经执行了一半的消息会重新放回队列。</p>
+<p>当消息被其他消费者重新消费时，如果没有幂等性，就会导致消息重复消费时结果异常，如数据库重复数据，数据库数据冲突，资源重复等。</p>
+<h2 id="防重手段实现幂等"><a href="#防重手段实现幂等" class="headerlink" title="防重手段实现幂等"></a>防重手段实现幂等</h2><h3 id="借助数据库"><a href="#借助数据库" class="headerlink" title="借助数据库"></a>借助数据库</h3><h4 id="先select再update-insert使用悲观锁"><a href="#先select再update-insert使用悲观锁" class="headerlink" title="先select再update/insert使用悲观锁"></a>先select再update/insert使用悲观锁</h4><p>使用悲观锁实现幂等性，一般是配合事务一起来实现，在没有使用悲观锁时，我们通常的执行过程是这样的，首先来判断数据的状态，执行 SQL 如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第一步：select status from table_name where id&#x3D;&#39;xxx&#39;;</span><br><span class="line"></span><br><span class="line">第二步：insert into table_name (id) values (&#39;xxx&#39;);</span><br><span class="line">		或者update table_name set status&#x3D;&#39;xxx&#39;;</span><br></pre></td></tr></table></figure>
+
+<p><a href="">但这种情况因为是非原子操作，所以在高并发环境下可能会造成一个业务被执行两次的问题</a>，当一个程序在执行中时，而另一个程序也开始状态判断的操作。因为第一个程序还未来得及更改状态，所以第二个程序也能执行成功，这就导致一个业务被执行了两次。</p>
+<ul>
+<li>使用事务实现悲观锁，从而保证原子性  <!--这种方法感觉有问题，select操作在RR事务隔离级别下，可能读到的是过期版本的数据--></li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">begin</span>;  <span class="comment"># 1.开始事务</span></span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> table_name <span class="keyword">where</span> <span class="keyword">id</span>=<span class="string">&#x27;xxx&#x27;</span> <span class="keyword">for</span> <span class="keyword">update</span>; <span class="comment"># 2.查询状态</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. insert或者update</span></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> table_name (<span class="keyword">id</span>) <span class="keyword">values</span> (<span class="string">&#x27;xxx&#x27;</span>); </span><br><span class="line">或者 <span class="keyword">update</span> table_name <span class="keyword">set</span> <span class="keyword">status</span>=<span class="string">&#x27;xxx&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">commit</span>; <span class="comment"># 4.提交事务</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用select … for update ,这种和 synchronized 锁住先查再insert or update一样,但要避免死锁,效率也较差。针对单体 请求并发不大 可以推荐使用</li>
+</ul>
+<blockquote>
+<p>在实现的过程中需要注意以下两个问题：</p>
+<ul>
+<li>如果使用的是 MySQL 数据库，必须选用 innodb 存储引擎，因为 innodb 支持事务；</li>
+<li>id 字段一定要是主键或者是唯一索引，不然会锁表，影响其他业务执行。</li>
+</ul>
+</blockquote>
+<h4 id="update使用多版本控制（乐观锁）"><a href="#update使用多版本控制（乐观锁）" class="headerlink" title="update使用多版本控制（乐观锁）"></a>update使用多版本控制（乐观锁）</h4><p>需要在表中增加一个<code>timestamp</code>或者<code>version</code>字段，这里以<code>version</code>字段为例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update user set amount&#x3D;amount+100,version&#x3D;version+1where id&#x3D;123 and version&#x3D;1;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="insert使用唯一索引"><a href="#insert使用唯一索引" class="headerlink" title="insert使用唯一索引"></a>insert使用唯一索引</h4><p>我们可以创建一个唯一索引的表来实现幂等性，在每次执行业务之前，先执行插入操作，因为唯一字段就是业务的 ID，因此如果重复插入的话会触发唯一约束而导致插入失败。在这种情况下（插入失败）我们就可以判定它为重复提交的请求。</p>
+<p>虽说抛异常对数据来说没有影响，不会造成错误数据。但是为了保证接口幂等性，我们需要对该异常进行捕获，然后返回成功。</p>
+<p>如果是<code>java</code>程序需要捕获：<code>DuplicateKeyException</code>异常，如果使用了<code>spring</code>框架还需要捕获：<code>MySQLIntegrityConstraintViolationException</code>异常。</p>
+<h3 id="借助web-api入口"><a href="#借助web-api入口" class="headerlink" title="借助web api入口"></a>借助web api入口</h3><h4 id="使用Redis实现分布式锁"><a href="#使用Redis实现分布式锁" class="headerlink" title="使用Redis实现分布式锁"></a>使用Redis实现分布式锁</h4><p>由于<code>数据库分布式锁</code>的性能不太好，我们可以改用：<code>redis</code>或<code>zookeeper</code>。</p>
+<p>鉴于现在很多公司分布式配置中心改用<code>apollo</code>或<code>nacos</code>，已经很少用<code>zookeeper</code>了，我们以<code>redis</code>为例介绍分布式锁。</p>
+<p>目前主要有三种方式实现redis的分布式锁：</p>
+<ol>
+<li>setNx命令</li>
+<li>set命令</li>
+<li>Redission框架</li>
+</ol>
+<blockquote>
+<p>需要特别注意的是：分布式锁一定要设置一个合理的过期时间，如果设置过短，无法有效的防止重复请求。如果设置过长，可能会浪费<code>redis</code>的存储空间，需要根据实际业务情况而定。</p>
+</blockquote>
+<h4 id="获取token"><a href="#获取token" class="headerlink" title="获取token"></a>获取token</h4><p>通过token 机制实现接口的幂等性,这是一种比较通用性的实现方法。</p>
+<p>示意图如下：</p>
+<img src="https://filescdn.proginn.com/863953bbd02d158b7d726d78b269339e/47e6218040f85184d170ef253514ca59.webp" alt="img" style="zoom:67%;" />
+
+<p>具体流程步骤：</p>
+<ol>
+<li>客户端会先发送一个请求去获取 token，服务端会生成一个全局唯一的 ID 作为 token 保存在 redis 中，同时把这个 ID 返回给客户端</li>
+<li>客户端第二次调用业务请求的时候必须携带这个 token</li>
+<li>服务端会校验这个 token，如果校验成功，则执行业务，并删除 redis 中的 token</li>
+<li>如果校验失败，说明 redis 中已经没有对应的 token，则表示重复操作，直接返回指定的结果给客户端</li>
+</ol>
+<blockquote>
+<p>注意：</p>
+<ol>
+<li>对 redis 中是否存在 token 以及删除的代码逻辑建议用 Lua 脚本实现，保证原子性</li>
+<li>全局唯一 ID 可以用百度的 uid-generator、美团的 Leaf 去生成</li>
+</ol>
+</blockquote>
+<p>这种思路存在漏洞，如下图所示：<br><a target="_blank" rel="noopener" href="https://tallate.top/imgs/%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E2%80%94%E2%80%94%E5%B9%82%E7%AD%89/%E5%B9%82%E7%AD%89%E6%A3%80%E6%9F%A5%E5%92%8C%E6%8E%A5%E5%8F%A3%E9%87%8D%E8%AF%95%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%B2%E7%AA%81.png"><img src="https://tallate.top/imgs/%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E2%80%94%E2%80%94%E5%B9%82%E7%AD%89/%E5%B9%82%E7%AD%89%E6%A3%80%E6%9F%A5%E5%92%8C%E6%8E%A5%E5%8F%A3%E9%87%8D%E8%AF%95%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%B2%E7%AA%81.png" alt="幂等检查和接口重试之间的冲突"></a></p>
+<p><a target="_blank" rel="noopener" href="https://tallate.top/imgs/%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86%E2%80%94%E2%80%94%E5%B9%82%E7%AD%89/%E5%B9%82%E7%AD%89%E6%A3%80%E6%9F%A5%E5%92%8C%E6%8E%A5%E5%8F%A3%E9%87%8D%E8%AF%95%E4%B9%8B%E9%97%B4%E7%9A%84%E5%86%B2%E7%AA%81.png">幂等检查和接口重试之间的冲突</a></p>
+<p>token 是只有在幂等检查结束后才会被保存下来的，如果下游服务还没执行完毕，触发上游 RPC 的超时重试机制，就会重新再发一次请求，这时如果上一次请求，仍然没有执行完毕，就会导致请求被执行了两次。<br>这里的漏洞是：进入下游 API 入口处的幂等检查逻辑，会经过查 <code>token -&gt; 保存 token -&gt; 设置超时时间</code>这个过程，可能会因为网络抖动而花费特别长的时间。如果超时是因此而导致的，幂等性检查就起不到作用了。<br>解决的办法是保证幂等检查的<strong>原子性</strong>，并且还需要注意存储的<strong>隔离性</strong>，这在一般的存储设计中是必须要考虑的。</p>
+<blockquote>
+<p>在这里吐槽一下我公司的实现，采用的是<code>setnx + expire</code>的方式，如果<code>setnx</code>后、<code>expire</code>前出错了，之后对该接口的重试也会直接被拦截了，也就是说幂等检查组件影响了正常的业务执行流程。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/23/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-02-shiro%E5%85%A5%E5%8F%A3/" rel="prev" title="shiro框架">
+                  <i class="fa fa-chevron-left"></i> shiro框架
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="解决Jar包依赖冲突">
+                  解决Jar包依赖冲突 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="问题在技术群有一位提出    shiro框架下获取主题subject信息都是从SecurityUtils.getSubject()方法中获取，跟踪到最后都是从ThreadLocal变量中获取的值，只能在当前内存中存储，那分布式部署的话，会产生获取到的subject的主体信息不一致的问题？ 那么 先看下上述问题的代码： 123456789&#x2F;&#x2F;SecurityUtilspublic static Su">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shiro分布式-01-subject维护">
+<meta property="og:url" content="http://example.com/2021/05/11/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%88%86%E5%B8%83%E5%BC%8F-01-subject%E7%BB%B4%E6%8A%A4/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="问题在技术群有一位提出    shiro框架下获取主题subject信息都是从SecurityUtils.getSubject()方法中获取，跟踪到最后都是从ThreadLocal变量中获取的值，只能在当前内存中存储，那分布式部署的话，会产生获取到的subject的主体信息不一致的问题？ 那么 先看下上述问题的代码： 123456789&#x2F;&#x2F;SecurityUtilspublic static Su">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-05-11T03:52:48.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.290Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/05/11/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%88%86%E5%B8%83%E5%BC%8F-01-subject%E7%BB%B4%E6%8A%A4/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shiro分布式-01-subject维护 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%81%E8%B4%9F%E8%B4%A3%E4%BB%8Esubject%E5%8F%96%E5%80%BC"><span class="nav-number">2.1.</span> <span class="nav-text">谁负责从subject取值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%81%E8%B4%9F%E8%B4%A3%E5%AF%B9subject%E8%B5%8B%E5%80%BC"><span class="nav-number">2.2.</span> <span class="nav-text">谁负责对subject赋值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%88%E7%9C%8B%E8%BF%99%E4%B8%AAThreadLocal%E5%8F%98%E9%87%8F%E7%A9%B6%E7%AB%9F%E6%98%AF%E5%93%AA%E4%B8%AA%E7%B1%BB%E5%9C%A8%E7%BB%99%E4%BB%96%E8%B5%8B%E5%80%BC%EF%BC%9F"><span class="nav-number">2.2.1.</span> <span class="nav-text">先看这个ThreadLocal变量究竟是哪个类在给他赋值？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E8%AF%B7%E6%B1%82%E8%BF%9B%E6%9D%A5%E6%97%B6%E8%BF%99%E4%B8%AAsubject%E4%BF%A1%E6%81%AF%E6%98%AF%E5%9C%A8%E8%BF%99%E9%87%8C%E7%94%9F%E6%88%90%E7%9A%84%EF%BC%8C%E9%82%A3%E5%8E%9F%E6%9D%A5%E5%B7%B2%E7%BB%8F%E7%99%BB%E5%BD%95%E7%9A%84%E7%94%A8%E6%88%B7%E5%86%8D%E6%AC%A1%E6%9D%A5%E8%AF%B7%E6%B1%82%E7%9A%84subject%E5%B7%B2%E7%BB%8F%E5%8F%98%E4%BA%86%EF%BC%8C%E6%80%8E%E4%B9%88%E7%99%BB%E5%BD%95%E6%88%90%E5%8A%9F%E5%91%A2%EF%BC%9F%E8%BF%98%E6%9C%89%E6%B2%A1%E7%99%BB%E5%BD%95%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8C%E8%BF%99%E9%87%8C%E4%BC%9A%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86%E5%91%A2%EF%BC%9F"><span class="nav-number">2.2.2.</span> <span class="nav-text">每次请求进来时这个subject信息是在这里生成的，那原来已经登录的用户再次来请求的subject已经变了，怎么登录成功呢？还有没登录的时候，这里会怎么处理呢？</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/11/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%88%86%E5%B8%83%E5%BC%8F-01-subject%E7%BB%B4%E6%8A%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shiro分布式-01-subject维护
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-11 11:52:48" itemprop="dateCreated datePublished" datetime="2021-05-11T11:52:48+08:00">2021-05-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在技术群有一位提出</p>
+<p>   shiro框架下获取主题subject信息都是从SecurityUtils.getSubject()方法中获取，跟踪到最后都是从ThreadLocal变量中获取的值，只能在当前内存中存储，那分布式部署的话，会产生获取到的subject的主体信息不一致的问题？</p>
+<p>那么 先看下上述问题的代码：</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//SecurityUtils</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Subject <span class="title">getSubject</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">     Subject subject = ThreadContext.getSubject();</span><br><span class="line">     <span class="keyword">if</span> (subject == <span class="literal">null</span>) &#123;</span><br><span class="line">         subject = (<span class="keyword">new</span> Subject.Builder()).buildSubject();</span><br><span class="line">         ThreadContext.bind(subject);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> subject;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//看下ThreadContext的方法 getSubject-&gt;get-&gt;getValue-&gt;resources</span></span><br><span class="line">    <span class="comment">//1</span></span><br><span class="line">    public <span class="keyword">static</span> Subject getSubject() &#123;</span><br><span class="line">        <span class="keyword">return</span> (Subject) <span class="keyword">get</span>(SUBJECT_KEY);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//2</span></span><br><span class="line">   public <span class="keyword">static</span> <span class="built_in">Object</span> <span class="keyword">get</span>(<span class="built_in">Object</span> key) &#123;</span><br><span class="line">        <span class="keyword">if</span> (log.isTraceEnabled()) &#123;</span><br><span class="line">            <span class="built_in">String</span> msg = <span class="string">&quot;get() - in thread [&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">            log.trace(msg);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">Object</span> value = getValue(key);</span><br><span class="line">        <span class="keyword">if</span> ((value != <span class="keyword">null</span>) &amp;&amp; log.isTraceEnabled()) &#123;</span><br><span class="line">            <span class="built_in">String</span> msg = <span class="string">&quot;Retrieved value of type [&quot;</span> + value.getClass().getName() + <span class="string">&quot;] for key [&quot;</span> +</span><br><span class="line">                    key + <span class="string">&quot;] &quot;</span> + <span class="string">&quot;bound to thread [&quot;</span> + Thread.currentThread().getName() + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">            log.trace(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="comment">//3 </span></span><br><span class="line">     private <span class="keyword">static</span> <span class="built_in">Object</span> getValue(<span class="built_in">Object</span> key) &#123;</span><br><span class="line">        <span class="built_in">Map</span>&lt;<span class="built_in">Object</span>, <span class="built_in">Object</span>&gt; perThreadResources = resources.<span class="keyword">get</span>();</span><br><span class="line">        <span class="keyword">return</span> perThreadResources != <span class="keyword">null</span> ? perThreadResources.<span class="keyword">get</span>(key) : <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//4</span></span><br><span class="line">        private <span class="keyword">static</span> <span class="keyword">final</span> ThreadLocal&lt;<span class="built_in">Map</span>&lt;<span class="built_in">Object</span>, <span class="built_in">Object</span>&gt;&gt; resources = <span class="keyword">new</span> InheritableThreadLocalMap&lt;<span class="built_in">Map</span>&lt;<span class="built_in">Object</span>, <span class="built_in">Object</span>&gt;&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>单看这些，可能有的朋友也会认同如此，都是从resources这个线程私有变量拿去。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="谁负责从subject取值"><a href="#谁负责从subject取值" class="headerlink" title="谁负责从subject取值"></a>谁负责从subject取值</h3><p>根据上述代码分析，是每个请求从subject中获取自己的subject信息</p>
+<h3 id="谁负责对subject赋值"><a href="#谁负责对subject赋值" class="headerlink" title="谁负责对subject赋值"></a>谁负责对subject赋值</h3><p>但是我是做过基于redis分布搭建shiro项目的，肯定应该不会存在上述现象，还是查源码为先吧。</p>
+<h4 id="先看这个ThreadLocal变量究竟是哪个类在给他赋值？"><a href="#先看这个ThreadLocal变量究竟是哪个类在给他赋值？" class="headerlink" title="先看这个ThreadLocal变量究竟是哪个类在给他赋值？"></a>先看这个ThreadLocal变量究竟是哪个类在给他赋值？</h4><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ThreadContext类</span></span><br><span class="line"><span class="comment">//获取的变量key，请注意看，无论怎么取subject，key值永远不变 </span></span><br><span class="line">    <span class="keyword">public</span> static <span class="keyword">final</span> String SECURITY_MANAGER_KEY = ThreadContext.<span class="keyword">class</span>.getName() + <span class="string">&quot;_SECURITY_MANAGER_KEY&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> static <span class="keyword">final</span> String SUBJECT_KEY = ThreadContext.<span class="keyword">class</span>.getName() + <span class="string">&quot;_SUBJECT_KEY&quot;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//找到一个引用，置入subject的信息</span></span><br><span class="line">    <span class="keyword">public</span> static void bind(Subject subject) &#123;</span><br><span class="line">        <span class="keyword">if</span> (subject != <span class="literal">null</span>) &#123;</span><br><span class="line">            put(SUBJECT_KEY, subject);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<p>对bind方法进行跟踪</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">--SubjectThreadState</span><span class="selector-class">.bind</span>()</span><br><span class="line"><span class="selector-tag">----SubjectCallable</span><span class="selector-class">.call</span>()</span><br><span class="line"><span class="selector-tag">------DelegatingSubject</span><span class="selector-class">.execute</span>(<span class="selector-tag">Callable</span>&lt;<span class="selector-tag">V</span>&gt; <span class="selector-tag">callable</span>)</span><br><span class="line"><span class="selector-tag">----SubjectRunnable</span><span class="selector-class">.run</span>()</span><br><span class="line"><span class="selector-tag">------DelegatingSubject</span><span class="selector-class">.execute</span>(<span class="selector-tag">Runnable</span> <span class="selector-tag">runnable</span>)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到SubjectThreadState字面意思应该是线程状态的信息，最终都跟踪到DelegatingSubject这个代理类上，其执行线程方法，更新绑定的subject值；</p>
+<p>再继续溯源，找到AbstractShiroFilter类的doFilterInternal。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doFilterInternal</span><span class="params">(ServletRequest servletRequest, ServletResponse servletResponse, <span class="keyword">final</span> FilterChain chain)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Throwable t = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> ServletRequest request = prepareServletRequest(servletRequest, servletResponse, chain);</span><br><span class="line">            <span class="keyword">final</span> ServletResponse response = prepareServletResponse(request, servletResponse, chain);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">final</span> Subject subject = createSubject(request, response);</span><br><span class="line"></span><br><span class="line">            <span class="comment">//noinspection unchecked</span></span><br><span class="line">            <span class="comment">//在该处调用线程方法更新</span></span><br><span class="line">            subject.execute(<span class="keyword">new</span> Callable() &#123;</span><br><span class="line">                <span class="function"><span class="keyword">public</span> Object <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                    updateSessionLastAccessTime(request, response);</span><br><span class="line">                    executeChain(request, response, chain);</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException ex) &#123;</span><br><span class="line">            t = ex.getCause();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">            t = throwable;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这里，应该了解到一点，就是每个请求进来的时候，这个主线程会有对应的新线程去更新赋值subject的信息。</p>
+<h4 id="每次请求进来时这个subject信息是在这里生成的，那原来已经登录的用户再次来请求的subject已经变了，怎么登录成功呢？还有没登录的时候，这里会怎么处理呢？"><a href="#每次请求进来时这个subject信息是在这里生成的，那原来已经登录的用户再次来请求的subject已经变了，怎么登录成功呢？还有没登录的时候，这里会怎么处理呢？" class="headerlink" title="每次请求进来时这个subject信息是在这里生成的，那原来已经登录的用户再次来请求的subject已经变了，怎么登录成功呢？还有没登录的时候，这里会怎么处理呢？"></a>每次请求进来时这个subject信息是在这里生成的，那原来已经登录的用户再次来请求的subject已经变了，怎么登录成功呢？还有没登录的时候，这里会怎么处理呢？</h4><p>借着这个问题，咱么看一下这个shiro过滤器都干啥了？</p>
+<p> 一般web项目都指定 ShiroFilter这个过滤器，在初始化到第一个请求到达之前，首先设置了一些环境参数，获取配置信息，初始化一些变量，包含SecurityManager这个核心（可以看init()，onFilterConfigSet()函数）</p>
+<p>第一个请求到达进入doFilterInternal方法内，调用prepareServletRequest，prepareServletResponse，判断为http方式时，封装Shiro格式的输入输出流。</p>
+<p>还有就是一旦发生请求，那么会话session就已经存在了</p>
+<p>接下来创建新的subject具体过程：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//AbstractShiroFilter</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> WebSubject <span class="title">createSubject</span><span class="params">(ServletRequest request, ServletResponse response)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WebSubject.Builder(getSecurityManager(), request, response).buildWebSubject();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>跟踪buildWebSubject方法，DefaultSecurityManager类</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//DefaultSecurityManager</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Subject <span class="title">createSubject</span><span class="params">(SubjectContext subjectContext)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//create a copy so we don&#x27;t modify the argument&#x27;s backing map:</span></span><br><span class="line">        <span class="comment">//英文不好，自行百度吧</span></span><br><span class="line">        SubjectContext context = copy(subjectContext);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//ensure that the context has a SecurityManager instance, and if not, add one:</span></span><br><span class="line">         <span class="comment">//英文不好，自行百度吧</span></span><br><span class="line">        context = ensureSecurityManager(context);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Resolve an associated Session (usually based on a referenced session ID), and place it in the context before</span></span><br><span class="line">        <span class="comment">//sending to the SubjectFactory.  The SubjectFactory should not need to know how to acquire sessions as the</span></span><br><span class="line">        <span class="comment">//process is often environment specific - better to shield the SF from these details:</span></span><br><span class="line">         <span class="comment">//这里是重点</span></span><br><span class="line">        context = resolveSession(context);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Similarly, the SubjectFactory should not require any concept of RememberMe - translate that here first</span></span><br><span class="line">        <span class="comment">//if possible before handing off to the SubjectFactory:</span></span><br><span class="line">        context = resolvePrincipals(context);</span><br><span class="line">        <span class="comment">//也是重点</span></span><br><span class="line">        Subject subject = doCreateSubject(context);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//save this subject for future reference if necessary:</span></span><br><span class="line">        <span class="comment">//(this is needed here in case rememberMe principals were resolved and they need to be stored in the</span></span><br><span class="line">        <span class="comment">//session, so we don&#x27;t constantly rehydrate the rememberMe PrincipalCollection on every operation).</span></span><br><span class="line">        <span class="comment">//Added in 1.2:</span></span><br><span class="line">        </span><br><span class="line">        save(subject);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> subject;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>重点跟踪resolveSession()方法</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> SubjectContext resolveSession(SubjectContext context) &#123;</span><br><span class="line">      <span class="comment">//第一次进来肯定没有缓存值，会进入下面的resolveContextSession</span></span><br><span class="line">      <span class="keyword">if</span> (context.resolveSession() != <span class="literal">null</span>) &#123;</span><br><span class="line">          log.debug(<span class="string">&quot;Context already contains a session.  Returning.&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span> context;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//Context couldn&#x27;t resolve it directly, let&#x27;s see if we can since we have direct access to </span></span><br><span class="line">          <span class="comment">//the session manager:</span></span><br><span class="line">          Session session = resolveContextSession(context);</span><br><span class="line">          <span class="keyword">if</span> (session != <span class="literal">null</span>) &#123;</span><br><span class="line">              context.setSession(session);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (InvalidSessionException e) &#123;</span><br><span class="line">          log.debug(<span class="string">&quot;Resolved SubjectContext context session is invalid.  Ignoring and creating an anonymous &quot;</span> +</span><br><span class="line">                  <span class="string">&quot;(session-less) Subject instance.&quot;</span>, e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> context;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//DefaultSecurityManager</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> Session <span class="title">resolveContextSession</span><span class="params">(SubjectContext context)</span> <span class="keyword">throws</span> InvalidSessionException </span>&#123;</span><br><span class="line"><span class="comment">//这里判断一下是http请求的话，会获取本身session的id</span></span><br><span class="line">     SessionKey key = getSessionKey(context);</span><br><span class="line">     <span class="keyword">if</span> (key != <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">return</span> getSession(key);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">//一直跟踪getSession方法到AbstractNativeSessionManager</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Session <span class="title">getSession</span><span class="params">(SessionKey key)</span> <span class="keyword">throws</span> SessionException </span>&#123;</span><br><span class="line">       Session session = lookupSession(key);</span><br><span class="line">       <span class="keyword">return</span> session != <span class="keyword">null</span> ? createExposedSession(session, key) : <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Session <span class="title">lookupSession</span><span class="params">(SessionKey key)</span> <span class="keyword">throws</span> SessionException </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (key == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;SessionKey argument cannot be null.&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> doGetSession(key);</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   </span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//上面doGetSession调用了了AbstractValidatingSessionManager</span></span><br><span class="line"> <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> Session <span class="title">doGetSession</span><span class="params">(<span class="keyword">final</span> SessionKey key)</span> <span class="keyword">throws</span> InvalidSessionException </span>&#123;</span><br><span class="line">        enableSessionValidationIfNecessary();</span><br><span class="line"></span><br><span class="line">        log.trace(<span class="string">&quot;Attempting to retrieve session with key &#123;&#125;&quot;</span>, key);</span><br><span class="line"></span><br><span class="line">        Session s = retrieveSession(key);</span><br><span class="line">        <span class="keyword">if</span> (s != <span class="keyword">null</span>) &#123;</span><br><span class="line">            validate(s, key);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//DefaultSessionManager.retrieveSession</span></span><br><span class="line"> <span class="function"><span class="keyword">protected</span> Session <span class="title">retrieveSession</span><span class="params">(SessionKey sessionKey)</span> <span class="keyword">throws</span> UnknownSessionException </span>&#123;</span><br><span class="line">        Serializable sessionId = getSessionId(sessionKey);</span><br><span class="line">        <span class="keyword">if</span> (sessionId == <span class="keyword">null</span>) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Unable to resolve session ID from SessionKey [&#123;&#125;].  Returning null to indicate a &quot;</span> +</span><br><span class="line">                    <span class="string">&quot;session could not be found.&quot;</span>, sessionKey);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Session s = retrieveSessionFromDataSource(sessionId);</span><br><span class="line">        <span class="keyword">if</span> (s == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">//session ID was provided, meaning one is expected to be found, but we couldn&#x27;t find one:</span></span><br><span class="line">            String msg = <span class="string">&quot;Could not find session with ID [&quot;</span> + sessionId + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnknownSessionException(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//DefaultSessionManager.retrieveSessionFromDataSource</span></span><br><span class="line"> <span class="function"><span class="keyword">protected</span> Session <span class="title">retrieveSessionFromDataSource</span><span class="params">(Serializable sessionId)</span> <span class="keyword">throws</span> UnknownSessionException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> sessionDAO.readSession(sessionId);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>一直跟踪到sessionDAO.readSession,这里，从方法字面意思也知道是从缓存或者数据库读取session信息了。就是上面提到的redis缓存，会吧session信息存储。</p>
+<p>接下来回头看，在buildWebSubject的方法里面，获取到了缓存的session信息或者是一个全新的session信息，</p>
+<p>之后的doCreateSubject方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//DefaultWebSubjectFactory</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Subject <span class="title">createSubject</span><span class="params">(SubjectContext context)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//SHIRO-646</span></span><br><span class="line">        <span class="comment">//Check if the existing subject is NOT a WebSubject. If it isn&#x27;t, then call super.createSubject instead.</span></span><br><span class="line">        <span class="comment">//Creating a WebSubject from a non-web Subject will cause the ServletRequest and ServletResponse to be null, which wil fail when creating a session.</span></span><br><span class="line">        <span class="keyword">boolean</span> isNotBasedOnWebSubject = context.getSubject() != <span class="keyword">null</span> &amp;&amp; !(context.getSubject() <span class="keyword">instanceof</span> WebSubject);</span><br><span class="line">        <span class="keyword">if</span> (!(context <span class="keyword">instanceof</span> WebSubjectContext) || isNotBasedOnWebSubject) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.createSubject(context);</span><br><span class="line">        &#125;</span><br><span class="line">        WebSubjectContext wsc = (WebSubjectContext) context;</span><br><span class="line">        SecurityManager securityManager = wsc.resolveSecurityManager();</span><br><span class="line">        <span class="comment">//取到session信息</span></span><br><span class="line">        Session session = wsc.resolveSession();</span><br><span class="line">        <span class="keyword">boolean</span> sessionEnabled = wsc.isSessionCreationEnabled();</span><br><span class="line">        <span class="comment">//如果缓存没有，获取session中的身份信息</span></span><br><span class="line">        PrincipalCollection principals = wsc.resolvePrincipals();</span><br><span class="line">        <span class="comment">//如果缓存没有，获取session中的认证信息</span></span><br><span class="line">        <span class="keyword">boolean</span> authenticated = wsc.resolveAuthenticated();</span><br><span class="line">        String host = wsc.resolveHost();</span><br><span class="line">        ServletRequest request = wsc.resolveServletRequest();</span><br><span class="line">        ServletResponse response = wsc.resolveServletResponse();</span><br><span class="line">        <span class="comment">//创建新的subject</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WebDelegatingSubject(principals, authenticated, host, session, sessionEnabled,</span><br><span class="line">                request, response, securityManager);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建完毕以后，接下来就更新缓存内的subject的状态，直至请求结束</p>
+<p>到这里每次请求到达filter基本上流程就完毕了，如果已经登录了，无论是从本身的map缓存还是外部的redis缓存，都应该能拿到session信息，如果没有登录，是拿不到的。也证明了分布式部署时，有了session的分布式缓存，应该就基本搭建成功了吧。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/10/database/redis/redis-7-%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="prev" title="redis-7-单多线程以及线程安全">
+                  <i class="fa fa-chevron-left"></i> redis-7-单多线程以及线程安全
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/11/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-02-%E4%B8%80%E8%87%B4%E6%80%A7/" rel="next" title="一致性-02-分布式事务">
+                  一致性-02-分布式事务 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

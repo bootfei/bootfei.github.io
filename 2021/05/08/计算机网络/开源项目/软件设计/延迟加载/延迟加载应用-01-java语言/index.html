@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="应用场景一般有几种延迟初始化的场景：  对于会消耗较多资源的对象：加快对象的创建速度，从而从整体上提升性能；并且如果这些对象可能根本用不到，那么就节省资源了。 某些数据在启动时无法获取：比如一些上下文信息可能在其他拦截器或处理中才能被设置，导致当前bean在加载的时候可能获取不到对应的变量的值  ，使用 延迟初始化可以在真正调用的时候去获取，通过延迟来保证数据的有效性。  在Java8中引入的la">
+<meta property="og:type" content="article">
+<meta property="og:title" content="延迟加载应用-01-java语言">
+<meta property="og:url" content="http://example.com/2021/05/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD%E5%BA%94%E7%94%A8-01-java%E8%AF%AD%E8%A8%80/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="应用场景一般有几种延迟初始化的场景：  对于会消耗较多资源的对象：加快对象的创建速度，从而从整体上提升性能；并且如果这些对象可能根本用不到，那么就节省资源了。 某些数据在启动时无法获取：比如一些上下文信息可能在其他拦截器或处理中才能被设置，导致当前bean在加载的时候可能获取不到对应的变量的值  ，使用 延迟初始化可以在真正调用的时候去获取，通过延迟来保证数据的有效性。  在Java8中引入的la">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-05-08T00:57:23.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.286Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/05/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD%E5%BA%94%E7%94%A8-01-java%E8%AF%AD%E8%A8%80/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>延迟加载应用-01-java语言 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">应用实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda-Supplier"><span class="nav-number">2.0.1.</span> <span class="nav-text">Lambda Supplier</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8Edelegate%EF%BC%9A%E5%AE%B9%E6%98%93%E7%90%86%E8%A7%A3"><span class="nav-number">2.0.1.1.</span> <span class="nav-text">基于delegate：容易理解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8ECloseableSupplier-%EF%BC%9A%E5%A4%8D%E6%9D%82%E4%BD%86%E5%8A%9F%E8%83%BD%E5%A4%9A"><span class="nav-number">2.0.1.2.</span> <span class="nav-text">基于CloseableSupplier ：复杂但功能多</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lambda-Stream"><span class="nav-number">2.0.2.</span> <span class="nav-text">Lambda Stream</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD/%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD%E5%BA%94%E7%94%A8-01-java%E8%AF%AD%E8%A8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          延迟加载应用-01-java语言
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-08 08:57:23" itemprop="dateCreated datePublished" datetime="2021-05-08T08:57:23+08:00">2021-05-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>一般有几种延迟初始化的场景：</p>
+<ul>
+<li>对于会消耗较多资源的对象：加快对象的创建速度，从而从整体上提升性能；并且如果这些对象可能根本用不到，那么就节省资源了。</li>
+<li>某些数据在启动时无法获取：比如一些上下文信息可能在其他拦截器或处理中才能被设置，导致当前bean在加载的时候可能获取不到对应的变量的值 <!--bean被加载的时候？加载是针对类说的，对于bean，只能是实例化。如果说的是bean实例化阶段，那么就是发生在spring容器启动阶段以后。从另一方面来说，如果作者想表达的是bean被spring容器加载，那么bean被容器进行di时，spring推荐的是懒加载（延迟初始化），即只注入对象句柄，不关心这个对象句柄指向的对象是否有值 --> ，使用 延迟初始化可以在真正调用的时候去获取，通过延迟来保证数据的有效性。</li>
+</ul>
+<p>在Java8中引入的lambda对于我们实现延迟操作提供很大的便捷性，如Stream、Supplier等，下面介绍几个例子。</p>
+<h2 id="应用实例"><a href="#应用实例" class="headerlink" title="应用实例"></a>应用实例</h2><h4 id="Lambda-Supplier"><a href="#Lambda-Supplier" class="headerlink" title="Lambda Supplier"></a>Lambda Supplier</h4><p>通过调用<code>get()</code>方法来实现具体对象的计算和生成并返回，而不是在定义Supplier的时候计算，从而达到了_延迟初始化_的目的。</p>
+<blockquote>
+<p>但是在使用 中需要考虑并发的问题，即防止多次被实例化，就像Spring的@Lazy注解一样。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Holder</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 默认第一次调用heavy.get()时，触发同步方法；不会在此定义的时候触发</span></span><br><span class="line">    <span class="keyword">private</span> Supplier&lt;Heavy&gt; heavy = () -&gt; createAndCacheHeavy(); </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Holder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Holder created&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Heavy <span class="title">getHeavy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 第一次调用后heavy已经指向了新的instance，所以后续不再执行synchronized。为什么？？heavy.get()应该是每次调用getHeavy()，都会被执行一次；但是由于</span></span><br><span class="line">        <span class="keyword">return</span> heavy.get(); </span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> Heavy <span class="title">createAndCacheHeavy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 方法内定义class，注意和类内的嵌套class在加载时的区别</span></span><br><span class="line">        <span class="class"><span class="keyword">class</span> <span class="title">HeavyFactory</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Heavy</span>&gt; </span>&#123;</span><br><span class="line">            <span class="comment">// 饥渴初始化</span></span><br><span class="line">            <span class="keyword">private</span> <span class="keyword">final</span> Heavy heavyInstance = <span class="keyword">new</span> Heavy(); </span><br><span class="line">            <span class="function"><span class="keyword">public</span> Heavy <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 每次返回固定的值</span></span><br><span class="line">                <span class="keyword">return</span> heavyInstance; </span><br><span class="line">            &#125; </span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//第一次调用方法来会将heavy重定向到新的Supplier实例</span></span><br><span class="line">        <span class="keyword">if</span>(!HeavyFactory.class.isInstance(heavy)) &#123;</span><br><span class="line">            heavy = <span class="keyword">new</span> HeavyFactory();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> heavy.get();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当Holder的实例被创建时，其中的Heavy实例还没有被创建。下面我们假设有三个线程会调用getHeavy方法，其中前两个线程会同时调用，而第三个线程会在稍晚的时候调用。</p>
+<p>当前两个线程调用该方法的时候，都会调用到createAndCacheHeavy方法，由于这个方法是同步的。因此第一个线程进入方法体，第二个线程开始等待。在createAndCacheHeavy方法体中会首先判断当前的heavy是否是HeavyInstance的一个实例。</p>
+<p>如果不是，就会将heavy对象替换成HeavyFactory类型的实例。</p>
+<ul>
+<li>第一个线程执行判断时，heavy对象还只是一个<code>Supplier的实例</code>，所以heavy会被替换成为<code>HeavyFactory的实例</code>，此时<code>heavy实例</code>会被真正的实例化，然后返回实例heavyInstance</li>
+<li>第二个线程执行判断时，heavy已经是HeavyFactory的一个实例了，跳过判断，即不实例化，然后直接返回已存在的实例heavyInstance。</li>
+</ul>
+<p>当第三个线程执行getHeavy方法时，由于此时的heavy对象已经是内嵌的HeavyFactory的实例了，因此它会直接调用HeavyFactory的get()方法从而返回需要的实例（即heavyInstance），即不再调用Heavy的同步方法createAndCacheHeavy没有任何关系了。<!--因为Heavy的同步方法是createAndCacheHeavy()--></p>
+<!--在我看来，这是通过把Heavy类向下转为另一个类HeavyFactory（从新实现get()方法），从而get()方法的执行对象变了，这在JUC书中阐述的使用工厂类来避免初始化阶段的线程安全性，一致-->
+
+<p>以上代码实际上实现了一个轻量级的虚拟代理模式(Virtual Proxy Pattern)。保证了懒加载在各种环境下的正确性。</p>
+<h5 id="基于delegate：容易理解"><a href="#基于delegate：容易理解" class="headerlink" title="基于delegate：容易理解"></a>基于delegate：容易理解</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MemoizeSupplier</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">final</span> Supplier&lt;T&gt; delegate;</span><br><span class="line"> ConcurrentMap&lt;Class&lt;?&gt;, T&gt; map = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">MemoizeSupplier</span><span class="params">(Supplier&lt;T&gt; delegate)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.delegate = delegate;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="comment">// 利用computeIfAbsent方法的特性，保证只会在key不存在的时候调用一次实例化方法，进而实现单例</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.map.computeIfAbsent(MemoizeSupplier.class,k -&gt; <span class="keyword">this</span>.delegate.get());</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Supplier&lt;T&gt; <span class="title">of</span><span class="params">(Supplier&lt;T&gt; provider)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> MemoizeSupplier&lt;&gt;(provider);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="基于CloseableSupplier-：复杂但功能多"><a href="#基于CloseableSupplier-：复杂但功能多" class="headerlink" title="基于CloseableSupplier ：复杂但功能多"></a>基于CloseableSupplier ：复杂但功能多</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">CloseableSupplier</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">T</span>&gt;, <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">0L</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Supplier&lt;T&gt; delegate;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> resetAfterClose;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">transient</span> <span class="keyword">boolean</span> initialized;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">transient</span> T value;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">CloseableSupplier</span><span class="params">(Supplier&lt;T&gt; delegate, <span class="keyword">boolean</span> resetAfterClose)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.delegate = delegate;</span><br><span class="line">            <span class="keyword">this</span>.resetAfterClose = resetAfterClose;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// 经典Singleton实现</span></span><br><span class="line">            <span class="keyword">if</span> (!(<span class="keyword">this</span>.initialized)) &#123; <span class="comment">// 注意是volatile修饰的，保证happens-before，t一定实例化完全</span></span><br><span class="line">                <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!(<span class="keyword">this</span>.initialized)) &#123; <span class="comment">// Double Lock Check</span></span><br><span class="line">                        T t = <span class="keyword">this</span>.delegate.get();</span><br><span class="line">                        <span class="keyword">this</span>.value = t;</span><br><span class="line">                        <span class="keyword">this</span>.initialized = <span class="keyword">true</span>;</span><br><span class="line">                        <span class="keyword">return</span> t;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 初始化后就直接读取值，不再同步抢锁</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.value;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isInitialized</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> initialized;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> &lt;X extends Throwable&gt; <span class="function"><span class="keyword">void</span> <span class="title">ifPresent</span><span class="params">(ThrowableConsumer&lt;T, X&gt; consumer)</span> <span class="keyword">throws</span> X </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (initialized &amp;&amp; <span class="keyword">this</span>.value != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    consumer.accept(<span class="keyword">this</span>.value);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> &lt;U&gt; <span class="function">Optional&lt;U&gt; <span class="title">map</span><span class="params">(Function&lt;? <span class="keyword">super</span> T, ? extends U&gt; mapper)</span> </span>&#123;</span><br><span class="line">            checkNotNull(mapper);</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (initialized &amp;&amp; <span class="keyword">this</span>.value != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> ofNullable(mapper.apply(value));</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> empty();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">tryClose</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            tryClose(i -&gt; &#123; &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> &lt;X extends Throwable&gt; <span class="function"><span class="keyword">void</span> <span class="title">tryClose</span><span class="params">(ThrowableConsumer&lt;T, X&gt; close)</span></span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (initialized) &#123;</span><br><span class="line">                    close.accept(value);</span><br><span class="line">                    <span class="keyword">if</span> (resetAfterClose) &#123;</span><br><span class="line">                        <span class="keyword">this</span>.value = <span class="keyword">null</span>;</span><br><span class="line">                        initialized = <span class="keyword">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (initialized) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;MoreSuppliers.lazy(&quot;</span> + get() + <span class="string">&quot;)&quot;</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;MoreSuppliers.lazy(&quot;</span> + <span class="keyword">this</span>.delegate + <span class="string">&quot;)&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Lambda-Stream"><a href="#Lambda-Stream" class="headerlink" title="Lambda Stream"></a>Lambda Stream</h4><p>Stream中的各种方法分为两类：</p>
+<ul>
+<li>中间方法(limit()/iterate()/filter()/map())</li>
+<li>结束方法(collect()/findFirst()/findAny()/count())</li>
+</ul>
+<p>前者的调用并不会立即执行，只有结束方法被调用后才会依次从前往后触发整个调用链条。但是需要注意，对于集合来说，是每一个元素依次按照处理链条执行到尾，而不是每一个中间方法都将所有能处理的元素全部处理一遍才触发 下一个中间方法。比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = Arrays.asList(<span class="string">&quot;Brad&quot;</span>, <span class="string">&quot;Kate&quot;</span>, <span class="string">&quot;Kim&quot;</span>, <span class="string">&quot;Jack&quot;</span>, <span class="string">&quot;Joe&quot;</span>, <span class="string">&quot;Mike&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> String firstNameWith3Letters = names.stream()</span><br><span class="line">    .filter(name -&gt; length(name) == <span class="number">3</span>)</span><br><span class="line">    .map(name -&gt; toUpper(name))</span><br><span class="line">    .findFirst()</span><br><span class="line">    .get();</span><br><span class="line"></span><br><span class="line">System.out.println(firstNameWith3Letters);</span><br></pre></td></tr></table></figure>
+
+<p>当触发findFirst()这一结束方法的时候才会触发整个Stream链条，每个元素依次经过filter()-&gt;map()-&gt;findFirst()后返回。所以filter()先处理，names中第一个和第二个元素不符合条件，不会触发后续的map方法；继续处理第三个元素符合条件，再触发map()方法，最后将转换的结果返回给findFirst()。所以filter()触发了_3_次，map()触发了_1_次。</p>
+<p>Stream类型的一个特点是：它们可以是无限的。Stream之所以可以是无限的也是源于Stream「懒」的这一特点。Stream只会返回你需要的元素，而不会一次性地将整个无限集合返回给你。</p>
+<p>Stream接口中有一个静态方法iterate()，这个方法能够为你创建一个无限的Stream对象。它需要接受两个参数：</p>
+<blockquote>
+<p>public static Stream iterate(final T seed, final UnaryOperator f)</p>
+</blockquote>
+<p>其中，seed表示的是这个无限序列的起点，而UnaryOperator则表示的是如何根据前一个元素来得到下一个元素，比如序列中的第二个元素可以这样决定：f.apply(seed)。</p>
+<p>下面是一个计算从某个数字开始并依次返回后面count个素数的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Primes</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrime</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> number)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> number &gt; <span class="number">1</span> &amp;&amp;</span><br><span class="line">            <span class="comment">// 依次从2到number的平方根判断number是否可以整除该值，即divisor</span></span><br><span class="line">            IntStream.rangeClosed(<span class="number">2</span>, (<span class="keyword">int</span>) Math.sqrt(number))</span><br><span class="line">                .noneMatch(divisor -&gt; number % divisor == <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">primeAfter</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> number)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(isPrime(number + <span class="number">1</span>)) <span class="comment">// 如果当前的数的下一个数是素数，则直接返回该值</span></span><br><span class="line">            <span class="keyword">return</span> number + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="comment">// 否则继续从下一个数据的后面继续找到第一个素数返回，递归</span></span><br><span class="line">            <span class="keyword">return</span> primeAfter(number + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Integer&gt; <span class="title">primes</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> fromNumber, <span class="keyword">final</span> <span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Stream.iterate(primeAfter(fromNumber - <span class="number">1</span>), Primes::primeAfter)</span><br><span class="line">            .limit(count)</span><br><span class="line">            .collect(Collectors.&lt;Integer&gt;toList());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于iterate和limit，它们只是中间操作，得到的对象仍然是Stream类型。对于collect方法，它是一个结束操作，会触发中间操作来得到需要的结果。</p>
+<p>如果用非Stream的方式需要面临两个问题：</p>
+<ul>
+<li>一是无法提前知晓fromNumber后count个素数的数值边界是什么</li>
+<li>二是无法使用有限的集合来表示计算范围，无法计算超大的数值</li>
+</ul>
+<p>所以，因为不知道第一个素数的位置在哪儿，需要提前计算出来第一个素数，然后用while来处理count次查找后续的素数。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/08/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA%E5%89%96%E6%9E%90tomcat/chapter03-%E8%BF%9E%E6%8E%A5%E5%99%A8/" rel="prev" title="chapter03-连接器">
+                  <i class="fa fa-chevron-left"></i> chapter03-连接器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/09/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2021-05-09/" rel="next" title="2021-05-09主日讲道">
+                  2021-05-09主日讲道 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

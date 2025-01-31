@@ -21,7 +21,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
   <meta name="description" content="C A S基本概念C A S（compareAndSwap）也叫比较交换，是一种无锁原子算法，映射到操作系统就是一条cmpxchg硬件汇编指令（保证原子性），其作用是让C P U将内存值更新为新值，但是有个条件，内存值必须与期望值相同，并且C A S操作无需用户态与内核态切换，直接在用户态对内存进行读写操作（意味着不会阻塞&#x2F;线程上下文切换）。 它包含3个参数C A S（V，E，N），V表示待更新的">
@@ -35,9 +35,9 @@
 <meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiab1UEcNV0VfpBkR7icdiazr27wBlcCa8QaMvdHoDWuZTe3HqaLHAiaB3cXQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
 <meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiab183RLQ5wiaWzgiaiblQpR7JQP0HHdZxzHlXJgcrhB5VZXSFqBnYNblfsg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
 <meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabJLQZYt6OMXoBHbMIlLoNjgVt85LZlT0FGAoWB09ScvI5KITMSr9qxg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
-<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640">
 <meta property="article:published_time" content="2021-04-01T01:21:03.000Z">
-<meta property="article:modified_time" content="2021-04-14T04:51:34.003Z">
+<meta property="article:modified_time" content="2021-07-09T11:19:08.829Z">
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabHujbJoOdS8SRxegxFTHuoKHLwjkVahNbPibZP6rhYkYtuX8RQkK2Cbw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
@@ -204,20 +204,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -289,7 +289,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-04-14 12:51:34" itemprop="dateModified" datetime="2021-04-14T12:51:34+08:00">2021-04-14</time>
+        <time title="Modified: 2021-07-09 19:19:08" itemprop="dateModified" datetime="2021-07-09T19:19:08+08:00">2021-07-09</time>
       </span>
 
   
@@ -364,7 +364,7 @@
 <ul>
 <li><strong>执行<code>tryLock</code>函数，返回<code>true</code>停止，否则一直循环</strong></li>
 </ul>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/23OQmC1ia8ny1VNcSscicjAax5qNibFxqiabQHKscYW1MI87ic7kFeJjDqKWIqRl72I4nPTwJ8OBaUBz7L0sN4FFBqA/640" alt="Image"></p>
 <p>从上图可以看出，只有<code>tryLock</code>成功的线程（<strong>把<code>lockValue</code>更新为<code>0</code>**），才会执行代码块，其他线程个<code>tryLock</code>自旋等待<code>lockValue</code>被更新成<code>1</code>，<code>tryLock</code>成功的线程执行<code>unLock</code>（</strong>把<code>lockValue</code>更新为<code>1</code>**），自旋的线程才会<code>tryLock</code>成功。</p>
 
     </div>
@@ -379,13 +379,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/03/31/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/redisson-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E5%92%8C%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E5%8F%AA%E6%89%A7%E8%A1%8C1%E6%AC%A1/" rel="prev" title="redisson-分布式锁和定时任务只执行1次">
+                <a href="/2021/03/31/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81-02-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%9B%86%E7%BE%A4%E5%8F%AA%E6%89%A7%E8%A1%8C1%E6%AC%A1/" rel="prev" title="redisson-分布式锁和定时任务只执行1次">
                   <i class="fa fa-chevron-left"></i> redisson-分布式锁和定时任务只执行1次
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E6%97%B6%E9%97%B4%E6%97%A5%E6%9C%9F%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" rel="next" title="jdk时间日期常用命令">
-                  jdk时间日期常用命令 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-Date/" rel="next" title="JDK-util-Date">
+                  JDK-util-Date <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
@@ -434,13 +434,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

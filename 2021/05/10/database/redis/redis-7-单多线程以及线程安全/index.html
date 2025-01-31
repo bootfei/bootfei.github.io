@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="单线程的设计也给Redis带来一些问题：  只能使用CPU一个核； 如果删除的键过大（比如Set类型中有上百万个对象），会导致服务端阻塞好几秒； QPS难再提高。  针对上面问题，Redis在4.0版本以及6.0版本分别引入了Lazy Free以及多线程IO，逐步向多线程过渡 单线程体现在哪里？版本不同，单线程不同 正确的说法是，redis只使用了单个线程去处理客户端的网络请求。到6.0版本，那这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis-7-单多线程以及线程安全">
+<meta property="og:url" content="http://example.com/2021/05/10/database/redis/redis-7-%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="单线程的设计也给Redis带来一些问题：  只能使用CPU一个核； 如果删除的键过大（比如Set类型中有上百万个对象），会导致服务端阻塞好几秒； QPS难再提高。  针对上面问题，Redis在4.0版本以及6.0版本分别引入了Lazy Free以及多线程IO，逐步向多线程过渡 单线程体现在哪里？版本不同，单线程不同 正确的说法是，redis只使用了单个线程去处理客户端的网络请求。到6.0版本，那这">
+<meta property="og:locale">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/2226BB23364A3092021556482C0880F0.jpg">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZGKyAlBBia6Au7U9ScIxh5QsI1KJaCuFaLsoJIWzpuVyCqALjd9dWX8A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZBrrXaOVX2HR8uoJLd4PIpJBmIUXiaVfsp2UPtl5n3icmsRzhpcgIISdA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/D62600E64DD64120A1AFC7B02C249F05.jpg">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/17AC77F7B141692BBB88D38395BDAB5A.jpg">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/9AE12897F8FCA20AA8BADAF3D04E3E56.jpg">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/45B0A1BFD93CE1E776FBD5BFE6D2756D.jpg">
+<meta property="og:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/0AC4121F88297E685697B648CE50BD5D.jpg">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="article:published_time" content="2021-05-10T05:27:23.000Z">
+<meta property="article:modified_time" content="2021-08-09T07:13:16.302Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/2226BB23364A3092021556482C0880F0.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/05/10/database/redis/redis-7-%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>redis-7-单多线程以及线程安全 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E7%BA%BF%E7%A8%8B%E4%BD%93%E7%8E%B0%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">单线程体现在哪里？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E4%B8%8D%E5%90%8C%EF%BC%8C%E5%8D%95%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%90%8C"><span class="nav-number">1.1.</span> <span class="nav-text">版本不同，单线程不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E6%98%AF%E5%8D%95%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">事件处理是单线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%93%B6%E9%A2%88"><span class="nav-number">2.</span> <span class="nav-text">单线程瓶颈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">2.1.</span> <span class="nav-text">CPU利用率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98"><span class="nav-number">2.2.</span> <span class="nav-text">内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9CIO"><span class="nav-number">2.3.</span> <span class="nav-text">网络IO</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BD%93%E7%8E%B0%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">多线程体现在哪里？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90RBD%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">生成RBD日志文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-0-Lazy-Free%E6%9C%BA%E5%88%B6"><span class="nav-number">3.2.</span> <span class="nav-text">4.0 Lazy Free机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-0-%E5%A4%9A%E7%BA%BF%E7%A8%8BI-O"><span class="nav-number">3.3.</span> <span class="nav-text">6.0 多线程I&#x2F;O</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%93%B6%E9%A2%88"><span class="nav-number">4.</span> <span class="nav-text">多线程瓶颈</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8BI-O%E5%8F%8A%E5%85%B6%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">4.0.1.</span> <span class="nav-text">多线程I&#x2F;O及其局限性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">4.0.1.1.</span> <span class="nav-text">实现原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">4.0.1.2.</span> <span class="nav-text">局限性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Tair%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">4.0.1.3.</span> <span class="nav-text">Tair多线程实现原理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.0.2.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">线程安全问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E8%BF%87%E6%9C%9F%E6%95%B0%E6%8D%AE"><span class="nav-number">5.1.</span> <span class="nav-text">读取过期数据</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/10/database/redis/redis-7-%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          redis-7-单多线程以及线程安全
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-10 13:27:23" itemprop="dateCreated datePublished" datetime="2021-05-10T13:27:23+08:00">2021-05-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-08-09 15:13:16" itemprop="dateModified" datetime="2021-08-09T15:13:16+08:00">2021-08-09</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>单线程的设计也给Redis带来一些问题：</p>
+<ul>
+<li>只能使用CPU一个核；</li>
+<li>如果删除的键过大（比如Set类型中有上百万个对象），会导致服务端阻塞好几秒；</li>
+<li>QPS难再提高。</li>
+</ul>
+<p>针对上面问题，Redis在4.0版本以及6.0版本分别引入了<code>Lazy Free</code>以及<code>多线程IO</code>，逐步向多线程过渡</p>
+<h2 id="单线程体现在哪里？"><a href="#单线程体现在哪里？" class="headerlink" title="单线程体现在哪里？"></a>单线程体现在哪里？</h2><h3 id="版本不同，单线程不同"><a href="#版本不同，单线程不同" class="headerlink" title="版本不同，单线程不同"></a>版本不同，单线程不同</h3><blockquote>
+<p><strong>正确的说法是，redis只使用了单个线程去处理客户端的网络请求。到6.0版本，那这个答案还要修正为多线程处理网络请求，但是真正操作数据部分程序是单线程的。</strong></p>
+</blockquote>
+<ul>
+<li>Redis的版本很多3.x、4.x、6.x，版本不同架构也是不同的，不限定版本问这种问题，是不是有点耍流氓。</li>
+<li>限定版本之后 比如4.x，严格意义来说Redis也不是单线程，而是负责处理客户端的请求的线程是单线程。</li>
+<li>最新版本的6.0版本，告别了大家印象中的单线程，用一种全新的多线程来解决问题</li>
+</ul>
+<p><img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/2226BB23364A3092021556482C0880F0.jpg" alt="img"></p>
+<h3 id="事件处理是单线程"><a href="#事件处理是单线程" class="headerlink" title="事件处理是单线程"></a>事件处理是单线程</h3><p>Redis服务器是一个事件驱动程序，服务器需要处理以下两类事件：</p>
+<ul>
+<li><code>文件事件</code>：Redis服务器通过套接字与客户端（或者其他Redis服务器）进行连接，而文件事件就是服务器对套接字操作的抽象；服务器与客户端的通信会产生相应的文件事件，而服务器则通过监听并处理这些事件来完成一系列网络通信操作，比如连接<code>accept</code>，<code>read</code>，<code>write</code>，<code>close</code>等；</li>
+<li><code>时间事件</code>：Redis服务器中的一些操作（比如serverCron函数）需要在给定的时间点执行，而时间事件就是服务器对这类定时操作的抽象，比如过期键清理，服务状态统计等。</li>
+</ul>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZGKyAlBBia6Au7U9ScIxh5QsI1KJaCuFaLsoJIWzpuVyCqALjd9dWX8A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom: 33%;" />
+
+<p>如上图，Redis将文件事件和时间事件进行抽象，时间轮训器会监听I/O事件表，一旦有文件事件就绪，Redis就会优先处理文件事件，接着处理时间事件。<a href="">在上述所有事件处理上，Redis都是以<code>单线程</code>形式处理，所以说Redis是单线程的</a></p>
+<p>Redis基于Reactor模式开发了自己的I/O事件处理器，也就是文件事件处理器，Redis在I/O事件处理上，采用了I/O多路复用技术，同时监听多个套接字，并为套接字关联不同的事件处理函数，<a href="">通过单线程实现了多客户端并发处理</a>。</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBGjKoEV1qzhribnDJZeSp9ZBrrXaOVX2HR8uoJLd4PIpJBmIUXiaVfsp2UPtl5n3icmsRzhpcgIISdA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:33%;" />
+
+<p>正因为这样的设计，在数据处理上避免了加锁操作，既使得实现上足够简洁，也保证了其高性能。</p>
+<h2 id="单线程瓶颈"><a href="#单线程瓶颈" class="headerlink" title="单线程瓶颈"></a>单线程瓶颈</h2><h3 id="CPU利用率"><a href="#CPU利用率" class="headerlink" title="CPU利用率"></a>CPU利用率</h3><p>通常来说多线程对于提高CPU利用率有重要作用，但是Redis对于提高CPU利用率并不感冒，在Redis看来如果要提高CPU利用率，那在一台机器部署多个实例就好了。</p>
+<blockquote>
+<p>其实在Redis 4.0就引入了多个线程来实现数据的异步删除等功能，但是其处理读写请求的仍然只有一个线程，所以仍然算是狭义上的单线程。</p>
+</blockquote>
+<p>抛开CPU之后，影响Redis性能的地方主要就剩下：<strong>内存和网络IO</strong>。</p>
+<h3 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h3><p>内存更多属于硬件范畴的东西，比如我们用容量更大、吞吐率更高的内存介质来进行优化，因此对于Redis来说可以优化的空间有限。</p>
+<h3 id="网络IO"><a href="#网络IO" class="headerlink" title="网络IO"></a>网络IO</h3><p>在优化网络IO之前，我们有必要回顾下Redis单线程整体架构：</p>
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/D62600E64DD64120A1AFC7B02C249F05.jpg" alt="img" style="zoom: 50%;" />
+
+<p>Redis采用Reactor模式的网络模型，对于一个客户端请求，主线程负责一个完整的处理过程：</p>
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/17AC77F7B141692BBB88D38395BDAB5A.jpg" alt="img" style="zoom: 50%;" />
+
+<p>从socket中读取数据和往socket写数据都是比较耗时的网络IO操作，解析请求和内存交互耗时可能远小于IO操作。</p>
+<p>对于这种问题，我们常见的解决方法是标准的多线程化：</p>
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/9AE12897F8FCA20AA8BADAF3D04E3E56.jpg" alt="img" style="zoom:50%;" />
+
+<p>该方案中工作线程的功能是一样的，MemCached就是采用这种方案，具体的流程：</p>
+<blockquote>
+<p>Memcached采用 master-woker 模式进行工作，主线程采用 Libevent 监听和处理事件，主线程将连接请求封装为任务放到队列中，根据算法选择空闲的工作线程，相应的工作线程处理完成后通过soeket与客户端进行数据交互。</p>
+</blockquote>
+<p>但是Redis 6.0的多线程并没有这么做。</p>
+<h2 id="多线程体现在哪里？"><a href="#多线程体现在哪里？" class="headerlink" title="多线程体现在哪里？"></a>多线程体现在哪里？</h2><h3 id="生成RBD日志文件"><a href="#生成RBD日志文件" class="headerlink" title="生成RBD日志文件"></a>生成RBD日志文件</h3><p><a href="">当然，Redis单线程只是指其在事件处理上，实际上，Redis也并不是单线程的，比如生成RDB文件，就会fork一个子进程来实现</a></p>
+<h3 id="4-0-Lazy-Free机制"><a href="#4-0-Lazy-Free机制" class="headerlink" title="4.0 Lazy Free机制"></a>4.0 Lazy Free机制</h3><p>如上所知，Redis在处理客户端命令时是以单线程形式运行，而且处理速度很快，期间不会响应其他客户端请求，但若客户端向Redis发送一条耗时较长的命令，比如删除一个含有上百万对象的Set键，或者执行flushdb，flushall操作，Redis服务器需要回收大量的内存空间，导致服务器卡住好几秒，对负载较高的缓存系统而言将会是个灾难。为了解决这个问题，在Redis 4.0版本引入了<code>Lazy Free</code>，将<code>慢操作</code>异步化，这也是在事件处理上向多线程迈进了一步。</p>
+<p>要解决<code>慢操作</code>，可以采用渐进式处理，即增加一个时间事件，比如在删除一个具有上百万个对象的Set键时，每次只删除大键中的一部分数据，最终实现大键的删除。但是，该方案可能会导致回收速度赶不上创建速度，最终导致内存耗尽。因此，Redis最终实现上是将大键的删除操作异步化，采用非阻塞删除（对应命令<code>UNLINK</code>），大键的空间回收交由单独线程实现，主线程只做关系解除，可以快速返回，继续处理其他事件，避免服务器长时间阻塞。</p>
+<p>以删除（<code>DEL</code>命令）为例，看看Redis是如何实现的，下面就是删除函数的入口，其中，<code>lazyfree_lazy_user_del</code>是是否修改<code>DEL</code>命令的默认行为，一旦开启，执行<code>DEL</code>时将会以<code>UNLINK</code>形式执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">void delCommand(client *c) &#123;</span><br><span class="line">    delGenericCommand(c,server.lazyfree_lazy_user_del);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;* This command implements DEL and LAZYDEL. *&#x2F;</span><br><span class="line">void delGenericCommand(client *c, int lazy) &#123;</span><br><span class="line">    int numdel &#x3D; 0, j;</span><br><span class="line"></span><br><span class="line">    for (j &#x3D; 1; j &lt; c-&gt;argc; j++) &#123;</span><br><span class="line">        expireIfNeeded(c-&gt;db,c-&gt;argv[j]);</span><br><span class="line">        &#x2F;&#x2F; 根据配置确定DEL在执行时是否以lazy形式执行</span><br><span class="line">        int deleted  &#x3D; lazy ? dbAsyncDelete(c-&gt;db,c-&gt;argv[j]) :</span><br><span class="line">                              dbSyncDelete(c-&gt;db,c-&gt;argv[j]);</span><br><span class="line">        if (deleted) &#123;</span><br><span class="line">            signalModifiedKey(c,c-&gt;db,c-&gt;argv[j]);</span><br><span class="line">            notifyKeyspaceEvent(NOTIFY_GENERIC,</span><br><span class="line">                &quot;del&quot;,c-&gt;argv[j],c-&gt;db-&gt;id);</span><br><span class="line">            server.dirty++;</span><br><span class="line">            numdel++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    addReplyLongLong(c,numdel);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同步删除很简单，只要把key和value删除，如果有内层引用，则进行递归删除，这里不做介绍。下面看下异步删除，Redis在回收对象时，会先计算回收收益，只有回收收益在超过一定值时，采用封装成Job加入到异步处理队列中，否则直接同步回收，这样效率更高。回收收益计算也很简单，比如<code>String</code>类型，回收收益值就是1，而<code>Set</code>类型，回收收益就是集合中元素个数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* Delete a key, value, and associated expiration entry if any, from the DB.</span><br><span class="line"> * If there are enough allocations to free the value object may be put into</span><br><span class="line"> * a lazy free list instead of being freed synchronously. The lazy free list</span><br><span class="line"> * will be reclaimed in a different bio.c thread. *&#x2F;</span><br><span class="line">#define LAZYFREE_THRESHOLD 64</span><br><span class="line">int dbAsyncDelete(redisDb *db, robj *key) &#123;</span><br><span class="line">    &#x2F;* Deleting an entry from the expires dict will not free the sds of</span><br><span class="line">     * the key, because it is shared with the main dictionary. *&#x2F;</span><br><span class="line">    if (dictSize(db-&gt;expires) &gt; 0) dictDelete(db-&gt;expires,key-&gt;ptr);</span><br><span class="line"></span><br><span class="line">    &#x2F;* If the value is composed of a few allocations, to free in a lazy way</span><br><span class="line">     * is actually just slower... So under a certain limit we just free</span><br><span class="line">     * the object synchronously. *&#x2F;</span><br><span class="line">    dictEntry *de &#x3D; dictUnlink(db-&gt;dict,key-&gt;ptr);</span><br><span class="line">    if (de) &#123;</span><br><span class="line">        robj *val &#x3D; dictGetVal(de);</span><br><span class="line">        &#x2F;&#x2F; 计算value的回收收益</span><br><span class="line">        size_t free_effort &#x3D; lazyfreeGetFreeEffort(val);</span><br><span class="line"></span><br><span class="line">        &#x2F;* If releasing the object is too much work, do it in the background</span><br><span class="line">         * by adding the object to the lazy free list.</span><br><span class="line">         * Note that if the object is shared, to reclaim it now it is not</span><br><span class="line">         * possible. This rarely happens, however sometimes the implementation</span><br><span class="line">         * of parts of the Redis core may call incrRefCount() to protect</span><br><span class="line">         * objects, and then call dbDelete(). In this case we&#39;ll fall</span><br><span class="line">         * through and reach the dictFreeUnlinkedEntry() call, that will be</span><br><span class="line">         * equivalent to just calling decrRefCount(). *&#x2F;</span><br><span class="line">        &#x2F;&#x2F; 只有回收收益超过一定值，才会执行异步删除，否则还是会退化到同步删除</span><br><span class="line">        if (free_effort &gt; LAZYFREE_THRESHOLD &amp;&amp; val-&gt;refcount &#x3D;&#x3D; 1) &#123;</span><br><span class="line">            atomicIncr(lazyfree_objects,1);</span><br><span class="line">            bioCreateBackgroundJob(BIO_LAZY_FREE,val,NULL,NULL);</span><br><span class="line">            dictSetVal(db-&gt;dict,de,NULL);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;* Release the key-val pair, or just the key if we set the val</span><br><span class="line">     * field to NULL in order to lazy free it later. *&#x2F;</span><br><span class="line">    if (de) &#123;</span><br><span class="line">        dictFreeUnlinkedEntry(db-&gt;dict,de);</span><br><span class="line">        if (server.cluster_enabled) slotToKeyDel(key-&gt;ptr);</span><br><span class="line">        return 1;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过引入<code>a threaded lazy free</code>，Redis实现了对于<code>Slow Operation</code>的<code>Lazy</code>操作，避免了在大键删除，<code>FLUSHALL</code>，<code>FLUSHDB</code>时导致服务器阻塞。当然，在实现该功能时，不仅引入了<code>lazy free</code>线程，也对Redis聚合类型在存储结构上进行改进。因为Redis内部使用了很多共享对象，比如客户端输出缓存。当然，Redis并未使用加锁来避免线程冲突，锁竞争会导致性能下降，而是去掉了共享对象，直接采用数据拷贝，如下，在3.x和6.x中<code>ZSet</code>节点value的不同实现。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 3.2.5版本ZSet节点实现，value定义robj *obj</span><br><span class="line">&#x2F;* ZSETs use a specialized version of Skiplists *&#x2F;</span><br><span class="line">typedef struct zskiplistNode &#123;</span><br><span class="line">    robj *obj;</span><br><span class="line">    double score;</span><br><span class="line">    struct zskiplistNode *backward;</span><br><span class="line">    struct zskiplistLevel &#123;</span><br><span class="line">        struct zskiplistNode *forward;</span><br><span class="line">        unsigned int span;</span><br><span class="line">    &#125; level[];</span><br><span class="line">&#125; zskiplistNode;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 6.0.10版本ZSet节点实现，value定义为sds ele</span><br><span class="line">&#x2F;* ZSETs use a specialized version of Skiplists *&#x2F;</span><br><span class="line">typedef struct zskiplistNode &#123;</span><br><span class="line">    sds ele;</span><br><span class="line">    double score;</span><br><span class="line">    struct zskiplistNode *backward;</span><br><span class="line">    struct zskiplistLevel &#123;</span><br><span class="line">        struct zskiplistNode *forward;</span><br><span class="line">        unsigned long span;</span><br><span class="line">    &#125; level[];</span><br><span class="line">&#125; zskiplistNode;</span><br></pre></td></tr></table></figure>
+
+<p>去掉共享对象，不但实现了<code>lazy free</code>功能，也为Redis向多线程跨进带来了可能，正如作者所述：</p>
+<blockquote>
+<p>Now that values of aggregated data types are fully unshared, and client output buffers don’t contain shared objects as well, there is a lot to exploit. For example it is finally possible to implement threaded I/O in Redis, so that different clients are served by different threads. This means that we’ll have a global lock only when accessing the database, but the clients read/write syscalls and even the parsing of the command the client is sending, can happen in different threads.</p>
+</blockquote>
+<h3 id="6-0-多线程I-O"><a href="#6-0-多线程I-O" class="headerlink" title="6.0 多线程I/O"></a>6.0 多线程I/O</h3><p>单线程给Redis带来的好处，或许更大。</p>
+<p>另外一点如果做成<a href="">标准化的多线程（见单线程瓶颈 - 网络IO）</a>，对于Redis来说可能更不好处理，因为多线程带来的线程安全问题和底层复杂的数据结构操作都十分棘手。</p>
+<p>Redis 6.0将处理过程中最耗时的Socket的读取、请求解析、写入单独外包出去，剩下的命令执行仍然由单线程来完成和内存的数据交互。</p>
+<p>这样一来，网络IO操作就变成多线程化了，其他核心部分仍然是线程安全的，确实是个不错的折中办法。</p>
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/45B0A1BFD93CE1E776FBD5BFE6D2756D.jpg" alt="img" style="zoom:50%;" />
+
+<blockquote>
+<p>画外音：<strong>Redis 6.0 将网络数据读写、请求协议解析通过多个IO线程的来处理 ，对于真正的命令执行来说，仍然使用主线程操作，真是个很特别的多线程啊！</strong></p>
+</blockquote>
+<img src="https://image.z.itpub.net/zitpub.net/JPG/2021-04-25/0AC4121F88297E685697B648CE50BD5D.jpg" alt="img" style="zoom:50%;" />
+
+<h2 id="多线程瓶颈"><a href="#多线程瓶颈" class="headerlink" title="多线程瓶颈"></a>多线程瓶颈</h2><h4 id="多线程I-O及其局限性"><a href="#多线程I-O及其局限性" class="headerlink" title="多线程I/O及其局限性"></a>多线程I/O及其局限性</h4><p>Redis在4.0版本引入了<code>Lazy Free</code>，自此Redis有了一个<code>Lazy Free</code>线程专门用于大键的回收，同时，也去掉了聚合类型的共享对象，这为多线程带来可能，Redis也不负众望，在6.0版本实现了<code>多线程I/O</code>。</p>
+<h5 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h5><p>正如官方以前的回复，Redis的性能瓶颈并不在CPU上，而是在内存和网络上。因此6.0发布的多线程并未将事件处理改成多线程，而是在I/O上，此外，如果把事件处理改成多线程，不但会导致锁竞争，而且会有频繁的上下文切换，即使用分段锁来减少竞争，对Redis内核也会有较大改动，性能也不一定有明显提升。</p>
+<p>是Redis实现的多线程部分，利用多核来分担I/O读写负荷。在<code>事件处理线程</code>每次获取到可读事件时，会将所有就绪的读事件分配给<code>I/O线程</code>，并进行等待，在所有<code>I/O线程</code>完成读操作后，<code>事件处理线程</code>开始执行任务处理，在处理结束后，同样将写事件分配给<code>I/O线程</code>，等待所有<code>I/O</code>线程完成写操作。</p>
+<p>以读事件处理为例，看下<code>事件处理线程</code>任务分配流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">int handleClientsWithPendingReadsUsingThreads(void) &#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    &#x2F;* Distribute the clients across N different lists. *&#x2F;</span><br><span class="line">    listIter li;</span><br><span class="line">    listNode *ln;</span><br><span class="line">    listRewind(server.clients_pending_read,&amp;li);</span><br><span class="line">    int item_id &#x3D; 0;</span><br><span class="line">    &#x2F;&#x2F; 将等待处理的客户端分配给I&#x2F;O线程</span><br><span class="line">    while((ln &#x3D; listNext(&amp;li))) &#123;</span><br><span class="line">        client *c &#x3D; listNodeValue(ln);</span><br><span class="line">        int target_id &#x3D; item_id % server.io_threads_num;</span><br><span class="line">        listAddNodeTail(io_threads_list[target_id],c);</span><br><span class="line">        item_id++;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    &#x2F;* Wait for all the other threads to end their work. *&#x2F;</span><br><span class="line">    &#x2F;&#x2F; 轮训等待所有I&#x2F;O线程处理完</span><br><span class="line">    while(1) &#123;</span><br><span class="line">        unsigned long pending &#x3D; 0;</span><br><span class="line">        for (int j &#x3D; 1; j &lt; server.io_threads_num; j++)</span><br><span class="line">            pending +&#x3D; io_threads_pending[j];</span><br><span class="line">        if (pending &#x3D;&#x3D; 0) break;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    return processed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>I/O线程</code>处理流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">void *IOThreadMain(void *myid) &#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    while(1) &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; I&#x2F;O线程执行读写操作</span><br><span class="line">        while((ln &#x3D; listNext(&amp;li))) &#123;</span><br><span class="line">            client *c &#x3D; listNodeValue(ln);</span><br><span class="line">            &#x2F;&#x2F; io_threads_op判断是读还是写事件</span><br><span class="line">            if (io_threads_op &#x3D;&#x3D; IO_THREADS_OP_WRITE) &#123;</span><br><span class="line">                writeToClient(c,0);</span><br><span class="line">            &#125; else if (io_threads_op &#x3D;&#x3D; IO_THREADS_OP_READ) &#123;</span><br><span class="line">                readQueryFromClient(c-&gt;conn);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                serverPanic(&quot;io_threads_op value is unknown&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        listEmpty(io_threads_list[id]);</span><br><span class="line">        io_threads_pending[id] &#x3D; 0;</span><br><span class="line"></span><br><span class="line">        if (tio_debug) printf(&quot;[%ld] Done\n&quot;, id);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h5><p>从上面实现上看，6.0版本的多线程并非彻底的多线程，<code>I/O线程</code>只能同时执行读或者同时执行写操作，期间<code>事件处理线程</code>一直处于等待状态，并非流水线模型，有很多轮训等待开销。</p>
+<h5 id="Tair多线程实现原理"><a href="#Tair多线程实现原理" class="headerlink" title="Tair多线程实现原理"></a>Tair多线程实现原理</h5><p>相较于6.0版本的多线程，Tair的多线程实现更加优雅。如下图，Tair的<code>Main Thread</code>负责客户端连接建立等，<code>IO Thread</code>负责请求读取、响应发送、命令解析等，<code>Worker Thread</code>线程专门用于事件处理。<code>IO Thread</code>读取用户的请求并进行解析，之后将解析结果以命令的形式放在队列中发送给<code>Worker Thread</code>处理。<code>Worker Thread</code>将命令处理完成后生成响应，通过另一条队列发送给<code>IO Thread</code>。为了提高线程的并行度，<code>IO Thread</code>和<code>Worker Thread</code>之间采用<strong>无锁队列</strong>和<strong>管道</strong>进行数据交换，整体性能会更好。<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"></p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>Redis 4.0引入<code>Lazy Free</code>线程，解决了诸如大键删除导致服务器阻塞问题，在6.0版本引入了<code>I/O Thread</code>线程，正式实现了多线程，但相较于Tair，并不太优雅，而且性能提升上并不多，压测看，多线程版本性能是单线程版本的2倍，Tair多线程版本则是单线程版本的3倍。在作者看来，Redis多线程无非两种思路，<code>I/O threading</code>和<code>Slow commands threading</code>，正如作者在其博客中所说：</p>
+<blockquote>
+<p>I/O threading is not going to happen in Redis AFAIK, because after much consideration I think it’s a lot of complexity without a good reason. Many Redis setups are network or memory bound actually. Additionally I really believe in a share-nothing setup, so the way I want to scale Redis is by improving the support for multiple Redis instances to be executed in the same host, especially via Redis Cluster.</p>
+</blockquote>
+<blockquote>
+<p>What instead I really want a lot is slow operations threading, and with the Redis modules system we already are in the right direction. However in the future (not sure if in Redis 6 or 7) we’ll get key-level locking in the module system so that threads can completely acquire control of a key to process slow operations. Now modules can implement commands and can create a reply for the client in a completely separated way, but still to access the shared data set a global lock is needed: this will go away.</p>
+</blockquote>
+<p>Redis作者更倾向于采用集群方式来解决<code>I/O threading</code>，尤其是在6.0版本发布的原生Redis Cluster Proxy背景下，使得集群更加易用。此外，作者更倾向于<code>slow operations threading</code>（比如4.0版本发布的<code>Lazy Free</code>）来解决多线程问题。后续版本，是否会将<code>IO Thread</code>实现的更加完善，采用Module实现对慢操作的优化，着实值得期待。</p>
+<h2 id="线程安全问题"><a href="#线程安全问题" class="headerlink" title="线程安全问题"></a>线程安全问题</h2><h3 id="读取过期数据"><a href="#读取过期数据" class="headerlink" title="读取过期数据"></a>读取过期数据</h3><p>典型场景是：</p>
+<ul>
+<li>Redis 内存储了一个用户的状态：<code>user5277=idle</code>；</li>
+<li>客户端连接 A 读取了用户状态，获取到用户的空闲状态 <code>status = get(&quot;user5277&quot;)</code>；</li>
+<li>客户端连接 B 也同样读取了用户状态；</li>
+<li>客户端连接 A 给用户安排了一个任务，并将 Redis 内用户状态置为忙碌 <code>set(&quot;user5277&quot;, &quot;busy&quot;)</code>；</li>
+<li>客户端连接 B 同样设置用户为忙碌状态。</li>
+<li>可是此时用户却被同时分配了两个任务。</li>
+</ul>
+<p>解决方法1：给用户状态加锁就行了，使同一时间内只能有一个客户端操作用户状态。不过加锁我们就需要考虑锁粒度、死锁等问题了，无疑添加了程序的复杂性，不利于维护。</p>
+<p>解决方法2：使用lua脚本，保证<a href="">复合命令</a>的原子性。java可以使用字符串的方式拼接lua脚本</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-01-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/" rel="prev" title="shiro应用-01-使用流程">
+                  <i class="fa fa-chevron-left"></i> shiro应用-01-使用流程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/11/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%88%86%E5%B8%83%E5%BC%8F-01-subject%E7%BB%B4%E6%8A%A4/" rel="next" title="shiro分布式-01-subject维护">
+                  shiro分布式-01-subject维护 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

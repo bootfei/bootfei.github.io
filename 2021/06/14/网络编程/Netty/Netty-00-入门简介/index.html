@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="BIO vs  NIO vs AIOBIO: 同步阻塞式IO  打个比喻您打了专车，在您没有到之前司机就在出发地等您上车。您上车之后司机专门送您到目的地。在这个例子中您扮演着IO中的网络事件，司机扮演着处理网络事件的线程。整个过程中您如果没有任何事件发生司机一直都在等待这就是同步阻塞﻿。 NIO:同步非阻塞IO  银行柜员在等待人办理银行业务，人们去银行后首先要到取号机上取号然后等待对应的柜台叫号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty-00-入门简介">
+<meta property="og:url" content="http://example.com/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-00-%E5%85%A5%E9%97%A8%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="BIO vs  NIO vs AIOBIO: 同步阻塞式IO  打个比喻您打了专车，在您没有到之前司机就在出发地等您上车。您上车之后司机专门送您到目的地。在这个例子中您扮演着IO中的网络事件，司机扮演着处理网络事件的线程。整个过程中您如果没有任何事件发生司机一直都在等待这就是同步阻塞﻿。 NIO:同步非阻塞IO  银行柜员在等待人办理银行业务，人们去银行后首先要到取号机上取号然后等待对应的柜台叫号">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSPBDsriaSyCRnSzWNxvdXt7mnxoSZvspbP5mBLq87byzGa2F5vN9IZyQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS4WVoHfAiaHuiaKicXmq9lhADmwAek4OXvYd4H5X5eqZvRXicCZgiadKUic9Q/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS0AOkj10sEic1TOgOU3Nz3OibVExRDnHl1Gc5PqH7Qic7s4qukyA1y1ibFg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSQbtEAPTNMt5GICMyCvgGicuicHXZB4Htm75JHFaKs5xNgWE6JolgIGrQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSzWEibh5E65kPBoibdTKprwakA6RRX2DVyVZHqkMK1vFLC7pQHPeNzN1g/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS1cl44RlPrA4W4061kHgS4FYgfJ3dHnnIjJOt1lHthlnUic4Wjz8rlow/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSZFCLWyVgA4OVRlBGy6BuyQM6ON49RQNWdH8bQ1FEr7icFnseLYOqiabg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS2zydhafxsdJySlGIC2LncGBcxCz9ibliaso4lIrr8KRmwzZJBjAuiaic4w/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS72UajWyyFsVEePGL9BWFY9otrysdlXUNbhaRUJFF3mb3CCVfVgHgWA/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS3EkyiaKtmgjichNyttyDSG1OtHFibic2DKmKI1ibfP1FgJtGiba9cXzxibdgg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-06-14T12:44:36.000Z">
+<meta property="article:modified_time" content="2024-05-13T04:23:35.434Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSPBDsriaSyCRnSzWNxvdXt7mnxoSZvspbP5mBLq87byzGa2F5vN9IZyQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-00-%E5%85%A5%E9%97%A8%E7%AE%80%E4%BB%8B/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>Netty-00-入门简介 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#BIO-vs-NIO-vs-AIO"><span class="nav-number">1.</span> <span class="nav-text">BIO vs  NIO vs AIO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%A7%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">编解码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCP%E7%B2%98%E5%8C%85%E6%8B%86%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">TCP粘包拆包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%A7%A3%E7%A0%81Handler"><span class="nav-number">2.2.</span> <span class="nav-text">编解码Handler</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E5%A4%9A%E7%A7%8D%E4%B8%BB%E6%B5%81%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.</span> <span class="nav-text">支持多种主流协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">3.1.</span> <span class="nav-text">﻿﻿</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#idle-%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B"><span class="nav-number">4.</span> <span class="nav-text">idle(心跳检测)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E9%83%BD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">5.</span> <span class="nav-text">一次网络通信都发生了什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Netty%E6%80%8E%E4%B9%88%E6%8F%90%E9%AB%98%E9%80%9A%E4%BF%A1%E6%80%A7%E8%83%BD"><span class="nav-number">6.</span> <span class="nav-text">Netty怎么提高通信性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E5%B1%82"><span class="nav-number">7.</span> <span class="nav-text">网络通信层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E8%B0%83%E5%BA%A6%E5%B1%82"><span class="nav-number">8.</span> <span class="nav-text">事件调度层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92%E5%B1%82"><span class="nav-number">9.</span> <span class="nav-text">服务编排层</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number"></span> <span class="nav-text">参考文献</span></a></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-00-%E5%85%A5%E9%97%A8%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Netty-00-入门简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-14 20:44:36" itemprop="dateCreated datePublished" datetime="2021-06-14T20:44:36+08:00">2021-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2024-05-13 12:23:35" itemprop="dateModified" datetime="2024-05-13T12:23:35+08:00">2024-05-13</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="BIO-vs-NIO-vs-AIO"><a href="#BIO-vs-NIO-vs-AIO" class="headerlink" title="BIO vs  NIO vs AIO"></a>BIO vs  NIO vs AIO</h3><p><strong>BIO: 同步阻塞式IO</strong>  打个比喻您打了专车，在您没有到之前司机就在出发地等您上车。您上车之后司机专门送您到目的地。在这个例子中您扮演着IO中的网络事件，司机扮演着处理网络事件的线程。整个过程中您如果没有任何事件发生司机一直都在等待这就是同步阻塞﻿。</p>
+<p><strong>NIO:同步非阻塞IO</strong>  银行柜员在等待人办理银行业务，人们去银行后首先要到取号机上取号然后等待对应的柜台叫号。在这个例子中银行柜员扮演着selector，办理银行业务的人扮演者网络事件，而取号机扮演者register的作用，银行柜台就是channel。整个过程中当没有人来办业务时，柜员是可以去做其他事情这就是非阻塞。</p>
+<p><strong>AIO:异步非阻塞IO</strong>  您点外卖后就去忙其他的事情了，等骑手把外卖送达后打电话告诉您外卖放外卖柜子里了；您闲下来的时候去取外卖。在这个例子里您扮演着处理网络事件线的程，外卖是网络事件；在这个过程中您可以在外卖还没有送来的时候做些其他的事情，等外卖送达后只是向您发送了一个外卖送达的事件。这就是异步和非阻塞。﻿</p>
+<p>通过网络服务端代码的编写来让我们直观感受一下他们的区别：</p>
+<p>BIOServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class Server &#123;  &#x2F;&#x2F;定义一个循环接收客户端的Socket连接请求。初始化一个线程池对象  private static ExecutorService poolHandler &#x3D; new ThreadPoolExecutor(5, 5,                120, TimeUnit.SECONDS, new ArrayBlockingQueue&lt;&gt;(10));    public static void main(String[] args) &#123;        try &#123;            &#x2F;&#x2F; 注册端口            ServerSocket ss &#x3D; new ServerSocket(9999);            while (true) &#123;                Socket socket &#x3D; ss.accept();                &#x2F;&#x2F; 把Socket封装成一个任务对象交给线程池处理                Runnable target &#x3D; new ServerRunnable(socket);                poolHandler.execute(target);            &#125;        &#125; catch (IOException e) &#123;            e.printStackTrace();        &#125;    &#125;</span><br><span class="line">    public static class ServerRunnable implements Runnable &#123;      private Socket socket;      public ServerRunnable(Socket socket) &#123;          this.socket &#x3D; socket;      &#125;      @Override      public void run() &#123;          &#x2F;&#x2F; 处理接收的客户端Socket通信需求          try &#123;              InputStream is &#x3D; socket.getInputStream();              BufferedReader br &#x3D; new BufferedReader(new InputStreamReader(is));              String msg;              while ((msg &#x3D; br.readLine()) !&#x3D; null) &#123;</span><br><span class="line">                &#x2F;&#x2F;处理数据的粘包拆包                &#x2F;&#x2F;对完整的数据包进行解码操作                &#x2F;&#x2F;得到客户端消息                &#x2F;&#x2F;触发各种统计类事件如心跳检测 信息统计                 &#x2F;&#x2F;处理客户端的消息                &#x2F;&#x2F;得到响应消息                &#x2F;&#x2F;对响应消息进行编码              &#125;          &#125; catch (IOException e) &#123;              e.printStackTrace();            &#x2F;&#x2F;处理网络断开事件            &#x2F;&#x2F;处理其他异常事件          &#125;      &#125;  &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>NIOServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public class Server &#123;    public static void main(String[] args) throws IOException &#123;        &#x2F;&#x2F;获取ServerSocketChannel        ServerSocketChannel ssChannel &#x3D; ServerSocketChannel.open();        &#x2F;&#x2F;设置非阻塞模式        ssChannel.configureBlocking(false);        &#x2F;&#x2F;绑定端口        ssChannel.bind(new InetSocketAddress(9999));        &#x2F;&#x2F;获取选择器        Selector selector &#x3D; Selector.open();        &#x2F;&#x2F;将ServerSocketChannel注册到选择器上，并且监听建立连接事件        ssChannel.register(selector, SelectionKey.OP_ACCEPT);        &#x2F;&#x2F; 使用Selector选择器轮询已经就绪好的事件        while (selector.select() &gt; 0) &#123;            &#x2F;&#x2F; 获取选择器就绪事件            Iterator&lt;SelectionKey&gt; it &#x3D; selector.selectedKeys().iterator();            &#x2F;&#x2F;遍历事件            while (it.hasNext()) &#123;                SelectionKey sk &#x3D; it.next();                &#x2F;&#x2F;判断事件类型                if (sk.isAcceptable()) &#123;                    &#x2F;&#x2F; 获取客户端channel                    SocketChannel channel &#x3D; ssChannel.accept();                    &#x2F;&#x2F;切换非阻塞模式                    channel.configureBlocking(false);                    &#x2F;&#x2F;将该channel注册到选择器上                    channel.register(selector, SelectionKey.OP_READ);                &#125; else if (sk.isReadable()) &#123;                    &#x2F;&#x2F;获取channel                    SocketChannel sChannel &#x3D; (SocketChannel) sk.channel();                    &#x2F;&#x2F;读取网络数据                    ByteBuffer buf &#x3D; ByteBuffer.allocate(1024);                    int len &#x3D; 0;                    while ((len &#x3D; sChannel.read(buf)) &gt; 0) &#123;                        &#x2F;&#x2F;处理数据的粘包拆包                        &#x2F;&#x2F;对完整的数据包进行解码操作                        &#x2F;&#x2F;得到客户端消息                        &#x2F;&#x2F;触发各种统计类事件如心跳检测 信息统计                     &#125;                &#125;else if(sk.isWritable())&#123;                        &#x2F;&#x2F;得到响应消息                        &#x2F;&#x2F;对响应消息进行编码                &#125;                &#x2F;&#x2F; 15.取消选择键SelectionKey                it.remove();            &#125;        &#125;    &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用Netty进行网络编程时代码是这样的：</p>
+<p>NettyServer</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public class NettyServer &#123;    public static void main(String[] args) throws Exception&#123;        &#x2F;&#x2F;设置接受网络连接线程池        NioEventLoopGroup bossGroup &#x3D; new NioEventLoopGroup(1);        &#x2F;&#x2F;设置处理网络除连接外所有事件线程的线程池        NioEventLoopGroup workerGroup &#x3D; new NioEventLoopGroup();        ServerBootstrap serverBootstrap &#x3D; new ServerBootstrap();</span><br><span class="line">        serverBootstrap.group(bossGroup,workerGroup)                .channel(NioServerSocketChannel.class)&#x2F;&#x2F;设置Channel类型                .option(ChannelOption.SO_BACKLOG,1024)                .handler(new ChannelInitializer&lt;ServerSocketChannel&gt;() &#123;                    @Override                    protected void initChannel(ServerSocketChannel ch) throws Exception &#123;                      &#x2F;&#x2F;设置处理网络连接的Handler                        ch.pipeline().addLast(&quot;serverBindHandler&quot;,                         new NettyBindHandler(NettyTcpServer.this,serverStreamLifecycleListeners));                    &#125;                &#125;)                .childHandler(new ChannelInitializer&lt;NioSocketChannel&gt;() &#123;                    @Override                    protected void initChannel(NioSocketChannel ch) throws Exception &#123;                        ch.pipeline()                                .addLast(&quot;protocolHandler&quot;, new NettyProtocolHandler())&#x2F;&#x2F;设置编解码器                                .addLast(&quot;serverIdleHandler&quot;,                                        new IdleStateHandler(0, 0, serverIdleTimeInSeconds))&#x2F;&#x2F;设置心跳检测                                .addLast(&quot;serverHandler&quot;,new NettyServerStreamHandler(NettyTcpServer.this, false,                                        serverStreamLifecycleListeners,                                          serverStreamMessageListeners));&#x2F;&#x2F;设置业务处理逻辑                    &#125;                &#125;);</span><br><span class="line">        ChannelFuture channelFuture &#x3D; serverBootstrap.bind(9000).sync();        channelFuture.channel().closeFuture().sync();    &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>BIO和NIO编程在网络事件发生后都需要进行处理数据的粘包拆包、对完整的数据包进行解码、触发各种统计类事件、对响应消息进行编码、监听各种网络异常、需要对底层网络和通信协议有一定的了解。﻿</p>
+<p>用Netty编程时只需要设置Handler就能快速的进行业务开发而不用关心数据的读取及网络事件的分发处理.让开发者从底层网络通信中解放出来。</p>
+<p>从这些对比中我们可以看出Netty开发网络程序要求低，使用者无需太多关心和业务无关的信息。</p>
+<p><strong>定制能力强</strong></p>
+<p><strong>通过ChannelHandler灵活扩展</strong></p>
+<p>多数情况下我们自定义的Handler会有多个，那么他们是怎么进行协调合作的呢？接下一起探索handler之间的协调合作。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSPBDsriaSyCRnSzWNxvdXt7mnxoSZvspbP5mBLq87byzGa2F5vN9IZyQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">﻿﻿</p>
+<p>通过上图我们可以知道我们定义的handler在Netty里是通过双向链表进行关联的。﻿</p>
+<p>介绍一下读网络事件发生后Handler事件流：</p>
+<ul>
+<li>假如每个handler都会把读事件向下一个InboundHandler类型的节点进行传递，此时的调用链路为head-&gt;A-&gt;B-&gt;C-&gt;tail；</li>
+<li>假如B业务handler处理数据后不把读事件继续向下传递,此时B可以在自己内部选择不向下一个节点传递读事件.此时调用链路变为head-&gt;A-&gt;B；</li>
+</ul>
+<p>当服务端有数据需要写入时又会发生什么呢？</p>
+<ul>
+<li>假如每个handler都会把读事件向下一个OutboundHandler类型的节点进行传递,当C业务handler发送响应数据时此时调用链路为C-&gt;B-&gt;head；</li>
+<li>假如业务B是参数校验的的headler,当校验失败就响应客户端.此时调用的链路为B-&gt;head﻿；</li>
+</ul>
+<p>我们可以看出Netty通过控制InboundHandler节点的调用来决定读事件响应链路；通过控制OutboundHandler节点的调用来决定写事件调用链路。</p>
+<p><strong>Handler强大</strong></p>
+<p>Netty通过内置多种Handler让你在不了解底层网络、通信协议、编解码的背景下也可进行网络应用程序。它都内置有哪些Handler呢？</p>
+<h3 id="编解码"><a href="#编解码" class="headerlink" title="编解码"></a>编解码</h3><p>当你通过Netty发送或者接受一个消息的时候，就将会发生一次数据转换。入站消息会被解码，从字节转换为另一种格式（比如java对象）。如果是出站消息，它会被编码成字节。</p>
+<h4 id="TCP粘包拆包"><a href="#TCP粘包拆包" class="headerlink" title="TCP粘包拆包"></a><strong>TCP粘包拆包</strong></h4><p>大多数基于Netty通信底层都会使用TCP进行的通信。TCP在发送数据流的时一定会把整条数据流单独发送吗？答案是否定的。TCP在发送数据包的时会存在拆包和粘包问题。什么是TCP的粘包和拆包呢？</p>
+<p><strong>TCP拆包:</strong> 产生的原因就是消息体太大了,一个数据包里只能发送消息体的一部分；</p>
+<p><strong>TCP粘包:</strong> 产生的原因就是有多条消息体需要发送,一个数据包可以存放多个消息体；</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS4WVoHfAiaHuiaKicXmq9lhADmwAek4OXvYd4H5X5eqZvRXicCZgiadKUic9Q/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>由于篇幅有限关于TCP拆包和粘包只是大致说明了一些。</p>
+<h4 id="编解码Handler"><a href="#编解码Handler" class="headerlink" title="编解码Handler"></a><strong>编解码Handler</strong></h4><p>Netty提供了三种解码器来解决TCP的拆包和粘包,他们分别是：</p>
+<ul>
+<li>LineBasedFrameDecoder(回车换行分包);</li>
+<li>DelimiterBasedFrameDecoder(特殊分隔符分包);</li>
+<li>FixedLengthFrameDecoder(固定长度报文来分包)</li>
+</ul>
+<p>此外Netty还提供了N：</p>
+<ul>
+<li>编解码字符串的StringEncoder和StringDecoder;</li>
+<li>用于处理HTTP协议编解码HttpObjectDecoder和HttpObjectEncoder;</li>
+<li>用于处理protobuf编解码ProtobufVarint32FrameDecoder和ProtobufDecoder；</li>
+</ul>
+<p>除了以上介绍的编解码Netty内部还有很多内置编解码器,当您使用Netty开发时如果有用到编解码的时候可以首先查询一下Netty内部是否有实现。</p>
+<h3 id="支持多种主流协议"><a href="#支持多种主流协议" class="headerlink" title="支持多种主流协议"></a>支持多种主流协议</h3><p>从Netty源码包上可以看出Netty基本上覆盖了主流协议的编解码实现，如HTTP、Protobuf、WebSocket、二进制等主流协议。</p>
+<h4 id=""><a href="#" class="headerlink" title="﻿﻿"></a>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS0AOkj10sEic1TOgOU3Nz3OibVExRDnHl1Gc5PqH7Qic7s4qukyA1y1ibFg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></h4><h3 id="idle-心跳检测"><a href="#idle-心跳检测" class="headerlink" title="idle(心跳检测)"></a>idle(心跳检测)</h3><p>当需要监听网络连接是否长时间没有数据交换（如发送心跳包、关闭连接等）就可以使用内置的IdleStateHandler。</p>
+<p>IdleStateHandler接收三个参数：</p>
+<ul>
+<li>readerIdleTimeSeconds: 读取空闲时间，即从上次读取数据到现在的秒数。</li>
+<li>writerIdleTimeSeconds: 写入空闲时间，即从上次写入数据到现在的秒数。</li>
+<li>allIdleTimeSeconds: 读写都空闲的时间，即从上次读写数据到现在的秒数。</li>
+</ul>
+<p>当达到设定的空闲时间阈值时，IdleStateHandler会触发对应的IdleState事件，这些事件包括READ_IDLE、WRITE_IDLE和ALL_IDLE。你可以通过实现ChannelInboundHandler的channelIdle方法来监听这些事件，并在事件发生时执行相应的操作。</p>
+<p><strong>高性能</strong></p>
+<h3 id="一次网络通信都发生了什么"><a href="#一次网络通信都发生了什么" class="headerlink" title="一次网络通信都发生了什么"></a>一次网络通信都发生了什么</h3><p>1.客户端确定需要发送的数据；</p>
+<p>2.数据从程序到系统然后通过网卡发送；</p>
+<p>3.服务端收到读事件后把数据从系统读取到应用中；</p>
+<p>4.应用处理客户端信息；</p>
+<h3 id="Netty怎么提高通信性能"><a href="#Netty怎么提高通信性能" class="headerlink" title="Netty怎么提高通信性能"></a>Netty怎么提高通信性能</h3><ul>
+<li>数据在系统中的存储Netty使用<strong>ByteBuf</strong>内存池来减少申请内存耗时；</li>
+<li>数据在用户态到内核态的传输Netty采用了<strong>内存零拷贝</strong>（减少用户态到内核态的两次拷贝）来<strong>减少传输耗时；</strong></li>
+</ul>
+<p><strong><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSQbtEAPTNMt5GICMyCvgGicuicHXZB4Htm75JHFaKs5xNgWE6JolgIGrQ/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></strong></p>
+<ul>
+<li>﻿﻿数据在网络中的传输  数据传输时间取决于数据传输速度、数据包数量。对于传输速度无法优化，Netty内置了许多<strong>编码器</strong>，可以选择对数据压缩比较好的解码器来减少数据包的数量，以此来减少耗时；</li>
+<li>服务端对网络事件的处理Netty采用主次<strong>Reactor多线程模型来加快对网络事件的处理</strong>，传统的BIO不能支持太多网络连接以及对系统资源使用率比较低。传统的NIO当网络连接数超多时网络事件得不到快速响应,造成大量客户端进行重试。</li>
+</ul>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSzWEibh5E65kPBoibdTKprwakA6RRX2DVyVZHqkMK1vFLC7pQHPeNzN1g/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><strong>reactor单线程模型：</strong> 有一个线程负责处理所有的网络事件。</p>
+<p>﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS1cl44RlPrA4W4061kHgS4FYgfJ3dHnnIjJOt1lHthlnUic4Wjz8rlow/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p><strong>Reactor多线程模型：</strong>有一个线程单独处理建立网络事件，另外一个线程负责处理其他的网络事件。</p>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dSZFCLWyVgA4OVRlBGy6BuyQM6ON49RQNWdH8bQ1FEr7icFnseLYOqiabg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>主次<strong>Reactor多线程模型：</strong>有一个线程单独处理建立网络事件,把建立网络连接放到线程池中的某一个线程中，这个线程负责大量网络连接的其他请求.</p>
+<p>从reactor线程模型上我们可以看出主次Reactor多线程模型可以快速对大量的网络事件进行响应,因此也会缩短网络事件处理时间.</p>
+<ul>
+<li>客户端消息处理上，Netty采用了无锁串行化设计思想结合volatile的大量使用;通过读写锁提升并发性能来大大缩短了消息处理时间。</li>
+</ul>
+<p>我们可以看到Netty针对网络传输的各个节点都做到了尽可能的缩短时间，这也是Netty高性能的原因所在。</p>
+<p>Netty运行原理</p>
+<p>通过以上对Netty是什么，优势有哪些已经有了初步了解。那么它内部是怎么工作的呢？接下来让我们一起看一下它内部的原理。</p>
+<p><strong>整体结构</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS2zydhafxsdJySlGIC2LncGBcxCz9ibliaso4lIrr8KRmwzZJBjAuiaic4w/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>上面这张图就是在官网首页的架构图，我们从上到下分析一下。</p>
+<ul>
+<li><strong>Core</strong>核心层：核心层里Netty最精华的部分，它提供了底层网络通信的通用抽象和实现，包括事件模型、通用API、支持零拷贝的ByteBuf 等；</li>
+<li><strong>Protocol Support 协议支持层</strong>：协议支持层基本上覆盖了主流协议的编解码实现，Netty 丰富的协议支持降低了用户的开发成本；</li>
+<li><strong>Transport Service 传输服务层：</strong>传输服务层提供了网络传输能力的定义和实现方法。它支持 Socket、HTTP 隧道等传输方式。Netty 对 TCP、UDP 等数据传输做了抽象和封装，让开发者可以更聚焦在业务逻辑实现上，而不必关系底层数据传输的细节；</li>
+</ul>
+<p>以上可看出Netty的功能、协议、传输方式都比较全，比较强大。</p>
+<p><strong>逻辑架构</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS72UajWyyFsVEePGL9BWFY9otrysdlXUNbhaRUJFF3mb3CCVfVgHgWA/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>从图中可以Netty通过网络通信层、事件调度层、服务编排层协调合作来运行程序</p>
+<h3 id="网络通信层"><a href="#网络通信层" class="headerlink" title="网络通信层"></a>网络通信层</h3><p>网络通信层的职责是执行网络 I/O 的操作。当网络数据读取到内核缓冲区后，会触发各种网络事件。这些网络事件会分发给事件调度层进行处理。接下来分别看一下Netty服务端和客户端在网络通信层是怎么运行的：</p>
+<ul>
+<li>Netty服务端：程序启动时会生成一个ServerBootstrap对象，该对象会生成一个NioServerSocketChannel来监听某一个端口的建立网络连接的事件，当网络连接建立后会监听网络连接的各种事件并通知到事件调度层。</li>
+<li>﻿Netty客户端：程序启动的时会生成一个Bootstrap对象，该对象会生成一个NioSocketChannel来与服务端建立网络连接的事件，当网络连接建立后会监听网络连接的各种事件并通知到事件调度层。</li>
+</ul>
+<h3 id="事件调度层"><a href="#事件调度层" class="headerlink" title="事件调度层"></a>事件调度层</h3><p>事件调度层的职责是通过 Reactor 线程模型对各类事件进行聚合处理，通过 Selector 主循环线程集成多种事件(I/O 事件,信号事件,定时事件等)，实际的业务处理逻辑是交由服务编排层中相关的 Handler 完成。事件调度层主要由EventLoopGroup和EventLoop构成。﻿</p>
+<ul>
+<li>EventLoop 负责处理 I/O 事件和调度任务。每一个NioEventLoop内部都有唯一一个Selector，通过这个Selector可以对注册的channel进行网络事件的读取；NioEventLoop 还有一个内部的任务队列，可以用来提交 Runnable 任务。这些任务会在 NioEventLoop 的线程上下文中执行，确保了任务的顺序执行。</li>
+<li>EventLoopGroup  本质是一个线程池，负责管理EventLoop。其主要作用有从线程池挑选一个EventLoop进行channe的注册或者提交一个任务、关闭不再使用的 Channel、释放 Selector 和其他相关资源确保应用程序的干净退出。</li>
+</ul>
+<h3 id="服务编排层"><a href="#服务编排层" class="headerlink" title="服务编排层"></a>服务编排层</h3><p>服务编排层的职责是通过组装各类handler来实现网络数据流的处理。它是 Netty 的核心处理链，用以实现网络事件的动态编排和有序传播。</p>
+<p>服务编排层的核心组件包括 <strong>ChannelHandler、ChannelHandlerContext、ChannelPipeline</strong>。他们之间的关系如下图所示：</p>
+<p>﻿﻿<img src="https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naIrkrXjImG2icPTKeiangL9dS3EkyiaKtmgjichNyttyDSG1OtHFibic2DKmKI1ibfP1FgJtGiba9cXzxibdgg/640?wx_fmt=png&from=appmsg&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<ul>
+<li><p>﻿<strong>ChannelHandler</strong>主要分为两类，InboundHandler和OutboundHandler</p>
+</li>
+<li><p>InboundHandler用于处理从网络流入(inbound)的数据和事件。帮助我们处理接收的数据、连接建立、断开等事件。核心方法有channelActive(网络连接建立成功时会调用)、channelInactive(网络连接断连时调用)、channelRead(接受到数据时调用)、exceptionCaught(如果在处理事件或数据时发生异常，该方法会被调用。可以在这里捕获并处理异常，防止应用程序崩溃。)</p>
+</li>
+<li><p>OutboundHandler用于处理从应用程序流向网络的出站(outbound)操作,如写入数据,发起连接,关闭连接等核心方法有。</p>
+<p>write(写入数据到channel时调用),flush(将缓冲区所有未写入数据立即发送出去),connect(尝试建立网络连接时调用)。</p>
+</li>
+<li><p>﻿<strong>ChannelHandlerContext</strong>是handler与Netty内部机制交互的主要方式，它使得 handler 可以在不直接访问其他handler的情况下，协同处理I/O事件和数据。同时也是每个ChannelHandler在处理事件时的上下文环境，可以获取到Pipeline、Channel、Allocator等对象。</p>
+</li>
+<li><p>﻿<strong>ChannelPipeline  Netty</strong>中的关键组件，是一个处理网络I/O事件和数据的有序链表。ChannelPipeline负责将入站（inbound）和出站（outbound）事件分发给链中的各个ChannelHandler，实现了事件驱动的网络编程模型。每个ChannelHandler都有一个唯一的ChannelHandlerContext，用于与ChannelPipeline交互。</p>
+</li>
+</ul>
+<p><strong>运行流程</strong></p>
+<p>我们已经从宏观上了解了Netty，接下来我们从服务端的视角简要的看一下Netty整个的运行流程。</p>
+<p>1.服务端启动的时把ServerSocketChannel注册到boss EventLoopGroup中某一个EventLoop上，暂时把这个EventLoop叫做server EventLoop；</p>
+<p>2.当 serverEventLoop中监听到有建立网络连接的事件后会把底层的SocketChannel和serverSocketChannel封装成为NioSocketChannel；</p>
+<p>3.开始把自定义的ChannelHandler加载到NioSocketChannel 里的pipeline中，然后把该NioSocketChannel注册到worker EventLoopGroup中某一个EventLoop上，暂时把这个EventLoop叫做worker  EventLoop；</p>
+<p>4.worker  EventLoop开始监听NioSocketChannel上所有网络事件；</p>
+<p>5.当有读事件后就会调用pipeline中第一个InboundHandler的channelRead方法进行处理；</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>Nettry入门：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/52iS3RxIO_to29IG_JoOpw">https://mp.weixin.qq.com/s/52iS3RxIO_to29IG_JoOpw</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-starter-05-tomcat/" rel="prev" title="springboot-starter-05-tomcat">
+                  <i class="fa fa-chevron-left"></i> springboot-starter-05-tomcat
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty/Netty-01-%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6/" rel="next" title="Netty-01-心跳机制">
+                  Netty-01-心跳机制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

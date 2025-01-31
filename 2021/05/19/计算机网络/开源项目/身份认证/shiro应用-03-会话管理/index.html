@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="所谓会话，即用户访问应用时保持的连接关系，在多次交互中应用能够识别出当前访问的用户是谁，且可以在多次交互中保存一些数据。如访问一些网站时登录成功后，网站可以记住用户，且在退出之前都可以识别当前用户是谁。 Shiro在开启Web功能的时候默认的会话管理器是DefaultWebSessionManager，这种管理器是针对cookie进行存储的，将sessionId存储在cookie中，但是现在的主流">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shiro应用-03-会话管理">
+<meta property="og:url" content="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-03-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="所谓会话，即用户访问应用时保持的连接关系，在多次交互中应用能够识别出当前访问的用户是谁，且可以在多次交互中保存一些数据。如访问一些网站时登录成功后，网站可以记住用户，且在退出之前都可以识别当前用户是谁。 Shiro在开启Web功能的时候默认的会话管理器是DefaultWebSessionManager，这种管理器是针对cookie进行存储的，将sessionId存储在cookie中，但是现在的主流">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-05-19T09:16:08.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.288Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-03-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shiro应用-03-会话管理 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89SessionMananger"><span class="nav-number">1.</span> <span class="nav-text">自定义SessionMananger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89SessionDao"><span class="nav-number">2.</span> <span class="nav-text">自定义SessionDao</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89SessionId%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5"><span class="nav-number">3.</span> <span class="nav-text">自定义SessionId生成策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89Session%E7%9B%91%E5%90%AC%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">自定义Session监听器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%88%90%E4%B8%8A%E8%BF%B0%E9%85%8D%E7%BD%AE"><span class="nav-number">5.</span> <span class="nav-text">完成上述配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%9A%E8%AF%9D%E9%AA%8C%E8%AF%81"><span class="nav-number">7.</span> <span class="nav-text">会话验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%9A%84Session%E6%98%AF%E5%A4%B1%E6%95%88%E7%9A%84"><span class="nav-number">7.1.</span> <span class="nav-text">如何的Session是失效的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%95%E6%97%B6%E6%98%AF%E5%A4%B1%E6%95%88%E7%9A%84"><span class="nav-number">7.2.</span> <span class="nav-text">何时是失效的</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-03-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shiro应用-03-会话管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-19 17:16:08" itemprop="dateCreated datePublished" datetime="2021-05-19T17:16:08+08:00">2021-05-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>所谓会话，即用户访问应用时保持的连接关系，在多次交互中应用能够识别出当前访问的用户是谁，且可以在多次交互中保存一些数据。如访问一些网站时登录成功后，网站可以记住用户，且在退出之前都可以识别当前用户是谁。</p>
+<p>Shiro在开启Web功能的时候默认的会话管理器是DefaultWebSessionManager，这种管理器是针对cookie进行存储的，将sessionId存储在cookie中，但是现在的主流方向是前后端分离，我们不能再依赖Cookie，因此我们必须自定义的会话管理器，实现跨JVM，前后端分离。</p>
+<h2 id="自定义SessionMananger"><a href="#自定义SessionMananger" class="headerlink" title="自定义SessionMananger"></a><strong>自定义SessionMananger</strong></h2><ul>
+<li>在原有的DefaultWebSessionManager进行扩展，否则从头实现将会要写大量代码。默认的Web的会话管理器是从cookie中获取SessionId，我们只需要重写其中的方法即可。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义的会话管理器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSessionManager</span> <span class="keyword">extends</span> <span class="title">DefaultWebSessionManager</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 前后端分离不存在cookie，因此需要重写getSessionId的逻辑，从请求参数中获取</span></span><br><span class="line"><span class="comment">     * 此处的逻辑：在登录成功之后会将sessionId作为一个token返回，下次请求的时候直接带着token即可</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Serializable <span class="title">getSessionId</span><span class="params">(ServletRequest request, ServletResponse response)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//获取上传的token,这里的token就是sessionId</span></span><br><span class="line">        <span class="keyword">return</span> request.getParameter(<span class="string">&quot;token&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写该方法，在SessionManager中只要涉及到Session的操作都会获取Session，获取Session主要是从缓存中获取，父类的该方法执行逻辑如下：</span></span><br><span class="line"><span class="comment">     *  1、先从RedisCache中获取，调用get方法</span></span><br><span class="line"><span class="comment">     *  2、如果RedisCache中不存在，在从SessionDao中获取，调用get方法</span></span><br><span class="line"><span class="comment">     *  优化：我们只需要从SessionDao中获取即可</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> sessionKey Session的Key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Session <span class="title">retrieveSession</span><span class="params">(SessionKey sessionKey)</span> <span class="keyword">throws</span> UnknownSessionException </span>&#123;</span><br><span class="line">        <span class="comment">//获取SessionId</span></span><br><span class="line">        Serializable sessionId = getSessionId(sessionKey);</span><br><span class="line">        <span class="keyword">if</span> (sessionId == <span class="keyword">null</span>) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Unable to resolve session ID from SessionKey [&#123;&#125;].  Returning null to indicate a &quot;</span> +</span><br><span class="line">                    <span class="string">&quot;session could not be found.&quot;</span>, sessionKey);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//直接调用SessionDao中的get方法获取</span></span><br><span class="line">        Session session = ((RedisSessionDao) sessionDAO).doReadSession(sessionId);</span><br><span class="line">        <span class="keyword">if</span> (session == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">//session ID was provided, meaning one is expected to be found, but we couldn&#x27;t find one:</span></span><br><span class="line">            String msg = <span class="string">&quot;Could not find session with ID [&quot;</span> + sessionId + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnknownSessionException(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> session;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 该方法是作用是当访问指定的uri的时候会更新Session中的执行时间，用来动态的延长失效时间。</span></span><br><span class="line"><span class="comment">     * 在父类的实现方法会直接调用SessionDao中的更新方法更新缓存中的Session</span></span><br><span class="line"><span class="comment">     * 此处并没有其他的逻辑，后续可以补充</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">touch</span><span class="params">(SessionKey key)</span> <span class="keyword">throws</span> InvalidSessionException </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.touch(key);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="自定义SessionDao"><a href="#自定义SessionDao" class="headerlink" title="自定义SessionDao"></a><strong>自定义SessionDao</strong></h2><ul>
+<li>SessionDao的作用是Session持久化的手段，默认的SessionDao是缓存在内存中的，此处使用Redis作为缓存的工具，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义RedisSessionDao，继承CachingSessionDAO</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSessionDao</span> <span class="keyword">extends</span> <span class="title">CachingSessionDAO</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 更新session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doUpdate</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doUpdate方法&quot;</span>);</span><br><span class="line">        redisTemplate.opsForValue().set(session.getId(), session);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDelete</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doDelete方法&quot;</span>);</span><br><span class="line">        redisTemplate.delete(session.getId());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建一个Session，添加到缓存中</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session Session信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 创建的SessionId</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Serializable <span class="title">doCreate</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doCreate方法&quot;</span>);</span><br><span class="line">        Serializable sessionId = generateSessionId(session);</span><br><span class="line">        assignSessionId(session, sessionId);</span><br><span class="line">        redisTemplate.opsForValue().set(session.getId(), session);</span><br><span class="line">        <span class="keyword">return</span> sessionId;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Session <span class="title">doReadSession</span><span class="params">(Serializable sessionId)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doReadSession方法&quot;</span>);</span><br><span class="line">       <span class="keyword">return</span> (Session) redisTemplate.opsForValue().get(sessionId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="自定义SessionId生成策略"><a href="#自定义SessionId生成策略" class="headerlink" title="自定义SessionId生成策略"></a><strong>自定义SessionId生成策略</strong></h2><ul>
+<li>默认的Shiro的生成策略是JavaUuidSessionIdGenerator，此处也可以自定义自己的生成策略，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义的SessionId的生成策略</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSessionIdGenerator</span> <span class="keyword">implements</span> <span class="title">SessionIdGenerator</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Serializable <span class="title">generateId</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> UUID.randomUUID().toString().replaceAll(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;&quot;</span>).toUpperCase();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="自定义Session监听器"><a href="#自定义Session监听器" class="headerlink" title="自定义Session监听器"></a><strong>自定义Session监听器</strong></h2><ul>
+<li>Session监听器能够监听Session的生命周期，包括开始、过期、失效（停止），如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义Session监听器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSessionListener</span> <span class="keyword">implements</span> <span class="title">SessionListener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStart</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;开始&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Session无效【停止了，stopTime！=null】</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStop</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;session失效&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onExpiration</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;超时&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="完成上述配置"><a href="#完成上述配置" class="headerlink" title="完成上述配置"></a><strong>完成上述配置</strong></h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置SessionDao，使用自定义的Redis缓存</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SessionDAO <span class="title">sessionDAO</span><span class="params">()</span></span>&#123;</span><br><span class="line">        RedisSessionDao sessionDao = <span class="keyword">new</span> RedisSessionDao();</span><br><span class="line">        <span class="comment">//设置自定义的Id生成策略</span></span><br><span class="line">        sessionDao.setSessionIdGenerator(<span class="keyword">new</span> RedisSessionIdGenerator());</span><br><span class="line">        <span class="keyword">return</span> sessionDao;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置会话监听器</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SessionListener <span class="title">sessionListener</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RedisSessionListener();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置会话管理器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SessionManager <span class="title">sessionManager</span><span class="params">()</span></span>&#123;</span><br><span class="line">        DefaultWebSessionManager sessionManager = <span class="keyword">new</span> RedisSessionManager();</span><br><span class="line">        <span class="comment">//设置session的过期时间</span></span><br><span class="line">        sessionManager.setGlobalSessionTimeout(<span class="number">60000</span>);</span><br><span class="line">        <span class="comment">//设置SessionDao</span></span><br><span class="line">        sessionManager.setSessionDAO(sessionDAO());</span><br><span class="line">        <span class="comment">//设置SessionListener</span></span><br><span class="line">        sessionManager.setSessionListeners(Lists.newArrayList(sessionListener()));</span><br><span class="line">        <span class="keyword">return</span> sessionManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 配置安全管理器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SecurityManager <span class="title">securityManager</span><span class="params">()</span></span>&#123;</span><br><span class="line">        DefaultWebSecurityManager securityManager = <span class="keyword">new</span> DefaultWebSecurityManager(userRealm());</span><br><span class="line">        <span class="comment">//设置缓存管理器</span></span><br><span class="line">        securityManager.setCacheManager(cacheManager());</span><br><span class="line">        <span class="comment">//设置会话管理器</span></span><br><span class="line">        securityManager.setSessionManager(sessionManager());</span><br><span class="line">        <span class="keyword">return</span> securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="优化"><a href="#优化" class="headerlink" title="优化"></a><strong>优化</strong></h2><ul>
+<li>在源码中可以看到<code>AbstractSessionDAO</code>中的增删改查方法的执行逻辑使用的双层缓存的，还设计到查询CacheManager中的缓存，但是我们的SessionDao既然是实现了Redis的缓存，那么是没必要查询两次的，因此需要重写其中的方法，此时我们自己需要写一个抽象类覆盖其中的增删改查方法即可，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * RedisSessionDao的抽象类，重写其中的增删改查方法，原因如下：</span></span><br><span class="line"><span class="comment"> *  1、AbstractSessionDAO中的默认方法是写查询CacheManager中的缓存，既然SessionDao实现了Redis的缓存</span></span><br><span class="line"><span class="comment"> *      那么就不需要重复查询两次，因此重写了方法，直接使用RedisSessionDao查询即可。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractRedisSessionDao</span> <span class="keyword">extends</span> <span class="title">AbstractSessionDAO</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写creat方法，直接执行sessionDao的方法，不再执行cacheManager</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Serializable <span class="title">create</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        Serializable sessionId = doCreate(session);</span><br><span class="line">        <span class="keyword">if</span> (sessionId == <span class="keyword">null</span>) &#123;</span><br><span class="line">            String msg = <span class="string">&quot;sessionId returned from doCreate implementation is null.  Please verify the implementation.&quot;</span>;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sessionId;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写删除操作</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">delete</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        doDelete(session);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写update方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> UnknownSessionException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">(Session session)</span> <span class="keyword">throws</span> UnknownSessionException </span>&#123;</span><br><span class="line">        doUpdate(session);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重写查找方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> sessionId</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> UnknownSessionException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Session <span class="title">readSession</span><span class="params">(Serializable sessionId)</span> <span class="keyword">throws</span> UnknownSessionException </span>&#123;</span><br><span class="line">        Session s = doReadSession(sessionId);</span><br><span class="line">        <span class="keyword">if</span> (s == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnknownSessionException(<span class="string">&quot;There is no session with id [&quot;</span> + sessionId + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> s;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doDelete</span><span class="params">(Session session)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doUpdate</span><span class="params">(Session session)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>此时的上面的RedisSessionDao直接继承我们自定义的抽象类即可，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义RedisSessionDao，继承AbstractRedisSessionDao，达到只查一层缓存</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSessionDao</span> <span class="keyword">extends</span> <span class="title">AbstractRedisSessionDao</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String HASH_NAME=<span class="string">&quot;shiro_user&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 更新session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doUpdate</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doUpdate方法&quot;</span>);</span><br><span class="line">        redisTemplate.opsForHash().put(HASH_NAME, session.getId(), session);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除session</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDelete</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doDelete方法&quot;</span>);</span><br><span class="line">        redisTemplate.opsForHash().delete(HASH_NAME, session.getId());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建一个Session，添加到缓存中</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> session Session信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 创建的SessionId</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Serializable <span class="title">doCreate</span><span class="params">(Session session)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doCreate方法&quot;</span>);</span><br><span class="line">        Serializable sessionId = generateSessionId(session);</span><br><span class="line">        assignSessionId(session, sessionId);</span><br><span class="line">        redisTemplate.opsForHash().put(HASH_NAME, session.getId(),session);</span><br><span class="line">        <span class="keyword">return</span> sessionId;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Session <span class="title">doReadSession</span><span class="params">(Serializable sessionId)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;执行redisdao的doReadSession方法&quot;</span>);</span><br><span class="line">       <span class="keyword">return</span> (Session) redisTemplate.opsForHash().get(HASH_NAME,sessionId);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取所有的Session</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Collection&lt;Session&gt; <span class="title">getActiveSessions</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List values = redisTemplate.opsForHash().values(HASH_NAME);</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isNotEmpty(values))&#123;</span><br><span class="line">            <span class="keyword">return</span> values;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> Collections.emptySet();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="会话验证"><a href="#会话验证" class="headerlink" title="会话验证"></a>会话验证</h2><ul>
+<li><p>Shiro默认是在当前用户访问页面的时候检查Session是否停止或者过期，如果过期和停止了会调用的SessionDao中的相关方法删除缓存，但是如果这是在用户名操作的情况下，如果用户一直未操作，那么Session已经失效了，但是缓存中并没有删除，这样一来将会有大量无效的Session堆积，因此我们必须定时清理失效的Session。</p>
+</li>
+<li><p>清理会话，有如下两种方法：</p>
+</li>
+<li><ul>
+<li>自己写一个定时器，每隔半小时或者几分钟清除清除缓存</li>
+<li>自定义SessionValidationScheduler</li>
+<li>使用已经实现的ExecutorServiceSessionValidationScheduler</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>在Shiro中默认会开启ExecutorServiceSessionValidationScheduler，执行时间是一个小时，但是如果想要使用定时器定时清除的话，那么需要关闭默认的清除器，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//禁用Session清除器，使用定时器清除</span></span><br><span class="line">sessionManager.setSessionValidationSchedulerEnabled(<span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="如何的Session是失效的"><a href="#如何的Session是失效的" class="headerlink" title="如何的Session是失效的"></a><strong>如何的Session是失效的</strong></h3><ul>
+<li><p>Session是如何保活的？</p>
+</li>
+<li><ul>
+<li><p>在<code>org.apache.shiro.web.servlet.AbstractShiroFilter#doFilterInternal</code>中的一个<code>updateSessionLastAccessTime(request, response);</code>方法用来更新Session的最后执行时间为当前时间，最终调用的就是<code>org.apache.shiro.session.mgt.SimpleSession#touch</code>。</p>
+</li>
+<li><p>在每次请求验证Session的时候实际调用的是<code>org.apache.shiro.session.mgt.AbstractValidatingSessionManager#doValidate</code>方法，在其中真正调用的是<code>org.apache.shiro.session.mgt.SimpleSession#validate</code>来验证是否过期或者停止</p>
+</li>
+<li><ul>
+<li>核心逻辑就是验证当前的时间和最后执行时间的差值是否在设置的过期时间的范围内</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="何时是失效的"><a href="#何时是失效的" class="headerlink" title="何时是失效的"></a><strong>何时是失效的</strong></h3><ul>
+<li><p>Session失效目前通过读源码总结出如下三点：</p>
+</li>
+<li><ul>
+<li><p>isValid判断，这个会在访问请求的时候shiro会自动验证，并且设置进去</p>
+</li>
+<li><p>用户长期不请求，此时的isValid并不能验证出来，此时需要比较最后执行的时间和开始时间比较</p>
+</li>
+<li><p>没有登录就访问的也会在redis中生成一个Session，但是此时的Session中是没有两个属性的，以下的两个属性只有在认证成功之后才会设置查到Session中</p>
+</li>
+<li><ul>
+<li>org.apache.shiro.subject.support.DefaultSubjectContext#PRINCIPALS_SESSION_KEY</li>
+<li>org.apache.shiro.subject.support.DefaultSubjectContext#AUTHENTICATED_SESSION_KEY</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>通过上面的分析，此时就能写出从缓存中删除失效Session的代码，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * session过期有三种可能，如下：</span></span><br><span class="line"><span class="comment">     *  1、isValid判断，这个会在访问请求的时候shiro会自动验证，并且设置进去</span></span><br><span class="line"><span class="comment">     *  2、用户长期不请求，此时的isValid并不能验证出来，此时需要比较最后执行的时间和开始时间</span></span><br><span class="line"><span class="comment">     *  3、没有登录就访问的也会在redis中生成一个Session，但是此时的Session中是没有两个属性的</span></span><br><span class="line"><span class="comment">     *      1、org.apache.shiro.subject.support.DefaultSubjectContext#PRINCIPALS_SESSION_KEY</span></span><br><span class="line"><span class="comment">     *      2、org.apache.shiro.subject.support.DefaultSubjectContext#AUTHENTICATED_SESSION_KEY</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">clearExpireSession</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//获取所有的Session</span></span><br><span class="line">        Collection&lt;Session&gt; sessions = redisSessionDao.getActiveSessions();</span><br><span class="line">        sessions.forEach(s-&gt;&#123;</span><br><span class="line">            SimpleSession session= (SimpleSession) s;</span><br><span class="line">            <span class="comment">//第一种可能</span></span><br><span class="line">            Boolean status1=!session.isValid();</span><br><span class="line">            <span class="comment">//第二种可能用开始时间和过期时间比较</span></span><br><span class="line">            Boolean status2=session.getLastAccessTime().getTime()+session.getTimeout()&lt;<span class="keyword">new</span> Date().getTime();</span><br><span class="line">            <span class="comment">//第三种可能</span></span><br><span class="line">            Boolean status3= Objects.isNull(session.getAttribute(DefaultSubjectContext.AUTHENTICATED_SESSION_KEY))&amp;&amp;Objects.isNull(session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY));</span><br><span class="line">            <span class="keyword">if</span> (status1||status2||status3)&#123;</span><br><span class="line">                <span class="comment">//清楚session</span></span><br><span class="line">                redisSessionDao.delete(session);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/19/database/Mybatis/Mybatis-PageHelper%E6%8F%92%E4%BB%B6%E5%AE%9E%E7%8E%B0/" rel="prev" title="Mybatis-PageHelper插件实现">
+                  <i class="fa fa-chevron-left"></i> Mybatis-PageHelper插件实现
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-04-%E7%BC%93%E5%AD%98%E7%AE%A1%E7%90%86/" rel="next" title="shiro应用-04-缓存管理">
+                  shiro应用-04-缓存管理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

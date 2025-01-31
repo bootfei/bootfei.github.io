@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="场景介绍基于分布式、微服务的设计理念，通常的架构设计（子系统交互）如下图所示：  其核心系统介绍如下：  账户中心提供用户登录、用户注册等服务，一个新用户注册时，向MQ服务器中的USER_REGISTER主题发送一条消息，主流程结束，与送积分，送优惠券等过程解耦。 优惠券（券系统）提供发放优惠券、使用优惠券等与券相关的基础服务。 积分中心提供积分相关的服务，例如积分赠送、积分消费、积分查询等基础服">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库操作与MQ消息分布式操作的一致性">
+<meta property="og:url" content="http://example.com/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="场景介绍基于分布式、微服务的设计理念，通常的架构设计（子系统交互）如下图所示：  其核心系统介绍如下：  账户中心提供用户登录、用户注册等服务，一个新用户注册时，向MQ服务器中的USER_REGISTER主题发送一条消息，主流程结束，与送积分，送优惠券等过程解耦。 优惠券（券系统）提供发放优惠券、使用优惠券等与券相关的基础服务。 积分中心提供积分相关的服务，例如积分赠送、积分消费、积分查询等基础服">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicvRbyskeRHIO7ocUm8qibhfS71gPKlmv1cicXz41hPegy67sRhiboKBibtg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicibtwsHP1sxDH14bE3W4Q7NhEIziam8g1PjXUeicchCT6VbpzovIvXl0xw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicp0FZqHBcHorVYwgyonW3l3GvxVf7JbwfPydgFfJ2W213bDhm5xAVzg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicRycFWlp0DLnuiaRsIEghB7vlSspbOOmqa5WyiasibBRX9d1AQOJg9ffDQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicHG08xaibsdPwygtzwqibIBibZxaxJmVbtZwBKvT9Iia033rprrdRlhpqNQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicXGC8hJ2eFUM1iaZwNLC2yoctYXalVJzJl3a1KgVr9dUVtLsOZZWo9fw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicOzMibUQdW16wMsd4Qia09pLKM7JWIeuOMCq87esPGNia07ib7WnRa1TWng/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-04-09T01:15:10.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.165Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640">
+
+
+<link rel="canonical" href="http://example.com/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>数据库操作与MQ消息分布式操作的一致性 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">场景介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">事务消息实现原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%AE%9E%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">事务消息实战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%AB%AF-UserServiceImpl"><span class="nav-number">3.1.</span> <span class="nav-text">应用程序端: UserServiceImpl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MQ-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1-UserRegTransactionListener"><span class="nav-number">3.2.</span> <span class="nav-text">MQ+定时任务: UserRegTransactionListener</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-1-%E5%AE%9E%E7%8E%B0-executeLocalTransaction"><span class="nav-number">3.2.0.1.</span> <span class="nav-text">3.2.1 实现 executeLocalTransaction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-2-%E5%AE%9E%E7%8E%B0-checkLocalTransaction"><span class="nav-number">3.2.0.2.</span> <span class="nav-text">3.2.2 实现 checkLocalTransaction</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库操作与MQ消息分布式操作的一致性
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-09 09:15:10" itemprop="dateCreated datePublished" datetime="2021-04-09T09:15:10+08:00">2021-04-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="场景介绍"><a href="#场景介绍" class="headerlink" title="场景介绍"></a>场景介绍</h2><p>基于分布式、微服务的设计理念，通常的架构设计（子系统交互）如下图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640" alt="Image"></p>
+<p>其核心系统介绍如下：</p>
+<ul>
+<li>账户中心<br>提供用户登录、用户注册等服务，一个新用户注册时，向MQ服务器中的USER_REGISTER主题发送一条消息，主流程结束，与送积分，送优惠券等过程解耦。</li>
+<li>优惠券（券系统）<br>提供发放优惠券、使用优惠券等与券相关的基础服务。</li>
+<li>积分中心<br>提供积分相关的服务，例如积分赠送、积分消费、积分查询等基础服务。</li>
+<li>送积分服务（消费者）<br>订阅MQ，按照规则决定是否需要赠送积分，如果需要则调用积分相关的基础接口，完成积分的发放。</li>
+<li>送优惠券（消费者）<br>订阅MQ，按照规则决定是否需要赠送优惠券，如果需要则调用券系统相关的基础接口，完成优惠券的发放。</li>
+</ul>
+<p>问题：<strong>如果新用户注册成功，但消息发送到MQ失败，或者消息成功发送到MQ，但发送完MQ后系统出现异常导致用户注册失败又该如何呢？</strong></p>
+<p>上面的问题其实就是<strong>典型的分布式事务问题</strong>：即如何保证<strong>用户注册(数据库操作)与MQ消息发送</strong>这两个分布式操作的一致性。</p>
+<h2 id="事务消息实现原理"><a href="#事务消息实现原理" class="headerlink" title="事务消息实现原理"></a>事务消息实现原理</h2><hr>
+<p><strong>解决思路：二阶段提交与事务状态回查</strong>，其具体实现流程如下图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicvRbyskeRHIO7ocUm8qibhfS71gPKlmv1cicXz41hPegy67sRhiboKBibtg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>其核心设计理念：</p>
+<ul>
+<li>应用程序开启一个本地事务<ul>
+<li>事务中包含数据库操作</li>
+<li>事务中发送一条PREPARE消息，PREPARE消息发送成功后通知应用程序记录本地事务状态，然后提交本地事务。</li>
+</ul>
+</li>
+<li>RocketMQ在收到类型为PREPARE的消息时，首先<strong>备份消息的原主题与原消息消费队列</strong>，然后将消息存储在主题为RMQ_SYS_TRANS_HALF_TOPIC的消息队列中，<a href="">故PREPARE的消息是不会被客户端消费的</a>。</li>
+<li>定时服务器开启一个定时任务处理RMQ_SYS_TRANS_HALF_TOPIC中的消息，会每隔指定时间向应用程序发起<strong>事务状态查询请求</strong> ,询问应用程序本地事务是否成功，然后根据回查状态决定是提交还是回滚，即对处于PREPARE状态进行提交或回滚操作。<ul>
+<li>定时服务器如果明确得知事务成功，则可以返回COMMIT，服务端会提交该条消息，具体操作是恢复原消息的主题与队列，重新发送到Broker，消费端感知后消费。</li>
+<li>定时服务器如果无法明确得知事务状态，则返回UNOWN，此时服务端会等待一定时间后再次向发送者询问，默认询问15次。</li>
+<li>定时服务器如果非常明确得知事务失败，则可以返回ROLLBACK。</li>
+</ul>
+</li>
+</ul>
+<p>在具体实践中，<a href="">定时服务器</a>在无法获取事务状态时不要武断的返回ROLLBACK，而是要返回UNOWN，让服务端定时重试回查，说明如下：</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicibtwsHP1sxDH14bE3W4Q7NhEIziam8g1PjXUeicchCT6VbpzovIvXl0xw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
+
+
+<p>在应用程序将PREPARE消息发送到Broker后，定时服务器发起事务查询时本地事务可能还未提交，为了避免无效的事务回查机制，RocketMQ通常至少在收到PREPARE消息6s后才会发起第一次事务回查，可通过 transactionTimeOut 配置。故客户端在实现事务回查时无法证明事务状态时不应该返回ROLLBACK，而是返回UNOWN。</p>
+<h2 id="事务消息实战"><a href="#事务消息实战" class="headerlink" title="事务消息实战"></a>事务消息实战</h2><hr>
+<p>光说不练假把式，接下来以一个<strong>新用户注册送优惠券的场景</strong>来详细介绍如何使用事务消息。</p>
+<p>项目模块职责说明如下：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicp0FZqHBcHorVYwgyonW3l3GvxVf7JbwfPydgFfJ2W213bDhm5xAVzg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>事务消息的核心代码组装在transaction-service，其核心类图如下：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicRycFWlp0DLnuiaRsIEghB7vlSspbOOmqa5WyiasibBRX9d1AQOJg9ffDQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>其中核心要点如下：</p>
+<ul>
+<li>UserServiceImpl<br>Dubbo接口业务实现类，类似MVC的控制层，在这里做一些参数验证，但<strong>不执行具体的业务逻辑</strong>，只是发送一条<strong>事务消息</strong>到MQ。</li>
+<li>UserRegTransactionListener<br>事务监听器，在 executeLocalTransaction 方法中执行业务逻辑，数据库本地事务加在该方法。</li>
+</ul>
+<blockquote>
+<p>温馨提示：之所以不在UserServicveImpl中执行本地事务，是因为 executeLocalTransaction 中抛出的异常会被RocketMQ框架捕捉，及异常无法被UserServiceImpl感知，即无法实现其事务的一致性。</p>
+</blockquote>
+<h3 id="应用程序端-UserServiceImpl"><a href="#应用程序端-UserServiceImpl" class="headerlink" title="应用程序端: UserServiceImpl"></a>应用程序端: UserServiceImpl</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicHG08xaibsdPwygtzwqibIBibZxaxJmVbtZwBKvT9Iia033rprrdRlhpqNQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>UserServiceImpl 的核心要点如下：</p>
+<ul>
+<li>首先应该对<strong>参数进行校验、业务逻辑进行校验</strong></li>
+<li>发送事务消息，<strong>建议对消息设置Key</strong>,Key的值可以用<strong>业务处理流水号</strong>(可唯一表示该业务操作)或者<strong>核心业务字段</strong>(例如订单编号)</li>
+<li>业务入口类可通过<strong>事务消息发送状态</strong>来判断<strong>业务是否失败</strong>。</li>
+</ul>
+<h3 id="MQ-定时任务-UserRegTransactionListener"><a href="#MQ-定时任务-UserRegTransactionListener" class="headerlink" title="MQ+定时任务: UserRegTransactionListener"></a>MQ+定时任务: UserRegTransactionListener</h3><p>事务监听器需要实现执行本地事务与事务回查两个接口。</p>
+<h5 id="3-2-1-实现-executeLocalTransaction"><a href="#3-2-1-实现-executeLocalTransaction" class="headerlink" title="3.2.1 实现 executeLocalTransaction"></a>3.2.1 实现 executeLocalTransaction</h5><p>首先需要实现 executeLocalTransaction 方法，执行本地事务，其代码如下图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicXGC8hJ2eFUM1iaZwNLC2yoctYXalVJzJl3a1KgVr9dUVtLsOZZWo9fw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>其中几个关键点说明如下：</p>
+<ul>
+<li>在该方法上添加数据库事务标签。</li>
+<li>执行业务逻辑，示例Demo只是将用户数据存储到数据库。</li>
+<li>如果业务执行失败，可明确告知需要回滚，上层调用方也可根据ROLLBACK_MESSAGE进行相应的处理。</li>
+<li>如果业务成功，<strong>不建议直接返回COMMIT，而是建议返回UNKNOW</strong>,因为该方法尽管在方法最后一行，但可能发生断电等异常情况，数据库并没有成功。</li>
+</ul>
+<h5 id="3-2-2-实现-checkLocalTransaction"><a href="#3-2-2-实现-checkLocalTransaction" class="headerlink" title="3.2.2 实现 checkLocalTransaction"></a>3.2.2 实现 checkLocalTransaction</h5><p>其次需要实现事务状态回查，用来RocketMQ服务端感知事务是否成功，其实现原理如下图所示：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicOzMibUQdW16wMsd4Qia09pLKM7JWIeuOMCq87esPGNia07ib7WnRa1TWng/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>其实现关键点如下：</p>
+<ul>
+<li>如果能明确得知本地事务成功，则返回COMMIT_MESSAGE</li>
+<li>如该不能明确得知本地事务成功，<strong>不能返回ROLLBACK_MESSAGE</strong>,而是返回UNKNOW，等待服务端下一次事务回查(不会立即触发)，<strong>服务端默认回查15次，如果15次都得到UNKNOW，则会回滚该消息</strong>。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/dingwpmz/rocketmq-learning">https://github.com/dingwpmz/rocketmq-learning</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/" rel="prev" title="JDK-线程不安全案例分析">
+                  <i class="fa fa-chevron-left"></i> JDK-线程不安全案例分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%B9%82%E7%AD%89%E6%80%A7/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BF%9D%E8%AF%81%E6%94%AF%E4%BB%98%E4%B8%8D%E4%BC%9A%E9%87%8D%E5%A4%8D/" rel="next" title="服务端保证支付不会重复">
+                  服务端保证支付不会重复 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

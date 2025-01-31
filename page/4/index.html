@@ -21,7 +21,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
   <meta name="description" content="learn more, forget more; practice more, get more.">
@@ -195,20 +195,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -248,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/15/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BC%93%E5%AD%98/%E7%BC%93%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5-LRU/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/04/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-04/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -262,554 +262,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/15/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E7%BC%93%E5%AD%98/%E7%BC%93%E5%AD%98%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5-LRU/" class="post-title-link" itemprop="url">缓存淘汰策略-LRU</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-04-15 13:06:49 / Modified: 13:19:16" itemprop="dateCreated datePublished" datetime="2021-04-15T13:06:49+08:00">2021-04-15</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>LRU总体大概是这样的，最近使用的放在前面，最近没用的放在后面，如果来了一个新的数，此时内存满了，就需要把旧的数淘汰。</p>
-<ul>
-<li>为了方便移动数据，使用链表类似的数据结构</li>
-<li>要判断这条数据是不是最新的或者最旧的，使用hashmap等key-value形式的数据结构。</li>
-<li>如果数据量特别大，</li>
-</ul>
-<h2 id="第一种实现-LinkedHashMap"><a href="#第一种实现-LinkedHashMap" class="headerlink" title="第一种实现(LinkedHashMap)"></a>第一种实现(LinkedHashMap)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">public class LRUCache &#123;</span><br><span class="line"></span><br><span class="line">    int capacity;</span><br><span class="line">    Map&lt;Integer,Integer&gt; map;</span><br><span class="line"></span><br><span class="line">    public LRUCache(int capacity)&#123;</span><br><span class="line">        this.capacity &#x3D; capacity;</span><br><span class="line">        map &#x3D; new LinkedHashMap&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int get(int key)&#123;</span><br><span class="line">        &#x2F;&#x2F;如果没有找到</span><br><span class="line">        if (!map.containsKey(key))&#123;</span><br><span class="line">            return -1;</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F;找到了就刷新数据</span><br><span class="line">        Integer value &#x3D; map.remove(key);</span><br><span class="line">        map.put(key,value);</span><br><span class="line">        return value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void put(int key,int value)&#123;</span><br><span class="line">        if (map.containsKey(key))&#123;</span><br><span class="line">            map.remove(key);</span><br><span class="line">            map.put(key,value);</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        map.put(key,value);</span><br><span class="line">        &#x2F;&#x2F;超出capacity，删除最久没用的即第一个,或者可以复写removeEldestEntry方法</span><br><span class="line">        if (map.size() &gt; capacity)&#123;</span><br><span class="line">            map.remove(map.entrySet().iterator().next().getKey());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        LRUCache lruCache &#x3D; new LRUCache(10);</span><br><span class="line">        for (int i &#x3D; 0; i &lt; 10; i++) &#123;</span><br><span class="line">            lruCache.map.put(i,i);</span><br><span class="line">            System.out.println(lruCache.map.size());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(lruCache.map);</span><br><span class="line">        lruCache.put(10,200);</span><br><span class="line">        System.out.println(lruCache.map);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhq3OnECT6N8PXoicxEXBE8EEk6WeYaPqabgIkcj0adzxGz0gABSwzJEIyMbZz2g2WicL5HgeXNNMlzA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<h2 id="第二种实现-双链表-hashmap"><a href="#第二种实现-双链表-hashmap" class="headerlink" title="第二种实现(双链表+hashmap)"></a>第二种实现(双链表+hashmap)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">public class LRUCache &#123;</span><br><span class="line"></span><br><span class="line">    private int capacity;</span><br><span class="line">    private Map&lt;Integer,ListNode&gt;map;</span><br><span class="line">    private ListNode head;</span><br><span class="line">    private ListNode tail;</span><br><span class="line"></span><br><span class="line">    public LRUCache2(int capacity)&#123;</span><br><span class="line">        this.capacity &#x3D; capacity;</span><br><span class="line">        map &#x3D; new HashMap&lt;&gt;();</span><br><span class="line">        head &#x3D; new ListNode(-1,-1);</span><br><span class="line">        tail &#x3D; new ListNode(-1,-1);</span><br><span class="line">        head.next &#x3D; tail;</span><br><span class="line">        tail.pre &#x3D; head;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int get(int key)&#123;</span><br><span class="line">        if (!map.containsKey(key))&#123;</span><br><span class="line">            return -1;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode node &#x3D; map.get(key);</span><br><span class="line">        node.pre.next &#x3D; node.next;</span><br><span class="line">        node.next.pre &#x3D; node.pre;</span><br><span class="line">        return node.val;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void put(int key,int value)&#123;</span><br><span class="line">        if (get(key)!&#x3D;-1)&#123;</span><br><span class="line">            map.get(key).val &#x3D; value;</span><br><span class="line">            return;</span><br><span class="line">        &#125;</span><br><span class="line">        ListNode node &#x3D; new ListNode(key,value);</span><br><span class="line">        map.put(key,node);</span><br><span class="line">        moveToTail(node);</span><br><span class="line"></span><br><span class="line">        if (map.size() &gt; capacity)&#123;</span><br><span class="line">            map.remove(head.next.key);</span><br><span class="line">            head.next &#x3D; head.next.next;</span><br><span class="line">            head.next.pre &#x3D; head;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;把节点移动到尾巴</span><br><span class="line">    private void moveToTail(ListNode node) &#123;</span><br><span class="line">        node.pre &#x3D; tail.pre;</span><br><span class="line">        tail.pre &#x3D; node;</span><br><span class="line">        node.pre.next &#x3D; node;</span><br><span class="line">        node.next &#x3D; tail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>像第一种方式，如果复写removeEldestEntry会更简单，这里简单的展示一下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class LRUCache extends LinkedHashMap&lt;Integer,Integer&gt; &#123;</span><br><span class="line">    private int capacity;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    protected boolean removeEldestEntry(Map.Entry&lt;Integer, Integer&gt; eldest) &#123;</span><br><span class="line">        return size() &gt; capacity;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/14/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E5%8F%8D%E5%B0%84%E4%B8%8E%E6%B3%A8%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/14/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E5%8F%8D%E5%B0%84%E4%B8%8E%E6%B3%A8%E8%A7%A3/" class="post-title-link" itemprop="url">JDK-反射与注解</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-04-14 12:50:22 / Modified: 12:59:37" itemprop="dateCreated datePublished" datetime="2021-04-14T12:50:22+08:00">2021-04-14</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><h3 id="注解定义"><a href="#注解定义" class="headerlink" title="注解定义"></a>注解定义</h3><p>Java 注解(Annotation)又称 Java 标注，是 JDK5.0 引入的一种注释机制。</p>
-<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li>编译格式检查</li>
-<li>反射中解析</li>
-<li>生成帮助文档</li>
-<li>跟踪代码依赖</li>
-</ul>
-<h3 id="内置注解"><a href="#内置注解" class="headerlink" title="内置注解"></a>内置注解</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX0Z2ngxxej4ImcDQ1VYaMh9ibaEzw6bv3csI5Lo1A7MjBbK6HY9vm3zkw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<blockquote>
-<p>补充：@SuppressWarnings 的三种方法：</p>
-</blockquote>
-<ol>
-<li>@SuppressWarnings(“unchecked”) [^ 抑制单类型的警告]</li>
-<li>@SuppressWarnings(“unchecked”,“rawtypes”) [^ 抑制多类型的警告]</li>
-<li>@SuppressWarnings(“all”) [^ 抑制所有类型的警告]</li>
-</ol>
-<h3 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX02icFl2HhcFc4aoyhylIf0E5CtZ0hL0JSN9YLrn6GQuqWA6YeZqtj44Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>Inherited 补充：</p>
-<ul>
-<li>子类会继承父类使用的注解中被@Inherited修饰的注解</li>
-<li>接口继承关系中，子接口不会继承父接口中的任何注解，不管父接口中使用的注解有没有 被@Inherited修饰</li>
-<li>类实现接口时不会继承任何接口中定义的注解</li>
-</ul>
-<h3 id="自定义注解"><a href="#自定义注解" class="headerlink" title="自定义注解"></a>自定义注解</h3><h4 id="自定义注解框架"><a href="#自定义注解框架" class="headerlink" title="自定义注解框架"></a>自定义注解框架</h4><p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX0sVhm5T7wk0fS8pdItdfmbgvHMjcGCEBsrZAc3Ivl4tHDuZgWIMpJ9Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p><strong>Annotation 与 RetentionPolicy 与 ElementType 。</strong></p>
-<p>每 1 个 Annotation 对象，都会有唯一的 RetentionPolicy 属性;至于 ElementType 属性，则有 1~n个。</p>
-<p><strong>ElementType(注解的用途类型)</strong></p>
-<p>“每 1 个 Annotation” 都与 “1~n 个 ElementType” 关联。当 Annotation 与某个 ElementType 关联 时，就意味着: Annotation有了某种用途。例如，若一个 Annotation 对象是 METHOD 类型，则该 Annotation 只能用来修饰方法。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">package java.lang.annotation;</span><br><span class="line">public enum ElementType &#123;</span><br><span class="line"></span><br><span class="line">TYPE,    &#x2F;* 类、接口(包括注释类型)或枚举声明 *&#x2F;</span><br><span class="line"></span><br><span class="line">FIELD,     &#x2F;* 字段声明(包括枚举常量) *&#x2F;</span><br><span class="line"></span><br><span class="line">METHOD,    &#x2F;* 方法声明 *&#x2F;</span><br><span class="line"></span><br><span class="line">PARAMETER,   &#x2F;* 参数声明 *&#x2F;</span><br><span class="line"></span><br><span class="line">CONSTRUCTOR,  &#x2F;* 构造方法声明 *&#x2F; </span><br><span class="line"></span><br><span class="line">LOCAL_VARIABLE,  &#x2F;* 局部变量声明 *&#x2F; </span><br><span class="line"></span><br><span class="line">ANNOTATION_TYPE,  &#x2F;* 注释类型声明 *&#x2F;</span><br><span class="line"></span><br><span class="line">PACKAGE     &#x2F;* 包声明 *&#x2F;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>RetentionPolicy(注解作用域策略)</strong></p>
-<p>“每 1 个 Annotation” 都与 “1 个 RetentionPolicy” 关联。</p>
-<p>a) 若 Annotation 的类型为 SOURCE，则意味着:Annotation 仅存在于编译器处理期间，编译器 处理完之后，该 Annotation 就没用了。例如，” @Override” 标志就是一个 Annotation。当它修 饰一个方法的时候，就意味着该方法覆盖父类的方法;并且在编译期间会进行语法检查，编译器处理完后，”@Override” 就没有任何作用了。</p>
-<p>b) 若 Annotation 的类型为 CLASS，则意味着:编译器将 Annotation 存储于类对应的 .class 文件 中，它是 Annotation 的默认行为。</p>
-<p>c) 若 Annotation 的类型为 RUNTIME，则意味着:编译器将 Annotation 存储于 class 文件中，并 且可由JVM读入。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">package java.lang.annotation;</span><br><span class="line">public enum RetentionPolicy &#123;</span><br><span class="line"> SOURCE, &#x2F;* Annotation信息仅存在于编译器处理期间，编译器处理完之后就没有该 Annotation信息了 *&#x2F;</span><br><span class="line"> </span><br><span class="line"> CLASS, &#x2F;* 编译器将Annotation存储于类对应的.class文件中。默认行为 *&#x2F;</span><br><span class="line"> </span><br><span class="line"> RUNTIME &#x2F;* 编译器将Annotation存储于class文件中，并且可由JVM读入 *&#x2F;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="定义格式"><a href="#定义格式" class="headerlink" title="定义格式"></a>定义格式</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@interface 自定义注解名&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意事项</strong></p>
-<ol>
-<li>定义的注解，自动继承了java.lang,annotation.Annotation接口</li>
-<li>注解中的每一个方法，实际是声明的注解配置参数</li>
-</ol>
-<ul>
-<li>方法的名称就是 配置参数的名称</li>
-<li>方法的返回值类型，就是配置参数的类型。只能是:基本类型/Class/String/enum</li>
-</ul>
-<ol>
-<li>可以通过default来声明参数的默认值</li>
-<li>如果只有一个参数成员，一般参数名为value</li>
-<li>注解元素必须要有值，我们定义注解元素时，经常使用空字符串、0作为默认值。</li>
-</ol>
-<h2 id="反射"><a href="#反射" class="headerlink" title="反射"></a>反射</h2><p>JAVA反射机制是在运行状态中，获取任意一个类的结构 , 创建对象 , 得到方法，执行方法 , 属性；</p>
-<p>这种在运行状态动态获取信息以及动态调用对象方法的功能被称为java语言的反射机制。</p>
-<p>（搜索公众号Java知音，回复“2021”，送你一份Java面试题宝典）</p>
-<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>Java类加载器(Java Classloader)是Java运行时环境(Java Runtime Environment)的一部分，负责动态加载Java类到Java虚拟机的内存空间中。</p>
-<p>java默认有三种类加载器，BootstrapClassLoader、ExtensionClassLoader、App ClassLoader。</p>
-<p><strong>BootstrapClassLoader(引导启动类加载器):</strong></p>
-<p>嵌在JVM内核中的加载器，该加载器是用C++语言写的，主要负载加载JAVA_HOME/lib下的类库，引导启动类加载器无法被应用程序直接使用。</p>
-<p><strong>ExtensionClassLoader(扩展类加载器):</strong></p>
-<p>ExtensionClassLoader是用JAVA编写，且它的父类加载器是Bootstrap。是由<code>sun.misc.Launcher$ExtClassLoader</code>实现的，主要加载JAVA_HOME/lib/ext目录中的类 库。它的父加载器是BootstrapClassLoader</p>
-<p><strong>App ClassLoader(应用类加载器):</strong></p>
-<p>App ClassLoader是应用程序类加载器，负责加载应用程序classpath目录下的所有jar和class文件。它的父加载器为Ext ClassLoader</p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"></p>
-<p>类通常是按需加载，即第一次使用该类时才加载。由于有了类加载器，Java运行时系统不需要知道文件与 文件系统。学习类加载器时，掌握Java的委派概念很重要。</p>
-<p><strong>双亲委派模型:</strong></p>
-<p>如果一个类加载器收到了一个类加载请求，它不会自己去尝试加载这个类，而是把这个请求 转交给父类加载器去完成。每一个层次的类加载器都是如此。因此所有的类加载请求都应该传递到最顶层的 启动类加载器中，只有到父类加载器反馈自己无法完成这个加载请求(在它的搜索范围没有找到这个类) 时，子类加载器才会尝试自己去加载。委派的好处就是避免有些类被重复加载。</p>
-<h3 id="加载配置文件"><a href="#加载配置文件" class="headerlink" title="加载配置文件"></a>加载配置文件</h3><ol>
-<li>给项目添加resource root目录</li>
-<li>通过类加载器加载资源文件</li>
-</ol>
-<ul>
-<li>默认加载的是src路径下的文件，但是当项目存在resource root目录时，就变为了加载 resource root下的文件了。</li>
-</ul>
-<h3 id="反射获取Class"><a href="#反射获取Class" class="headerlink" title="反射获取Class"></a>反射获取Class</h3><p>要想了解一个类,必须先要获取到该类的字节码文件对象. 在Java中，每一个字节码文件，被夹在到内存后，都存在一个对应的Class类型的对象。</p>
-<p>（搜索公众号Java知音，回复“2021”，送你一份Java面试题宝典）</p>
-<p><strong>得到Class</strong></p>
-<ol>
-<li>如果在编写代码时, 知道类的名称, 且类已经存在, 可以通过包名.类名.class 得到一个类的 类对象</li>
-<li>如果拥有类的对象, 可以通过Class 对象.getClass() 得到一个类的 类对象</li>
-<li>如果在编写代码时, 知道类的名称 , 可以通过Class.forName(包名+类名): 得到一个类的 类对象</li>
-</ol>
-<p>上述的三种方式, 在调用时, 如果类在内存中不存在, 则会加载到内存。如果类已经在内存中存在, 不会重复加载, 而是重复利用</p>
-<p><strong>特殊的类对象</strong></p>
-<blockquote>
-<p>基本数据类型的类对象：基本数据类型.clss</p>
-<p>包装类.type</p>
-<p>基本数据类型包装类对象:包装类.class</p>
-</blockquote>
-<h3 id="反射获取-Constructor"><a href="#反射获取-Constructor" class="headerlink" title="反射获取 Constructor"></a>反射获取 Constructor</h3><p><strong>通过class对象 获取一个类的构造方法</strong></p>
-<p>1.通过指定的参数类型, 获取指定的单个构造方法 getConstructor(参数类型的class对象数组) 例如:</p>
-<p>构造方法如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Person(String name,int age)</span><br></pre></td></tr></table></figure>
-
-<p>得到这个构造方法的代码如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Constructor c &#x3D; p.getClass().getConstructor(String.class,int.class);</span><br></pre></td></tr></table></figure>
-
-<p>2.获取构造方法数组</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getConstructors();</span><br></pre></td></tr></table></figure>
-
-<p>3.获取所有权限的单个构造方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getDeclaredConstructor(参数类型的class对象数组)</span><br></pre></td></tr></table></figure>
-
-<p>4.获取所有权限的构造方法数组</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getDeclaredConstructors();</span><br></pre></td></tr></table></figure>
-
-<h4 id="Constructor-创建对象"><a href="#Constructor-创建对象" class="headerlink" title="Constructor 创建对象"></a>Constructor 创建对象</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newInstance(Object... para)</span><br></pre></td></tr></table></figure>
-
-<p>调用这个构造方法, 把对应的对象创建出来。参数: 是一个Object类型可变参数, 传递的参数顺序 必须匹配构造方法中形式参数列表的顺序</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setAccessible(boolean flag)</span><br></pre></td></tr></table></figure>
-
-<p>如果flag为true 则表示忽略访问权限检查 !(可以访问任何权限的方法)</p>
-<h3 id="反射获取-Method"><a href="#反射获取-Method" class="headerlink" title="反射获取 Method"></a>反射获取 Method</h3><p><strong>通过class对象 获取一个类的方法</strong></p>
-<ol>
-<li>getMethod(String methodName , class.. clss)</li>
-</ol>
-<p>根据参数列表的类型和方法名, 得到一个方法(public修饰的)</p>
-<ol>
-<li>getMethods();</li>
-</ol>
-<p>得到一个类的所有方法 (public修饰的)</p>
-<ol>
-<li>getDeclaredMethod(String methodName , class.. clss)</li>
-</ol>
-<p>根据参数列表的类型和方法名, 得到一个方法(除继承以外所有的:包含私有, 共有, 保护, 默认)</p>
-<ol>
-<li>getDeclaredMethods();</li>
-</ol>
-<p>得到一个类的所有方法 (除继承以外所有的:包含私有, 共有, 保护, 默认)</p>
-<p><strong>Method 执行方法</strong></p>
-<p>invoke(Object o,Object… para) :</p>
-<ul>
-<li>调用方法,参数1. 要调用方法的对象;参数2. 要传递的参数列表</li>
-</ul>
-<p>getName()</p>
-<ul>
-<li>获取方法的方法名称</li>
-</ul>
-<p>setAccessible(boolean flag)</p>
-<ul>
-<li>如果flag为true 则表示忽略访问权限检查 (可以访问任何权限的方法)</li>
-</ul>
-<h3 id="反射获取-Field"><a href="#反射获取-Field" class="headerlink" title="反射获取 Field"></a>反射获取 Field</h3><p><strong>通过class对象 获取一个类的属性</strong></p>
-<ol>
-<li>getDeclaredField(String filedName)</li>
-</ol>
-<p>根据属性的名称, 获取一个属性对象 (所有属性)</p>
-<ol>
-<li>getDeclaredFields()</li>
-</ol>
-<p>获取所有属性</p>
-<ol>
-<li>getField(String filedName)</li>
-</ol>
-<p>根据属性的名称, 获取一个属性对象 (public属性)</p>
-<ol>
-<li>getFields()</li>
-</ol>
-<p>获取所有属性 (public)</p>
-<p><strong>Field 属性的对象类型</strong></p>
-<p>常用方法:</p>
-<ol>
-<li>get(Object o);</li>
-</ol>
-<p>参数: 要获取属性的对象 获取指定对象的此属性值</p>
-<ol>
-<li>set(Object o , Object value);</li>
-</ol>
-<p>参数1.要设置属性值的对象；参数2.要设置的值设置指定对象的属性的值</p>
-<ol>
-<li>getName();</li>
-</ol>
-<p>获取属性的名称</p>
-<ol>
-<li>setAccessible(boolean flag);</li>
-</ol>
-<p>如果flag为true 则表示忽略访问权限检查 !(可以访问任何权限的属性)</p>
-<h2 id="通过反射获取注解信息"><a href="#通过反射获取注解信息" class="headerlink" title="通过反射获取注解信息"></a>通过反射获取注解信息</h2><p>获取类/属性/方法的全部注解对象</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Annotation[] annotations01 &#x3D; Class&#x2F;Field&#x2F;Method.getAnnotations();</span><br><span class="line"></span><br><span class="line">for (Annotation annotation : annotations01) &#123;</span><br><span class="line">    System.out.println(annotation);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据类型获取类/属性/方法的注解对象</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">注解类型 对象名 &#x3D; (注解类型) c.getAnnotation(注解类型.class);</span><br></pre></td></tr></table></figure>
-
-<h2 id="内省-Introspector获取JavaBean"><a href="#内省-Introspector获取JavaBean" class="headerlink" title="内省 Introspector获取JavaBean"></a>内省 Introspector获取JavaBean</h2><p>基于反射 , java所提供的一套应用到JavaBean的API</p>
-<p>Bean类：</p>
-<ul>
-<li>一个定义在包中的类 </li>
-<li>拥有无参构造器</li>
-<li>所有属性私有,</li>
-<li>所有属性提供get/set方法</li>
-<li>实现了序列化接口</li>
-</ul>
-<p>Java提供了一套java.beans包的api , 对于反射的操作, 进行了封装</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbufMhhxMFuSA30XB7aViccfX0PEZpoWVlXU9Qf2EibCia3dlsHN72X9EGdkDMMExWicL1WibZ5qVtDUs9Qw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<h3 id="获取Bean类信息"><a href="#获取Bean类信息" class="headerlink" title="获取Bean类信息"></a>获取Bean类信息</h3><p><code>BeanInfo getBeanInfo(Class cls)</code> 通过传入的类信息, 得到这个Bean类的封装对象 .</p>
-<h3 id="获取bean类的-get-set方法-数组"><a href="#获取bean类的-get-set方法-数组" class="headerlink" title="获取bean类的 get/set方法 数组"></a>获取bean类的 get/set方法 数组</h3><p>常用的方法:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MethodDescriptor[] getPropertyDescriptors():</span><br></pre></td></tr></table></figure>
-
-<h3 id="MethodDescriptor"><a href="#MethodDescriptor" class="headerlink" title="MethodDescriptor"></a>MethodDescriptor</h3><p>常用方法:</p>
-<ul>
-<li>Method getReadMethod():获取一个get方法</li>
-<li>Method getWriteMethod():获取一个set方法。有可能返回null 注意 需要加判断</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Mybatis/mybatis-01-%E5%85%A5%E9%97%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Mybatis/mybatis-01-%E5%85%A5%E9%97%A8/" class="post-title-link" itemprop="url">mybatis-01-入门</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-04-13 18:33:58 / Modified: 18:34:40" itemprop="dateCreated datePublished" datetime="2021-04-13T18:33:58+08:00">2021-04-13</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">第一种写法（1）：</span><br><span class="line"></span><br><span class="line">原符号       &lt;        &lt;&#x3D;      &gt;       &gt;&#x3D;       &amp;        &#39;        &quot;</span><br><span class="line">替换符号    &lt;    &lt;&#x3D;   &gt;    &gt;&#x3D;   &amp;   &amp;apos;  &quot;</span><br><span class="line">例如：sql如下：</span><br><span class="line">create_date_time &gt;&#x3D; #&#123;startTime&#125; and  create_date_time &lt;&#x3D; #&#123;endTime&#125;</span><br><span class="line"></span><br><span class="line">第二种写法（2）：</span><br><span class="line">大于等于</span><br><span class="line">&lt;![CDATA[ &gt;&#x3D; ]]&gt;</span><br><span class="line">小于等于</span><br><span class="line">&lt;![CDATA[ &lt;&#x3D; ]]&gt;</span><br><span class="line">例如：sql如下：</span><br><span class="line">create_date_time &lt;![CDATA[ &gt;&#x3D; ]]&gt; #&#123;startTime&#125; and  create_date_time &lt;![CDATA[ &lt;&#x3D; ]]&gt; #&#123;endTime&#125;</span><br><span class="line">————————————————</span><br><span class="line">版权声明：本文为CSDN博主「转角人生」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。</span><br><span class="line">原文链接：https:&#x2F;&#x2F;blog.csdn.net&#x2F;xuanzhangran&#x2F;article&#x2F;details&#x2F;60329357</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Mybatis/mybatis-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8B%A6%E6%88%AA%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/13/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Mybatis/mybatis-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8B%A6%E6%88%AA%E5%99%A8/" class="post-title-link" itemprop="url">mybatis-自定义拦截器</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2021-04-13 13:04:10 / Modified: 13:32:54" itemprop="dateCreated datePublished" datetime="2021-04-13T13:04:10+08:00">2021-04-13</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>首先熟悉一下Mybatis的执行过程，如下图：</p>
-<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3sTLNItu74rpxaibkopwwJ78osHCNjbw40aWj7YraIlZtwmLl4fwibRlw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" />
-
-<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><p>先说明Mybatis中可以被拦截的类型具体有以下四种：</p>
-<ol>
-<li>Executor：拦截执行器的方法。</li>
-<li>ParameterHandler：拦截参数的处理。</li>
-<li>ResultHandler：拦截结果集的处理。</li>
-<li>StatementHandler：拦截Sql语法构建的处理。</li>
-</ol>
-<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><p>Intercepts注解需要一个Signature(拦截点)参数数组。通过Signature来指定拦截哪个对象里面的哪个方法。@Intercepts注解定义如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@Documented</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Target(ElementType.TYPE)</span><br><span class="line">public @interface Intercepts &#123;</span><br><span class="line">    &#x2F;**</span><br><span class="line">     * 定义拦截点</span><br><span class="line">     * 只有符合拦截点的条件才会进入到拦截器</span><br><span class="line">     *&#x2F;</span><br><span class="line">    Signature[] value();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Signature来指定咱们需要拦截那个类对象的哪个方法。定义如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">@Documented</span><br><span class="line">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="line">@Target(&#123;&#125;)</span><br><span class="line">public @interface Signature &#123;</span><br><span class="line">  &#x2F;**</span><br><span class="line">   * 定义拦截的类 Executor、ParameterHandler、StatementHandler、ResultSetHandler当中的一个</span><br><span class="line">   *&#x2F;</span><br><span class="line">  Class&lt;?&gt; type();</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * 在定义拦截类的基础之上，在定义拦截的方法</span><br><span class="line">   *&#x2F;</span><br><span class="line">  String method();</span><br><span class="line"></span><br><span class="line">  &#x2F;**</span><br><span class="line">   * 在定义拦截方法的基础之上在定义拦截的方法对应的参数，</span><br><span class="line">   * JAVA里面方法可能重载，故注意参数的类型和顺序</span><br><span class="line">   *&#x2F;</span><br><span class="line">  Class&lt;?&gt;[] args();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>标识拦截注解@Intercepts规则使用,简单实例如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Intercepts(&#123;&#x2F;&#x2F;注意看这个大花括号，也就这说这里可以定义多个@Signature对多个地方拦截，都用这个拦截器</span><br><span class="line">        @Signature(</span><br><span class="line">                type &#x3D; ResultSetHandler.class,</span><br><span class="line">                method &#x3D; &quot;handleResultSets&quot;, </span><br><span class="line">                args &#x3D; &#123;Statement.class&#125;),</span><br><span class="line">        @Signature(type &#x3D; Executor.class,</span><br><span class="line">                method &#x3D; &quot;query&quot;,</span><br><span class="line">                args &#x3D; &#123;MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class&#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>说明：@Intercepts：标识该类是一个拦截器；</p>
-<p>@Signature：指明自定义拦截器需要拦截哪一个类型，哪一个方法；</p>
-<ul>
-<li>type：上述四种类型中的一种；</li>
-<li>method：对应接口中的哪类方法（因为可能存在重载方法）；</li>
-<li>args：对应哪一个方法的入参；</li>
-</ul>
-<p>method中对应四种的类型的方法：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3QLEXojbN3JpNNh3OTw2iaRjP8p5DcCH5c5Ao3yrBgLmonoULw8GoyyQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>谈到自定义拦截器实践部分，主要按照以下三步：</p>
-<h3 id="step1-实现接口"><a href="#step1-实现接口" class="headerlink" title="step1: 实现接口"></a>step1: 实现接口</h3><p>org.apache.ibatis.plugin.Interceptor</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public interface Interceptor &#123;</span><br><span class="line">    Object intercept(Invocation var1) throws Throwable;</span><br><span class="line">    Object plugin(Object var1);</span><br><span class="line">    void setProperties(Properties var1);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="intercept-Invocation-invocation"><a href="#intercept-Invocation-invocation" class="headerlink" title="intercept(Invocation invocation)"></a>intercept(Invocation invocation)</h4><p>从上面我们了解到interceptor能够拦截的四种类型对象，此处入参invocation便是指拦截到的对象。</p>
-<p>举例说明：拦截 <strong>StatementHandler#query(Statement st,ResultHandler rh)</strong> 方法，那么Invocation就是该对象。</p>
-<h4 id="plugin-Object-target"><a href="#plugin-Object-target" class="headerlink" title="plugin(Object target)"></a>plugin(Object target)</h4><p>这个方法的作用是就是让mybatis判断，是否要进行拦截，然后做出决定是否生成一个代理。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">public Object plugin(Object target) &#123;</span><br><span class="line">&#x2F;&#x2F;判断是否拦截这个类型对象（根据@Intercepts注解决定），然后决定是返回一个代理对象还是返回原对象。</span><br><span class="line">&#x2F;&#x2F;故我们在实现plugin方法时，要判断一下目标类型，如果是插件要拦截的对象时才执行Plugin.wrap方法，否则的话，直接返回目标本身。</span><br><span class="line">    if (target instanceof StatementHandler) &#123;</span><br><span class="line">        return Plugin.wrap(target, this);</span><br><span class="line">    &#125;</span><br><span class="line">    return target;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意:每经过一个拦截器对象都会调用插件的plugin方法，也就是说，该方法会调用4次。根据@Intercepts注解来决定是否进行拦截处理。</p>
-<h4 id="setProperties-Properties-properties"><a href="#setProperties-Properties-properties" class="headerlink" title="setProperties(Properties properties)"></a>setProperties(Properties properties)</h4><p>拦截器需要一些变量对象，而且这个对象是支持可配置的。</p>
-<h3 id="step2-添加拦截器注解"><a href="#step2-添加拦截器注解" class="headerlink" title="step2: 添加拦截器注解"></a>step2: 添加拦截器注解</h3><p>@Intercepts{…}。具体值遵循上述规则设置。</p>
-<h3 id="step3-配置文件中添加拦截器"><a href="#step3-配置文件中添加拦截器" class="headerlink" title="step3: 配置文件中添加拦截器"></a>step3: 配置文件中添加拦截器</h3><h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p><strong>自定义拦截器</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">@Intercepts(value &#x3D; &#123;@Signature(type &#x3D; StatementHandler.class, method &#x3D; &quot;prepare&quot;, args &#x3D; &#123;Connection.class, Integer.class&#125;)&#125;)</span><br><span class="line">public class MyInterceptor implements Interceptor &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object intercept(Invocation invocation) throws Throwable &#123;</span><br><span class="line">        StatementHandler statementHandler &#x3D; (StatementHandler) invocation.getTarget();</span><br><span class="line">        BoundSql boundSql &#x3D; statementHandler.getBoundSql();</span><br><span class="line">        Object obj &#x3D; boundSql.getParameterObject();</span><br><span class="line">        String sql &#x3D; boundSql.getSql();</span><br><span class="line">        if (sql.trim().toUpperCase().startsWith(&quot;INSERT&quot;)) &#123;</span><br><span class="line">            ReflectUtil.setFieldValue(obj, &quot;rev&quot;, 0);</span><br><span class="line">            ReflectUtil.setFieldValue(obj, &quot;createTime&quot;, new Date());</span><br><span class="line">            ReflectUtil.setFieldValue(obj, &quot;operateTime&quot;, new Date());</span><br><span class="line">            ReflectUtil.setFieldValue(boundSql,&quot;parameterObject&quot;, obj);</span><br><span class="line"></span><br><span class="line">        &#125; else if (sql.trim().toUpperCase().startsWith(&quot;UPDATE&quot;)) &#123;</span><br><span class="line">            sql &#x3D; sql.replaceAll(&quot; set &quot;, &quot; SET &quot;)</span><br><span class="line">                    .replaceAll(&quot; Set &quot;, &quot; SET &quot;)</span><br><span class="line">                    .replaceAll(&quot; SET &quot;, &quot; SET rev &#x3D; rev+1, operate_time &#x3D; NOW(), &quot;);</span><br><span class="line">            ReflectUtil.setFieldValue(boundSql,&quot;sql&quot;, sql);</span><br><span class="line">        &#125;</span><br><span class="line">        return invocation.proceed();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public Object plugin(Object o) &#123;</span><br><span class="line">        return Plugin.wrap(o, this);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void setProperties(Properties properties) &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>主要看下核心代码方法intercept（）:</p>
-<blockquote>
-<p>这段代码主要目的：拦截insert和update语句，利用反射机制</p>
-<ul>
-<li>设置insert语句的参数rev(版本号，利用乐观锁)，第一次查询，故创建时间和操作时间相同；</li>
-<li>设置update语句的参数rev(版本号)+1，统一修改其操作时间。</li>
-</ul>
-</blockquote>
-<p><strong>mybatis-config</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE configuration PUBLIC &quot;-&#x2F;&#x2F;mybatis.org&#x2F;&#x2F;DTD Config 3.0&#x2F;&#x2F;EN&quot; &quot;http:&#x2F;&#x2F;mybatis.org&#x2F;dtd&#x2F;mybatis-3-config.dtd&quot;&gt;</span><br><span class="line">&lt;configuration&gt;    </span><br><span class="line"> &lt;plugins&gt;</span><br><span class="line">        &lt;plugin interceptor&#x3D;&quot;com.qxy.mybatis.interceptor.MyInterceptor&quot;&#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;plugins&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;configuration&gt;</span><br></pre></td></tr></table></figure>
-
-<p><strong>application.yml</strong></p>
-<p>特别重要的一点，一定将mybatis-config中的对象注入到Sprint容器中，否则不会生效。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...&#x2F;&#x2F;省略其他配置</span><br><span class="line">mybatis:</span><br><span class="line">  config-location: classpath:&#x2F;mybatis-config.xml</span><br></pre></td></tr></table></figure>
-
-<p><strong>ReflectUtil</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">public class ReflectUtil &#123;</span><br><span class="line"></span><br><span class="line">    private ReflectUtil() &#123;&#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * 利用反射获取指定对象的指定属性</span><br><span class="line">     * @param obj 目标对象</span><br><span class="line">     * @param fieldName 目标属性</span><br><span class="line">     * @return 目标字段</span><br><span class="line">     *&#x2F;</span><br><span class="line">    private static Field getField(Object obj, String fieldName) &#123;</span><br><span class="line">        Field field &#x3D; null;</span><br><span class="line">        for (Class&lt;?&gt; clazz &#x3D; obj.getClass(); clazz !&#x3D; Object.class; clazz &#x3D; clazz.getSuperclass()) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                field &#x3D; clazz.getDeclaredField(fieldName);</span><br><span class="line">                break;</span><br><span class="line">            &#125; catch (NoSuchFieldException e) &#123;</span><br><span class="line">                &#x2F;&#x2F;这里不用做处理，子类没有该字段，可能父类有，都没有就返回null</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return field;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;**</span><br><span class="line">     * 利用反射设置指定对象的指定属性为指定的值</span><br><span class="line">     * @param obj 目标对象</span><br><span class="line">     * @param fieldName 目标属性</span><br><span class="line">     * @param fieldValue 目标值</span><br><span class="line">     *&#x2F;</span><br><span class="line">    public static void setFieldValue(Object obj, String fieldName, Object fieldValue) throws IllegalAccessException &#123;</span><br><span class="line">        Field field &#x3D; getField(obj, fieldName);</span><br><span class="line">        if (field !&#x3D; null) &#123;</span><br><span class="line">            field.setAccessible(true);</span><br><span class="line">            field.set(obj, fieldValue);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>debug</strong></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z33MrmSYBaiau2kuJPySVs6ibCdob3iaSY7Ewo7YZNGsEKNm1mEQbuRUKJg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>上图中能够看到BoundSql对象中主要存储的属性值，所以我们自定义拦截器时，主要针对BoundSql的属性值进行修改。</p>
-<p>程序代码现在没有走到我们反射机制设置值的位置，可以看到测试createTime=null;</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3ic5POjnRNQ4r50l9Jwv3sJIeLlqsdqssDkZDVQibd2IgNEPozCnic7FQA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>继续跟进，程序代码返回之前，看下BoundSql对象的值，可以看到创建时间已被赋值。</p>
-<img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbuegug4Q7S6Wwqc0yH4pia6z3sTLNItu74rpxaibkopwwJ78osHCNjbw40aWj7YraIlZtwmLl4fwibRlw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6/" class="post-title-link" itemprop="url">springboot-定时任务框架</a>
+            <a href="/2022/12/04/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-12-04/" class="post-title-link" itemprop="url">Sun Dec 04 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -820,14 +273,14 @@
       </span>
       <span class="post-meta-item-text">Posted on</span>
 
-      <time title="Created: 2021-04-12 19:22:20" itemprop="dateCreated datePublished" datetime="2021-04-12T19:22:20+08:00">2021-04-12</time>
+      <time title="Created: 2022-12-04 10:22:31" itemprop="dateCreated datePublished" datetime="2022-12-04T10:22:31+08:00">2022-12-04</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-04-13 13:03:54" itemprop="dateModified" datetime="2021-04-13T13:03:54+08:00">2021-04-13</time>
+        <time title="Modified: 2022-12-11 14:30:51" itemprop="dateModified" datetime="2022-12-11T14:30:51+08:00">2022-12-11</time>
       </span>
 
   
@@ -840,67 +293,52 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="Quartz"><a href="#Quartz" class="headerlink" title="Quartz"></a>Quartz</h1><p>Quartz是一个定时任务框架，其他介绍网上也很详尽。这里要介绍一下Quartz里的几个非常核心的接口。</p>
-<h2 id="Scheduler接口"><a href="#Scheduler接口" class="headerlink" title="Scheduler接口"></a>Scheduler接口</h2><p>Quartz通过调度器来注册、暂停、删除Trigger和JobDetail。Scheduler还拥有一个SchedulerContext，通过SchedulerContext我们可以获取到触发器和任务的一些信息。</p>
-<h2 id="Trigger接口"><a href="#Trigger接口" class="headerlink" title="Trigger接口"></a>Trigger接口</h2><p>Trigger通过cron表达式或是SimpleScheduleBuilder等类，指定任务执行的周期。系统时间走到触发器指定的时间的时候，触发器就会触发任务的执行。</p>
-<h2 id="JobDetail接口"><a href="#JobDetail接口" class="headerlink" title="JobDetail接口"></a>JobDetail接口</h2><p>Job接口是真正需要执行的任务。JobDetail接口相当于将Job接口包装了一下，Trigger和Scheduler实际用到的都是JobDetail。</p>
-<h3 id="Job接口"><a href="#Job接口" class="headerlink" title="Job接口"></a>Job接口</h3><p>Job接口是真正需要执行的任务，由客户自行定义</p>
-<h1 id="SpringBoot官方文档解读"><a href="#SpringBoot官方文档解读" class="headerlink" title="SpringBoot官方文档解读"></a>SpringBoot官方文档解读</h1><p>SpringBoot官方写了<code>spring-boot-starter-quartz</code>。使用过SpringBoot的同学都知道这是一个官方提供的启动器，有了这个启动器，集成的操作就会被大大简化。</p>
-<p>现在我们来看一看SpingBoot2.2.6官方文档，其中第4.20小节<code>Quartz Scheduler</code>就谈到了Quartz，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Spring Boot offers several conveniences for working with the Quartz scheduler, including the</span><br><span class="line">spring-boot-starter-quartz “Starter”. If Quartz is available, a Scheduler is auto-configured (through the SchedulerFactoryBean abstraction).</span><br><span class="line">Beans of the following types are automatically picked up and associated with the Scheduler:</span><br><span class="line">• JobDetail: defines a particular Job. JobDetail instances can be built with the JobBuilder API.</span><br><span class="line">• Calendar.</span><br><span class="line">• Trigger: defines when a particular job is triggered.</span><br></pre></td></tr></table></figure>
-
-<p>翻译一下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Job可以定义setter(也就是set方法)来注入配置信息。也可以用同样的方法注入普通的bean。</span><br></pre></td></tr></table></figure>
-
-<p>下面是文档里给的示例代码，我直接完全照着写，拿到的却是null。不知道是不是我的使用方式有误。后来仔细一想，文档的意思应该是在创建Job对象之后，调用set方法将依赖注入进去。但后面我们是通过框架反射生成的Job对象，这样做反而会搞得更加复杂。最后还是决定采用给Job类加@Component注解的方法。</p>
-<p>文档的其他篇幅就介绍了一些配置，但是介绍得也不全面，看了帮助也并不是很大。详细的配置可以参考w3school的<a target="_blank" rel="noopener" href="https://www.w3cschool.cn/quartz_doc/quartz_doc-ml8e2d9m.html">Quartz配置</a>。</p>
-<h1 id="SpringBoot集成Quartz"><a href="#SpringBoot集成Quartz" class="headerlink" title="SpringBoot集成Quartz"></a>SpringBoot集成Quartz</h1><h2 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h2><p>我选择将定时任务的信息保存在数据库中，优点是显而易见的，定时任务不会因为系统的崩溃而丢失。</p>
-<p>建表的sql语句在Quartz的github中可以找到，里面有针对每一种常用数据库的sql语句，具体地址是：<a target="_blank" rel="noopener" href="https://github.com/quartz-scheduler/quartz/tree/9f9e400733f51f7cb658e3319fc2c140ab8af938/quartz-core/src/main/resources/org/quartz/impl/jdbcjobstore">Quartz数据库建表sql</a>。</p>
-<p><img src="https://segmentfault.com/img/bVbGMZo" alt="quartz表"></p>
-<p>建表以后，可以看到数据库里多了11张表。我们完全不需要关心每张表的具体作用，在添加删除任务、触发器等的时候，Quartz框架会操作这些表。</p>
-<h2 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h2><p>在<code>pom.xml</code>里添加依赖。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- quartz 定时任务 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-starter-quartz&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.2.6.RELEASE&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="配置quartz"><a href="#配置quartz" class="headerlink" title="配置quartz"></a>配置quartz</h2><p>在<code>application.yml</code>中配置quartz。相关配置的作用已经写在注解上。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  quartz:</span><br><span class="line">      job-store-type: jdbc # 将任务等保存化到数据库</span><br><span class="line">      wait-for-jobs-to-complete-on-shutdown: true # 程序结束时会等待quartz相关的内容结束</span><br><span class="line">      # QuartzScheduler启动时更新己存在的Job,这样就不用每次修改targetObject后删除qrtz_job_details表对应记录</span><br><span class="line">      overwrite-existing-jobs: true</span><br><span class="line">      # 这里居然是个map，搞得智能提示都没有，佛了</span><br><span class="line">      properties:</span><br><span class="line">        org:</span><br><span class="line">          quartz:</span><br><span class="line">            # scheduler相关</span><br><span class="line">            scheduler:        </span><br><span class="line">              instanceName: scheduler # scheduler的实例名</span><br><span class="line">              instanceId: AUTO</span><br><span class="line">            # 持久化相关</span><br><span class="line">            jobStore:</span><br><span class="line">              class: org.quartz.impl.jdbcjobstore.JobStoreTX</span><br><span class="line">              driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate</span><br><span class="line">              # 表示数据库中相关表是QRTZ_开头的</span><br><span class="line">              tablePrefix: QRTZ_</span><br><span class="line">              useProperties: false</span><br><span class="line">            # 线程池相关</span><br><span class="line">            threadPool:</span><br><span class="line">              class: org.quartz.simpl.SimpleThreadPool</span><br><span class="line">              threadCount: 10  # 线程数</span><br><span class="line">              threadPriority: 5 # 线程优先级</span><br><span class="line">              threadsInheritContextClassLoaderOfInitializingThread: true</span><br></pre></td></tr></table></figure>
-
-<h2 id="注册周期性的定时任务"><a href="#注册周期性的定时任务" class="headerlink" title="注册周期性的定时任务"></a>注册周期性的定时任务</h2><p>第1节中提到的第一个子需求是在每天0点执行的，是一个周期性的任务，任务内容也是确定的，所以直接在代码里注册JobDetail和Trigger的bean就可以了。当然，这些JobDetail和Trigger也是会被持久化到数据库里。</p>
-<p>JobDetail和Trigger</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Quartz的相关配置，注册JobDetail和Trigger</span></span><br><span class="line"><span class="comment"> * 注意JobDetail和Trigger是org.quartz包下的，不是spring包下的，不要导入错误</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuartzConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JobDetail <span class="title">jobDetail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        JobDetail jobDetail = JobBuilder.newJob(StartOfDayJob.class)</span><br><span class="line">                .withIdentity(<span class="string">&quot;start_of_day&quot;</span>, <span class="string">&quot;start_of_day&quot;</span>)</span><br><span class="line">                .storeDurably()</span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> jobDetail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Trigger <span class="title">trigger</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Trigger trigger = TriggerBuilder.newTrigger()</span><br><span class="line">                .forJob(jobDetail())</span><br><span class="line">                .withIdentity(<span class="string">&quot;start_of_day&quot;</span>, <span class="string">&quot;start_of_day&quot;</span>)</span><br><span class="line">                .startNow()</span><br><span class="line">                <span class="comment">// 每天0点执行</span></span><br><span class="line">                .withSchedule(CronScheduleBuilder.cronSchedule(<span class="string">&quot;0 0 0 * * ?&quot;</span>))</span><br><span class="line">                .build();</span><br><span class="line">        <span class="keyword">return</span> trigger;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>builder类创建了一个JobDetail和一个Trigger并注册成为Spring bean。从摘录的官方文档中，我们已经知道这些bean会自动关联到调度器上。需要注意的是JobDetail和Trigger需要设置组名和自己的名字，用来作为唯一标识。当然，JobDetail和Trigger的唯一标识可以相同，因为他们是不同的类。</p>
-<p>Trigger通过cron表达式指定了任务执行的周期。</p>
-<h3 id="QuartzJobBean（Job类逻辑）"><a href="#QuartzJobBean（Job类逻辑）" class="headerlink" title="QuartzJobBean（Job类逻辑）"></a>QuartzJobBean（Job类逻辑）</h3><p>JobDetail里有一个StartOfDayJob类，这个类就是Job接口的一个实现类，里面定义了任务的具体内容</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StartOfDayJob</span> <span class="keyword">extends</span> <span class="title">QuartzJobBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> StudentService studentService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">StartOfDayJob</span><span class="params">(StudentService studentService)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.studentService = studentService;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">executeInternal</span><span class="params">(JobExecutionContext jobExecutionContext)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line">        <span class="comment">// 任务的具体逻辑</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>这里面有一个小问题，上面用builder创建JobDetail时，传入了StartOfDayJob.class，按常理推测，应该是Quartz框架通过反射创建StartOfDayJob对象，再调用executeInternal()执行任务。这样依赖，这个Job是Quartz通过反射创建的，即使加了注解@Component，这个StartOfDayJob对象也不会被注册到ioc容器中，更不可能实现依赖的自动装配。</p>
-<p>网上很多博客也是这么介绍的。但是根据我的实际测试，这样写可以完成依赖注入，但我还不知道它的实现原理。</p>
-</blockquote>
-<p><img src="https://segmentfault.com/img/bVbGMZp" alt="编写定时任务"></p>
-<p><img src="https://segmentfault.com/img/bVbGMZq" alt="依赖注入成功"></p>
-<h2 id="注册无周期性的定时任务"><a href="#注册无周期性的定时任务" class="headerlink" title="注册无周期性的定时任务"></a>注册无周期性的定时任务</h2><p>第1节中提到的第二个子需求是学生请假，显然请假是不定时的，一次性的，而且不具有周期性。</p>
-<p>4.5节与4.4节大体相同，但是有两点区别：</p>
+          <p>《基督徒的三观》</p>
+<p>讲员：赫老师</p>
+<h3 id="成人主人学"><a href="#成人主人学" class="headerlink" title="成人主人学"></a>成人主人学</h3><h4 id="民国前后的中国教会历史"><a href="#民国前后的中国教会历史" class="headerlink" title="民国前后的中国教会历史"></a>民国前后的中国教会历史</h4><p>彼得前书3:14-15: 你们就是为义人，有人问我们盼望的缘由，…存温柔的心..告诉他们</p>
+<p>庚子事件的影响</p>
 <ul>
-<li>Job类需要获取到一些数据用于任务的执行；</li>
-<li>任务执行完成后删除Job和Trigger。</li>
-</ul>
-<p>业务逻辑是在老师批准学生的请假申请时，向调度器添加Trigger和JobDetail。</p>
-<p>实体类：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaveApplication</span> </span>&#123;</span><br><span class="line">    <span class="meta">@TableId(type = IdType.AUTO)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line">    <span class="keyword">private</span> Long proposerUsername;</span><br><span class="line">    <span class="meta">@JsonFormat( pattern = &quot;yyyy-MM-dd HH:mm&quot;,timezone=&quot;GMT+8&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime startTime;</span><br><span class="line">    <span class="meta">@JsonFormat( pattern = &quot;yyyy-MM-dd HH:mm&quot;,timezone=&quot;GMT+8&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> LocalDateTime endTime;</span><br><span class="line">    <span class="keyword">private</span> String reason;</span><br><span class="line">    <span class="keyword">private</span> String state;</span><br><span class="line">    <span class="keyword">private</span> String disapprovedReason;</span><br><span class="line">    <span class="keyword">private</span> Long checkerUsername;</span><br><span class="line">    <span class="keyword">private</span> LocalDateTime checkTime;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Service层逻辑，重要的地方已在注释中说明。</p>
-<h3 id="JobDetail和Trigger还有Scheduler"><a href="#JobDetail和Trigger还有Scheduler" class="headerlink" title="JobDetail和Trigger还有Scheduler"></a>JobDetail和Trigger还有Scheduler</h3><ul>
-<li><a href="">客户端类</a>将<a href="">待执行的任务类</a>封装成JobDetail和Trigger，然后将两者交给scheduler。这样JobDetail和Trigger都含有客户端类想要实现的逻辑和参数表，并且数据库也对其持久化</li>
-<li>在封装JobDetail的同时，JobDetail会接收<a href="">客户端想要的Job类</a>为入参，比如JobDetail接收LeaveStartJob.class。<ul>
-<li>对于具体的业务场景，JobDetail接收LeaveStartJob.class这个操作会被执行多次，那么框架是如何识别该执行哪个JobDetail呢？通过withIdentity()方法，指定任务组名和任务名</li>
+<li><p>对教会传教士的血是福音的种子；</p>
+</li>
+<li><p>西方宣教士认识到，不应该依靠条约保护，开始注意到培养中国本地教会，同时认识到帝国主义的入侵</p>
+</li>
+<li><p>更重视要让中国的教会三自（和中国政府代理的三自不一样）</p>
+<ul>
+<li>自治、自养、自传</li>
 </ul>
 </li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaveApplicationServiceImpl</span> <span class="keyword">implements</span> <span class="title">LeaveApplicationService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> Scheduler scheduler;</span><br><span class="line">  </span><br><span class="line">       <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 添加job和trigger到scheduler</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">addJobAndTrigger</span><span class="params">(LeaveApplication leaveApplication)</span> </span>&#123;</span><br><span class="line">        Long proposerUsername = leaveApplication.getProposerUsername();</span><br><span class="line">        </span><br><span class="line">        LocalDateTime startTime = leaveApplication.getStartTime();<span class="comment">// 创建请假开始Job</span></span><br><span class="line">        JobDetail startJobDetail = JobBuilder.newJob(LeaveStartJob.class)            </span><br><span class="line">                .withIdentity(leaveApplication.getStartTime().toString(),</span><br><span class="line">                        proposerUsername + <span class="string">&quot;_start&quot;</span>)<span class="comment">// 指定任务组名和任务名        </span></span><br><span class="line">                .usingJobData(<span class="string">&quot;username&quot;</span>, proposerUsername)<span class="comment">// 添加一些参数，执行的时候用</span></span><br><span class="line">                .usingJobData(<span class="string">&quot;time&quot;</span>, startTime.toString())</span><br><span class="line">                .build();</span><br><span class="line">        <span class="comment">// 创建请假开始任务的触发器</span></span><br><span class="line">        <span class="comment">// 创建cron表达式指定任务执行的时间，由于请假时间是确定的，所以年月日时分秒都是确定的，这也符合任务只执行一次的要求。</span></span><br><span class="line">        String startCron = String.format(<span class="string">&quot;%d %d %d %d %d ? %d&quot;</span>,</span><br><span class="line">                startTime.getSecond(),</span><br><span class="line">                startTime.getMinute(),</span><br><span class="line">                startTime.getHour(),</span><br><span class="line">                startTime.getDayOfMonth(),</span><br><span class="line">                startTime.getMonth().getValue(),</span><br><span class="line">                startTime.getYear());</span><br><span class="line">        CronTrigger startCronTrigger = TriggerBuilder.newTrigger()                </span><br><span class="line">                .withIdentity(leaveApplication.getStartTime().toString(),</span><br><span class="line">                        proposerUsername + <span class="string">&quot;_start&quot;</span>)<span class="comment">// 指定触发器组名和触发器名</span></span><br><span class="line">                .withSchedule(CronScheduleBuilder.cronSchedule(startCron))</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将job和trigger添加到scheduler里</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            scheduler.scheduleJob(startJobDetail, startCronTrigger);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (SchedulerException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> CustomizedException(<span class="string">&quot;添加请假任务失败&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="QuartzJobBean（Job类逻辑）-1"><a href="#QuartzJobBean（Job类逻辑）-1" class="headerlink" title="QuartzJobBean（Job类逻辑）"></a>QuartzJobBean（Job类逻辑）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaveStartJob</span> <span class="keyword">extends</span> <span class="title">QuartzJobBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Scheduler scheduler;</span><br><span class="line">    <span class="keyword">private</span> SystemUserMapperPlus systemUserMapperPlus;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">LeaveStartJob</span><span class="params">(Scheduler scheduler,</span></span></span><br><span class="line"><span class="function"><span class="params">                         SystemUserMapperPlus systemUserMapperPlus)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.scheduler = scheduler;</span><br><span class="line">        <span class="keyword">this</span>.systemUserMapperPlus = systemUserMapperPlus;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">executeInternal</span><span class="params">(JobExecutionContext jobExecutionContext)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line">        Trigger trigger = jobExecutionContext.getTrigger();</span><br><span class="line">        JobDetail jobDetail = jobExecutionContext.getJobDetail();</span><br><span class="line">        JobDataMap jobDataMap = jobDetail.getJobDataMap();</span><br><span class="line">        <span class="comment">// 将添加任务的时候存进去的数据拿出来</span></span><br><span class="line">        <span class="keyword">long</span> username = jobDataMap.getLongValue(<span class="string">&quot;username&quot;</span>);</span><br><span class="line">        LocalDateTime time = LocalDateTime.parse(jobDataMap.getString(<span class="string">&quot;time&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 编写任务的逻辑</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 执行之后删除任务</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 暂停触发器的计时</span></span><br><span class="line">            scheduler.pauseTrigger(trigger.getKey());</span><br><span class="line">            <span class="comment">// 移除触发器中的任务</span></span><br><span class="line">            scheduler.unscheduleJob(trigger.getKey());</span><br><span class="line">            <span class="comment">// 删除任务</span></span><br><span class="line">            scheduler.deleteJob(jobDetail.getKey());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (SchedulerException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<p>神拆毁是为了拆掉人民心中的罪</p>
+<p>民国到抗日的时间段：</p>
+<p>孙中山（孙日新）：一个爱国的基督徒典范，在1883年香港受洗，1925年去世，</p>
+<ul>
+<li>三民主义：民族主義、民权主義和民生主義</li>
+</ul>
+<p>非基同盟：反对基督教的非基督徒的学生同盟（中国社会主义青年团支持）</p>
+<ul>
+<li>1919年，五四运动，受到西方19世纪的反基督教的思想</li>
+<li>陈独秀、胡适、钱学同</li>
+<li>1922年4月，在清华，全球基督教大学生同盟，认为基督教是资本主义的先锋；基督徒对外很少有回应，教会内部反省的很多，如何把基督教与国家的关系讲清楚却很少<ul>
+<li>初代教会，面对希腊文化的攻击，初代信徒能从真理上把哲理讲清楚</li>
+<li>当时中国的教会希望本色化，发起本地化运动<ul>
+<li>编纂诗歌本《普天颂赞》，比如收编了《祷告良辰》</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>五四运动中国文人看宗教</p>
+<ol>
+<li>否定论：主张理性主义、科学主义，全盘否定</li>
+<li>取代论：蔡元培-美学教育，替代信仰；胡适-立德、立功、立言，三不朽，替代信仰</li>
+<li>选取论：选取耶稣的博爱、牺牲、宽恕，不要超自然的教义</li>
+<li>二元论：宗教（唯心）和科学（唯物），二者并存，屠孝实、刘明伯</li>
+</ol>
+<p>基督徒如何面对世面上的攻击？建议</p>
+<ol>
+<li>基督教的客观性：比如旧约的预言实现、考古界的发现</li>
+<li></li>
+</ol>
 
       
     </div>
@@ -927,7 +365,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E6%97%A5%E5%BF%97%E7%B3%BB%E7%BB%9F/%E6%97%A5%E5%BF%97%E9%87%87%E9%9B%86%E7%B3%BB%E7%BB%9F%E7%94%A8%E5%88%B0%E7%9A%84%E6%8A%80%E6%9C%AF/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/20/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-20/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -941,7 +379,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/12/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E6%97%A5%E5%BF%97%E7%B3%BB%E7%BB%9F/%E6%97%A5%E5%BF%97%E9%87%87%E9%9B%86%E7%B3%BB%E7%BB%9F%E7%94%A8%E5%88%B0%E7%9A%84%E6%8A%80%E6%9C%AF/" class="post-title-link" itemprop="url">日志采集系统用到的技术</a>
+            <a href="/2022/11/20/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-20/" class="post-title-link" itemprop="url">Sun Nov 20 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -953,7 +391,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2021-04-12 09:24:11 / Modified: 09:24:55" itemprop="dateCreated datePublished" datetime="2021-04-12T09:24:11+08:00">2021-04-12</time>
+      <time title="Created: 2022-11-20 10:22:31 / Modified: 10:41:09" itemprop="dateCreated datePublished" datetime="2022-11-20T10:22:31+08:00">2022-11-20</time>
     </span>
 
   
@@ -966,63 +404,160 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>日志从最初面向人类演变到现在的面向机器发生了巨大的变化。最初的日志主要的消费者是软件工程师，他们通过读取日志来排查问题，如今，大量机器日夜处理日志数据以生成可读性的报告以此来帮助人类做出决策。在这个转变的过程中，日志采集Agent在其中扮演着重要的角色。</p>
-<p>作为一个日志采集的Agent简单来看其实就是一个将数据从源端投递到目的端的程序，通常目的端是一个具备数据订阅功能的集中存储，这么做的目的其实是为了将日志分析和日志存储解耦，同一份日志可能会有不同的消费者感兴趣，获取到日志后所处理的方式也会有所不同，通过将数据存储和数据分析进行解耦后，不同的消费者可以订阅自己感兴趣的日志，选择对应的分析工具进行分析。</p>
-<p>像这样的具备数据订阅功能的集中存储业界比较流行的是Kafka，对应到阿里巴巴内部就是DataHub还有阿里云的LogHub。而数据源端大致可以分为三类，一类就是普通的文本文件，另外一类则是通过网络接收到的日志数据，最后一类则是通过共享内存的方式，本文只会谈及第一类。一个日志采集Agent最为核心的功能大致就是这个样子了。</p>
-<p>在这个基础上进一步又可以引入日志过滤、日志格式化、路由等功能，看起来就好像是一个生产车间。从日志投递的方式来看，日志采集又可以分为推模式和拉模式，本文主要分析的是推模式的日志采集。</p>
-<blockquote>
-<p>推模式是指日志采集Agent主动从源端取得数据后发送给目的端，而拉模式指的是目的端主动向日志采集Agent获取源端的数据</p>
-</blockquote>
-<h2 id="业界现状"><a href="#业界现状" class="headerlink" title="业界现状"></a>业界现状</h2><p>目前业界比较流行的日志采集主要有Fluentd、Logstash、Flume、scribe等，阿里巴巴内部则是LogAgent、阿里云则是LogTail，这些产品中Fluentd占据了绝对的优势并成功入驻CNCF阵营，它提出的统一日志层(Unified Logging Layer)大大的减少了整个日志采集和分析的复杂度。</p>
-<p>Fluentd认为大多数现存的日志格式其结构化都很弱，这得益于人类出色的解析日志数据的能力，因为日志数据其最初是面向人类的，人类是其主要的日志数据消费者。</p>
-<p>为此Fluentd希望通过统一日志存储格式来降低整个日志采集接入的复杂度，假想下输入的日志数据比如有M种格式，日志采集Agent后端接入了N种存储，那么每一种存储系统需要实现M种日志格式解析的功能，总的复杂度就是<code>M*N</code>，如果日志采集Agent统一了日志格式那么总的复杂度就变成了M + N。这就是Fluentd的核心思想，另外它的插件机制也是一个值得称赞的地方。</p>
-<p>Logstash和Fluentd类似是属于ELK技术栈，在业界也被广泛使用，关于两者的对比可以参考这篇文章Fluentd vs. Logstash: A Comparison of Log Collectors</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eukZ9J6BEiafd6PIlr0yWDkQL79oXxe5qBlJ4IicpFaSxZxMsic6NZAx9OKUbpLNjHBuHic5RJe7tdv7fq50f3AkVg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">图片</p>
-<h2 id="从头开始写一个日志采集Agent"><a href="#从头开始写一个日志采集Agent" class="headerlink" title="从头开始写一个日志采集Agent"></a>从头开始写一个日志采集Agent</h2><p>作为一个日志采集Agent在大多数人眼中可能就是一个数据“搬运工”，还会经常抱怨这个“搬运工”用了太多的机器资源，简单来看就是一个tail -f命令，再贴切不过了，对应到Fluentd里面就是in_tail插件。</p>
-<p>笔者作为一个亲身实践过日志采集Agent的开发者，希望通过本篇文章来给大家普及下日志采集Agent开发过程中的一些技术挑战。为了让整篇文章脉络是连续的，笔者试图通过“从头开始写一个日志采集Agent”的主题来讲述在整个开发过程中遇到的问题。</p>
-<h2 id="如何发现一个文件"><a href="#如何发现一个文件" class="headerlink" title="如何发现一个文件?"></a>如何发现一个文件?</h2><p>当我们开始写日志采集Agent的时候遇到的第一个问题就是怎么发现文件，最简单的方式就是用户直接把要采集的文件罗列出来放在配置文件中，然后日志采集Agent会读取配置文件找到要采集的文件列表，最后打开这些文件进行采集，这恐怕是最为简单的了。</p>
-<p>但是大多数情况日志是动态产生的，会在日志采集的过程中动态的创建出来, 提前罗列到配置文件中就太麻烦了。正常情况下用户只需要配置一个日志采集的目录和文件名字匹配的规则就可以了，比如Nginx的日志是放在/var/www/log目录下，日志文件的名字是access.log、access.log-2018-01-10…..类似于这样的形式，为了描述这类文件可以通过通配符或者正则的表示来匹配这类文件例如: access.log(-[0-9]{4}-[0-9]{2}-[0-9]{2})?有了这样的描述规则后日志采集Agent就可以知道哪些文件是需要采集的，哪些文件是不用采集的。</p>
-<p>接下来会遇到另外一个问题就是如何发现新创建的日志文件?，定时去轮询下目录或许是个不错的方法，但是轮询的周期太长会导致不够实时，太短又会耗CPU，你也不希望你的采集Agent被人吐槽占用太多CPU吧。Linux内核给我们提供了高效的Inotify的机制，由内核来监测一个目录下文件的变化，然后通过事件的方式通知用户。</p>
-<p>但是别高兴的太早，Inotify并没有我们想的那么好，它存在一些问题，首先并不是所有的文件系统都支持Inotify，此外它不支持递归的目录监测，比如我们对A目录进行监测，但是如果在A目录下面创建了B目录，然后立刻创建C文件，那么我们只能得到B目录创建的事件，C文件创建的事件就会丢失，最终会导致这个文件没有被发现和采集。</p>
-<p>对于已经存在的文件Inotify也无能为力，Inotify只能实时的发现新创建的文件。Inotify manpage中描述了更多关于Inotify的一些使用上的限制以及bug。如果你要保证不漏采那么最佳的方案还是Inotify+轮询的组合方式。通过较大的轮询周期来检测漏掉的文件和历史文件，通过Inotify来保证新创建的文件在绝大数情况下可以实时发现，即使在不支持Inotify的场景下，单独靠轮询也能正常工作。</p>
-<p>到此为止我们的日志采集Agent可以发现文件了，那么接下来就需要打开这个文件，然后进行采集了。但是天有不测风云，在我们采集的过程中机器Crash掉了，我们该如何保证已经采集的数据不要再采集了，能够继续上次没有采集到的地方继续呢?</p>
-<blockquote>
-<p>基于轮询的方式其优点就是保证不会漏掉文件，除非文件系统发生了bug，通过增大轮询的周期可以避免浪费CPU、但是实时性不够。Inotify虽然很高效，实时性很好但是不能保证100%不丢事件。因此通过结合轮询和Inotify后可以相互取长补短。</p>
-</blockquote>
-<h2 id="点位文件高可用"><a href="#点位文件高可用" class="headerlink" title="点位文件高可用"></a>点位文件高可用</h2><p>点位文件? 对就是通过点位文件来记录文件名和对应的采集位置。那如何保证这个点位文件可以可靠的写入呢? 因为可能在文件写入的那一刻机器Crash了导致点位数据丢掉或者数据错乱了。要解决这个问题就需要保证文件写入要么成功，要么失败，绝对不能出现写了一半的情况。Linux内核给我们提供了原子的rename。</p>
-<p>一个文件可以原子的rename成另外一个文件，利用这个特性可以保证点位文件的高可用。假设我们已经存在一份点位文件叫做offset，每一秒我们去更新这个点位文件，将采集的位置实时的记录在里面，整个更新的过程如下：</p>
+          <p>《启示录 3:14-22  第7个教会老底嘉教会》</p>
+<p>唐崇荣  </p>
+<p>不冷不热的基督徒：看世界胜过真理</p>
+<p>老底嘉教会历史悠久，但是没有什么长进。</p>
+<p>【14】你要写信给老底嘉教会的使者，说，那为阿们的, 为诚信真实见证的，在神创造万物之上为元首的，说，</p>
 <ul>
-<li>将点位数据写入到磁盘的<code>offset.bak</code>文件中</li>
-<li>fdatasync确保数据写入到磁盘</li>
-<li>通过<code>rename</code>系统调用将<code>offset.bak</code>更名为<code>offset</code></li>
+<li>阿门意味着诚心真实敬拜的，说明上帝的属性是真实的，所以上帝被称为阿门的上帝</li>
+<li>敬拜的门是透过圣灵到上帝面前，恩典的门是透过基督到上帝面前</li>
+<li>万物的元首：权柄<ul>
+<li>罗马书13:1，世上的权柄，都是神所命定的（政治神学）</li>
+<li>比拉多问问题，不是寻找真理，想知道答案，而是显得自己有智慧</li>
 </ul>
-<p>通过这个手段可以保证在任何时刻点位文件都是正常的，因为每次写入都会先确保写入到临时文件是成功的，然后原子的进行替换。这样就保证了offset文件总是可用的。在极端场景下会导致1秒内的点位没有及时更新，日志采集Agent启动后会再次采集这1秒内的数据进行重发，这基本上满足需求了。</p>
-<p>但是点位文件中记录了文件名和对应的采集位置这会带来另外一个问题，如果在进程Crash的过程中，文件被重命名了该怎么办? 那启动后岂不是找不到对应的采集位置了。在日志的这个场景下文件名其实非常不可靠，文件的重命名、删除、软链等都会导致相同的文件名在不同时刻其实指向的是不同的文件，而且将整个文件路径在内存中保存其实是非常耗费内存的。</p>
-<p>Linux内核提供了inode可以作为文件的标识信息，而且保证同一时刻Inode是不会重复的，这样就可以解决上面的问题，在点位文件中记录文件的inode和采集的位置即可。日志采集Agent启动后通过文件发现找到要采集的文件，通过获取Inode然后从点位文件中查找对应的采集位置，最后接着后面继续采集即可。那么即使文件重命名了但是它的Inode不会变化，所以还是可以从点位文件中找到对应的采集位置。</p>
-<p>但是Inode有没有限制呢? 当然有，天下没有免费的午餐，不同的文件系统Inode会重复，一个机器可以安装多个文件系统，所以我们还需要通过dev(设备号)来进一步区分，所以点位文件中需要记录的就是dev、inode、offset三元组。到此为止我们的采集Agent可以正常的采集日志了，即使Crash了再次启动后仍然可以继续进行采集。</p>
-<p>但是突然有一天我们发现有两个文件居然是同一个Inode，Linux内核不是保证同一时刻不会重复的吗?难道是内核的bug?注意我用的是“同一时刻”，内核只能保证在同一时刻不会重复，这到底是什么意思呢? 这便是日志采集Agent中会遇到的一个比较大的技术挑战，如何准确的标识一个文件。</p>
-<p>（搜索公众号Java知音，回复“2021”，送你一份Java面试题宝典）</p>
-<h2 id="如何识别一个文件"><a href="#如何识别一个文件" class="headerlink" title="如何识别一个文件?"></a>如何识别一个文件?</h2><p>如何标识一个文件算是日志采集Agent中一个比较有挑战的技术问题了，我们先是通过文件名来识别，后来发现文件名并不可靠，而且还耗费资源，后来我们换成了dev+Inode，但是发现Inode只能保证同一时刻Inode不重复，那这句话到底是什么意思呢?</p>
-<p>想象一下在T1时刻有一个文件Inode是1我们发现了并开始采集，一段时间后这个文件被删除了，Linux内核就会将这个Inode释放掉，新创建一个文件后Linux内核会将刚释放的Inode又分配给这个新文件。那么这个新文件被发现后会从点位文件中查询上次采集到哪了，结果就会找到之前的那个文件记录的点位了，导致新文件是从一个错误的位置进行采集。</p>
-<p>如果能给每一个文件打上一个唯一标识或许就可以解决这个问题，幸好Linux内核给文件系统提供了扩展属性xattr，我们可以给每一个文件生成唯一标识记录在点位文件中，如果文件被删除了，然后创建一个新的文件即使Inode相同，但是文件标识不一样，日志采集Agent就可以识别出来这是两个文件了。</p>
-<p>但是问题来了，并不是所有的文件系统都支持xattr扩展属性。所以扩展属性只是解了部分问题。或许我们可以通过文件的内容来解决这个问题，可以读取文件的前N个字节作为文件标识。这也不失为一种解决方案，但是这个N到底取多大呢?</p>
-<p>越大相同的概率越小，造成无法识别的概率就越小。要真正做到100%识别出来的通用解决方案还有待调研，姑且认为这里解了80%的问题吧。接下来就可以安心的进行日志采集了，日志采集其实就是读文件了，读文件的过程需要注意的就是尽可能的顺序读，充份利用Linux系统缓存，必要的时候可以用posix_fadvise在采集完日志文件后清除页缓存，主动释放系统资源。那么什么时候才算采集完一个文件呢?</p>
-<p>采集到末尾返回EOF的时候就算采集完了。可是一会日志文件又会有新内容产生，如何才知道有新数据了，然后继续采集呢?</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eukZ9J6BEiafd6PIlr0yWDkQL79oXxe5qNiaico2ZxAyFlSVibr7ClMWStLWxRhxGiaYqcLcX6Taw1zonPkzvo8tgRQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">图片</p>
-<h2 id="如何知道文件内容更新了"><a href="#如何知道文件内容更新了" class="headerlink" title="如何知道文件内容更新了?"></a>如何知道文件内容更新了?</h2><p>Inotify可以解决这个问题、通过Inotify监控一个文件，那么只要这个文件有新增数据就会触发事件，得到事件后就可以继续采集了。但是这个方案存在一个问题就是在大量文件写入的场景会导致事件队列溢出，比如用户连续写入日志N次就会产生N个事件，其实对于日志采集Agent只要知道内容就更新就可以了，至于更新几次这个反而不重要， 因为每次采集其实都是持续读文件，直到EOF，只要用户是连续写日志，那么就会一直采集下去。</p>
-<p>另外Intofy能监控的文件数量也是有上限的。所以这里最简单通用的方案就是轮询去查询要采集文件的stat信息，发现文件内容有更新就采集，采集完成后再触发下一次的轮询，既简单又通用。通过这些手段日志采集Agent终于可以不中断的持续采集日志了，既然是日志总会有被删除的一刻，如果在我们采集的过程中被删除了会如何?</p>
-<p>大可放心，Linux中的文件是有引用计数的，已经打开的文件即使被删除也只是引用计数减1，只要有进程引用就可以继续读内容的，所以日志采集Agent可以安心的继续把日志读完，然后释放文件的fd，让系统真正的删除文件。但是如何知道采集完了呢?</p>
-<p>废话，上面不是说了采集到文件末尾就是采集完了啊，可是如果此刻还有另外一个进程也打开了这个文件，在你采集完所有内容后又追加了一段内容进去，而你此时已经释放了fd了，在文件系统上这个文件已经不在了，再也没办法通过文件发现找到这个文件，打开并读取数据了，这该怎么办?</p>
-<h2 id="如何安全的释放文件句柄"><a href="#如何安全的释放文件句柄" class="headerlink" title="如何安全的释放文件句柄?"></a>如何安全的释放文件句柄?</h2><p>Fluentd的处理方式就是将这部分的责任推给用户，让用户配置一个时间，文件删除后如果在指定的时间范围内没有数据新增就释放fd，其实这就是间接的甩锅行为了。这个时间配置的太小会造成丢数据的概率增大，这个时间配置的太大会导致fd和磁盘空间一直被占用造成短时间自由浪费的假象。</p>
-<p>这个问题的本质上其实就是我们不知道还有谁在引用这个文件，如果还有人在引用这个文件就可能会写入数据，此时即使你释放了fd资源仍然是占用的，还不如不释放，如果没有任何人在引用这个文件了，那其实就可以立刻释放fd了。如何知道谁在引用这个文件呢?</p>
-<p>想必大家都用过 lsof -f列出系统中进程打开的文件列表，这个工具通过扫描每一个进程的/proc/PID/fd/目录下的所有文件描述符，通过readlink就可以查看这个描述符对应的文件路径，例如下面这个例子:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tianqian-zyf@ubuntu:~$ sudo ls -al &#x2F;proc&#x2F;22686&#x2F;fd  </span><br><span class="line">total 0  </span><br><span class="line">dr-x------ 2 tianqian-zyf tianqian-zyf  0 May 27 12:25 .  </span><br><span class="line">dr-xr-xr-x 9 tianqian-zyf tianqian-zyf  0 May 27 12:25 ..  </span><br><span class="line">lrwx------ 1 tianqian-zyf tianqian-zyf 64 May 27 12:25 0 -&gt; &#x2F;dev&#x2F;pts&#x2F;19  </span><br><span class="line">lrwx------ 1 tianqian-zyf tianqian-zyf 64 May 27 12:25 1 -&gt; &#x2F;dev&#x2F;pts&#x2F;19  </span><br><span class="line">lrwx------ 1 tianqian-zyf tianqian-zyf 64 May 27 12:25 2 -&gt; &#x2F;dev&#x2F;pts&#x2F;19  </span><br><span class="line">lrwx------ 1 tianqian-zyf tianqian-zyf 64 May 27 12:25 4 -&gt; &#x2F;home&#x2F;tianqian-zyf&#x2F;.post.lua.swp  </span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>【15】我知道你的行为，你也不冷也不热。我巴不得你或冷或热。</p>
+<ul>
+<li>上帝创造人类，给了人类生命的温度 - 体温</li>
+<li>思想冷静、火热的生命</li>
+<li>如果一个教会冷到一个地步，会意识到自己需要热了；如果一个教会热到一个地步，就意识到自己需要找医生了</li>
+</ul>
+<h3 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h3>
+      
+    </div>
 
-<p>22686这个进程就打开了一个文件，fd是4，对应的文件路径是/home/tianqian-zyf/.post.lua.swp。通过这个方法可以查询到文件的引用计数，如果引用计数是1，也就是只有当前进程引用，那么基本上可以做到安全的释放fd，不会造成数据丢失，但是带来的问题就是开销有点大，需要遍历所有的进程查看它们的打开文件表逐一的比较，复杂度是O(n)，如果能做到O(1)这个问题才算完美解决。</p>
-<p>通过搜索相关的资料我发现这个在用户态来做几乎是没有办法做到的，Linux内核没有暴露相关的API。只能通过Kernel的方式来解决，比如添加一个API通过fd来获取文件的引用计数。这在内核中还是比较容易做到的，每一个进程都保存了打开的文件，在内核中就是struct file结构，通过这个结构就可以找到这个文件对应的struct inode对象，这个对象内部就维护了引用计数值。期待后续Linux内核能够提供相关的API来完美解决这个问题吧。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eukZ9J6BEiafd6PIlr0yWDkQL79oXxe5qjpso9AwdROS9wv2rp55UwwJgaPrC20Z8f0z6RS9icIkBTVfAXfOmT5Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">图片</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>到此为此，一个基于文件的采集Agen涉及到的核心技术点都已经介绍完毕了，这其中涉及到很多文件系统、Linux相关的知识，只有掌握好这些知识才能更好的驾驭日志采集。</p>
-<p>想要编写一个可靠的日志采集Agent确保数据不丢失，这其中的复杂度和挑战不容忽视。希望通过本文能让读者对日志采集有一个较为全面的认知。</p>
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring%E6%A1%86%E6%9E%B6-04-bean%E5%8C%85-Bean/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring%E6%A1%86%E6%9E%B6-04-bean%E5%8C%85-Bean/" class="post-title-link" itemprop="url">spring框架-04-bean包-Bean</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2022-10-17T19:52:16+08:00">2022-10-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-12-10 18:54:08" itemprop="dateModified" datetime="2022-12-10T18:54:08+08:00">2022-12-10</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="spring框架-04-bean包-Bean"><a href="#spring框架-04-bean包-Bean" class="headerlink" title="spring框架-04-bean包-Bean"></a>spring框架-04-bean包-Bean</h1><p><img src="https://mmbiz.qpic.cn/mmbiz_png/PW0wIHxgg3lvJAyXpj95WKrwovJQwiay1XP0WEEEPn0uuicicWbPcVo9picKjaErjr3psdE0jMY9Fqs8xoUA28rVmA/640" alt="图片"></p>
+<h3 id="BeanDefinition（元信息的内存形式）"><a href="#BeanDefinition（元信息的内存形式）" class="headerlink" title="BeanDefinition（元信息的内存形式）"></a>BeanDefinition（元信息的内存形式）</h3><p>我们只是需要知道配置元信息被加载到内存之后是以BeanDefinition的形存在的即可。</p>
+<h3 id="BeanDefinitionReader（元信息的读取）"><a href="#BeanDefinitionReader（元信息的读取）" class="headerlink" title="BeanDefinitionReader（元信息的读取）"></a>BeanDefinitionReader（元信息的读取）</h3><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhqR6Jg1H8Gw5ryNDWeh5b2FtAJ3fVegLzicgADJvM2ibYFJKkuoS0ehty9TI437OtBRCE5u0Mo4VOfw/640" alt="图片" style="zoom:66%;" />
+
+<p>Spring中xml配置文件中一个个的Bean定义，但是Spring是要靠BeanDefinationReader了。</p>
+<ul>
+<li><p>读取xml配置元信息，那么可以使用XmlBeanDefinationReader。</p>
+</li>
+<li><p>读取properties配置文件，那么可以使用PropertiesBeanDefinitionReader加载。</p>
+</li>
+<li><p>读取注解配置元信息，那么可以使用 AnnotatedBeanDefinitionReader加载。</p>
+</li>
+<li><p>读取自定义的配置信息，那么可以自定义BeanDefinationReader来控制配置元信息的加载</p>
+</li>
+</ul>
+<p>总的来说，BeanDefinationReader的作用就是加载配置元信息，并将其转化为内存形式的BeanDefination，存在某一个地方</p>
+<h3 id="BeanDefinationRegistry（元信息内存形式的内存位置）"><a href="#BeanDefinationRegistry（元信息内存形式的内存位置）" class="headerlink" title="BeanDefinationRegistry（元信息内存形式的内存位置）"></a>BeanDefinationRegistry（元信息内存形式的内存位置）</h3><p>Spring通过BeanDefinationReader将配置元信息加载到内存生成相应的BeanDefination之后，就将其注册到BeanDefinationRegistry中，BeanDefinationRegistry就是一个存放BeanDefination的Map，通过特定的Bean定义的id，映射到相应的BeanDefination。</p>
+<h3 id="BeanFactoryPostProcessor-解析BeanDef中的占位符"><a href="#BeanFactoryPostProcessor-解析BeanDef中的占位符" class="headerlink" title="BeanFactoryPostProcessor(解析BeanDef中的占位符)"></a>BeanFactoryPostProcessor(解析BeanDef中的占位符)</h3><p>BeanFactoryPostProcessor是容器启动阶段Spring提供的一个扩展点，主要负责对注册到BeanDefinationRegistry中的一个个的BeanDefination进行一定程度上的修改与替换。</p>
+<p>例如我们的配置元信息中有些可能会修改的配置信息散落到各处，不够灵活，修改相应配置的时候比较麻烦，这时我们可以使用占位符的方式来配置。例如配置Jdbc的DataSource连接的时候可以这样配置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id&#x3D;&quot;dataSource&quot;  </span><br><span class="line">    class&#x3D;&quot;org.apache.commons.dbcp.BasicDataSource&quot;  </span><br><span class="line">    destroy-method&#x3D;&quot;close&quot;&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;maxIdle&quot; value&#x3D;&quot;$&#123;jdbc.maxIdle&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;maxActive&quot; value&#x3D;&quot;$&#123;jdbc.maxActive&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;maxWait&quot; value&#x3D;&quot;$&#123;jdbc.maxWait&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;minIdle&quot; value&#x3D;&quot;$&#123;jdbc.minIdle&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">  </span><br><span class="line">    &lt;property name&#x3D;&quot;driverClassName&quot;  </span><br><span class="line">        value&#x3D;&quot;$&#123;jdbc.driverClassName&#125;&quot;&gt;  </span><br><span class="line">    &lt;&#x2F;property&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;url&quot; value&#x3D;&quot;$&#123;jdbc.url&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">  </span><br><span class="line">    &lt;property name&#x3D;&quot;username&quot; value&#x3D;&quot;$&#123;jdbc.username&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">    &lt;property name&#x3D;&quot;password&quot; value&#x3D;&quot;$&#123;jdbc.password&#125;&quot;&gt;&lt;&#x2F;property&gt;  </span><br><span class="line">&lt;&#x2F;bean&gt; </span><br></pre></td></tr></table></figure>
+
+<p>BeanFactoryPostProcessor就会对注册到BeanDefinationRegistry中的BeanDefination做最后的修改，替换<code>$</code>占位符为配置文件中的真实的数据。</p>
+<p>至此，整个容器启动阶段就算完成了，容器的启动阶段的最终产物就是注册到BeanDefinationRegistry中的一个个BeanDefination了，这就是Spring为Bean实例化所做的预热的工作。<img src="https://mmbiz.qpic.cn/mmbiz_png/8KKrHK5ic6XBzOtg5OQ6icxfKTvViaePJOczt8icmDz64YEmm1NjOzOkpl7C4dU8Arrc4xFFniayWje5TkK8AydcAtg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:67%;" /></p>
+<h1 id="Bean实例化阶段源码解析"><a href="#Bean实例化阶段源码解析" class="headerlink" title="Bean实例化阶段源码解析"></a>Bean实例化阶段源码解析</h1><p>Bean的创建过程</p>
+<ol>
+<li>验证，Merge BeanDefinition(<code>@Lookup</code>等)，判断是否是抽象类、单例、懒加载、FactoryBean等等</li>
+<li>推断构造方法</li>
+<li>new对象(反射),放到Spring容器中</li>
+<li>缓存注解信息，并合并BeanDefination对象</li>
+<li>提前暴露自己(bean的半成品)</li>
+<li>判定是否需要属性注入</li>
+<li>完成属性注入</li>
+<li>调用生命周期回调方法<code>Aware</code>等</li>
+<li>完成代理AOP</li>
+<li>put容器</li>
+<li>销毁对象</li>
+</ol>
+<h2 id="context包高级容器入口：AbstractApplicationContext-refresh"><a href="#context包高级容器入口：AbstractApplicationContext-refresh" class="headerlink" title="context包高级容器入口：AbstractApplicationContext.refresh()"></a>context包高级容器入口：AbstractApplicationContext.refresh()</h2><p>-&gt;finishBeanFactoryInitialization(beanFactory)</p>
+<h2 id="bean包基础容器入口："><a href="#bean包基础容器入口：" class="headerlink" title="bean包基础容器入口："></a>bean包基础容器入口：</h2><p>BeanDefinition的解析入口：</p>
+<h5 id="AbstractBeanFactory-preInstantiateSingletons"><a href="#AbstractBeanFactory-preInstantiateSingletons" class="headerlink" title="AbstractBeanFactory.preInstantiateSingletons()"></a>AbstractBeanFactory.preInstantiateSingletons()</h5><p>-&gt; // Instantiate all remaining (non-lazy-init) singletons.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">beanFactory.preInstantiateSingletons();</span><br></pre></td></tr></table></figure>
+
+<h5 id="AbstractBeanFactory-getBean-beanName"><a href="#AbstractBeanFactory-getBean-beanName" class="headerlink" title="AbstractBeanFactory#getBean(beanName)"></a>AbstractBeanFactory#getBean(beanName)</h5><p>-&gt; // Trigger initialization of all non-lazy singleton beans…</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">getBean</span><span class="params">(String name)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.doGetBean(name, (Class)<span class="keyword">null</span>, (Object[])<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="AbstractBeanFactory-doGetBean-beanName-》从BeanDefinition获取Bean的元数据"><a href="#AbstractBeanFactory-doGetBean-beanName-》从BeanDefinition获取Bean的元数据" class="headerlink" title="AbstractBeanFactory#doGetBean(beanName)=》从BeanDefinition获取Bean的元数据"></a>AbstractBeanFactory#doGetBean(beanName)=》从BeanDefinition获取Bean的元数据</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> &lt;T&gt; <span class="function">T <span class="title">doGetBean</span><span class="params">(<span class="keyword">final</span> String name, <span class="meta">@Nullable</span> <span class="keyword">final</span> Class&lt;T&gt; requiredType,</span></span></span><br><span class="line"><span class="function"><span class="params">			<span class="meta">@Nullable</span> <span class="keyword">final</span> Object[] args, <span class="keyword">boolean</span> typeCheckOnly)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">    <span class="comment">//TODO 验证Bean的名字是否非法</span></span><br><span class="line">    <span class="keyword">final</span> String beanName = transformedBeanName(name);</span><br><span class="line">    Object bean;</span><br><span class="line">	<span class="comment">// 从单例缓存中检查是否存在单例bean，第一次必定返回null</span></span><br><span class="line">	Object sharedInstance = getSingleton(beanName);</span><br><span class="line">	<span class="keyword">if</span> (sharedInstance != <span class="keyword">null</span> &amp;&amp; args == <span class="keyword">null</span>) &#123;</span><br><span class="line">    	bean = getObjectForBeanInstance(sharedInstance, name, beanName, <span class="keyword">null</span>);</span><br><span class="line">	&#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果当前bean正在被创建则抛出异常，prototype bean</span></span><br><span class="line">        <span class="keyword">if</span> (isPrototypeCurrentlyInCreation(beanName)) &#123;</span><br><span class="line">        	<span class="keyword">throw</span> <span class="keyword">new</span> BeanCurrentlyInCreationException(beanName);</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//TODO 解析合并后的BeanDefinition对象 待研究</span></span><br><span class="line">            <span class="keyword">final</span> RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);</span><br><span class="line">            checkMergedBeanDefinition(mbd, beanName, args);</span><br><span class="line">            <span class="comment">// 确保当前Bean所依赖的Bean的初始化, @DependsOn</span></span><br><span class="line">            String[] dependsOn = mbd.getDependsOn();</span><br><span class="line">            <span class="keyword">if</span> (dependsOn != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (String dep : dependsOn) &#123;</span><br><span class="line">                    registerDependentBean(dep, beanName);</span><br><span class="line">                    <span class="comment">// 省略</span></span><br><span class="line">                    <span class="comment">// 实例化该例DependsOn的类</span></span><br><span class="line">                    getBean(dep);  </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 判断类是否是单例，prototype bean Spring是不会实例化的</span></span><br><span class="line">			<span class="comment">// SpringBoot和Spring MVC中@Controller、@Service、@Component、@Repository默认都是单例</span></span><br><span class="line">            <span class="keyword">if</span> (mbd.isSingleton()) &#123;</span><br><span class="line">                sharedInstance = getSingleton(beanName, () -&gt; &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="comment">// 创建bean的过程,对象的创建以及代理</span></span><br><span class="line">                        <span class="keyword">return</span> createBean(beanName, mbd, args);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (BeansException ex) &#123;</span><br><span class="line">                        destroySingleton(beanName);</span><br><span class="line">                        <span class="keyword">throw</span> ex;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (BeansException ex) &#123;</span><br><span class="line">            <span class="comment">// Bean创建失败，清除Bean创建标识</span></span><br><span class="line">            cleanupAfterBeanCreationFailure(beanName);</span><br><span class="line">            <span class="keyword">throw</span> ex;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="keyword">return</span> (T) bean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="AbstractBeanFactory-doCreateBean-beanName"><a href="#AbstractBeanFactory-doCreateBean-beanName" class="headerlink" title="AbstractBeanFactory#doCreateBean(beanName)"></a>AbstractBeanFactory#doCreateBean(beanName)</h2><h5 id="AbstractBeanFactory-createBeanInstance：实例化"><a href="#AbstractBeanFactory-createBeanInstance：实例化" class="headerlink" title="AbstractBeanFactory#createBeanInstance：实例化"></a>AbstractBeanFactory#createBeanInstance：实例化</h5><p>其实也就是 调用对象的构造方法实例化对象  —-&gt; new ServiceA()</p>
+<h5 id="AbstractBeanFactory-populateBean：填充属性"><a href="#AbstractBeanFactory-populateBean：填充属性" class="headerlink" title="AbstractBeanFactory#populateBean：填充属性"></a>AbstractBeanFactory#populateBean：填充属性</h5><p>这一步主要是多bean的依赖属性进行填充</p>
+<h5 id="AbstractBeanFactory-initializeBean：调用初始化方法"><a href="#AbstractBeanFactory-initializeBean：调用初始化方法" class="headerlink" title="AbstractBeanFactory#initializeBean：调用初始化方法"></a>AbstractBeanFactory#initializeBean：调用初始化方法</h5><p>调用spring xml中的init() 方法。</p>
 
       
     </div>
@@ -1049,7 +584,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/springboot-FactoryBean%E5%92%8CBeanFactory/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-16/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1063,7 +598,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/springboot-FactoryBean%E5%92%8CBeanFactory/" class="post-title-link" itemprop="url">springboot-FactoryBean和BeanFactory</a>
+            <a href="/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-16/" class="post-title-link" itemprop="url">Sun Oct 16 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1075,7 +610,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2021-04-12 09:13:20 / Modified: 09:21:49" itemprop="dateCreated datePublished" datetime="2021-04-12T09:13:20+08:00">2021-04-12</time>
+      <time title="Created: 2022-10-16 10:22:31 / Modified: 16:33:25" itemprop="dateCreated datePublished" datetime="2022-10-16T10:22:31+08:00">2022-10-16</time>
     </span>
 
   
@@ -1088,34 +623,81 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>常说spring的核心是ioc，ioc的核心是BeanFactory。然而在spring中还有一个很容易让人混淆的词FactoryBean。本文通过一些mybatis源码来讲述其区别，请大家参考。</p>
-<h2 id="一、为什么会有FactoryBean？"><a href="#一、为什么会有FactoryBean？" class="headerlink" title="一、为什么会有FactoryBean？"></a>一、为什么会有FactoryBean？</h2><p>BeanFactory是生产bean的工厂。在此工厂中，我们可以生产出我们想要的bean，并且通过getBean接口进行获取。</p>
-<p>但是在通过getBean获取bean之前，我们需要事先定义这个bean涨什么样子，或者说它由哪些组件组成。定义的方式有很多，可以通过xml进行定义，或者在代码中通过注解（@Bean、@Service）进行定义。</p>
-<p>就好比一个Controller，在最原始的xml配置bean的时候，我们需要定义它是由哪些service组成，然后一点点的配置好。xml要与Controller的service一一对应起来。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbudngSXpAkDiasH1qK8ojKKCjNLksdkxibGFpjw28Sl9aRkr1BUhHukCibTrTf5IB9Jm3eGLtPQ227m5A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>这种方式的弊端是所有的bean都需要事先定义好，但是有时候，有的一些bean，我们只知道它大概的样子，但是无法事先定义出其具体的功能。</p>
-<p>就好比，我们知道它是一只鸟，但是不知道是什么种类的鸟，只有在代码执行的时候，我才知道是什么种类的鸟。</p>
-<p>这样FactoryBean的就有了其意义，它可以定义出一种类型的Bean,并且在创建的时候再去实现其具体的功能。里面有三个方法。</p>
+          <p>《启示录：基督给非拉铁非教会》</p>
+<p>讲员：唐崇荣牧师</p>
+<p>经文：启示录 3:7-13</p>
+<p>非拉铁非教会没有被耶稣责备和悔改</p>
+<p>大卫的钥匙，而不是亚伯拉罕、摩西的钥匙、但以理的钥匙</p>
 <ul>
-<li><code>getObject</code> 获取bean方法，在此方法中，我们可以自己定义一个对象，然后自行修改其创建过程。通过这个方法，我们可以在mapper创建的时候再实现其具体的功能。</li>
-<li><code>getObjectType</code> 获取这类的类型。</li>
-<li><code>isSingleton</code> 是否单例。</li>
+<li>大卫是合神心意的，但是合神心意的意思是什么呢？<ul>
+<li>唐牧师观点：大卫也有罪，而且非常严重的杀人罪和淫乱罪，怎么可能称为合神心意的人？按照善行的角度，大卫不是合神心意的，因为基督是神的心，大卫对基督的认识、他的基督论，大卫看到神所喜悦的，是旧约中最深的；传道人能看到基督，就是神所喜悦的</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public interface FactoryBean&lt;T&gt; &#123;</span><br><span class="line">    String OBJECT_TYPE_ATTRIBUTE &#x3D; &quot;factoryBeanObjectType&quot;;</span><br><span class="line"></span><br><span class="line">    @Nullable</span><br><span class="line">    T getObject() throws Exception;</span><br><span class="line"></span><br><span class="line">    @Nullable</span><br><span class="line">    Class&lt;?&gt; getObjectType();</span><br><span class="line"></span><br><span class="line">    default boolean isSingleton() &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="二、通过源码深入学习FactoryBean"><a href="#二、通过源码深入学习FactoryBean" class="headerlink" title="二、通过源码深入学习FactoryBean"></a>二、通过源码深入学习FactoryBean</h2><p>这里带领大家了解下Mybatis的MapperFactoryBean，这个是生成Mapper的FactoryBean。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbudngSXpAkDiasH1qK8ojKKCjb1k1G4PNRZ0nhyIuzyuoetyQabviaej3Phw7lmjtzaCrB5m1pxIHBAw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>大家可以自行打开源码查看，通过上图的流程即可发现。每一个mapper是通过MapperFactoryBean的getObject方法进行创建，最后生成一个代理类。在代理类中对Mapper对应的注解信息进行解析。</p>
-<p>相信跟一下mybatis的源码之后，对FactoryBean会有更加深入的理解。虽然在开发时用FactoryBean的机会并不多，但是源码中会经常遇到，例如spring cloud的feign组件，里面肯定也会看到FactoryBean的身影。</p>
-<p>对于mybatis和feign，可以很轻松的发现其共同点：</p>
+</li>
+<li>所以教会对基督的认识，能像大卫一样，就是神所喜悦的</li>
+</ul>
+<p>教会人众多，但是能传福音的人不多，</p>
 <ul>
-<li>存在一种类型的bean。mybatis是Mapper,feign是FeignClient。</li>
-<li>这种bean功能单一。mapper只跟数据库做交互。FeignClient只是接口调用。</li>
-<li>quartz框架。里面也有JobDetailFactoryBean</li>
-<li>Redis中有RedisClientFactoryBean。</li>
-<li>security框架的UserDetailsManagerResourceFactoryBean。</li>
+<li>这些人能抓住耶稣基督，是蒙恩的，施比受更蒙恩，这样上帝为他们开了门，没有人能关的</li>
+<li>这些传福音的过程中，开始的时候非常艰难，比如唐牧师传福音，上帝为他们教会打开了门，以后的青年牧者，可以继续走在耶稣开的这条门</li>
 </ul>
-<p>其实他们都是有一个共同的特点，就是生产的bean是一种类型，在<a href="">创建的过程中</a>在实现其功能</p>
+<p>众多会友不认识教会蒙恩的地方，就是传福音的机会，而不是金钱增多；</p>
+<p>约翰福音9:4</p>
+<p>趁着白日（就是主耶稣打开的门），你们要做工</p>
+<p>非拉铁非教会的圣徒能够辨别真假使徒和撒旦一伙儿的人</p>
+<ul>
+<li><p>能够分辨真假的，就是智慧，3个要素</p>
+<ul>
+<li><p>敬畏耶和华是智慧的开端；</p>
+</li>
+<li><p>认识主的圣洁</p>
+</li>
+<li><p>远远离开恶事的人</p>
+</li>
+</ul>
+</li>
+<li><p>向一个人下跪</p>
+</li>
+</ul>
+<p>非拉铁非教会要保守</p>
+<ul>
+<li>曾经的领受，是守不住的，所以我们要持守上帝给与的</li>
+<li>我们不要为过去的成功而骄傲和傲慢，因为上帝会夺去</li>
+</ul>
+<p>得胜的，我要叫他在我神殿中作柱子；</p>
+<ul>
+<li>虽然柱子的担子很重，但是要支持</li>
+</ul>
+<p>“我又要将我神的名和我神城的名”</p>
+<ul>
+<li>赐下名字，就是赐下尊贵的地位；圣经中3次神赐名字，亚伯拉罕、雅各-&gt;以色列、西门-&gt;彼得</li>
+<li>“我的新名”，耶稣基督的新名是什么？<ul>
+<li>启示录19章：万王之王、万主之主</li>
+</ul>
+</li>
+</ul>
+<p>“凡有耳的都应当听”</p>
+<ul>
+<li></li>
+</ul>
+<h3 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h3><h4 id="从基督教的角度看太平天国"><a href="#从基督教的角度看太平天国" class="headerlink" title="从基督教的角度看太平天国"></a>从基督教的角度看太平天国</h4><p>使徒行传9章，彼得和行邪术的西门；这个西门和洪秀全很像</p>
+<p>洪秀全，1812年生，广东花县出生；在广东收到梁发的《劝世良言》小册子；1843年，他感悟到他在梦中的老年人；1851年，广西起义，口号：替天行道、斩妖除魔</p>
+<p>虽然和基督教有关系，但又不是纯正的基督教改革运动</p>
+<ul>
+<li>和传统的民间革命很像</li>
+<li>洪秀全迷信的是黄天上帝，是混合中国的民间；</li>
+<li>基督论：他对耶稣的独一儿子，不认识</li>
+<li>人伦：大使命不是暴力手段，但是洪秀全是用武力驱逐妖魔；造偶像运动</li>
+<li>神论：他把自己当做偶像，造神运动</li>
+</ul>
+<p>混合主义：</p>
+<ol>
+<li>教会初期，诺斯底的混合主义，基督不是完全的神，他们在基督教上一致，但是基督论上有问题</li>
+<li>19世纪，非神化化”，他认为圣经是用神话的方式表达</li>
+<li>二战以后，存在主义，</li>
+<li>“最终关怀”，祁克果</li>
+<li>新纪元</li>
+<li>统一教，文显明，强调血统</li>
+</ol>
 
       
     </div>
@@ -1142,7 +724,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/09/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BF%9D%E8%AF%81%E6%94%AF%E4%BB%98%E4%B8%8D%E4%BC%9A%E9%87%8D%E5%A4%8D/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-23/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1156,7 +738,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/09/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%BF%9D%E8%AF%81%E6%94%AF%E4%BB%98%E4%B8%8D%E4%BC%9A%E9%87%8D%E5%A4%8D/" class="post-title-link" itemprop="url">服务端保证支付不会重复</a>
+            <a href="/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-10-23/" class="post-title-link" itemprop="url">Sun Oct 16 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1166,10 +748,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2021-04-09 09:25:38 / Modified: 09:27:10" itemprop="dateCreated datePublished" datetime="2021-04-09T09:25:38+08:00">2021-04-09</time>
+      <time title="Created: 2022-10-16 10:22:31" itemprop="dateCreated datePublished" datetime="2022-10-16T10:22:31+08:00">2022-10-16</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-11-06 16:07:40" itemprop="dateModified" datetime="2022-11-06T16:07:40+08:00">2022-11-06</time>
+      </span>
 
   
 </div>
@@ -1181,21 +769,50 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhpvHLOZIFbzHcjiaDicm4SkC8fVx1iaB4z2znhP1WibEws2L6EGZOJVaGzVI1AQdp48NXKuUOWB8Oxlzg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>如图是一个简化的下单流程，首先是提交订单，然后是支付。支付的话，一般是走支付网关（支付中心），然后支付中心与第三方支付渠道（微信、支付宝、银联）交互，支付成功以后，异步通知支付中心，支付中心更新自身支付订单状态，再通知业务应用，各业务再更新各自订单状态。</p>
-<p>这个过程中经常可能遇到的问题是掉单，无论是超时未收到回调通知也好，还是程序自身报错也好，总之由于各种各样的原因，没有如期收到通知并正确的处理后续逻辑等等，都会造成用户支付成功了，但是服务端这边订单状态没更新，这个时候有可能产生投诉，或者用户重复支付。</p>
-<p><strong>由于③⑤造成的掉单称之为外部掉单，由④⑥造成的掉单我们称之为内部掉单</strong></p>
-<p>为了防止掉单，这里可以这样处理：</p>
-<p>1、支付订单增加一个中间状态“支付中”，当同一个订单去支付的时候，先检查有没有状态为“支付中”的支付流水，当然支付（prepay）的时候要加个锁。支付完成以后更新支付流水状态的时候再讲其改成“支付成功”状态。</p>
-<p>2、支付中心这边要自己定义一个超时时间（比如：30秒），在此时间范围内如果没有收到支付成功回调，则应调用接口主动查询支付结果，比如10s、20s、30s查一次，如果在最大查询次数内没有查到结果，应做异常处理</p>
-<p>3、支付中心收到支付结果以后，将结果同步给业务系统，可以发MQ，也可以直接调用，直接调用的话要加重试（比如：SpringBoot Retry）</p>
-<p>4、无论是支付中心，还是业务应用，在接收支付结果通知时都要考虑接口幂等性，消息只处理一次，其余的忽略</p>
-<p>5、业务应用也应做超时主动查询支付结果</p>
-<p>对于上面说的超时主动查询可以在发起支付的时候将这些支付订单放到一张表中，用定时任务去扫</p>
-<p><strong>为了防止订单重复提交，可以这样处理：</strong></p>
-<p>创建订单的时候，用订单信息计算一个哈希值，判断redis中是否有key，有则不允许重复提交，没有则生成一个新key，放到redis中设置个过期时间，然后创建订单。其实就是在一段时间内不可重复相同的操作</p>
-<p>附上微信支付最佳实践：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhpvHLOZIFbzHcjiaDicm4SkC8nImKMeCljnNNHJ6ff9AXgWny0f1icxBJJicMzicysZGlHq3EtjcTibCV4w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+          <p>《》</p>
+<p>讲员：赫老师</p>
+<h3 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h3><p>1.楼李华:更正教第一个在华珣道、他爸爸在中国开办印刷厂</p>
+<p>2.bin辉连：苏格兰，名言【随时待命】</p>
+<p>3.戴德生（英国）</p>
+<p>沿海宣教时期：1792年</p>
+<p>中国内地宣教时期：1865年，戴德生在英国伦敦成立，截至目前，戴德生有5代在中国宣教</p>
+<ul>
+<li><p>利文斯顿（非洲内度，非洲宣教之父）</p>
+</li>
+<li><p>信心差会原则：不公开募捐</p>
+</li>
+<li><p>愿景：每一个省都要有一对宣教夫妇</p>
+</li>
+<li><p>照着神的吩咐去做，一定会得到神的供应</p>
+</li>
+</ul>
+<p>4.李-提莫太（英国）</p>
+<p>因为国家强大，才会有有宣教士差出去；当时英国强盛，所以英国</p>
+<ul>
+<li><p>广学会（1891-1895年），出版社</p>
+<ul>
+<li>其中就有办&lt;万国公报&gt;：当时知识分子非常重视</li>
+</ul>
+</li>
+<li><p>庚子事件，他请求政府，开办太原大学</p>
+</li>
+<li><p>办中西学院、中西女塾</p>
+</li>
+</ul>
+<p>5.goforth，顾约拿单(加拿大)</p>
+<ul>
+<li>戴德生提醒他，以膝盖代步</li>
+<li>东北大复兴，几千人受洗，撒迦利亚书4章6节</li>
+<li>大复兴（revival）:在教会中，有很多人清楚地认罪悔改、重生得救，并且在社会上有很大的影响，并且持续很久时间长达几十年时间</li>
+</ul>
+<p>6.剑桥七杰1885年</p>
+<ul>
+<li>剑桥是贵族学校</li>
+<li>加入中国内地会</li>
+<li>他们的名言【除非你完全降服于神，否则你不知道神的心意】，罗马书1:12</li>
+<li>支持中国的赈灾</li>
+</ul>
+<p>信仰自由的环境，宣教士才能开会</p>
 
       
     </div>
@@ -1222,7 +839,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/09/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-13/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1236,7 +853,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/09/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/" class="post-title-link" itemprop="url">数据库操作与MQ消息分布式操作的一致性</a>
+            <a href="/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-13/" class="post-title-link" itemprop="url">Sun Oct 16 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1246,10 +863,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2021-04-09 09:15:10 / Modified: 21:48:18" itemprop="dateCreated datePublished" datetime="2021-04-09T09:15:10+08:00">2021-04-09</time>
+      <time title="Created: 2022-10-16 10:22:31" itemprop="dateCreated datePublished" datetime="2022-10-16T10:22:31+08:00">2022-10-16</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-12-04 14:39:57" itemprop="dateModified" datetime="2022-12-04T14:39:57+08:00">2022-12-04</time>
+      </span>
 
   
 </div>
@@ -1261,82 +884,46 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="活动中心场景介绍"><a href="#活动中心场景介绍" class="headerlink" title="活动中心场景介绍"></a>活动中心场景介绍</h2><hr>
-<p>在电商系统上线初期，往往会进行一些“拉新”活动，例如活动部门提出<strong>新用户注册送积分、送优惠券活动</strong>。</p>
-<p>基于分布式、微服务的设计理念，通常的架构设计（子系统交互）如下图所示：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicv3lkl4PYzkxwxUUT8cvHPic1EVzs5Ib9p3DmbMu4CR2ejNV7lQ0biavg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>其核心系统介绍如下：</p>
+          <p>《季度信仰的世界观框架-02》</p>
+<h3 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h3><p>李提莫太和戴德生的宣教路线</p>
+<p>戴德生</p>
+<ol>
+<li>比较保守的基要主义</li>
+<li>内地会不认为宣教士必须有很高的学历</li>
+<li>认为传教士不应该有固定工资，薪水按照需要分配；坚信地依赖神，祷告，所以不需要公开募捐</li>
+<li>内地会的总部设立在中国</li>
+<li>事工的次序：直接传福音才是最重要的</li>
+<li>扎扎实实地撒福音。在质不在量</li>
+<li>强调尊重中国人的文化。不建立宗派，原则上没有教会</li>
+<li>培养中国的同工</li>
+</ol>
+<p>李提摩太</p>
+<ol>
+<li>倾向于普救论：在所有宗教中，都会有人得救</li>
+<li>神的国不仅建立在人心上，也建立在政府和社会机构。致力于社会改革，把社会改造成神的国</li>
+<li>事工原理：宣教士必须精通中国文化和高学历</li>
+<li>宣教的对象：强调精英人才，和景教、利玛窦</li>
+<li>主张政教合一，相反戴德生强调政教分离</li>
+</ol>
+<p>由于当时宣教室没有太多选择，所以当时提莫太和戴德生所做的差不多</p>
+<p>精英文化</p>
 <ul>
-<li>账户中心<br>提供用户登录、用户注册等服务，一个新用户注册时，向MQ服务器中的USER_REGISTER主题发送一条消息，主流程结束，与送积分，送优惠券等过程解耦。</li>
-<li>优惠券（券系统）<br>提供发放优惠券、使用优惠券等与券相关的基础服务。</li>
-<li>积分中心<br>提供积分相关的服务，例如积分赠送、积分消费、积分查询等基础服务。</li>
-<li>送积分服务（消费者）<br>订阅MQ，按照规则决定是否需要赠送积分，如果需要则调用积分相关的基础接口，完成积分的发放。</li>
-<li>送优惠券（消费者）<br>订阅MQ，按照规则决定是否需要赠送优惠券，如果需要则调用券系统相关的基础接口，完成优惠券的发放。</li>
-</ul>
-<p>问题：<strong>如果新用户注册成功，但消息发送到MQ失败，或者消息成功发送到MQ，但发送完MQ后系统出现异常导致用户注册失败又该如何呢？</strong></p>
-<p>上面的问题其实就是<strong>典型的分布式事务问题</strong>：即如何保证<strong>用户注册(数据库操作)与MQ消息发送</strong>这两个分布式操作的一致性。</p>
-<h2 id="事务消息实现原理"><a href="#事务消息实现原理" class="headerlink" title="事务消息实现原理"></a>事务消息实现原理</h2><hr>
-<p><strong>解决思路：二阶段提交与事务状态回查</strong>，其具体实现流程如下图所示：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicvRbyskeRHIO7ocUm8qibhfS71gPKlmv1cicXz41hPegy67sRhiboKBibtg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>其核心设计理念：</p>
-<ul>
-<li>应用程序开启一个本地事务<ul>
-<li>事务中包含数据库操作</li>
-<li>事务中发送一条PREPARE消息，PREPARE消息发送成功后通知应用程序记录本地事务状态，然后提交本地事务。</li>
-</ul>
-</li>
-<li>RocketMQ在收到类型为PREPARE的消息时，首先<strong>备份消息的原主题与原消息消费队列</strong>，然后将消息存储在主题为RMQ_SYS_TRANS_HALF_TOPIC的消息队列中，<a href="">故PREPARE的消息是不会被客户端消费的</a>。</li>
-<li>定时服务器开启一个定时任务处理RMQ_SYS_TRANS_HALF_TOPIC中的消息，会每隔指定时间向应用程序发起<strong>事务状态查询请求</strong> ,询问应用程序本地事务是否成功，然后根据回查状态决定是提交还是回滚，即对处于PREPARE状态进行提交或回滚操作。<ul>
-<li>定时服务器如果明确得知事务成功，则可以返回COMMIT，服务端会提交该条消息，具体操作是恢复原消息的主题与队列，重新发送到Broker，消费端感知后消费。</li>
-<li>定时服务器如果无法明确得知事务状态，则返回UNOWN，此时服务端会等待一定时间后再次向发送者询问，默认询问15次。</li>
-<li>定时服务器如果非常明确得知事务失败，则可以返回ROLLBACK。</li>
+<li>吸收外在的文化</li>
+<li>弊端<ul>
+<li>文化性的基督徒：只对基督教文化有好感，但是生命不一定有改变</li>
 </ul>
 </li>
 </ul>
-<p>在具体实践中，<a href="">定时服务器</a>在无法获取事务状态时不要武断的返回ROLLBACK，而是要返回UNOWN，让服务端定时重试回查，说明如下：</p>
-<img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicibtwsHP1sxDH14bE3W4Q7NhEIziam8g1PjXUeicchCT6VbpzovIvXl0xw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image" style="zoom:50%;" />
-
-
-<p>在应用程序将PREPARE消息发送到Broker后，定时服务器发起事务查询时本地事务可能还未提交，为了避免无效的事务回查机制，RocketMQ通常至少在收到PREPARE消息6s后才会发起第一次事务回查，可通过 transactionTimeOut 配置。故客户端在实现事务回查时无法证明事务状态时不应该返回ROLLBACK，而是返回UNOWN。</p>
-<h2 id="事务消息实战"><a href="#事务消息实战" class="headerlink" title="事务消息实战"></a>事务消息实战</h2><hr>
-<p>光说不练假把式，接下来以一个<strong>新用户注册送优惠券的场景</strong>来详细介绍如何使用事务消息。</p>
-<p>项目模块职责说明如下：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicp0FZqHBcHorVYwgyonW3l3GvxVf7JbwfPydgFfJ2W213bDhm5xAVzg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>事务消息的核心代码组装在transaction-service，其核心类图如下：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicRycFWlp0DLnuiaRsIEghB7vlSspbOOmqa5WyiasibBRX9d1AQOJg9ffDQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>其中核心要点如下：</p>
+<p>平民教会</p>
 <ul>
-<li>UserServiceImpl<br>Dubbo接口业务实现类，类似MVC的控制层，在这里做一些参数验证，但<strong>不执行具体的业务逻辑</strong>，只是发送一条<strong>事务消息</strong>到MQ。</li>
-<li>UserRegTransactionListener<br>事务监听器，在 executeLocalTransaction 方法中执行业务逻辑，数据库本地事务加在该方法。</li>
+<li>建立草根教会，春风吹又生</li>
+<li>民众大量信主，热心，委身，量变带来质变</li>
+<li>弊端：<ul>
+<li>混合主义</li>
+<li>装备不够</li>
 </ul>
-<blockquote>
-<p>温馨提示：之所以不在UserServicveImpl中执行本地事务，是因为 executeLocalTransaction 中抛出的异常会被RocketMQ框架捕捉，及异常无法被UserServiceImpl感知，即无法实现其事务的一致性。</p>
-</blockquote>
-<h3 id="应用程序端-UserServiceImpl"><a href="#应用程序端-UserServiceImpl" class="headerlink" title="应用程序端: UserServiceImpl"></a>应用程序端: UserServiceImpl</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicHG08xaibsdPwygtzwqibIBibZxaxJmVbtZwBKvT9Iia033rprrdRlhpqNQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>UserServiceImpl 的核心要点如下：</p>
-<ul>
-<li>首先应该对<strong>参数进行校验、业务逻辑进行校验</strong></li>
-<li>发送事务消息，<strong>建议对消息设置Key</strong>,Key的值可以用<strong>业务处理流水号</strong>(可唯一表示该业务操作)或者<strong>核心业务字段</strong>(例如订单编号)</li>
-<li>业务入口类可通过<strong>事务消息发送状态</strong>来判断<strong>业务是否失败</strong>。</li>
+</li>
 </ul>
-<h3 id="MQ-定时任务-UserRegTransactionListener"><a href="#MQ-定时任务-UserRegTransactionListener" class="headerlink" title="MQ+定时任务: UserRegTransactionListener"></a>MQ+定时任务: UserRegTransactionListener</h3><p>事务监听器需要实现执行本地事务与事务回查两个接口。</p>
-<h5 id="3-2-1-实现-executeLocalTransaction"><a href="#3-2-1-实现-executeLocalTransaction" class="headerlink" title="3.2.1 实现 executeLocalTransaction"></a>3.2.1 实现 executeLocalTransaction</h5><p>首先需要实现 executeLocalTransaction 方法，执行本地事务，其代码如下图所示：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicXGC8hJ2eFUM1iaZwNLC2yoctYXalVJzJl3a1KgVr9dUVtLsOZZWo9fw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>其中几个关键点说明如下：</p>
-<ul>
-<li>在该方法上添加数据库事务标签。</li>
-<li>执行业务逻辑，示例Demo只是将用户数据存储到数据库。</li>
-<li>如果业务执行失败，可明确告知需要回滚，上层调用方也可根据ROLLBACK_MESSAGE进行相应的处理。</li>
-<li>如果业务成功，<strong>不建议直接返回COMMIT，而是建议返回UNKNOW</strong>,因为该方法尽管在方法最后一行，但可能发生断电等异常情况，数据库并没有成功。</li>
-</ul>
-<h5 id="3-2-2-实现-checkLocalTransaction"><a href="#3-2-2-实现-checkLocalTransaction" class="headerlink" title="3.2.2 实现 checkLocalTransaction"></a>3.2.2 实现 checkLocalTransaction</h5><p>其次需要实现事务状态回查，用来RocketMQ服务端感知事务是否成功，其实现原理如下图所示：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/Wkp2azia4QFvz5BhRHmnGstLtUaJHNRLicOzMibUQdW16wMsd4Qia09pLKM7JWIeuOMCq87esPGNia07ib7WnRa1TWng/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>其实现关键点如下：</p>
-<ul>
-<li>如果能明确得知本地事务成功，则返回COMMIT_MESSAGE</li>
-<li>如该不能明确得知本地事务成功，<strong>不能返回ROLLBACK_MESSAGE</strong>,而是返回UNKNOW，等待服务端下一次事务回查(不会立即触发)，<strong>服务端默认回查15次，如果15次都得到UNKNOW，则会回滚该消息</strong>。</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://github.com/dingwpmz/rocketmq-learning">https://github.com/dingwpmz/rocketmq-learning</a></p>
 
       
     </div>
@@ -1363,7 +950,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/08/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%A4%9A%E7%BA%BF%E7%A8%8B/%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85-%E4%BF%A1%E5%8F%B7%E9%87%8F/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-06/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1377,7 +964,124 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/04/08/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%A4%9A%E7%BA%BF%E7%A8%8B/%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85-%E4%BF%A1%E5%8F%B7%E9%87%8F/" class="post-title-link" itemprop="url">生产者-消费者-信号量</a>
+            <a href="/2022/10/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-11-06/" class="post-title-link" itemprop="url">Sun Oct 16 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-10-16 10:22:31" itemprop="dateCreated datePublished" datetime="2022-10-16T10:22:31+08:00">2022-10-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-11-06 15:57:00" itemprop="dateModified" datetime="2022-11-06T15:57:00+08:00">2022-11-06</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>《季度信仰的世界观框架-02》</p>
+<p>讲员：赫老师</p>
+<p>基督的世界观：世界的来源（上帝的创造）、世界结局（灭亡与更新）、世界的问题（人类的堕落）、解决的方案（基督的救赎）</p>
+<p>无神论的世界观：世界的来源（自然)，世界的结局(乌托邦)，世界的问题：制度，解决方案：解放</p>
+<p>与时俱进？玉石俱焚！！！</p>
+<p>虚无主义、存在主义、相对主义（道德标准就是无原则的宽容）</p>
+<p>人格的来源：从职分、属性2个角度</p>
+<ul>
+<li>职分：“管理”、“治理” =&gt;君王</li>
+<li>属性：“理性、情感、意志、道德、灵性、关系”</li>
+</ul>
+<p>人：自由、平等、权利、责任、界限、分工</p>
+<ul>
+<li>西方不要【分工、责任、解析】</li>
+<li>专制国家不要【自由、权利、平等】</li>
+</ul>
+<h3 id="成人主日学"><a href="#成人主日学" class="headerlink" title="成人主日学"></a>成人主日学</h3><p>传教士与帝国主义</p>
+<p>事实：</p>
+<ol>
+<li>宣教士来到中国的时间，和帝国主义进入中国的时间，是一样的</li>
+<li>有宣教士确实参与了不平等条约的制定，比如马礼逊是东印度公司的翻译</li>
+<li>当时的确有部分宣教士确实认为上帝使用帝国主义的入侵，开启了传福音的大门</li>
+<li>部分传教士欺压百姓</li>
+</ol>
+<p>帮助慕道友理解：</p>
+<ol>
+<li><p>宣教士不仅来中国，也去其他国家；宣教士早早来到中国，唐朝就有基督教了</p>
+</li>
+<li><p>责任伦理和动机伦理：宣教士承担责任，动机是出于爱心</p>
+</li>
+<li><p>不能以偏慨全</p>
+</li>
+<li><p>传教士带来了文明，做了巨大贡献</p>
+<ul>
+<li>设立禁烟局，反对东印度公司出售鸦片，后来东印度公司被英国禁止出售鸦片</li>
+<li>天足会，反对妇女裹小脚</li>
+<li>办立孤儿院，育婴堂，弃婴堂，收容所，红十字会（效法耶稣基督）</li>
+<li>赈灾</li>
+</ul>
+<p>注意：有些宣教团体走到极端，只做社会福利，不宣教了</p>
+<ul>
+<li>教育方面:伯加医生设立博济医院，林乐知，丁韪良设立同文馆、京师大学堂</li>
+<li>翻译：理雅各翻译的很正确，艾约瑟把中国的历代科学翻译为英文</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-24/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-24/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1389,7 +1093,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2021-04-08 13:15:02 / Modified: 13:32:15" itemprop="dateCreated datePublished" datetime="2021-04-08T13:15:02+08:00">2021-04-08</time>
+      <time title="Created: 2022-07-24 10:22:31 / Modified: 11:06:42" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
     </span>
 
   
@@ -1402,63 +1106,221 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="生产者—消费者问题"><a href="#生产者—消费者问题" class="headerlink" title="生产者—消费者问题"></a>生产者—消费者问题</h2><p>生产者—消费者题型最基本的是<strong>有界缓冲区的生产者消费者问题和无界缓冲区的生产者消费者问题</strong>，对这两个问题的解我们应该掌握其解决方案。</p>
-<h3 id="有界缓冲区的生产者—消费者问题"><a href="#有界缓冲区的生产者—消费者问题" class="headerlink" title="有界缓冲区的生产者—消费者问题"></a>有界缓冲区的生产者—消费者问题</h3><p>两个进程共享一个公共的固定大小的缓冲区。其中一个是生产者，将信息放入缓冲区；另一个是消费者，从缓冲区中取出信息（也可以把这个问题一般化为m个生产者和n个消费者问题，但是我们只讨论一个生产者和一个消费者的情况，这样可以简化解决方案）。</p>
+          <p>《可爱的教会》刘海龙弟兄</p>
+<p>哥林多后书9章</p>
 <ul>
-<li>问题在于当缓冲区已满，而此时生产者还想向其中放入一个新的数据项的情况，其解决办法是让生产者睡眠，待消费者从缓冲区中取出一个或多个数据项时再唤醒它。</li>
-<li>同样地，当消费者试图从缓冲区取数据而发现缓冲区为空时，消费者就睡眠，直到生产者向其中放入一些数据时再将其唤醒。</li>
+<li>世人以为神为自己敛财，但基督徒明白神是赏赐恩待世人的</li>
 </ul>
-<p>这个方法听起来很简单，为了跟踪缓冲区中的数据项数，我们需要一个变量count。</p>
 <ul>
-<li><p>对于生产者，如果缓冲区最多存放N个数据项，则生产者代码将首先检查count是否达到N</p>
-<ul>
-<li>若是，则生产者睡眠</li>
-<li>若不是，则生产者向缓冲区放入一个数据项并增量count的值。</li>
+<li>蒙主拯救的人，一定是有乐捐的心<ul>
+<li>为什么保罗相信哥林多人有乐捐的心呢？<ul>
+<li>哥林多人1年前就要捐献</li>
+<li>哥林多人蒙受了神的恩典，得救了，有基督的灵</li>
 </ul>
 </li>
-<li><p>对于消费者，首先测试count是否为0</p>
-<ul>
-<li>若是，则睡眠</li>
-<li>否则从中取出一个数据项并递减count的值。</li>
 </ul>
 </li>
-<li><p>每个进程同时也检测另一个进程是否应该被唤醒，若是则唤醒之。</p>
+<li>乐捐的心 = 理所当然要落实在行为上<ul>
+<li>建立圣殿的时候，捐献晚的，错过了奉献，就不收了，与圣殿无缘了</li>
+<li>如果不及时落实行为，错过了与神同工、服侍神的机会；服侍神是争先恐后的</li>
+</ul>
+</li>
+<li>胜过一切拦阻，活出乐捐的心<ul>
+<li>学会抓住上帝的应许</li>
+</ul>
+</li>
+<li>甘心乐意的奉献应该多多益善<ul>
+<li>少种的少收，多种的多收</li>
+</ul>
+</li>
+<li>甘心乐意的奉献大有果效<ul>
+<li>多结属灵的果子【是你们凡事常常充足，能多行各样的善事】</li>
+<li>使得缺乏的圣徒得着帮补</li>
+<li>为福音作见证</li>
+<li>更加让教会合一，彼此相爱，彼此代祷</li>
+<li>可以让人感谢神，归荣耀给神</li>
+</ul>
+</li>
+<li>一起都是源于神的恩典</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-08-07/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-08-07/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-08-07 11:04:41" itemprop="dateModified" datetime="2022-08-07T11:04:41+08:00">2022-08-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>《启示录》推雅推喇教会</p>
+<p>唐崇荣牧师</p>
+<ol>
+<li><p>就当舍己，天天背起十字架，跟从主 ：神要求我们应当挑起的责任</p>
+<ul>
+<li><p>结婚，丈夫的责任</p>
+</li>
+<li><p>做人，工作的责任</p>
+</li>
+<li><p>父亲，管教孩子的责任</p>
+</li>
+<li><p>思考：儒家的思想：君君，臣臣，父父，子子</p>
 </li>
 </ul>
-<p>生产者消费者的代码如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> N 100</span></span><br><span class="line"><span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">producer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">int</span> item;</span><br><span class="line"> <span class="keyword">while</span>(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  item = produce_item();</span><br><span class="line">  <span class="keyword">if</span>(count == N)     <span class="comment">//如果缓冲区满就休眠</span></span><br><span class="line">  sleep();</span><br><span class="line">  insert_item(item);</span><br><span class="line">  count = count + <span class="number">1</span>;    <span class="comment">//缓冲区数据项计数加1</span></span><br><span class="line">  <span class="keyword">if</span>(count == <span class="number">1</span>)</span><br><span class="line">  wakeup(consumer);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">consumer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">int</span> item;</span><br><span class="line"> <span class="keyword">while</span>(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  <span class="keyword">if</span>(count == <span class="number">0</span>)    <span class="comment">//如果缓冲区空就休眠</span></span><br><span class="line">   sleep();</span><br><span class="line">  item = remove_item();</span><br><span class="line">  count = count - <span class="number">1</span>;   <span class="comment">//缓冲区数据项计数减1</span></span><br><span class="line">  <span class="keyword">if</span>(count == N - <span class="number">1</span>)</span><br><span class="line">   wakeup(producer);</span><br><span class="line">  consume_item(item);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>因为我们自己的错误或者跟随假的教训（正如推雅推喇教会的部分跟从假先知的假教训），去担起我们不该担起的责任，不是神放在我们身上的担子，这是犯罪</p>
+</li>
+<li><p>基督徒不应该在挑起责任的时候有埋怨，因为主的担子是轻省的；主不会让我们挑起我们无法挑起的责任</p>
+</li>
+<li><p>基督的责任，就是进入到世界受苦、舍己，进入永恒的荣耀</p>
+</li>
+</ol>
+<p>疫情对宗教的打击</p>
+<ol>
+<li></li>
+</ol>
+<p>铁杖：诗篇第二篇、耶稣第二次来要审批</p>
 
-<h3 id="线程不安全-对于count的读写不同步造成的race-condition"><a href="#线程不安全-对于count的读写不同步造成的race-condition" class="headerlink" title="线程不安全: 对于count的读写不同步造成的race condition"></a>线程不安全: 对于count的读写不同步造成的race condition</h3><p><strong>这里有可能出现竞争条件，其原因是对count的访问未作限制。</strong>有可能出现以下情况：</p>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-31/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/24/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2022-07-31/" class="post-title-link" itemprop="url">Sun Jul 24 2022 08:00:00 GMT+0800 (China Standard Time)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-07-24 10:22:31" itemprop="dateCreated datePublished" datetime="2022-07-24T10:22:31+08:00">2022-07-24</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-07-31 11:20:35" itemprop="dateModified" datetime="2022-07-31T11:20:35+08:00">2022-07-31</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>赫弟兄</p>
+<p>诗90：12  指教我们怎样数算自己的日子</p>
+<p>生活应用：</p>
 <ul>
-<li>缓冲区为空（消费者正在准备睡眠），消费者刚刚读取count的值发现它为0，此时调度程序决定暂停消费者并启动运行生产者（进程切换）。</li>
-<li>生产者向缓冲区加入一个数据项，count加1。现在count的值变成了1，它推断认为count刚才为0，所以消费者此时一定在睡眠，于是生产者调用wakeup来唤醒消费者。</li>
-<li>但是消费者在逻辑上并未睡眠，所以wakeup信号丢失</li>
-<li>当消费者运行时（进程切换），它将测试先前读取的count值，发现它为0。于是睡眠，生产者迟早会填满整个缓冲区，然后睡眠，这样一来，两个进程将永远睡眠下去。</li>
+<li>对于那些事情、哪些选择说不</li>
+<li>福音告诉我们生命中的主次先后，对时间的珍惜、竭力多做主工、与时间赛跑</li>
+<li>不要熬夜</li>
+<li>我们随时可能见主，在主面前交账</li>
 </ul>
-<h2 id="信号量的引入及其操作"><a href="#信号量的引入及其操作" class="headerlink" title="信号量的引入及其操作"></a>信号量的引入及其操作</h2><p>信号量是Dijkstra在1965年提出的一种方法，它使用一个整型变量来累计唤醒次数，供以后使用。在他的建议中引入了一个新的变量类型，称作信号量（semaphore）。一个信号量的取值可以为0（表示没有保存下来的唤醒操作）或者正值（表示有一个或多个唤醒操作）。</p>
-<p>Dijkstra建议设立两种操作：<strong>down和up（分别为一般化后的sleep和wakeup）。对一个信号量执行down操作，则是检查其值是否大于0。若该值大于0，则将其减1（即用掉一个保存的唤醒信号）并继续；若该值为0，则进程将睡眠，而且此时down操作并未结束。检查数值、修改变量值以及可能发生的睡眠操作均作为一个单一的、不可分割的原子操作完成。</strong>保证一旦一个信号量操作开始，则在该操作完成或阻塞之前，其他进程均不允许访问该信号量。这种<strong>原子性对于解决同步问题和避免竞争条件是绝对必要的。所谓原子操作，是指一组相关联的操作要么都不间断地执行，要么不执行。</strong></p>
-<p>up操作对信号量的值增1。如果一个或多个进程在该信号量上睡眠，无法完成一个先前的down操作，则由系统选择其中的一个（如随机挑选）并允许该进程完成它的down操作。于是，对一个有进程在其上睡眠的信号量执行一次up操作后，该信号量的值仍旧是0，但在其上睡眠的进程却少了一个。信号量的值增加1和唤醒一个进程同样也是不可分割的，不会有某个进程因执行up而阻塞，正如前面的模型中不会有进程因执行wakeup而阻塞一样。</p>
-<p>在Dijkstra原来的论文中，他分别使用名称P和V而不是down和up，荷兰语中，Proberen的意思是尝试，Verhogen的含义是增加或升高。</p>
-<p>从物理上说明信号量的P、V操作的含义。<strong>P(S)表示申请一个资源，S.value&gt;0表示有资源可用，其值为资源的数目；S.value=0表示无资源可用；S.value&lt;0, 则|S.value|表示S等待队列中的进程个数。</strong>V(S)表示释放一个资源，信号量的初值应该大于等于0。P操作相当于“等待一个信号”，而V操作相当于“发送一个信号”，<strong>在实现同步过程中，V操作相当于发送一个信号说合作者已经完成了某项任务，在实现互斥过程中，V操作相当于发送一个信号说临界资源可用了。</strong>实际上，在实现互斥时，P、V操作相当于申请资源和释放资源。</p>
-<p>该解决方案使用了三个信号量：一个称为full，用来记录充满缓冲槽数目，一个称为empty，记录空的缓冲槽总数；一个称为mutex，用来确保生产者和消费者不会同时访问缓冲区。full的初值为0，empty的初值为缓冲区中槽的数目，mutex的初值为1。供两个或多个进程使用的信号量，其初值为1，保证同时只有一个进程可以进入临界区，称作二元信号量。如果每个进程在进入临界区前都执行down操作，并在刚刚退出时执行一个up操作，就能够实现互斥。</p>
-<p>在下面的例子中，我们实际上是通过两种不同的方式来使用信号量，两者之间的区别是很重要的，信号量mutex用于互斥，它用于保证任一时刻只有一个进程读写缓冲区和相关的变量。互斥是避免混乱所必需的操作。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#define N 100</span><br><span class="line">typedef int semaphore;</span><br><span class="line">semaphore mutex &#x3D; 1;</span><br><span class="line">semaphore empty &#x3D; N;</span><br><span class="line">semaphore full &#x3D; 0;</span><br><span class="line">void producer(void)</span><br><span class="line">&#123;</span><br><span class="line"> int item;</span><br><span class="line"> while(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  item &#x3D; produce_item();</span><br><span class="line">  down(&amp;empty);    &#x2F;&#x2F;空槽数目减1，相当于P(empty)</span><br><span class="line">  down(&amp;mutex);    &#x2F;&#x2F;进入临界区，相当于P(mutex)</span><br><span class="line">  insert_item(item);   &#x2F;&#x2F;将新数据放到缓冲区中</span><br><span class="line">  up(&amp;mutex);    &#x2F;&#x2F;离开临界区，相当于V(mutex)</span><br><span class="line">  up(&amp;full);    &#x2F;&#x2F;满槽数目加1，相当于V(full)</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line">void consumer(void)</span><br><span class="line">&#123;</span><br><span class="line"> int item;</span><br><span class="line"> while(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  down(&amp;full);    &#x2F;&#x2F;将满槽数目减1，相当于P(full)</span><br><span class="line">  down(&amp;mutex);    &#x2F;&#x2F;进入临界区，相当于P(mutex)</span><br><span class="line">  item &#x3D; remove_item();       &#x2F;&#x2F;从缓冲区中取出数据</span><br><span class="line">  up(&amp;mutex);    &#x2F;&#x2F;离开临界区，相当于V(mutex)  </span><br><span class="line">  up(&amp;empty);    &#x2F;&#x2F;将空槽数目加1 ，相当于V(empty)</span><br><span class="line">  consume_item(item);   &#x2F;&#x2F;处理取出的数据项</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>信号量的另一种用途是用于实现同步，信号量full和empty用来保证某种事件的顺序发生或不发生。在本例中，它们保证当缓冲区满的时候生产者停止运行，以及当缓冲区空的时候消费者停止运行。</p>
-<h3 id="无界缓冲区的生产者—消费者问题"><a href="#无界缓冲区的生产者—消费者问题" class="headerlink" title="无界缓冲区的生产者—消费者问题"></a>无界缓冲区的生产者—消费者问题</h3><p>两个进程共享一个不限大小的公共缓冲区。由于是无界缓冲区（仓库是无界限制的），即生产者不用关心仓库是否满，只管往里面生产东西，但是消费者还是要关心仓库是否空。所以生产者不会因得不到缓冲区而被阻塞，不需要对空缓冲区进行管理，可以去掉在有界缓冲区中用来管理空缓冲区的信号量及其PV操作。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Semaphore mutex &#x3D; 1; </span><br><span class="line">Semaphore full &#x3D; 0; </span><br><span class="line">int in &#x3D; 0，out &#x3D; 0;</span><br><span class="line">void producer(void)</span><br><span class="line">&#123;</span><br><span class="line"> while(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  item &#x3D; produce_item();</span><br><span class="line">  P(mutex);    &#x2F;&#x2F;进入临界区</span><br><span class="line">  Buffer(in) &#x3D; item;   &#x2F;&#x2F;新生产的数据项放入缓冲区</span><br><span class="line">  in &#x3D; in + 1;    &#x2F;&#x2F;因无界，无需考虑输入指针越界</span><br><span class="line">  V(mutex);    &#x2F;&#x2F;离开临界区</span><br><span class="line">  V(full);    &#x2F;&#x2F;增加已用缓冲区的数目</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line">void consumer(void)</span><br><span class="line">&#123;</span><br><span class="line"> int item;</span><br><span class="line"> while(TRUE)</span><br><span class="line"> &#123;</span><br><span class="line">  P(full);   &#x2F;&#x2F;等待已用缓冲区的数目非0</span><br><span class="line">  P(mutex);   &#x2F;&#x2F;进入临界区</span><br><span class="line">  item &#x3D; Buffer(out);  &#x2F;&#x2F;新生产的数据项放入缓冲区</span><br><span class="line">  out &#x3D; out + 1;   &#x2F;&#x2F;因无界，无需考虑输出指针越界</span><br><span class="line">  V(mutex);   &#x2F;&#x2F;离开临界区</span><br><span class="line">  consume_item(item);  &#x2F;&#x2F;处理取出的数据项</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>在计算机领域，同步就是指一个进程在执行某个请求的时候，若该请求需要一段时间才能返回信息，那么这个进程会一直等待下去。</strong>直到收到返回信息才继续执行下去。异步是指进程不需要一直等待下去，而是继续执行下面的操作，不管其他进程的状态，当有消息返回时，系统会通知进程进行处理，这样可以提高效率。</p>
-<h2 id="进程同步与互斥"><a href="#进程同步与互斥" class="headerlink" title="进程同步与互斥"></a>进程同步与互斥</h2><p>在操作系统中，进程是占有资源的最小单位（线程可以访问其所在进程内的所有资源，但线程本身并不占有资源或仅仅占有一点必须资源）。但对于某些资源来说，其在同一时间只能被一个进程所占用。这些一次只能被一个进程所占用的资源就是所谓的临界资源。典型的临界资源比如物理上的打印机，或是存在硬盘或内存中被多个进程所共享的一些变量和数据等（如果这类资源不被看成临界资源加以保护，那么很有可能造成丢数据的问题）。</p>
-<p>对临界资源的访问，必须是互斥地进行。也就是当临界资源被占用时，另一个申请临界资源的进程会被阻塞，直到其所申请的临界资源被释放。而进程内访问临界资源的代码被成为临界区。</p>
-<p>进程同步也是进程之间直接的制约关系，是为完成某种任务而建立的两个或多个进程，这些进程需要在某些位置上协调他们的工作次序而等待、传递信息所产生的制约关系。进程间的直接制约关系来源于他们之间的合作。比如说进程A需要从缓冲区读取进程B产生的信息，当缓冲区为空时，进程B因为读取不到信息而被阻塞。而当进程A产生信息放入缓冲区时，进程B才会被唤醒。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhr7BKTq5BfxWHuf7ckZwHlMVIm3icgGk6eqeMnOG6ib8svTuDHVzlDW5mPxIRdfe2137qKFhoZrjljg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>进程互斥是进程之间的间接制约关系。<strong>当一个进程进入临界区使用临界资源时，另一个进程必须等待。只有当使用临界资源的进程退出临界区后，这个进程才会解除阻塞状态。</strong>比如进程B需要访问打印机，但此时进程A占有了打印机，进程B会被阻塞，直到进程A释放了打印机资源，进程B才可以继续执行，概念如下图所示。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JfTPiahTHJhr7BKTq5BfxWHuf7ckZwHlM9SrDbuPN7mMOibCRWaZ8QibSmJOvMFsnUytFKiaDzwWia3SVnB8KPQ56gQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
-<p>进程的同步和互斥是指进程在推进时的相互制约关系。 <strong>进程同步源于进程合作，是进程间共同完成一项任务是直接发生相互作用的关系。进程互斥源于对临界资源的竞争，是进程之间的间接制约关系。</strong></p>
-<p>实现临界区互斥访问的基本方法有硬件实现方法和信号量方法。</p>
-<p>通过硬件实现临界区最简单的办法就是关CPU的中断。从计算机原理我们知道，CPU进行进程切换是需要通过中断来进行。如果屏蔽了中断那么就可以保证当前进程顺利的将临界区代码执行完，从而实现了互斥。这个办法的步骤就是：屏蔽中断—执行临界区操作—开中断。但这样做并不好，这大大限制了处理器交替执行任务的能力。并且将关中断的权限交给用户代码，那么如果用户代码屏蔽了中断后不再开，那系统岂不是跪了？</p>
-<p>信号量实现方式，这也是我们比较熟悉P/V操作。通过设置一个表示资源个数的信号量S，通过对信号量S的P和V操作来实现进程的的互斥。P/V操作是操作系统的原语，意味着具有原子性。<strong>P操作首先减少信号量S，表示有一个进程将占用或等待资源，然后检测S是否小于0，如果小于0则阻塞，如果大于0则占有资源进行执行。</strong>V操作是和P操作相反的操作，首先增加信号量S，表示占用或等待资源的进程减少了1个,然后检测S是否小于0，如果大于0则唤醒等待使用S资源的其它进程。前面的生产者—消费者问题就是典型的应用信号量解决的进程同步问题。</p>
 
       
     </div>
@@ -1480,7 +1342,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1521,13 +1383,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

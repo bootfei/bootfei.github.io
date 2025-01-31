@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="AC算法在美团上单系统的应用1.背景在美团，为了保证单子质量，需要对上单系统创建的每一个产品进行审核。为了提高效率，审核人员积累提炼出了一套关键词库，先基于该词库进行自动审核过滤，对于不包括这些关键词的产品信息不再需要进行人工审核。因此，如何在页面中快速的检测是否包含了这些关键词就变得非常重要。 对于上述问题我们描述为如下的形式：  给定关键词集合P&#x3D;{p1,p2,……,pk}，在目标串T[1…m">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AC算法">
+<meta property="og:url" content="http://example.com/2021/06/23/%E7%AE%97%E6%B3%95/%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95/AC%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="AC算法在美团上单系统的应用1.背景在美团，为了保证单子质量，需要对上单系统创建的每一个产品进行审核。为了提高效率，审核人员积累提炼出了一套关键词库，先基于该词库进行自动审核过滤，对于不包括这些关键词的产品信息不再需要进行人工审核。因此，如何在页面中快速的检测是否包含了这些关键词就变得非常重要。 对于上述问题我们描述为如下的形式：  给定关键词集合P&#x3D;{p1,p2,……,pk}，在目标串T[1…m">
+<meta property="og:locale">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/7fe93be9.gif">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/3d902714.gif">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/ec9d47b8.gif">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/b649e48a.gif">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/272631ae.png">
+<meta property="og:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/fbebb381.png">
+<meta property="article:published_time" content="2021-06-23T05:29:54.000Z">
+<meta property="article:modified_time" content="2021-06-23T05:31:48.201Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/7fe93be9.gif">
+
+
+<link rel="canonical" href="http://example.com/2021/06/23/%E7%AE%97%E6%B3%95/%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95/AC%E7%AE%97%E6%B3%95/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>AC算法 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AC%E7%AE%97%E6%B3%95%E5%9C%A8%E7%BE%8E%E5%9B%A2%E4%B8%8A%E5%8D%95%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">AC算法在美团上单系统的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">1.背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-AC%E7%AE%97%E6%B3%95%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.2.</span> <span class="nav-text">2.AC算法详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%80%EF%BC%9A%E6%9E%84%E9%80%A0%E5%89%8D%E7%BC%80%E6%A0%91"><span class="nav-number">1.2.1.</span> <span class="nav-text">步骤一：构造前缀树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%BA%8C%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E5%A4%B1%E9%85%8D%E8%B7%B3%E8%BD%AC"><span class="nav-number">1.2.2.</span> <span class="nav-text">步骤二：设置每个节点的失配跳转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%89%EF%BC%9A%E5%AF%B9%E7%9B%AE%E6%A0%87%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BF%9B%E8%A1%8C%E6%90%9C%E7%B4%A2%E5%8C%B9%E9%85%8D"><span class="nav-number">1.2.3.</span> <span class="nav-text">步骤三：对目标字符串进行搜索匹配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%B8%8A%E5%8D%95%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">3.上单系统中的实现</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/23/%E7%AE%97%E6%B3%95/%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95/AC%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AC算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-23 13:29:54 / Modified: 13:31:48" itemprop="dateCreated datePublished" datetime="2021-06-23T13:29:54+08:00">2021-06-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="AC算法在美团上单系统的应用"><a href="#AC算法在美团上单系统的应用" class="headerlink" title="AC算法在美团上单系统的应用"></a><a target="_blank" rel="noopener" href="https://tech.meituan.com/2014/06/09/ac-algorithm-in-meituan-order-system-practice.html">AC算法在美团上单系统的应用</a></h1><h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1.背景"></a>1.背景</h2><p>在美团，为了保证单子质量，需要对上单系统创建的每一个产品进行审核。为了提高效率，审核人员积累提炼出了一套关键词库，先基于该词库进行自动审核过滤，对于不包括这些关键词的产品信息不再需要进行人工审核。因此，如何在页面中快速的检测是否包含了这些关键词就变得非常重要。</p>
+<p>对于上述问题我们描述为如下的形式：</p>
+<ul>
+<li>给定关键词集合P={p1,p2,……,pk}，在目标串T[1…m]中找到出现了哪些关键词。</li>
+</ul>
+<p>很容易想到的方法就是针对每个单词去匹配一遍，最后总结出都哪些单词匹配成功。</p>
+<p>考虑KMP算法，单个关键词匹配的时间复杂度是O(|pk|+m)，所以，所有关键词都匹配一遍的时间复杂度为O(|p1|+m+|p2|+m+…+|pk|+m)。令n=|p1|+…+|pk|，上式化简为O(n+km)，因此，当关键词的数量变得非常多时，这种算法就变得无法忍受了。</p>
+<p>Alfred V.Aho和Margaret J.Corasick在1974年提出了一个经典的多模式匹配算法-AC算法，这个算法可以保证对于给定的长度为n的文本，和模式集合P{p1,p2,…pm}，在O(n)的时间复杂度内找到文本中的所有目标模式，而与模式集合的规模m无关。</p>
+<h2 id="2-AC算法详解"><a href="#2-AC算法详解" class="headerlink" title="2.AC算法详解"></a>2.AC算法详解</h2><p>AC算法的具体实现方法就是创建一棵前缀树，根据被查找的目标字符串，从树的根节点开始往叶子节点逐字符匹配。在这个过程中，如果发生失配，要根据失配跳转点进行跳转，如果找到匹配的模式串则进行打印输出。AC算法在扫描文本时完全不需要回溯，如果只考虑匹配的过程，该算法的时间复杂度为O(n)，也就是只跟待匹配文本的长度相关。</p>
+<p>AC算法的实现可以由如下三个步骤构成：</p>
+<ol>
+<li>构造前缀树</li>
+<li>设置每个节点的失配跳转并收集每个节点的所有匹配模式串</li>
+<li>对目标字符串进行搜索匹配</li>
+</ol>
+<p>其间共用到三个函数：goto，fail，output。</p>
+<h3 id="步骤一：构造前缀树"><a href="#步骤一：构造前缀树" class="headerlink" title="步骤一：构造前缀树"></a>步骤一：构造前缀树</h3><p>这里我们考虑模式集合P={“he”,”she”,”his”,”hers”}。</p>
+<p>首先是goto函数的建立，该函数决定了对于当前状态S和条件C，如何得到下一状态S’。为了构建goto函数，我们需要建立一个状态转移图，开始，这个图只包含一个状态0，然后通过添加一条从起始状态出发的路径的方式，依次向图中输入每个关键字keyword，新的顶点和边被加入到图表中，这样就产生了一条能拼写出关键字keyword的路径。</p>
+<p>添加第一个关键词“he”得到下图，其中从状态0到状态2的路径就拼写出了关键字“he”；</p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/7fe93be9.gif" alt="img"></p>
+<p>接着添加第二个关键字“she”得到下图，输出“she”和状态5相关联；</p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/3d902714.gif" alt="img"></p>
+<p>增加第三个关键字“his”得到下图，当我们增加“his”时，因为已经存在一条从状态0在输入h的条件下到达状态1的边，因此我们这里不需要另外添加一条同样的边。这个输出的“his”是和状态7相关联的；</p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/ec9d47b8.gif" alt="img"></p>
+<p>最后我们添加“hers”得到下图，输出“hers”和状态9相关联，最后对除了h和s外的每个字符都增加一个从状态0到0的循环；</p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/b649e48a.gif" alt="img"></p>
+<p>经由上面一系列添加过程，就构造了整个模式集合的状态转移图，这个图也就代表了转向函数goto。 我们利用伪代码将goto函数表示如下，同时我们在这一步骤中构造了output函数，但这个函数并不是完整的，需要在步骤二中继续完善：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">begin</span><br><span class="line">     newstate ← 0</span><br><span class="line">     for i ← 1 util k do enter(yi)</span><br><span class="line">     for all a such that goto(0,a) &#x3D;&#x3D; fail do goto(0,a) ← 0</span><br><span class="line">end</span><br><span class="line"> </span><br><span class="line">procedure enter(a1a2…am):</span><br><span class="line">begin</span><br><span class="line">     state ← 0</span><br><span class="line">     j ← 1</span><br><span class="line">     while goto(state, aj) ≠ fail do</span><br><span class="line">          begin</span><br><span class="line">               state ← goto(state, aj)</span><br><span class="line">               j ← j+1</span><br><span class="line">          end</span><br><span class="line">     for p ← j util m do</span><br><span class="line">          begin</span><br><span class="line">               newstate ← newstate + 1</span><br><span class="line">               goto(state, ap) ← newstate</span><br><span class="line">               state ← newstate</span><br><span class="line">          end</span><br><span class="line">     output(state) ← &#123;a1a2…am&#125;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤二：设置每个节点的失配跳转"><a href="#步骤二：设置每个节点的失配跳转" class="headerlink" title="步骤二：设置每个节点的失配跳转"></a>步骤二：设置每个节点的失配跳转</h3><p>失效函数fail决定了当goto函数得到的下一个状态无效时，应该回退到哪一个状态。在构造fail函数时，我们首先定义状态转移图中状态S的深度为从状态0到状态S的最短路径。以我们上面构造的状态转移图为例，起始状态的深度为0，状态1和3的深度是1，状态2、6、4的深度是2，依次类推。计算失效函数的思路是这样的：首先计算深度为1 的状态的失效函数值，然后是深度为2的，以此类推，直到所有状态的失效函数值都被计算出。同时，我们规定所有深度为1的状态的fail值为0，假设所有深度小于d的状态的fail值都已经计算出，考虑每个深度为d-1的状态r，基于这些已经被计算出的深度为d-1的fail值，我们是可以得到深度为d的fail值的。</p>
+<p>令L(Si)为从根节点到Si节点的路径上的所有边的值的序列，我们从树的根节点开始遍历计算fail值，如果L(Sj)是L(Si)的一个后缀，并且是最长后缀，那么，fail(Si) = Sj。假设当前状态为S1，现在要求fail(S1)，S1的前一状态我们记为S2，而S2跳到S1的条件为C，也就是S1 = goto(S2,C)，而S2的fail值是已知的，记为S3，也即S3 = fail(S2)，则L(S3)是L(S2)的一个最长后缀，假设S4 = goto(S3,C)存在，那么fail(S1) = S4，如果不存在则测试S5 = goto(fail(S3),C)，直到得到一个有效的状态为止。这个计算的过程是这样的：</p>
+<ol>
+<li>对于所有的字符a，如果goto(r,a) = fail，那么什么也不做（当r为我们上面构造的trie树的叶子节点时，就符合这种情况）</li>
+<li>如果goto(r,a) == s，我们记state = fail®，执行state = f(state)零次或者若干次，直到使得goto(state,a) != fail，因为goto(0,a) != fail，所以这个状态是一定存在的。</li>
+<li>记fail(s) = goto(state,a)。</li>
+</ol>
+<p>我们还是以上面构造出的状态转移图为例，计算每个节点的fail值，根据规定，fail(1) = fail(3) = 0，因为1和3是深度为1的状态。</p>
+<blockquote>
+<p>考虑深度为2的状态2、6、4： * 计算fail(2)，令state = fail(1) = 0，由于goto(0，e) = 0，所以fail(2) = 0 * 计算fail(4)，令state = fail(3) = 0，由于goto(0，h) = 1，所以fail(4) = 1 * 计算fail(6)，令state = fail(1) = 0，由于goto(0，i) = 0，所以fail(6) = 0</p>
+<p>考虑深度为3的节点8、7、5： * 计算fail(8)，令state = fail(2) = 0，因为goto(0，r) = 0，所以fail(8) = 0 * 计算fail(7)，令state = fail(6) = 0，因为goto(0，s) = 3，所以fail(7) = 3 * 计算fail(5)，令state = fail(4) = 1，因为goto(1，e) = 2，所以fail(5) = 2</p>
+<p>最后考虑深度为4的节点9： * 计算fail(9)，令state = fail(8) = 0，因为goto(0，s) = 3，所以fail(9) = 3</p>
+</blockquote>
+<p>这样一来我们构造的fail表如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">状态</th>
+<th align="left">0</th>
+<th align="left">1</th>
+<th align="left">2</th>
+<th align="left">3</th>
+<th align="left">4</th>
+<th align="left">5</th>
+<th align="left">6</th>
+<th align="left">7</th>
+<th align="left">8</th>
+<th align="left">9</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">fail值</td>
+<td align="left">None</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">0</td>
+<td align="left">3</td>
+<td align="left">0</td>
+<td align="left">3</td>
+</tr>
+</tbody></table>
+<p>失效函数创建的伪代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">begin</span><br><span class="line">     queue ← empty</span><br><span class="line">     for each a such that goto(0,a) &#x3D; s ≠ fail do</span><br><span class="line">          begin</span><br><span class="line">               queue ← queue U &#123;s&#125;</span><br><span class="line">               fail(s) ← 0</span><br><span class="line">          end</span><br><span class="line">     while queue ≠ empty do</span><br><span class="line">     begin</span><br><span class="line">          let r be the next state in queue</span><br><span class="line">          queue ← queue - &#123;r&#125;</span><br><span class="line">          for each a such that goto(r,a) &#x3D; s ≠ fail do</span><br><span class="line">               begin</span><br><span class="line">                    queue ← queue U &#123;s&#125;</span><br><span class="line">                    state ← fail(r)</span><br><span class="line">                    while goto(state,a) &#x3D; fail do state ← fail(state)</span><br><span class="line">                    fail(s) ← goto(state,a)</span><br><span class="line">                    output(s) ← output(s) U output(fail(s))</span><br><span class="line">               end</span><br><span class="line">     end</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤三：对目标字符串进行搜索匹配"><a href="#步骤三：对目标字符串进行搜索匹配" class="headerlink" title="步骤三：对目标字符串进行搜索匹配"></a>步骤三：对目标字符串进行搜索匹配</h3><p>上面两个步骤都完成了之后就可以开始对目标串进行搜索了，只需对目标串从头到尾线性扫描，且没有回溯。搜索之前先记录树的当前节点node，初始时，树的当前节点node为根节点Root。从目标串的第一个字符开始，和Root的孩子节点进行匹配，如果不匹配，则目标字符串往后挪一个字符，继续在Root的孩子节点中查找匹配。如果找到匹配的孩子，则目标字符串往后挪一个字符，node变为匹配上的孩子节点。在接下来的匹配过程中，如果失配将跳转到node节点的fail值处继续进行匹配。在树上每次往孩子节点方向走一步都要检查该孩子节点的匹配模式串信息，如果有匹配的模式串信息，则应记录找到了哪些能够匹配的模式串。</p>
+<p>整体的匹配过程如下代码所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">begin</span><br><span class="line">     state ← 0</span><br><span class="line">     for i ← 1 until n do</span><br><span class="line">          begin</span><br><span class="line">               while goto(state,ai) &#x3D; fail do state &#x3D; fail(state)</span><br><span class="line">               state ← goto(state,ai)</span><br><span class="line">               if output(state) ≠ empty then</span><br><span class="line">                    begin</span><br><span class="line">                         print output(state)</span><br><span class="line">                    end</span><br><span class="line">          end</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-上单系统中的实现"><a href="#3-上单系统中的实现" class="headerlink" title="3.上单系统中的实现"></a>3.上单系统中的实现</h2><p>在美团上单系统中，待匹配的关键词根据产品类别进行分组，不同品类之间的关键词具有重叠。如果针对每个品类生成一棵状态转移树固然可行，但是随着品类的增多，对内存的使用也会随之增高。考虑到AC算法的时间复杂度与关键词的数量无关，因此可以考虑将所有品类的关键词构造在同一棵状态转移树中，每次进行匹配时，在output函数中对该关键词是否属于该品类做判断。在上单系统中，关键词用Keyword类表示，该类的定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Keyword</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> Map&lt;Integer, Integer&gt; categoryTypeMap;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> String word;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> List&lt;Integer&gt; categories; <span class="comment">//当前的关键词属于哪几个分类</span></span><br><span class="line"> </span><br><span class="line">    getter and setter ...</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> == o) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (o == <span class="keyword">null</span> || getClass() != o.getClass()) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"> </span><br><span class="line">        Keyword keyword = (Keyword) o;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (id != <span class="keyword">null</span> ? !id.equals(keyword.id) : keyword.id != <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id != <span class="keyword">null</span> ? id.hashCode() : <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，categoryTypeMap属性用来标识该关键词在不同品类中所代表的类型，当匹配命中时，根据类型信息指出其可能违反了哪些条款。</p>
+<p>我们用一个Node类来代表状态转移树的一个节点，同时，将goto信息、fail信息和output信息封装到里面，这样，这个类的定义就像下面这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> state;                    <span class="comment">//自动机的状态，也就是节点数字</span></span><br><span class="line">    <span class="keyword">char</span> character = <span class="number">0</span>;           <span class="comment">//指向当前节点的字符，也即条件</span></span><br><span class="line">    Node failureNode;             <span class="comment">//匹配失败时，下一个节点</span></span><br><span class="line">    List&lt;Keyword&gt; keywords;       <span class="comment">//匹配成功时，当前节点对应的关键词</span></span><br><span class="line">    List&lt;Node&gt; children;          <span class="comment">//当前节点的子节点</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们用Patterns类来表示整个待匹配的模式串，它是对Node的进一步封装：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Patterns</span></span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> Node root = <span class="keyword">new</span> Node();</span><br><span class="line">    <span class="keyword">protected</span> List&lt;Node&gt; tree;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Patterns</span><span class="params">(List&lt;Keyword&gt; keywords)</span> </span>&#123;</span><br><span class="line">        tree = <span class="keyword">new</span> ArrayList&lt;Node&gt;();</span><br><span class="line">        tree.add(root);</span><br><span class="line">        <span class="keyword">for</span>(Keyword keyword : keywords)&#123;</span><br><span class="line">            addKeyword(keyword);</span><br><span class="line">        &#125;</span><br><span class="line">        setFailNode();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addKeyword</span><span class="params">(Keyword keyword)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">char</span>[] wordCharArr = keyword.getWord().toCharArray();</span><br><span class="line">        Node current = root;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">char</span> currentChar : wordCharArr)&#123;</span><br><span class="line">            <span class="keyword">if</span>(current.containsChild(currentChar))&#123;</span><br><span class="line">                current = current.getChild(currentChar);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                Node node = <span class="keyword">new</span> Node(table.size(), currentChar, root);</span><br><span class="line">                current.addChild(node);</span><br><span class="line">                current = node;</span><br><span class="line">                tree.add(node);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        current.addKeyword(keyword);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFailNode</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Queue&lt;Node&gt; queue = <span class="keyword">new</span> LinkedList&lt;Node&gt;();</span><br><span class="line">        Node node = root;</span><br><span class="line">        <span class="keyword">for</span> (Node d1 : node.children)</span><br><span class="line">            queue.offer(d1);</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty()) &#123;</span><br><span class="line">            node = queue.poll();</span><br><span class="line">            <span class="keyword">if</span> (node.children != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (Node curNode : node.children) &#123;</span><br><span class="line">                    queue.offer(curNode);</span><br><span class="line">                    Node failNode = node.failureNode;</span><br><span class="line">                    <span class="keyword">while</span> (!failNode.containsChild(curNode.character)) &#123;</span><br><span class="line">                        failNode = failNode.failureNode;</span><br><span class="line">                        <span class="keyword">if</span> (failNode.state == <span class="number">0</span>) <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (failNode.containsChild(curNode.character)) &#123;</span><br><span class="line">                        curNode.failureNode = failNode.getChild(curNode.character);</span><br><span class="line">                        curNode.addKeywords(curNode.failureNode.keywords);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">         </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上单系统中对关键词的匹配需要传递一个categoryId，当匹配成功时，我们需要根据传递的类别信息判断是否应该保存当前关键词：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Set&lt;Keyword&gt; <span class="title">searchKeyword</span><span class="params">(String data, Integer category)</span> </span>&#123;</span><br><span class="line">    Set&lt;Keyword&gt; matchResult = <span class="keyword">new</span> HashSet&lt;Keyword&gt;();</span><br><span class="line">    Node node = patterns.getRoot();</span><br><span class="line">    <span class="keyword">char</span>[] chs = data.toCharArray();</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i &lt; chs.length; i++)&#123;</span><br><span class="line">        <span class="keyword">while</span> (!node.containsChild(chs[i])) &#123;</span><br><span class="line">            node = node.failureNode;</span><br><span class="line">            <span class="keyword">if</span> (node.state == <span class="number">0</span>) <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(node.containsChild(chs[i]))&#123;</span><br><span class="line">            node = node.getChild(chs[i]);</span><br><span class="line">            <span class="keyword">if</span>(node.keywords != <span class="keyword">null</span>)&#123;</span><br><span class="line">                <span class="keyword">for</span>(Keyword pattern : node.keywords)&#123;</span><br><span class="line">                    <span class="keyword">if</span> (category == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        matchResult.add(pattern);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">if</span> (pattern.getCategories().contains(category)) &#123;</span><br><span class="line">                            matchResult.add(pattern);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> matchResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>算法的测试结果如下：</p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/272631ae.png" alt="img"></p>
+<p><img src="https://awps-assets.meituan.net/mit-x/blog-images-bundle-2014/fbebb381.png" alt="img"></p>
+<p>在第二张图中，有一个因素没有考虑进去，就是同样关键词数量，当关键词在文本中出现的次数较多时，因为需要遍历找出对应该品类的词，所以花费的时间会增加，但整体上还是符合预期的。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/23/database/hbase/hbase-01-%E5%8D%95%E6%9C%BA%E5%AE%89%E8%A3%85/" rel="prev" title="hbase-01-单机安装">
+                  <i class="fa fa-chevron-left"></i> hbase-01-单机安装
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/23/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-url-%E8%87%AA%E5%8A%A8%E8%BD%AC%E8%AF%91%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7%E4%B8%BA%E7%A9%BA%E6%A0%BC/" rel="next" title="http-url自动转译特殊符号为空格">
+                  http-url自动转译特殊符号为空格 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

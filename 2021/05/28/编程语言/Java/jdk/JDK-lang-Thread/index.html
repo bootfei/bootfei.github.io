@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="线程状态操作系统中线程状态传统的进（线）程状态一般划分如下：  jdk中线程状态Runnable包含OS的ready和running状态runnable 状态实质上是包括了 ready 状态和running 状态。  A thread in the runnable state is executing in the Java virtual machine but it may be waiti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDK-lang-Thread">
+<meta property="og:url" content="http://example.com/2021/05/28/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Thread/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="线程状态操作系统中线程状态传统的进（线）程状态一般划分如下：  jdk中线程状态Runnable包含OS的ready和running状态runnable 状态实质上是包括了 ready 状态和running 状态。  A thread in the runnable state is executing in the Java virtual machine but it may be waiti">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPvuebO2CAvYA39TwmEx3t5agr9HlYDO9wxvRoW8eGut9tzZUGvvJyNg/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPEQSACKpCTzaaLPDxT4MNqw0KgSqLFX6LxM8qFbf61zybHibUGM8n3Cw/640">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/1ed0ebb5d7a15469d852e640d8daa0dd.png">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/87d263be12c962900f8a33fa6b68e264.png">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/8484f37a0899c7617f7fc4e9db310e82.png">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/7cbd9e0e3d0429f3457a83cc93986736.png">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/aac05a22a9f161e09ff13ccd498d4e3c.png">
+<meta property="og:image" content="http://f1.babyitellyou.com/sp1/img/20201206/ce38281f97a1a12abb4811f2b11f94d6.png">
+<meta property="article:published_time" content="2021-05-28T07:09:45.000Z">
+<meta property="article:modified_time" content="2023-03-15T09:59:31.265Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPvuebO2CAvYA39TwmEx3t5agr9HlYDO9wxvRoW8eGut9tzZUGvvJyNg/640">
+
+
+<link rel="canonical" href="http://example.com/2021/05/28/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Thread/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>JDK-lang-Thread | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81"><span class="nav-number">1.</span> <span class="nav-text">线程状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81"><span class="nav-number">1.1.</span> <span class="nav-text">操作系统中线程状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jdk%E4%B8%AD%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.</span> <span class="nav-text">jdk中线程状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Runnable"><span class="nav-number">1.2.1.</span> <span class="nav-text">Runnable</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8C%85%E5%90%ABOS%E7%9A%84ready%E5%92%8Crunning%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">包含OS的ready和running状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8C%85%E5%90%ABOS%E4%B8%AD%E7%94%B1%E4%BA%8EIO%E5%BC%95%E8%B5%B7%E7%9A%84wait%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">包含OS中由于IO引起的wait状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BLOCKED-%E9%98%BB%E5%A1%9E%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">BLOCKED: 阻塞状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WAITING-%E7%AD%89%E5%BE%85%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.3.</span> <span class="nav-text">WAITING: 等待状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TIMED-WAITING"><span class="nav-number">1.2.4.</span> <span class="nav-text">TIMED_WAITING:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TERMINATED"><span class="nav-number">1.2.5.</span> <span class="nav-text">TERMINATED</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%90%8C%E7%8A%B6%E6%80%81%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.3.</span> <span class="nav-text">java线程不同状态之间的转换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RUNNABLE-gt-BLOCKED%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.1.</span> <span class="nav-text">RUNNABLE -&gt; BLOCKED状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RUNNABLE-gt-WAITING%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.2.</span> <span class="nav-text">RUNNABLE -&gt; WAITING状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RUNNABLE-gt-TIMED-WAITING%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.3.</span> <span class="nav-text">RUNNABLE -&gt; TIMED_WAITING状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BLOCKED-gt-RUNNABLE%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.4.</span> <span class="nav-text">BLOCKED -&gt; RUNNABLE状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WAITING-gt-RUNNABLE%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.5.</span> <span class="nav-text">WAITING -&gt; RUNNABLE状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TIMED-WAITING-gt-RUNNABLE%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.6.</span> <span class="nav-text">TIMED_WAITING -&gt; RUNNABLE状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jstack%E6%98%BE%E7%A4%BA%E7%9A%84java%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81"><span class="nav-number">2.</span> <span class="nav-text">jstack显示的java线程状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD"><span class="nav-number">2.1.</span> <span class="nav-text">线程中断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%86%85%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">3.</span> <span class="nav-text">线程池内线程的状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E4%B8%8Ecpu%E5%85%B3%E7%B3%BB"><span class="nav-number">4.</span> <span class="nav-text">JVM线程状态与cpu关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E4%B8%8E%E9%94%81%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">5.</span> <span class="nav-text">JVM线程状态与锁的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#wait-%E5%92%8Csleep"><span class="nav-number">5.1.</span> <span class="nav-text">wait()和sleep()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#notify-%E4%B8%8EnotifyAll"><span class="nav-number">5.2.</span> <span class="nav-text">notify()与notifyAll()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E6%98%93%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.3.</span> <span class="nav-text">简易消息队列的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD-1"><span class="nav-number">6.</span> <span class="nav-text">线程中断</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E4%B8%AA%E4%B8%AD%E6%96%AD%E7%9B%B8%E5%85%B3%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">6.1.</span> <span class="nav-text">3个中断相关的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Method1-interrupt-%E4%B8%AD%E6%96%AD%E7%BA%BF%E7%A8%8B-%E8%BD%AF%E4%B8%AD%E6%96%AD"><span class="nav-number">6.1.1.</span> <span class="nav-text">Method1: interrupt()中断线程(软中断)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Method2-%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95interrupted-%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E7%BA%BF%E7%A8%8B%E6%98%AF%E5%90%A6%E4%B8%AD%E6%96%AD%E7%8A%B6%E6%80%81"><span class="nav-number">6.1.2.</span> <span class="nav-text">Method2: 静态方法interrupted()判断当前线程是否中断状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Method3-isInterrupted-%E5%88%A4%E6%96%AD%E7%BA%BF%E7%A8%8B%E6%98%AF%E5%90%A6%E4%B8%AD%E6%96%AD%E7%8A%B6%E6%80%81"><span class="nav-number">6.1.3.</span> <span class="nav-text">Method3: isInterrupted()判断线程是否中断状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%95%E8%8E%B7%E4%B8%AD%E6%96%AD%E7%8A%B6%E6%80%81"><span class="nav-number">6.2.</span> <span class="nav-text">捕获中断状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%88%A4%E6%96%AD%E4%B8%AD%E6%96%AD%E7%8A%B6%E6%80%81%EF%BC%8C%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%EF%BC%8C%E5%81%9C%E6%AD%A2%E7%BA%BF%E7%A8%8B"><span class="nav-number">6.2.1.</span> <span class="nav-text">通过判断中断状态，抛出异常，停止线程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E6%8D%95%E8%8E%B7InterruptedException%E5%81%9C%E6%AD%A2"><span class="nav-number">6.2.2.</span> <span class="nav-text">通过捕获InterruptedException停止</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/28/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Thread/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JDK-lang-Thread
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-28 15:09:45" itemprop="dateCreated datePublished" datetime="2021-05-28T15:09:45+08:00">2021-05-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2023-03-15 17:59:31" itemprop="dateModified" datetime="2023-03-15T17:59:31+08:00">2023-03-15</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="线程状态"><a href="#线程状态" class="headerlink" title="线程状态"></a>线程状态</h2><h3 id="操作系统中线程状态"><a href="#操作系统中线程状态" class="headerlink" title="操作系统中线程状态"></a>操作系统中线程状态</h3><p>传统的进（线）程状态一般划分如下：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPvuebO2CAvYA39TwmEx3t5agr9HlYDO9wxvRoW8eGut9tzZUGvvJyNg/640" alt="图片"></p>
+<h3 id="jdk中线程状态"><a href="#jdk中线程状态" class="headerlink" title="jdk中线程状态"></a>jdk中线程状态</h3><h4 id="Runnable"><a href="#Runnable" class="headerlink" title="Runnable"></a>Runnable</h4><h5 id="包含OS的ready和running状态"><a href="#包含OS的ready和running状态" class="headerlink" title="包含OS的ready和running状态"></a>包含OS的ready和running状态</h5><p>runnable 状态实质上是包括了 ready 状态和running 状态。</p>
+<blockquote>
+<p>A thread in the runnable state is executing in the Java virtual machine but it may be waiting for other resources from the operating system such as processor.</p>
+</blockquote>
+<p>通常，Java的线程状态是服务于监控的，如果线程切换得是如此之快，那么区分 ready 与 running 就没什么太大意义了。</p>
+<p>现今主流的 JVM 实现都把 Java 线程一一映射到操作系统底层的线程上，把调度委托给了操作系统，我们在虚拟机层面看到的状态实质是对底层状态的映射及包装。JVM 本身没有做什么实质的调度，把底层的 ready 及 running 状态映射上来也没多大意义，因此，统一成为runnable 状态是不错的选择。</p>
+<h5 id="包含OS中由于IO引起的wait状态"><a href="#包含OS中由于IO引起的wait状态" class="headerlink" title="包含OS中由于IO引起的wait状态"></a>包含OS中由于IO引起的wait状态</h5><p>一旦线程中执行到 I/O 有关的代码，相应线程立马被切走，然后调度 ready 队列中另一个线程来运行。这时执行了 I/O 的线程就不再运行，处于上图中的 waiting 状态。</p>
+<p>而当 I/O 完成时，则用一种叫中断 （interrupt）的机制来通知 cpu：</p>
+<p>cpu 会收到一个比如说来自硬盘的Interrput信号，并进入中断处理例程，CPU正在执行的线程因此被Interrput，回到 ready 队列。而先前因 I/O 而waiting 的线程随着 I/O 的完成也再次回到 ready 队列，这时 cpu 可能会选择它来执行。</p>
+<blockquote>
+<p>进行阻塞式 I/O 操作时，Java 的线程状态究竟是什么？是 BLOCKED？还是 WAITING？</p>
+</blockquote>
+<p>其实状态还是 RUNNABLE。</p>
+<p>网络阻塞时同理，比如socket.accept，我们说这是一个“阻塞式(blocked)”式方法，但线程状态还是 RUNNABLE。</p>
+<blockquote>
+<p>至少我们看到了，进行传统上的 IO 操作时，口语上我们也会说“阻塞”，但这个“阻塞”与线程的 BLOCKED 状态是两码事！</p>
+</blockquote>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>首先还是前面说的，注意分清两个层面：</p>
+<ul>
+<li><p>JVM层面：当进行阻塞式的 IO 操作时，或许底层的操作系统线程确实处在阻塞状态，但我们关心的是 JVM 的线程状态。JVM 把那些都视作资源，cpu 也好，硬盘，网卡也罢，有东西在为线程服务，它就认为线程在“执行”。</p>
+</li>
+<li><p>操作系统：操作系统的线程状态是围绕着 cpu 这一核心去述说的，这与 JVM 的侧重点是有所不同的。</p>
+</li>
+</ul>
+<p>前面我们也强调了“Java 线程状态的改变通常只与自身显式引入的机制有关”，如果 JVM 中的线程状态发生改变了，通常是自身机制引发的。</p>
+<blockquote>
+<p>比如 synchronize 机制有可能让线程进入BLOCKED 状态，sleep，wait等方法则可能让其进入 WATING 之类的状态。</p>
+</blockquote>
+<p>它与传统的线程状态的对应可以如下来看：</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/JdLkEI9sZfednyicQRNkh1ibicsEjORXmQPEQSACKpCTzaaLPDxT4MNqw0KgSqLFX6LxM8qFbf61zybHibUGM8n3Cw/640" alt="图片" style="zoom: 50%;" />
+
+<p>RUNNABLE 状态对应了传统的 ready， running 以及部分的 waiting 状态。</p>
+<h4 id="BLOCKED-阻塞状态"><a href="#BLOCKED-阻塞状态" class="headerlink" title="BLOCKED: 阻塞状态"></a>BLOCKED: 阻塞状态</h4><p>等待锁的释放，比如线程A进入了一个synchronized方法，线程B也想进入这个方法，但是这个方法的锁已经被线程A获取了，这个时候线程B就处于BLOCKED状态</p>
+<h4 id="WAITING-等待状态"><a href="#WAITING-等待状态" class="headerlink" title="WAITING: 等待状态"></a>WAITING: 等待状态</h4><p>处于等待状态的线程是由于执行了3个方法中的任意方法。 </p>
+<ol>
+<li>Object.wait() with no timeout</li>
+<li>Thread.join() with no timeout</li>
+<li>LockSupport.park()</li>
+</ol>
+<p>处于waiting状态的线程会等待另外一个线程处理特殊的行为。 </p>
+<p>再举个例子，如果一个线程调用了一个对象的wait方法，那么这个线程就会处于waiting状态直到另外一个线程调用这个对象的notify或者notifyAll方法后才会解除这个状态</p>
+<blockquote>
+<p>比如线程处于WAITING状态，这个时候可以分析一下notifyAll或者signalAll方法的调用时机是否不对。</p>
+</blockquote>
+<h4 id="TIMED-WAITING"><a href="#TIMED-WAITING" class="headerlink" title="TIMED_WAITING:"></a>TIMED_WAITING:</h4><p>有等待时间的等待状态，比如调用了以下几个方法中的任意方法，并且指定了等待时间，线程就会处于这个状态。  </p>
+<ol>
+<li><p>Thread.sleep(long millis)</p>
+</li>
+<li><p>Object.wait(long) with timeout </p>
+</li>
+<li><p>Thread.join(long) with timeout</p>
+</li>
+<li><p>LockSupport.parkNanos(Object blocker, long deadline)</p>
+</li>
+<li><p>LockSupport.parkUntil(long deadline)</p>
+</li>
+</ol>
+<h4 id="TERMINATED"><a href="#TERMINATED" class="headerlink" title="TERMINATED"></a>TERMINATED</h4><p>线程中止的状态，这个线程已经完整地执行了它的任务</p>
+<h3 id="java线程不同状态之间的转换"><a href="#java线程不同状态之间的转换" class="headerlink" title="java线程不同状态之间的转换"></a>java线程不同状态之间的转换</h3><p><img src="http://f1.babyitellyou.com/sp1/img/20201206/1ed0ebb5d7a15469d852e640d8daa0dd.png" alt="img"></p>
+<h4 id="RUNNABLE-gt-BLOCKED状态"><a href="#RUNNABLE-gt-BLOCKED状态" class="headerlink" title="RUNNABLE -&gt; BLOCKED状态"></a>RUNNABLE -&gt; BLOCKED状态</h4><p>代码执行到synchronized代码块和synchronized方法 时候要获取到锁，就变成BLOCKED状态。</p>
+<blockquote>
+<p><strong>我们平时所谓的 Java 在调用阻塞式 API 时，线程会阻塞，指的是操作系统线程的状态，并不是 Java 线程的状态。</strong></p>
+</blockquote>
+<h4 id="RUNNABLE-gt-WAITING状态"><a href="#RUNNABLE-gt-WAITING状态" class="headerlink" title="RUNNABLE -&gt; WAITING状态"></a>RUNNABLE -&gt; WAITING状态</h4><p>根据官方文档，线程执行到代码Object#wait()，Thread.join，LockSupport#park()时候线程会转移到该前状态。</p>
+<h4 id="RUNNABLE-gt-TIMED-WAITING状态"><a href="#RUNNABLE-gt-TIMED-WAITING状态" class="headerlink" title="RUNNABLE -&gt; TIMED_WAITING状态"></a>RUNNABLE -&gt; TIMED_WAITING状态</h4><p>根据定义线程执行到Thread.sleep(long millis)，Object.wait(long timeout)，Thread.join(long millis)，LockSupport.parkNanos(Object blocker, long deadline)，LockSupport.parkUntil(long deadline)，和waitting相比主要是有个等待时间，且比waiting多了个sleep操作。</p>
+<h4 id="BLOCKED-gt-RUNNABLE状态"><a href="#BLOCKED-gt-RUNNABLE状态" class="headerlink" title="BLOCKED -&gt; RUNNABLE状态"></a>BLOCKED -&gt; RUNNABLE状态</h4><p>线程获得 监视器锁(synchronized 隐式锁)时，就又会从 BLOCKED 转换到 RUNNABLE 状态</p>
+<h4 id="WAITING-gt-RUNNABLE状态"><a href="#WAITING-gt-RUNNABLE状态" class="headerlink" title="WAITING -&gt; RUNNABLE状态"></a>WAITING -&gt; RUNNABLE状态</h4><p>对于Object.wait()，其它线程执行了同一个对象的Object#notify()或者nofityAll()时候唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<p>对于Thread.join()，其它线程执行完毕或者抛出异常后唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<p>对于LockSupport#park，在别处执行了此Thread的LockSuport#unPark时候唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<h4 id="TIMED-WAITING-gt-RUNNABLE状态"><a href="#TIMED-WAITING-gt-RUNNABLE状态" class="headerlink" title="TIMED_WAITING -&gt; RUNNABLE状态"></a>TIMED_WAITING -&gt; RUNNABLE状态</h4><p>对于Object.wait(long timeout)，线程阻塞timeout时间后，或者在timeout时间内其它线程执行了同一个对象的Object#notify()或者nofityAll()时候唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<p>对于Thread.join(long millis)，线程阻塞millis时间后，或者millis时间内其它线程执行完毕或者抛出异常后唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<p>对于LockSupport.parkNanos(Object blocker, long deadline)和LockSupport.parkUntil(long deadline)，线程阻塞deadline时间后，或者在别处执行了此Thread的LockSuport#unPark时候唤醒线程，线程由WAITING -&gt; RUNNABLE。</p>
+<p>Thread.sleep(long millis)，休眠millis时间后线程自动唤醒，或者线程被打断休眠，也会被唤醒。线程由WAITING -&gt; RUNNABLE。</p>
+<h2 id="jstack显示的java线程状态"><a href="#jstack显示的java线程状态" class="headerlink" title="jstack显示的java线程状态"></a>jstack显示的java线程状态</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack PID(10进制)</span><br></pre></td></tr></table></figure>
+
+<p>生成线程堆栈文件</p>
+<blockquote>
+<p>java.lang.Thread.State: BLOCKED 线程处于阻塞状态，遇到了synchronized处于阻塞状态</p>
+<p>java.lang.Thread.State: RUNNABLE 线程处于正运行状态，或者阻塞在IO状态 </p>
+<p>java.lang.Thread.State: TIMED_WAITING (on object monitor) Object.wait(long)加超时时间操作 java.lang.Thread.State: TIMED_WAITING (parking) 通过LockSupport.parkXXX加超时时间操作 java.lang.Thread.State: TIMED_WAITING (sleeping) 通过Thread.sleep加休眠时间操作 </p>
+<p>java.lang.Thread.State: WAITING (on object monitor) Object.wait()无超时时间操作 </p>
+<p>java.lang.Thread.State: WAITING (parking) 通过LockSupport.park())操作</p>
+</blockquote>
+<h3 id="线程中断"><a href="#线程中断" class="headerlink" title="线程中断"></a>线程中断</h3><p>除了Object.nofity()，nofityAll()，LockSupport.unPark(Thread)操作唤醒线程或者超时自动唤醒线程，工作中也经常使用到interrupt() 方法对阻塞中的线程(WAITING、TIMED_WAITING 状态)进行中断，以便使线程从阻塞(WAITING、TIMED_WAITING 状态)中被唤醒。interrupt()操作是给正在处于阻塞状态的线程发个中断通知，以便线程从阻塞中唤醒过来。</p>
+<p>线程 A 处于 WAITING、TIMED_WAITING 状态时，如果其他线程调用线程 A 的 interrupt() 方法，会使线程 A 返回到 RUNNABLE 状态(中间可能存在BLOCKED状态)，同时线程 A 的代码会触发 InterruptedException 异常。通过查看Object.wait()，Thread.join()方法上都有throws InterruptedException。这个异常的触发条件就是：其他线程调用了该线程的 interrupt() 方法。</p>
+<p>当RUNNABLE状态线程在阻塞到IO操作时候，此时线程状态还是RUNNABLE ，但是实际在linux线程模型中是阻塞状态，比如线程A阻塞在 java.nio.channels.Selector.select() 上时，如果其他线程调用线程 A 的 interrupt() 方法，线程 A 的 java.nio.channels.Selector 会立即返回。</p>
+<h2 id="线程池内线程的状态"><a href="#线程池内线程的状态" class="headerlink" title="线程池内线程的状态"></a>线程池内线程的状态</h2><ul>
+<li><p>预热阶段，线程状态也是从NEW-&gt;RUNNABLE-BLOCKED/WAITING/TIMED_WAITING状态</p>
+</li>
+<li><p>线程池活动达到core线程后，接入的请求都会存放到队列内，如果队列内任务为空，那么Worker线程getTask()阻塞，处于waiting状态</p>
+</li>
+</ul>
+<p><img src="http://f1.babyitellyou.com/sp1/img/20201206/87d263be12c962900f8a33fa6b68e264.png" alt="img"></p>
+<p>其中代码@1和@2底层都是使用的LockSupport.park()挂起线程 <!--ReentrantLock锁--> ，因此，线程池内的线程空闲时候，线程状态是waiting状态。</p>
+<p>验证如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AllocateServiceImpl</span> <span class="keyword">implements</span> <span class="title">AllocateService</span>, <span class="title">InitializingBean</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ThreadPoolExecutor pool;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ThreadFactory threadFactory = <span class="keyword">new</span> ThreadFactoryBuilder().</span><br><span class="line">                setNameFormat(<span class="string">&quot;my-pool-%d&quot;</span>).build();</span><br><span class="line">        pool = <span class="keyword">new</span> ThreadPoolExecutor(<span class="number">10</span>, <span class="number">10</span>, <span class="number">60L</span>, TimeUnit.MINUTES, </span><br><span class="line">                <span class="keyword">new</span> LinkedBlockingDeque&lt;Runnable&gt;(<span class="number">1024</span>), threadFactory, <span class="keyword">new</span> ThreadPoolExecutor.AbortPolicy());</span><br><span class="line">        pool.prestartAllCoreThreads();<span class="comment">//启动所有线程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动后使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack pid</span><br></pre></td></tr></table></figure>
+
+<p>验证截图如下</p>
+<p><img src="http://f1.babyitellyou.com/sp1/img/20201206/8484f37a0899c7617f7fc4e9db310e82.png" alt="img"></p>
+<h2 id="JVM线程状态与cpu关系"><a href="#JVM线程状态与cpu关系" class="headerlink" title="JVM线程状态与cpu关系"></a>JVM线程状态与cpu关系</h2><blockquote>
+<p>NEW 这线程刚创建，还未执行, CPU=0%</p>
+<p>RUNNABLE 线程处于可运行状态，但是实际可能是正在运行或者等待io资源，因此不能完全确定是否在使用cpu资源。 </p>
+<p>BLOCKED 线程阻塞状态，肯定不会使用cpu资源 </p>
+<p>WAITING 线程休眠状态，肯定不会使用cpu资源 </p>
+<p>TIMED_WAITING 线程休眠状态，肯定不会使用cpu资源</p>
+</blockquote>
+<p>通过上面分析，在分析cpu100%问题时候，<code>jstack PID</code> 后，只需要查看dump结果中处于RUNNABLE状态的线程即可，但是处于RUNNABLE状态的线程，不代表就一定正在使用cpu资源，因此要特定分析（通过代码分析）。通常是通过top -Hp PID确定使用cpu资源高的线程后，再通过多次jstack操作，查看哪些线程堆栈一直处于RUNNABLE。</p>
+<p>举例如下：</p>
+<p>1.处于waiting，timed_waiting，blocked状态肯定不消化cpu，如下图，分析cpu时候忽略这些线程</p>
+<p><img src="http://f1.babyitellyou.com/sp1/img/20201206/7cbd9e0e3d0429f3457a83cc93986736.png" alt="img"></p>
+<p>2.比如下面这个，虽然处于RUNNABLE状态，实际上是阻塞在监听接入连接上（阻塞在网络IO上），因此实际是不使用cpu资源</p>
+<p><img src="http://f1.babyitellyou.com/sp1/img/20201206/aac05a22a9f161e09ff13ccd498d4e3c.png" alt="img"></p>
+<p>3.如下图这个，线程状态是RUNNABLE，这里是使用正则表达式解析，正在使用cpu资源</p>
+<p><img src="http://f1.babyitellyou.com/sp1/img/20201206/ce38281f97a1a12abb4811f2b11f94d6.png" alt="img"></p>
+<h2 id="JVM线程状态与锁的关系"><a href="#JVM线程状态与锁的关系" class="headerlink" title="JVM线程状态与锁的关系"></a>JVM线程状态与锁的关系</h2><p>sleep、wait、join都会使线程进入阻塞状态(waiting/timed_waiting状态)，同时也都会释放cpu资源</p>
+<blockquote>
+<p>yield是释放cpu资源，然后又抢夺cpu资源，目的是为了让其它线程有机会获取cpu资源进行处理，但是线程状态还是runnable。</p>
+</blockquote>
+<p>sleep如果是在锁方法内执行，比如同步代码块或者重入锁方法内执行，是不会释放锁。而wait会释放锁。</p>
+<ul>
+<li>wait用于锁机制，sleep不是，这也是为什么sleep不释放锁，wait释放锁的原因，</li>
+<li>sleep是线程的方法，跟锁没关系，</li>
+<li>wait，notify，notifyall 都是Object对象的方法，是一起使用的，用于锁机制。</li>
+</ul>
+<p>有个特殊的Thread.sleep(0)，操作这个动作是让出cpu，让其它线程又机会获取cpu资源执行</p>
+<h3 id="wait-和sleep"><a href="#wait-和sleep" class="headerlink" title="wait()和sleep()"></a>wait()和sleep()</h3><p>前面synchronized关键字的用法讲完了，该轮到wait和sleep了。可能会有点好奇，为什么wait和sleep要一块讲？因为我一开始也搞不懂他们的区别，只知道wait()是Object类的实例方法，sleep()是Thread类的实例方法。作用都是使让代码停下来。</p>
+<p>但后来研究了下，两者使用起来还是有一定的差别的。</p>
+<p>首先，wait必须要在获得了当前对象的对象锁代码块中执行（可以理解为调用哪个对象的wait方法，调用的时候就要处于哪个对象的同步代码块中），而sleep则没有这个限制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">methodName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.wait(); <span class="comment">//可以 没问题</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.wait(); <span class="comment">//不可以，没有处于this的同步代码块中，抛出IllegalMonitorStateException</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodName2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span>(其他对象) &#123;</span><br><span class="line">        <span class="keyword">this</span>.wait() <span class="comment">// 不可以，这里只获得了其他对象的锁，但是却调用了this的wait，抛出IllegalMonitorStateException</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodName3</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span>(其他对象) &#123;</span><br><span class="line">        其他对象.wait() <span class="comment">// 可以，没问题，不一定非得是this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也许你注意到了，wait()必须配合synchronized使用？为什么呢？那就是wait()有个很有意思的特性，<strong>执行wait()后的睡眠期间，会释放掉通过synchronized获得的锁，直到被唤醒的时候会重新获得锁</strong>，而sleep()会在线程睡眠期间依然持有这个锁，也就是说，在同步代码块中用wait()睡眠后，其他线程也能够获得对象的锁。</p>
+<p>wait()的睡眠状态被notity()或notifyAll()唤醒时，不会抛出异常，sleep()导致的睡眠只能被interrupt()方法唤醒，同时sleep()会抛出异常，若interrupt()唤醒的是由wait()导致的睡眠，wait()同样会抛出异常。</p>
+<p>同时，由于wait()会释放掉锁，因此一个对象中可能会同时存在多个线程由于wait()导致的睡眠</p>
+<h3 id="notify-与notifyAll"><a href="#notify-与notifyAll" class="headerlink" title="notify()与notifyAll()"></a>notify()与notifyAll()</h3><p>notify()会将对象的一个线程从wait()导致的睡眠状态中唤醒，至于是哪个线程，则是随机的。</p>
+<p>而notifyAll()则是唤醒对象所有由于wait()导致的睡眠。由于wait()被唤醒后会对对象加锁，如果没能拿到锁会暂时先阻塞着直到有机会拿到锁，因此依然是线程安全的。</p>
+<h3 id="简易消息队列的实现"><a href="#简易消息队列的实现" class="headerlink" title="简易消息队列的实现"></a>简易消息队列的实现</h3><p>现在就利用上面的特性，实现一个简单的阻塞型消息队列吧。</p>
+<p>消息队列是一个典型的消费者-生产者模型，当消费者消费时，若消息队列为空，则一直等待（阻塞执行），直到生产者生产了一个消息，此时消费者阻塞消除并获得一个消息</p>
+<p>这里阻塞的关键是队列空时等待，非空时唤醒</p>
+<p>消息队列类完整代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 使用锁实现的消息队列</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MessageQueue</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 队列关闭标志</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> stop = <span class="keyword">false</span>;</span><br><span class="line">    <span class="comment">// 使用链表作为消息容器</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> LinkedList&lt;String&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 生产消息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> msg   消息内容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">product</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取链表的锁之后，向链表添加消息，最后尝试唤醒链表对象（如果在等待的话）</span></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (stop) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;消息队列已关闭&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            queue.add(msg);</span><br><span class="line">            <span class="keyword">this</span>.notify();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 关闭消息队列，并唤醒消费者的等待（如果在等待的话）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            stop = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">this</span>.notify();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 消费消息，若无消息将会一直阻塞，直到有消息或队列关闭，若消息队列已关闭则不再阻塞且返回null</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 拿到的消息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">consume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 获取对象的锁</span></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (queue.size() != <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> queue.remove();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">while</span> (!stop &amp;&amp; queue.size() == <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">this</span>.wait();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ignored) &#123; &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 由于关闭队列也有可能退出上面的循环，所以要再判断一次长度</span></span><br><span class="line">                <span class="keyword">if</span> (queue.size() == <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> queue.remove();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        MessageQueue mq = <span class="keyword">new</span> MessageQueue();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 开1个线程消费消息</span></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">           <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">               String msg = mq.consume();</span><br><span class="line">               System.out.println(<span class="string">&quot;消费消息：&quot;</span> + msg);</span><br><span class="line">               <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</span><br><span class="line">                   System.out.println(<span class="string">&quot;队列关闭&quot;</span>);</span><br><span class="line">                   <span class="keyword">break</span>;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            mq.product(<span class="string">&quot;&quot;</span> + i);</span><br><span class="line">            System.out.println(<span class="string">&quot;生产消息：&quot;</span> + i);</span><br><span class="line">            Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        mq.stop();</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;主线程结束&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行可以观察到每0.1秒生产一个消息，紧接着就被消费，最后程序退出 </p>
+<h2 id="线程中断-1"><a href="#线程中断-1" class="headerlink" title="线程中断"></a>线程中断</h2><h3 id="3个中断相关的方法"><a href="#3个中断相关的方法" class="headerlink" title="3个中断相关的方法"></a>3个中断相关的方法</h3><p> 停止一个线程意味着在任务处理完任务之前停掉正在做的操作，也就是放弃当前的操作。</p>
+<p>在java中有以下3种方法可以终止正在运行的线程：</p>
+<ol>
+<li>使用退出标志，使线程正常退出，也就是当run方法完成后线程终止。</li>
+<li>使用stop方法强行终止，但是不推荐这个方法，因为stop和suspend及resume一样都是过期作废的方法。</li>
+<li>使用interrupt方法中断线程。</li>
+</ol>
+<h4 id="Method1-interrupt-中断线程-软中断"><a href="#Method1-interrupt-中断线程-软中断" class="headerlink" title="Method1: interrupt()中断线程(软中断)"></a>Method1: interrupt()中断线程(软中断)</h4><blockquote>
+<p>Interrupts this thread.<br>Unless the current thread is interrupting itself, which is always permitted, the checkAccess method of this thread is invoked, which may cause a SecurityException to be thrown.</p>
+<p>If this thread is blocked in an invocation of the wait(), wait(long), or wait(long, int) methods of the Object class, or of the join(), join(long), join(long, int), sleep(long), or sleep(long, int), methods of this class, then its interrupt status will be cleared and it will receive an InterruptedException.</p>
+</blockquote>
+<p>调用interrupt方法是在当前线程中打了一个停止标志，并不是真的停止线程，无法硬中断线程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.run();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">500000</span>; i++)&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;i=&quot;</span>+(i+<span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringBootApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> MyThread();</span><br><span class="line">        thread.start();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            thread.interrupt();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：可以看到线程继续运行，并没有中断</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">i&#x3D;499998</span><br><span class="line">i&#x3D;499999</span><br><span class="line">i&#x3D;500000</span><br></pre></td></tr></table></figure>
+
+<h4 id="Method2-静态方法interrupted-判断当前线程是否中断状态"><a href="#Method2-静态方法interrupted-判断当前线程是否中断状态" class="headerlink" title="Method2: 静态方法interrupted()判断当前线程是否中断状态"></a>Method2: 静态方法interrupted()判断当前线程是否中断状态</h4><blockquote>
+<p>Tests whether the current thread has been interrupted. <font color='red'>The interrupted status of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false</font>&gt; (unless the current thread were interrupted again, after the first call had cleared its interrupted status and before the second call had examined it).<br>A thread interruption ignored because a thread was not alive at the time of the interrupt will be reflected by this method returning false.<br>Returns:<br>true if the current thread has been interrupted; false otherwise.</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> interrupted&#123;</span><br><span class="line">	<span class="keyword">return</span> currentThread().isInterrputed(<span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>interrupted(): 测试<font color='red'>当前线程</font>是否已经中断，线程的中断状态由该方法清除。 换句话说，如果连续两次调用该方法，则第二次调用返回false。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Run</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> MyThread();</span><br><span class="line">        thread.start();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            thread.interrupt();</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;stop 1??&quot;</span> + thread.interrupted());</span><br><span class="line">            System.out.println(<span class="string">&quot;stop 2??&quot;</span> + thread.interrupted());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stop 1??false</span><br><span class="line">stop 2??false</span><br></pre></td></tr></table></figure>
+
+<p>类Run.java中虽然是在thread对象上调用以下代码：thread.interrupt(), 后面又使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(&quot;stop 1??&quot; + thread.interrupted());</span><br><span class="line">System.out.println(&quot;stop 2??&quot; + thread.interrupted());</span><br></pre></td></tr></table></figure>
+
+<p>来判断thread对象所代表的线程是否停止，但从控制台打印的结果来看，线程并未停止，这也证明了interrupted()方法的解释，测试<a href="">当前线程</a>是否已经中断。这个当前线程是main主线程，它从未中断过，而是子线程thread中断了，所以打印的结果是两个false.</p>
+<p>如何使main线程产生中断效果呢？就是把thread.interrupt改为main线程interrupt <!--Thread.currentThread()获取当前main线程--></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Run2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        Thread.currentThread().interrupt();</span><br><span class="line">        System.out.println(<span class="string">&quot;stop 1??&quot;</span> + Thread.interrupted());</span><br><span class="line">        System.out.println(<span class="string">&quot;stop 2??&quot;</span> + Thread.interrupted());</span><br><span class="line">        System.out.println(<span class="string">&quot;End&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行效果为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stop 1??true</span><br><span class="line">stop 2??false</span><br><span class="line">End</span><br></pre></td></tr></table></figure>
+
+<p>方法interrupted()的确判断出当前线程是否是停止状态。</p>
+<h4 id="Method3-isInterrupted-判断线程是否中断状态"><a href="#Method3-isInterrupted-判断线程是否中断状态" class="headerlink" title="Method3: isInterrupted()判断线程是否中断状态"></a>Method3: isInterrupted()判断线程是否中断状态</h4><blockquote>
+<p>Tests whether this thread has been interrupted. <font color='red'>The interrupted status of the thread is unaffected by this method.</font><br>A thread interruption ignored because a thread was not alive at the time of the interrupt will be reflected by this method returning false.<br>Returns:<br>true if this thread has been interrupted; false otherwise.</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">boolean</span> isInterrupted&#123;</span><br><span class="line">	<span class="keyword">return</span> isInterrupted(<span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">isInterrupted</span><span class="params">(<span class="keyword">boolean</span> ClearInterrupted)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>isInterrupted()并<font color='red'>不清除中断状态</font>,所有连续2次调用并不清除中断状态</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Run3</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> MyThread();</span><br><span class="line">        thread.start();</span><br><span class="line">        thread.interrupt();</span><br><span class="line">        System.out.println(<span class="string">&quot;stop 1??&quot;</span> + thread.isInterrupted());</span><br><span class="line">        System.out.println(<span class="string">&quot;stop 2??&quot;</span> + thread.isInterrupted());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stop 1??true</span><br><span class="line">stop 2??true</span><br></pre></td></tr></table></figure>
+
+<h3 id="捕获中断状态"><a href="#捕获中断状态" class="headerlink" title="捕获中断状态"></a>捕获中断状态</h3><h4 id="通过判断中断状态，抛出异常，停止线程"><a href="#通过判断中断状态，抛出异常，停止线程" class="headerlink" title="通过判断中断状态，抛出异常，停止线程"></a>通过判断中断状态，抛出异常，停止线程</h4><p>在线程中用for语句来判断一下线程是否是停止状态，如果是停止状态，则后面的代码不再运行即可</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.run();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">500000</span>; i++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">this</span>.interrupted()) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;线程已经终止， for循环不再执行&quot;</span>);</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(<span class="string">&quot;i=&quot;</span>+(i+<span class="number">1</span>));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;这是for循环外面的语句，也会被执行&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;进入MyThread.java类中的catch了。。。&quot;</span>);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>建议使用“抛异常”的方法来实现线程的停止，因为在catch块中还可以将异常向上抛，使线程停止事件得以传播。</p>
+</blockquote>
+<h4 id="通过捕获InterruptedException停止"><a href="#通过捕获InterruptedException停止" class="headerlink" title="通过捕获InterruptedException停止"></a>通过捕获InterruptedException停止</h4><p>如果线程在sleep()状态下停止线程，会是什么效果呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.run();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;线程开始。。。&quot;</span>);</span><br><span class="line">            Thread.sleep(<span class="number">200000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;线程结束。&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;在沉睡中被停止, 进入catch， 调用isInterrupted()方法的结果是：&quot;</span> + <span class="keyword">this</span>.isInterrupted());</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用Run.java运行的结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">线程开始。。。</span><br><span class="line">在沉睡中被停止, 进入catch， 调用isInterrupted()方法的结果是：false</span><br><span class="line">java.lang.InterruptedException: sleep interrupted</span><br><span class="line"> at java.lang.Thread.sleep(Native Method)</span><br><span class="line"> at thread.MyThread.run(MyThread.java:12)</span><br></pre></td></tr></table></figure>
+
+<p>从打印的结果来看， 如果在sleep状态下停止某一线程，会进入catch语句，并且清除停止状态值，使之变为false。</p>
+<p>前一个实验是先sleep然后再用interrupt()停止，与之相反的操作在学习过程中也要注意：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.run();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;线程开始。。。&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">10000</span>; i++)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;i=&quot;</span> + i);</span><br><span class="line">            &#125;</span><br><span class="line">            Thread.sleep(<span class="number">200000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;线程结束。&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">             System.out.println(<span class="string">&quot;先停止，再遇到sleep，进入catch异常&quot;</span>);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</span><br><span class="line">        Thread thread = <span class="keyword">new</span> MyThread();</span><br><span class="line">        thread.start();</span><br><span class="line">        thread.interrupt();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">i&#x3D;9998</span><br><span class="line">i&#x3D;9999</span><br><span class="line">先停止，再遇到sleep，进入catch异常</span><br><span class="line">java.lang.InterruptedException: sleep interrupted</span><br><span class="line"> at java.lang.Thread.sleep(Native Method)</span><br><span class="line"> at thread.MyThread.run(MyThread.java:15)</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/28/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E5%A0%86%E6%8E%92%E5%BA%8F(stack-sorting)/" rel="prev" title="堆排序(stack-sorting)">
+                  <i class="fa fa-chevron-left"></i> 堆排序(stack-sorting)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/28/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Object-wait-notify/" rel="next" title="JDK-lang-Thread">
+                  JDK-lang-Thread <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

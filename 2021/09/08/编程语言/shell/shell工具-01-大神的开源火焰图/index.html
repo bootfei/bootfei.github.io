@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="来源：https:&#x2F;&#x2F;zhenbianshu.github.io 前言火焰图，之前组内大神分享过它的使用办法，但我之后很久都没有用过，以至于对它没有什么深刻印象，最近排查我们 Java 应用负载问题时试用了一下，这才对它的用途有了点心得。 介绍引子在排查性能问题时，我们通常会把线程栈 dump 出来，然后使用 grep --no-group-separator -A 1 java.lang.Th">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shell工具-01-大神的开源火焰图">
+<meta property="og:url" content="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell%E5%B7%A5%E5%85%B7-01-%E5%A4%A7%E7%A5%9E%E7%9A%84%E5%BC%80%E6%BA%90%E7%81%AB%E7%84%B0%E5%9B%BE/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="来源：https:&#x2F;&#x2F;zhenbianshu.github.io 前言火焰图，之前组内大神分享过它的使用办法，但我之后很久都没有用过，以至于对它没有什么深刻印象，最近排查我们 Java 应用负载问题时试用了一下，这才对它的用途有了点心得。 介绍引子在排查性能问题时，我们通常会把线程栈 dump 出来，然后使用 grep --no-group-separator -A 1 java.lang.Th">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/j3gficicyOvauyA1tcQgR1fHrxzrSgcAWjq0icLIXIcCIF7hibbGlaXGxFsjibxANw4evL9xNL6nan7iaaeFIJtABg3w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04l8qwqLuAsZNZVtNKRsloJlTsDdd4ialwYzZTGiaAFAhl35iawbMibbwRdCClX2n6zW62gvXgA5uRKYlA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-09-08T10:39:39.000Z">
+<meta property="article:modified_time" content="2021-09-08T10:40:36.424Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/j3gficicyOvauyA1tcQgR1fHrxzrSgcAWjq0icLIXIcCIF7hibbGlaXGxFsjibxANw4evL9xNL6nan7iaaeFIJtABg3w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell%E5%B7%A5%E5%85%B7-01-%E5%A4%A7%E7%A5%9E%E7%9A%84%E5%BC%80%E6%BA%90%E7%81%AB%E7%84%B0%E5%9B%BE/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shell工具-01-大神的开源火焰图 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E5%AD%90"><span class="nav-number">2.0.1.</span> <span class="nav-text">引子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D-1"><span class="nav-number">2.0.2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E6%80%A7"><span class="nav-number">2.0.3.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.0.4.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.0.5.</span> <span class="nav-text">应用场景</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%B7%A5%E5%85%B7"><span class="nav-number">3.0.1.</span> <span class="nav-text">生成工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="nav-number">3.0.2.</span> <span class="nav-text">数据准备</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell%E5%B7%A5%E5%85%B7-01-%E5%A4%A7%E7%A5%9E%E7%9A%84%E5%BC%80%E6%BA%90%E7%81%AB%E7%84%B0%E5%9B%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shell工具-01-大神的开源火焰图
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-09-08 18:39:39 / Modified: 18:40:36" itemprop="dateCreated datePublished" datetime="2021-09-08T18:39:39+08:00">2021-09-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p> <em>来源：<a target="_blank" rel="noopener" href="https://zhenbianshu.github.io/">https://zhenbianshu.github.io</a></em></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>火焰图</code>，之前组内大神分享过它的使用办法，但我之后很久都没有用过，以至于对它没有什么深刻印象，最近排查我们 Java 应用负载问题时试用了一下，这才对它的用途有了点心得。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><h4 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h4><p>在排查性能问题时，我们通常会把线程栈 dump 出来，然后使用 <code>grep --no-group-separator -A 1 java.lang.Thread.State jstack.log | awk &#39;NR%2==0&#39; | sort | uniq -c | sort -nr</code> 类似的 shell 语句，查看大多数线程栈都在干什么。而由线程栈的出现频率，来推断 JVM 内耗时最多的调用。</p>
+<p>至于其原理，设想广场上有一个大屏幕在不停地播放各种广告。如果我们随机对大屏幕拍照，次数多了，统计照片中各个广告出现的频率，基本可以得出每个广告的播放时长占比了。</p>
+<p>而我们应用的资源就像大屏幕，每次调用就像是播放一次广告，统计 dump 出的线程栈出现比例，也就基本能看出线程栈的耗时占比，虽然有误差，但是多次统计下应该差不了多少。这也就是为什么有些家长每次进孩子房间都发现孩子在看系统桌面后以为孩子平时喜欢对着桌面发呆的原因。:)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2444  at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1200)</span><br><span class="line">1587  at sun.misc.Unsafe.park(Native Method)</span><br><span class="line"> 795  at java.security.Provider.getService(Provider.java:1035)</span><br><span class="line"> 293  at java.lang.Object.wait(Native Method)</span><br><span class="line"> 292  at java.lang.Thread.sleep(Native Method)</span><br><span class="line">  73  at org.apache.logging.log4j.core.layout.TextEncoderHelper.copyDataToDestination(TextEncoderHelper.java:61)</span><br><span class="line">  71  at sun.nio.ch.EPollArrayWrapper.epollWait(Native Method)</span><br><span class="line">  70  at java.lang.Class.forName0(Native Method)</span><br><span class="line">  54  at org.apache.logging.log4j.core.appender.rolling.RollingFileManager.checkRollover(RollingFileManager.java:217)</span><br></pre></td></tr></table></figure>
+
+<p>但是这样有些问题，首先写 shell 挺费事的，另外如果我想查看自栈顶第二个栈的最多调用，即使修改了 shell 命令，结果也不直观。</p>
+<p>产生这个问题的主要原因是，我们的线程栈是有调用关系的，即我们需要考虑线程栈的 <code>调用链</code> 和 <code>出现频率</code> 两个维度，而单一的文本表现这两种维度比较困难，所以，著名性能分析大师 brendan gregg 就提出了火焰图。</p>
+<h4 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h4><p>火焰图，因其形似火焰而得名，其开源代码地址：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></p>
+</blockquote>
+<p>它是一种 svg 可交互式图形，我们通过点击和鼠标指向可以展示出更多的信息。下图就是一个典型的火焰图，从结构上，它是由多个大小和颜色各异的方块构成，每个方块上都有字符，它们底部连接在一块，组成火焰的基底，顶部分出许多”小火苗”。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/j3gficicyOvauyA1tcQgR1fHrxzrSgcAWjq0icLIXIcCIF7hibbGlaXGxFsjibxANw4evL9xNL6nan7iaaeFIJtABg3w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>当我们点击方块时，图片会从我们点击的方块为基底向上展开，而我们鼠标指向方块时，会展示出方块的详细说明。</p>
+<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p>介绍火焰图的分析前，我们要首先说明它的特性：</p>
+<ul>
+<li>由底部到顶部可以追溯一个唯一的调用链，下面的方块是上面方块的父调用。</li>
+<li>同一父调用的方块从左到右以字母序排列。</li>
+<li>方块上的字符表示一个调用名称，括号内是火焰图指向的调用在火焰图中出现的次数和这个方块占最底层方块的宽度百分比。</li>
+<li>方块的颜色没有实际意义，相邻方块的颜色差只为了便于查看。</li>
+</ul>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>那么，给我们一张火焰图，我们怎么能看出系统哪里有问题呢？</p>
+<p>由上文中的火焰图特性特性，查看火焰图时，我们最主要的关注点要放在方块的宽度上，因为宽度代表了调用栈在全局出现的次数，次数代表着出现频率，而频率也就可以说明耗时。</p>
+<p>但是观察火焰图底部或中部方块的宽度占比意义不大，如上面的火焰图，中部的 <code>do_redirections</code> 函数宽度是 24.87%，也就是说它耗用了整个应用近四分之一的时间，但是真正消耗时间的并不是 do_redirections 函数，而是 do_redirections 内部又调用的其他函数，而它的子调用分为了很多个，每个调用的耗时并没有异常。</p>
+<p>我们更应该关注的是火焰图顶部的一些 “平顶山”，顶部说明它没有子调用，方块宽说明它耗时长，长时间 hang 住，或者被非常频率地调用，这种方块指向的调用才是性能问题的罪魁祸首。</p>
+<p>找到了异常调用，直接优化它，或者再根据火焰图的调用链层层向下，找到我们的业务代码进行优化，也就大功告成。</p>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><p>每种工具都有其适合的应用场景，火焰图则适合用在：</p>
+<ul>
+<li>代码循环分析：如果代码中有很大的循环或死循环代码，那么从火焰图的顶部或接近项部的地方会有很明显的”平顶”，表示代码频繁地在某个线程栈上下切换。但需要注意的是，如果循环的总耗时不长，在火焰图上不会很明显。</li>
+<li>IO 瓶颈/锁分析：在我们的应用代码中，我们的调用普遍都是同步的，也就是说在进行网络调用、文件 I/O 操作或未成功获得锁时，线程会停留在某个调用上等待 I/O 响应或锁，如果这个等待非常耗时，会导致线程在某个调用上一直 hang 住，这在火焰图上表现得会非常清晰。与此相对的是，我们应用线程构成的火焰图无法准确地表达 CPU 的消耗，因为应用线程内没有系统的调用栈，在应用线程栈 hang 住时，CPU 可能去做其他事了，导致我们看到耗时很长，而 CPU 却很闲。</li>
+<li>火焰图倒置分析全局代码：火焰图倒置有时也会很实用，如果我们的代码 N 个不同的分支都调用某一方法，倒置后，所有栈顶相同的调用被合并在一块，我们就能看出这个方法的总耗时，也就很容易评估出优化这个方法的收益。</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>既然火焰图这么强大，那么我们该怎么实现呢？</p>
+<h4 id="生成工具"><a href="#生成工具" class="headerlink" title="生成工具"></a>生成工具</h4><p>brendan gregg 大神已经把生成火焰图的方法用 perl 实现了，开源代码就在上文的 Github 仓库中，根目录下的 <code>flamegraph.pl</code> 文件就是可执行的 perl 文件了。</p>
+<p>这个命令还可以传入各种参数，支持我们修改火焰图的颜色、大小等 。</p>
+<p>但 flamegraph.pl 只能处理特定格式的文件，像：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">a;b;c 12</span><br><span class="line">a;d 3</span><br><span class="line">b;c 3</span><br><span class="line">z;d 5</span><br><span class="line">a;c;e 3</span><br></pre></td></tr></table></figure>
+
+<p>前面是调用链，每个调用之间用 <code>;</code> 隔开，每行后面的数字是调用栈出现的次数。</p>
+<p>如上面的数据，用 flamegraph.pl 生成的火焰图如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04l8qwqLuAsZNZVtNKRsloJlTsDdd4ialwYzZTGiaAFAhl35iawbMibbwRdCClX2n6zW62gvXgA5uRKYlA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h4 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h4><p>至于我们的 jstack 信息如何被处理成上面的格式，大神则为常见的 dump 格式都提供了工具，像 <code>stackcollapse-perf.pl</code>可以处理 <code>perf</code> 命令的输出，<code>stackcollapse-jstack.pl</code> 处理 <code>jstack</code> 输出，<code>stackcollapse-gdb.pl</code> 处理 gdb 输出的栈等。</p>
+<p>也可以用 shell 简单地实现一下 jstack 的处理方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -v -P &#39;.+prio&#x3D;d+ os_prio&#x3D;d+&#39; | grep -v -E &#39;locked &lt;&#39; | awk &#39;&#123;if ($0&#x3D;&#x3D;&quot;&quot;)&#123;print $0&#125;else&#123;printf&quot;%s;&quot;,$0&#125;&#125;&#39; | sort | uniq -c | awk &#39;&#123;a&#x3D;$1;$1&#x3D;&quot;&quot;;print $0,a&#125;&#39;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell-01-%E7%BB%9F%E8%AE%A1stack%E4%BF%A1%E6%81%AF/" rel="prev" title="shell-01-统计stack信息">
+                  <i class="fa fa-chevron-left"></i> shell-01-统计stack信息
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/09/23/My%20Lord%20Jesus/%E5%A9%9A%E5%A7%BB%E8%BE%85%E5%AF%BC/2023-01-14/" rel="next" title="腓立比书灵修">
+                  腓立比书灵修 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

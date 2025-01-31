@@ -21,18 +21,18 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
-  <meta name="description" content="对于Spring Boot来说，最为重要的注解应该就是@SpringBootApplication了，请谈 一下你对这个注解的认识。 Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:  @SpringBootConfiguration:其等价于@Configuration，表示当前类为一个配置类。 @Compo">
+  <meta name="description" content="@SpringBootApplication了，请谈 一下你对这个注解的认识。 Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:  @SpringBootConfiguration:其等价于@Configuration，表示当前类为一个配置类。 @ComponentScan:该注解用于配置应用中Bean的扫描指">
 <meta property="og:type" content="article">
 <meta property="og:title" content="springboot-面试题与知识点">
 <meta property="og:url" content="http://example.com/2021/02/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-%E9%9D%A2%E8%AF%95%E9%A2%98%E4%B8%8E%E7%9F%A5%E8%AF%86%E7%82%B9/index.html">
 <meta property="og:site_name" content="BootFei&#39;s Blog">
-<meta property="og:description" content="对于Spring Boot来说，最为重要的注解应该就是@SpringBootApplication了，请谈 一下你对这个注解的认识。 Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:  @SpringBootConfiguration:其等价于@Configuration，表示当前类为一个配置类。 @Compo">
+<meta property="og:description" content="@SpringBootApplication了，请谈 一下你对这个注解的认识。 Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:  @SpringBootConfiguration:其等价于@Configuration，表示当前类为一个配置类。 @ComponentScan:该注解用于配置应用中Bean的扫描指">
 <meta property="og:locale">
 <meta property="article:published_time" content="2021-02-17T03:13:15.000Z">
-<meta property="article:modified_time" content="2021-02-17T06:15:47.034Z">
+<meta property="article:modified_time" content="2021-05-27T09:27:01.517Z">
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
 
@@ -184,7 +184,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8ESpring-Boot%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%9C%80%E4%B8%BA%E9%87%8D%E8%A6%81%E7%9A%84%E6%B3%A8%E8%A7%A3%E5%BA%94%E8%AF%A5%E5%B0%B1%E6%98%AF-SpringBootApplication%E4%BA%86%EF%BC%8C%E8%AF%B7%E8%B0%88-%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">1.</span> <span class="nav-text">对于Spring Boot来说，最为重要的注解应该就是@SpringBootApplication了，请谈 一下你对这个注解的认识。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot-%E4%B8%AD%E6%9C%89%E4%B8%80%E4%B8%AA%E6%B3%A8%E8%A7%A3-ComponentScan%EF%BC%8C%E8%AF%B7%E8%B0%88%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">2.</span> <span class="nav-text">Spring Boot 中有一个注解@ComponentScan，请谈一下你对这个注解的认识。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot-%E6%9C%89-EnableAutoConfiguration%EF%BC%8C%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">3.</span> <span class="nav-text">Spring Boot 有@EnableAutoConfiguration，对这个注解的认识。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#META-INF-spring-factory-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%AF%B9%E4%BA%8E-Spring-Boot-%E7%9A%84%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%BE%88%E9%87%8D%E8%A6%81%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">4.</span> <span class="nav-text">META-INF&#x2F;spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot-%E5%AE%98%E6%96%B9%E7%BB%99%E5%87%BA%E7%9A%84-Starter-%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83%E5%90%97%E5%85%B7%E4%BD%93%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">5.</span> <span class="nav-text">Spring Boot 官方给出的 Starter 工程的命名规范吗具体是什么?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Configuration-%E6%89%80%E6%B3%A8%E8%A7%A3%E7%9A%84%E7%B1%BB%E7%A7%B0%E4%B8%BA%E9%85%8D%E7%BD%AE%E7%B1%BB%EF%BC%8C%E5%85%B6%E4%B8%AD%E7%9A%84-Bean-%E6%96%B9%E6%B3%95%E5%8F%AF%E4%BB%A5%E5%88%9B%E5%BB%BA%E7%9B%B8%E5%BA%94%E5%AE%9E%E4%BE%8B%EF%BC%8C-Bean-%E6%96%B9%E6%B3%95%E5%AE%9E%E4%BE%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E9%A1%BA%E5%BA%8F%E4%BB%80%E4%B9%88"><span class="nav-number">6.</span> <span class="nav-text">@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%A0%E6%9B%BE%E5%AE%9A%E4%B9%89%E8%BF%87-Starter-%E5%90%97-%E7%AE%80%E5%8D%95%E8%AF%B4%E4%B8%80%E4%B8%8B%E5%AE%9A%E4%B9%89%E7%9A%84%E5%A4%A7%E4%BD%93%E6%AD%A5%E9%AA%A4%E3%80%82"><span class="nav-number">7.</span> <span class="nav-text">你曾定义过 Starter 吗?简单说一下定义的大体步骤。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9C%A8%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E4%B8%AD%E4%B8%80%E8%88%AC%E4%BC%9A%E6%B6%89%E5%8F%8A%E5%88%B0%E5%BE%88%E5%A4%9A%E7%9A%84%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%EF%BC%8C%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E5%87%A0%E4%B8%AA%E4%BD%A0%E4%BA%86%E8%A7%A3%E7%9A%84%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%E3%80%82"><span class="nav-number">8.</span> <span class="nav-text">在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%88%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9-Spring-Boot-%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B%E7%9A%84%E4%BA%86%E8%A7%A3%E3%80%82"><span class="nav-number">9.</span> <span class="nav-text">谈一下你对 Spring Boot 启动过程的了解。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E5%8D%95%E8%B0%88%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9-Spring-Boot-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%9A%84%E7%90%86%E8%A7%A3%E3%80%82"><span class="nav-number">10.</span> <span class="nav-text">请简单谈一下你对 Spring Boot 自动配置的理解。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8%E5%87%86%E5%A4%87%E8%A7%A3%E6%9E%90-Spring-Cloud-%E4%B8%AD%E6%9F%90%E5%AD%90%E6%A1%86%E6%9E%B6%E7%9A%84%E6%BA%90%E7%A0%81%EF%BC%8C%E9%82%A3%E4%B9%88%E4%BB%8E%E5%93%AA%E9%87%8C%E5%BC%80%E5%A7%8B%E8%A7%A3%E6%9E%90"><span class="nav-number">11.</span> <span class="nav-text">现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EnableConfigurationProperties-%E6%B3%A8%E8%A7%A3%E5%AF%B9%E4%BA%8E-Starter-%E7%9A%84%E5%AE%9A%E4%B9%89%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">12.</span> <span class="nav-text">@EnableConfigurationProperties 注解对于 Starter 的定义很重要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Boot-%E4%B8%AD%E5%AE%9A%E4%B9%89%E4%BA%86%E5%BE%88%E5%A4%9A%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%EF%BC%8C%E8%BF%99%E4%BA%9B%E6%B3%A8%E8%A7%A3%E4%B8%80%E8%88%AC%E7%94%A8%E4%BA%8E%E5%AF%B9%E9%85%8D%E7%BD%AE%E7%B1%BB%E7%9A%84%E6%8E%A7%E5%88%B6%E3%80%82%E5%9C%A8%E8%BF%99%E4%BA%9B%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%E4%B8%AD%E6%9C%89%E4%B8%80%E4%B8%AA-ConditionalOnMissingBean-%E6%B3%A8%E8%A7%A3-%E8%AF%B7%E8%B0%88%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9%E5%AE%83%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">13.</span> <span class="nav-text">Spring Boot 中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个@ConditionalOnMissingBean 注解,请谈一下你对它的认识。</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBootApplication%E4%BA%86%EF%BC%8C%E8%AF%B7%E8%B0%88-%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">1.</span> <span class="nav-text">@SpringBootApplication了，请谈 一下你对这个注解的认识。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ComponentScan%EF%BC%8C%E8%AF%B7%E8%B0%88%E4%B8%80%E4%B8%8B%E4%BD%A0%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">2.</span> <span class="nav-text">@ComponentScan，请谈一下你对这个注解的认识。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableAutoConfiguration%EF%BC%8C%E5%AF%B9%E8%BF%99%E4%B8%AA%E6%B3%A8%E8%A7%A3%E7%9A%84%E8%AE%A4%E8%AF%86%E3%80%82"><span class="nav-number">3.</span> <span class="nav-text">@EnableAutoConfiguration，对这个注解的认识。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#META-INF-spring-factory-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%AF%B9%E4%BA%8E-Spring-Boot-%E7%9A%84%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%BE%88%E9%87%8D%E8%A6%81%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">4.</span> <span class="nav-text">META-INF&#x2F;spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-Boot-%E5%AE%98%E6%96%B9%E7%BB%99%E5%87%BA%E7%9A%84-Starter-%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83"><span class="nav-number">5.</span> <span class="nav-text">Spring Boot 官方给出的 Starter 工程的命名规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Configuration-%E6%89%80%E6%B3%A8%E8%A7%A3%E7%9A%84%E7%B1%BB%E7%A7%B0%E4%B8%BA%E9%85%8D%E7%BD%AE%E7%B1%BB%EF%BC%8C%E5%85%B6%E4%B8%AD%E7%9A%84-Bean-%E6%96%B9%E6%B3%95%E5%8F%AF%E4%BB%A5%E5%88%9B%E5%BB%BA%E7%9B%B8%E5%BA%94%E5%AE%9E%E4%BE%8B%EF%BC%8C-Bean-%E6%96%B9%E6%B3%95%E5%AE%9E%E4%BE%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E9%A1%BA%E5%BA%8F%E4%BB%80%E4%B9%88"><span class="nav-number">6.</span> <span class="nav-text">@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89-Starter-%E7%9A%84%E5%A4%A7%E4%BD%93%E6%AD%A5%E9%AA%A4%E3%80%82"><span class="nav-number">7.</span> <span class="nav-text">定义 Starter 的大体步骤。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E4%B8%AD%E4%B8%80%E8%88%AC%E4%BC%9A%E6%B6%89%E5%8F%8A%E5%88%B0%E5%BE%88%E5%A4%9A%E7%9A%84%E6%9D%A1%E4%BB%B6%E6%B3%A8%E8%A7%A3%EF%BC%8C%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E5%87%A0%E4%B8%AA"><span class="nav-number">8.</span> <span class="nav-text">在自动配置类中一般会涉及到很多的条件注解，简单介绍几个</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spring-Boot-%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">9.</span> <span class="nav-text">Spring Boot 启动过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9-Spring-Boot-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%9A%84%E7%90%86%E8%A7%A3%E3%80%82"><span class="nav-number">10.</span> <span class="nav-text">对 Spring Boot 自动配置的理解。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8%E5%87%86%E5%A4%87%E8%A7%A3%E6%9E%90-Spring-Cloud-%E4%B8%AD%E6%9F%90%E5%AD%90%E6%A1%86%E6%9E%B6%E7%9A%84%E6%BA%90%E7%A0%81%EF%BC%8C%E9%82%A3%E4%B9%88%E4%BB%8E%E5%93%AA%E9%87%8C%E5%BC%80%E5%A7%8B%E8%A7%A3%E6%9E%90"><span class="nav-number">11.</span> <span class="nav-text">现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnableConfigurationProperties-%E6%B3%A8%E8%A7%A3%E5%AF%B9%E4%BA%8E-Starter-%E7%9A%84%E5%AE%9A%E4%B9%89%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">12.</span> <span class="nav-text">@EnableConfigurationProperties 注解对于 Starter 的定义很重要</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -198,20 +198,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -275,10 +275,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2021-02-17 11:13:15 / Modified: 14:15:47" itemprop="dateCreated datePublished" datetime="2021-02-17T11:13:15+08:00">2021-02-17</time>
+      <time title="Created: 2021-02-17 11:13:15" itemprop="dateCreated datePublished" datetime="2021-02-17T11:13:15+08:00">2021-02-17</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-27 17:27:01" itemprop="dateModified" datetime="2021-05-27T17:27:01+08:00">2021-05-27</time>
+      </span>
 
   
 </div>
@@ -290,13 +296,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h1 id="对于Spring-Boot来说，最为重要的注解应该就是-SpringBootApplication了，请谈-一下你对这个注解的认识。"><a href="#对于Spring-Boot来说，最为重要的注解应该就是-SpringBootApplication了，请谈-一下你对这个注解的认识。" class="headerlink" title="对于Spring Boot来说，最为重要的注解应该就是@SpringBootApplication了，请谈 一下你对这个注解的认识。"></a>对于Spring Boot来说，最为重要的注解应该就是@SpringBootApplication了，请谈 一下你对这个注解的认识。</h1><p> Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:</p>
+        <h3 id="SpringBootApplication了，请谈-一下你对这个注解的认识。"><a href="#SpringBootApplication了，请谈-一下你对这个注解的认识。" class="headerlink" title="@SpringBootApplication了，请谈 一下你对这个注解的认识。"></a>@SpringBootApplication了，请谈 一下你对这个注解的认识。</h3><p> Spring Boot中的@SpringBootApplication是一个组合注解。除了基本的元注解外，其 还组合了三个很重要的注解:</p>
 <ul>
 <li>@SpringBootConfiguration:其等价于@Configuration，表示当前类为一个配置类。</li>
 <li>@ComponentScan:该注解用于配置应用中Bean的扫描指令，但其并没有进行真正的扫描</li>
 <li>@EnableAutoConfiguration:这是核心注解，其开启了自动配置。对内置自动配置类的加载及对自定义 Bean 的扫描都是由该注解完成的。</li>
 </ul>
-<h1 id="Spring-Boot-中有一个注解-ComponentScan，请谈一下你对这个注解的认识。"><a href="#Spring-Boot-中有一个注解-ComponentScan，请谈一下你对这个注解的认识。" class="headerlink" title="Spring Boot 中有一个注解@ComponentScan，请谈一下你对这个注解的认识。"></a>Spring Boot 中有一个注解@ComponentScan，请谈一下你对这个注解的认识。</h1><p>@ComponentScan是@SpringBootApplication注解的一个组成注 解，用于配置使用@Configuration 定义的组件的扫描指令，并且支持同时使用 Spring 配置文件中的<a href="context:component-scan/">context:component-scan/</a>标签。该注解的注释说，该注解仅仅就 是配置了一下用于进行组件扫描的指令参数，并没有进行扫描，真正扫描并装配这些类是 @EnableAutoConfiguration 完成的。而这些指令参数就是通过该注解的属性进行配置的，例 如扫描哪里，扫描之前可以先进行怎样的过滤等。如果这些注解属性都没有配置，则默认会 扫描当前注解所标注类所在的包及其子孙包。</p>
+<h3 id="ComponentScan，请谈一下你对这个注解的认识。"><a href="#ComponentScan，请谈一下你对这个注解的认识。" class="headerlink" title="@ComponentScan，请谈一下你对这个注解的认识。"></a>@ComponentScan，请谈一下你对这个注解的认识。</h3><p>@ComponentScan是@SpringBootApplication注解的一个组成注 解，用于配置使用@Configuration 定义的组件的扫描指令，并且支持同时使用 Spring 配置文件中的<a href="context:component-scan/">context:component-scan/</a>标签。该注解的注释说，该注解仅仅就 是配置了一下用于进行组件扫描的指令参数，并没有进行扫描，真正扫描并装配这些类是 @EnableAutoConfiguration 完成的。而这些指令参数就是通过该注解的属性进行配置的，例 如扫描哪里，扫描之前可以先进行怎样的过滤等。如果这些注解属性都没有配置，则默认会 扫描当前注解所标注类所在的包及其子孙包。</p>
 <p>不过，对于这点，Spring Boot1.x 版本中仅会扫描当前标注类所在包的子孙包，不会扫 描标注类所在的包。但Spring Boot2.x版本中默认会扫描当前注解所标注类所在的包及其子 孙包。</p>
 <p>对于一个 Spring Boot 工程，与自动配置相关的 Bean 均是由 Spring 容器管理的。而这些 Bean 的类型根据创建者的不同可以分为两种:</p>
 <ul>
@@ -304,7 +310,7 @@
 <li>另一种是框架本身已经定义好的自动配置相关类。</li>
 </ul>
 <p>自定义类由@ComponentScan 指定的扫描指令进行扫描，而框架自身的自动配置相关类 在一个配置文件中存放，将来会被加载到内存。这两种类型的类都会由注解 @EnableAutoConfiguration 交给 Spring 容器来管理。</p>
-<h1 id="Spring-Boot-有-EnableAutoConfiguration，对这个注解的认识。"><a href="#Spring-Boot-有-EnableAutoConfiguration，对这个注解的认识。" class="headerlink" title="Spring Boot 有@EnableAutoConfiguration，对这个注解的认识。"></a>Spring Boot 有@EnableAutoConfiguration，对这个注解的认识。</h1><p>首先，@Enable 开头这一类注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注解，就会自动导入某些类。所以该类注解是组合注解，一般都会组合一个 @Import 注解，用于导入指定的多个类。@EnableXxx 的功能主要体现在这些被导入的类上， 而被导入的类一般有三种:</p>
+<h3 id="EnableAutoConfiguration，对这个注解的认识。"><a href="#EnableAutoConfiguration，对这个注解的认识。" class="headerlink" title="@EnableAutoConfiguration，对这个注解的认识。"></a>@EnableAutoConfiguration，对这个注解的认识。</h3><p>首先，@Enable 开头这一类注解一般用于开启某一项功能，是为了简化代码的导入，即使用了该类注解，就会自动导入某些类。所以该类注解是组合注解，一般都会组合一个 @Import 注解，用于导入指定的多个类。@EnableXxx 的功能主要体现在这些被导入的类上， 而被导入的类一般有三种:</p>
 <ul>
 <li>配置类</li>
 <li>可以实现动态选择的选择器</li>
@@ -317,14 +323,14 @@
 <li><p>@AutoConfigurationPackage: 用于扫描、加载并注册自定义的组件类。</p>
 </li>
 </ul>
-<h1 id="META-INF-spring-factory-配置文件对于-Spring-Boot-的自动配置很重要，为什么"><a href="#META-INF-spring-factory-配置文件对于-Spring-Boot-的自动配置很重要，为什么" class="headerlink" title="META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?"></a>META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?</h1><p>无论是 Spring Boot 内置的 META-INF/spring.factory 配置文件，还是导入 Starter 依赖中 的 META-INF/spring.factory 配置文件，对于 Spring Boot 自动配置来说很重要是因为，其包含 了一个 key-value 对，key 为 EnableAutoConfiguration 的全限定性类名，而 value 则为当前应 用中所有可用的自动配置类。所有可用的自动配置类都在这里声明，所以该文件对于 Spring Boot 自动配置来说很重要。</p>
-<h1 id="Spring-Boot-官方给出的-Starter-工程的命名规范吗具体是什么"><a href="#Spring-Boot-官方给出的-Starter-工程的命名规范吗具体是什么" class="headerlink" title="Spring Boot 官方给出的 Starter 工程的命名规范吗具体是什么?"></a>Spring Boot 官方给出的 Starter 工程的命名规范吗具体是什么?</h1><p>Spring Boot 官方给出的 Starter 工程的命名需要遵循如下规范:</p>
+<h3 id="META-INF-spring-factory-配置文件对于-Spring-Boot-的自动配置很重要，为什么"><a href="#META-INF-spring-factory-配置文件对于-Spring-Boot-的自动配置很重要，为什么" class="headerlink" title="META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?"></a>META-INF/spring.factory 配置文件对于 Spring Boot 的自动配置很重要，为什么?</h3><p>无论是 Spring Boot 内置的 META-INF/spring.factory 配置文件，还是导入 Starter 依赖中 的 META-INF/spring.factory 配置文件，对于 Spring Boot 自动配置来说很重要是因为，其包含 了一个 key-value 对，key 为 EnableAutoConfiguration 的全限定性类名，而 value 则为当前应 用中所有可用的自动配置类。所有可用的自动配置类都在这里声明，所以该文件对于 Spring Boot 自动配置来说很重要。</p>
+<h3 id="Spring-Boot-官方给出的-Starter-工程的命名规范"><a href="#Spring-Boot-官方给出的-Starter-工程的命名规范" class="headerlink" title="Spring Boot 官方给出的 Starter 工程的命名规范"></a>Spring Boot 官方给出的 Starter 工程的命名规范</h3><p>Spring Boot 官方给出的 Starter 工程的命名需要遵循如下规范:</p>
 <ul>
 <li>Spring 官方定义的Starter格式为:spring-boot-starter-{name}，如spring-boot-starter-web。 </li>
 <li>非官方Starter命名格式为:{name}-spring-boot-starter，如dubbo-spring-boot-starter。</li>
 </ul>
-<h1 id="Configuration-所注解的类称为配置类，其中的-Bean-方法可以创建相应实例，-Bean-方法实例的创建顺序什么"><a href="#Configuration-所注解的类称为配置类，其中的-Bean-方法可以创建相应实例，-Bean-方法实例的创建顺序什么" class="headerlink" title="@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?"></a>@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?</h1><p> @Configuration 所注解的类中的@Bean 方法实例的创建顺序即这些@Bean 方法的执 行顺序。首先可以为这些方法的执行添加执行条件，例如使用以@ConditionOn 开头的条件 注解。在这些条件都满足的情况下，这些方法的执行顺序即为其在@Configuration 注解类中 的定义顺序，先定义者先执行，其对应实例先创建。</p>
-<h1 id="你曾定义过-Starter-吗-简单说一下定义的大体步骤。"><a href="#你曾定义过-Starter-吗-简单说一下定义的大体步骤。" class="headerlink" title="你曾定义过 Starter 吗?简单说一下定义的大体步骤。"></a>你曾定义过 Starter 吗?简单说一下定义的大体步骤。</h1><p>对于自定义 Starter，其工程命名格式为{name}-spring-boot-starterConfiguration。工程 需要导入配置处理器依赖。然工程中需要定义如下的类与配置:</p>
+<h3 id="Configuration-所注解的类称为配置类，其中的-Bean-方法可以创建相应实例，-Bean-方法实例的创建顺序什么"><a href="#Configuration-所注解的类称为配置类，其中的-Bean-方法可以创建相应实例，-Bean-方法实例的创建顺序什么" class="headerlink" title="@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?"></a>@Configuration 所注解的类称为配置类，其中的@Bean 方法可以创建相应实例，@Bean 方法实例的创建顺序什么?</h3><p> @Configuration 所注解的类中的@Bean 方法实例的创建顺序即这些@Bean 方法的执 行顺序。首先可以为这些方法的执行添加执行条件，例如使用以@ConditionOn 开头的条件 注解。在这些条件都满足的情况下，这些方法的执行顺序即为其在@Configuration 注解类中 的定义顺序，先定义者先执行，其对应实例先创建。</p>
+<h3 id="定义-Starter-的大体步骤。"><a href="#定义-Starter-的大体步骤。" class="headerlink" title="定义 Starter 的大体步骤。"></a>定义 Starter 的大体步骤。</h3><p>对于自定义 Starter，其工程命名格式为{name}-spring-boot-starterConfiguration。工程 需要导入配置处理器依赖。然工程中需要定义如下的类与配置:</p>
 <ul>
 <li><p>定义核心业务类，这是该Starter存在的意义。</p>
 </li>
@@ -335,28 +341,27 @@
 <li><p>定义META-INF/spring.factories配置文件，用于对自动配置类进行注册。</p>
 </li>
 </ul>
-<h1 id="在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。"><a href="#在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。" class="headerlink" title="在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。"></a>在自动配置类中一般会涉及到很多的条件注解，简单介绍几个你了解的条件注解。</h1><p>在自动配置类定义中的确会用于到很多的条件注解，条件注解一般都是以 @ConditionalOn 开头的，例如:</p>
+<h3 id="在自动配置类中一般会涉及到很多的条件注解，简单介绍几个"><a href="#在自动配置类中一般会涉及到很多的条件注解，简单介绍几个" class="headerlink" title="在自动配置类中一般会涉及到很多的条件注解，简单介绍几个"></a>在自动配置类中一般会涉及到很多的条件注解，简单介绍几个</h3><p>在自动配置类定义中的确会用于到很多的条件注解，条件注解一般都是以 @ConditionalOn 开头的，例如:</p>
 <ul>
 <li><p>@ConditionalOnClass():条件判断注解，其可以标注在类与方法上，表示当参数指定的类在类路径下存在时才会创建当前类的 Bean，或当前方法指定的 Bean。</p>
 </li>
-<li><p>@ConditionalOnMissionBean:条件判断注解，其可以标注在类与方法上，表示当容器中不存在当前类或方法类型的对象时，将去创建一个相应的 Bean。</p>
+<li><p>@ConditionalOnMissionBean:条件判断注解，其可以标注在类与方法上，表示当容器中不存在当前类或方法类型的对象时，将去创建一个相应的 Bean。不过，这里要查找的“容器”是可以指定的。通过 search 属性指定。其 search 的范围有三种:<a href="">仅搜索当前配置类容器</a>; <a href="">搜索所有层次的父类容器</a>，但不包含当前配置类容 器; <a href="">搜索当前配置类容器及其所有层次的父类容器</a>，这个是默认搜索范围。</p>
 </li>
 <li><p>@ConditionalOnBean():条件判断注解，其可以标注在类与方法上，表示当在容器中存在指定类的实例时才会创建当前类的 Bean，或当前方法指定的 Bean。</p>
 </li>
 </ul>
-<h1 id="谈一下你对-Spring-Boot-启动过程的了解。"><a href="#谈一下你对-Spring-Boot-启动过程的了解。" class="headerlink" title="谈一下你对 Spring Boot 启动过程的了解。"></a>谈一下你对 Spring Boot 启动过程的了解。</h1><p> Spring Boot 的启动从大的方面来说需要经过以下两大阶段:加载 Spring Boot 配置文 件 application.yml，与完成自动配置。</p>
+<h3 id="Spring-Boot-启动过程"><a href="#Spring-Boot-启动过程" class="headerlink" title="Spring Boot 启动过程"></a>Spring Boot 启动过程</h3><p> Spring Boot 的启动从大的方面来说需要经过以下两大阶段:加载 Spring Boot 配置文 件 application.yml，与完成自动配置。</p>
 <p>而自动配置又包含以下两个大的步骤:加载自动配置相关的类，与扫描并注册自定义的 组件类。</p>
 <p>加载Spring Boot配置文件是在启动类的run()方法执行时加载的。其大体要经历运行环 境准备、为环境准备过程添加监听、发布环境准备事件等步骤。</p>
 <p>自动配置则是由组合注解 @SpringBootApplication 所包含的子注解 @EnableAutoConfiguration 完成。其不仅加载了 META-INF/spring.factories 中内置的自动配置 相关类，还完成了自定义类的加载与注册。若存在第三方 Starter，则其会将该 Starter 中 META-INF/spring.factories 中的自动配置相关类加载并装配。</p>
-<h1 id="请简单谈一下你对-Spring-Boot-自动配置的理解。"><a href="#请简单谈一下你对-Spring-Boot-自动配置的理解。" class="headerlink" title="请简单谈一下你对 Spring Boot 自动配置的理解。"></a>请简单谈一下你对 Spring Boot 自动配置的理解。</h1><p>Spring Boot与SSM传统开发相比，其最大的特点是自动配置，不用再在xml文件中 做大量的配置了。自动配置的实现主要是通过自动配置类来完成的，自动配置类存在于两类 位置:一个是 Spring Boot 框架中内置的，一是从外部引入的 Starter 中。</p>
+<h3 id="对-Spring-Boot-自动配置的理解。"><a href="#对-Spring-Boot-自动配置的理解。" class="headerlink" title="对 Spring Boot 自动配置的理解。"></a>对 Spring Boot 自动配置的理解。</h3><p>Spring Boot与SSM传统开发相比，其最大的特点是自动配置，不用再在xml文件中 做大量的配置了。自动配置的实现主要是通过自动配置类来完成的，自动配置类存在于两类 位置:一个是 Spring Boot 框架中内置的，一是从外部引入的 Starter 中。</p>
 <p>具体来说，自动配置类的作用就是根据条件创建核心业务类的实例到 Spring 容器中， 以备该 Starter 的引用工程类中注入。当然，自动配置类还有一个作用:若创建核心业务类 时需要获取配置文件中的相关属性值，其也会将这些属性值封装为一个属性实例，以备核心 业务类使用。当然，自动配置类需要在 META-INF/spring.factories 中注册。</p>
 <p>所以自动配置其实就是能够自动获取配置文件中的属性并创建相应核心业务类实例。</p>
-<h1 id="现在准备解析-Spring-Cloud-中某子框架的源码，那么从哪里开始解析"><a href="#现在准备解析-Spring-Cloud-中某子框架的源码，那么从哪里开始解析" class="headerlink" title="现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?"></a>现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?</h1><p>对于一个 未曾阅读过的子框架源码，我认为从自动配置类开始解析可能是一个不错的选择。</p>
+<h3 id="现在准备解析-Spring-Cloud-中某子框架的源码，那么从哪里开始解析"><a href="#现在准备解析-Spring-Cloud-中某子框架的源码，那么从哪里开始解析" class="headerlink" title="现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?"></a>现在准备解析 Spring Cloud 中某子框架的源码，那么从哪里开始解析?</h3><p>对于一个 未曾阅读过的子框架源码，我认为从自动配置类开始解析可能是一个不错的选择。</p>
 <p>我们知道 <a href="">Spring Cloud 是通过 Spring Boot 将其它第三方框架集成进来的</a>。<a href="">Spring Boot 最大的特点就是自动配置</a>，我们可以<a href="">通过导入相关 Starter 来实现需求功能的自动配置、相关核心业务类实例的创建等</a>。也就是说，核心业务类都是集中在自动配置类中的。所以从这里 下手分析应该是个不错的选择。</p>
 <p>那么从哪里可以找到这个自动配置类呢?从导入的 starter 依赖工程的 META-INF 目录中 的 spring.factory 文件中可以找到。该文件的内容为 key-value 对，查找 EnableAutoConfiguration 的全限定性类名作为 key 的 value，这个 value 就是我们要找到的自动配置类。</p>
-<h1 id="EnableConfigurationProperties-注解对于-Starter-的定义很重要"><a href="#EnableConfigurationProperties-注解对于-Starter-的定义很重要" class="headerlink" title="@EnableConfigurationProperties 注解对于 Starter 的定义很重要"></a>@EnableConfigurationProperties 注解对于 Starter 的定义很重要</h1><p>@EnableConfigurationProperties 注解在 Starter 定义时主要用于读取 application.yml 配 置文件中相关的属性，并封装到指定类型的实例中，以备 Starter 中的核心业务实例使用。</p>
+<h3 id="EnableConfigurationProperties-注解对于-Starter-的定义很重要"><a href="#EnableConfigurationProperties-注解对于-Starter-的定义很重要" class="headerlink" title="@EnableConfigurationProperties 注解对于 Starter 的定义很重要"></a>@EnableConfigurationProperties 注解对于 Starter 的定义很重要</h3><p>@EnableConfigurationProperties 注解在 Starter 定义时主要用于读取 application.yml 配 置文件中相关的属性，并封装到指定类型的实例中，以备 Starter 中的核心业务实例使用。</p>
 <p>具体来说，它就是开启了对@ConfigurationProperties 注解的 Bean 的自动注册，注解到 Spring 容器中。这种 Bean 有两种注册方式:在配置类使用@Bean 方法注册，或直接使用该 注解的 value 属性进行注册。若在配置类中使用@Bean 注册，则需要在配置类中定义一个 @Bean 方法，该方法的返回值为“使用@ConfigurationProperties 注解标注”的类。若直接 使用该注解的 value 属性进行注册，则需要将这个“使用@ConfigurationProperties 注解标注” 的类作为 value 属性值出现即可。</p>
-<h1 id="Spring-Boot-中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个-ConditionalOnMissingBean-注解-请谈一下你对它的认识。"><a href="#Spring-Boot-中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个-ConditionalOnMissingBean-注解-请谈一下你对它的认识。" class="headerlink" title="Spring Boot 中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个@ConditionalOnMissingBean 注解,请谈一下你对它的认识。"></a>Spring Boot 中定义了很多条件注解，这些注解一般用于对配置类的控制。在这些条件注解中有一个@ConditionalOnMissingBean 注解,请谈一下你对它的认识。</h1><p>@ConditionalOnMissingBean 注解是 Spring Boot 提供的众多条件注册中的一个。其表示的意义是，当容器中没有指定名称或指定类型的 Bean 时，该条件为 true。不过，这里需 要强调一点的是，这里要查找的“容器”是可以指定的。通过 search 属性指定。其 search 的范围有三种:仅搜索当前配置类容器;搜索所有层次的父类容器，但不包含当前配置类容 器;搜索当前配置类容器及其所有层次的父类容器，这个是默认搜索范围。</p>
 
     </div>
 
@@ -370,7 +375,7 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/02/17/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/Distributed%20Streaming%20Platform/Kafka/kafka-03-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="kafka-03-知识点与面试题">
+                <a href="/2021/02/17/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="kafka-03-知识点与面试题">
                   <i class="fa fa-chevron-left"></i> kafka-03-知识点与面试题
                 </a>
             </div>
@@ -425,13 +430,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

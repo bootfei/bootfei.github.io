@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="原理每次请求建立连接123456789101112131415161718Public void FindAllUsers()&amp;#123;  &#x2F;&#x2F;1、装载sqlserver驱动对象  DriverManager.registerDriver(new SQLServerDriver());               &#x2F;&#x2F;2、通过JDBC建立数据库连接  Connection con &#x3D;Driver">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库连接池">
+<meta property="og:url" content="http://example.com/2021/05/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF-01-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="原理每次请求建立连接123456789101112131415161718Public void FindAllUsers()&amp;#123;  &#x2F;&#x2F;1、装载sqlserver驱动对象  DriverManager.registerDriver(new SQLServerDriver());               &#x2F;&#x2F;2、通过JDBC建立数据库连接  Connection con &#x3D;Driver">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-05-13T01:17:35.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.291Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/05/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF-01-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>数据库连接池 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E8%AF%B7%E6%B1%82%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.1.</span> <span class="nav-text">每次请求建立连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E8%AF%B7%E6%B1%82%E8%AE%BF%E9%97%AE%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">1.2.</span> <span class="nav-text">每次请求访问连接池</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DataSource%E4%BD%9C%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">DataSource作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Connection%E4%BD%9C%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">Connection作用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%B1%A0%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.1.</span> <span class="nav-text">连接池代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%BF%9E%E6%8E%A5%E6%B1%A0"><span class="nav-number">2.2.2.</span> <span class="nav-text">使用连接池</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal%E4%BD%9C%E7%94%A8"><span class="nav-number">2.3.</span> <span class="nav-text">ThreadLocal作用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadLocal%E8%83%BD%E5%AD%98%E5%85%B1%E4%BA%AB%E5%8F%98%E9%87%8F%E4%B9%88%EF%BC%9F"><span class="nav-number">2.3.1.</span> <span class="nav-text">ThreadLocal能存共享变量么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadLocal%E5%AE%8C%E6%88%90%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E9%9A%94%E7%A6%BB%E7%9A%84%E5%8A%9F%E8%83%BD%EF%BC%8C%E9%9C%80%E8%A6%81%E6%80%8E%E4%B9%88%E5%81%9A"><span class="nav-number">2.3.2.</span> <span class="nav-text">ThreadLocal完成数据库连接隔离的功能，需要怎么做?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#druid%E3%80%81zdal%E4%B8%AD%EF%BC%8Cthreadlocal%E7%9A%84%E4%BD%9C%E7%94%A8%E4%BD%93%E7%8E%B0%E5%9C%A8%E5%93%AA%E9%87%8C%E5%91%A2%EF%BC%9F"><span class="nav-number">2.3.3.</span> <span class="nav-text">druid、zdal中，threadlocal的作用体现在哪里呢？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E6%BA%90%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">开源数据库连接池的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF/%E8%B5%84%E6%BA%90%E6%B1%A0%E5%8C%96%E6%8A%80%E6%9C%AF-01-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库连接池
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-13 09:17:35" itemprop="dateCreated datePublished" datetime="2021-05-13T09:17:35+08:00">2021-05-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><h3 id="每次请求建立连接"><a href="#每次请求建立连接" class="headerlink" title="每次请求建立连接"></a>每次请求建立连接</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Public <span class="keyword">void</span> <span class="title">FindAllUsers</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="comment">//1、装载sqlserver驱动对象</span></span><br><span class="line">  DriverManager.registerDriver(<span class="keyword">new</span> SQLServerDriver());             </span><br><span class="line">  <span class="comment">//2、通过JDBC建立数据库连接</span></span><br><span class="line">  Connection con =DriverManager.getConnection(<span class="string">&quot;jdbc:sqlserver://192.168.2.6:1433;DatabaseName=customer&quot;</span>, <span class="string">&quot;sa&quot;</span>, <span class="string">&quot;123&quot;</span>);            </span><br><span class="line">  <span class="comment">//3、创建状态</span></span><br><span class="line">  Statement state =con.createStatement();           </span><br><span class="line">  <span class="comment">//4、查询数据库并返回结果</span></span><br><span class="line">  ResultSet result =state.executeQuery(<span class="string">&quot;select * from users&quot;</span>);           </span><br><span class="line">  <span class="comment">//5、输出查询结果</span></span><br><span class="line">  <span class="keyword">while</span>(result.next())&#123;</span><br><span class="line">    System.out.println(result.getString(<span class="string">&quot;email&quot;</span>));</span><br><span class="line">  &#125;            </span><br><span class="line">  <span class="comment">//6、断开数据库连接</span></span><br><span class="line">  result.close();</span><br><span class="line">  state.close();</span><br><span class="line">  con.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>缺点：</p>
+<ul>
+<li>每一次web请求都要建立一次数据库连接。每次都得花费0.05s～1s的时间，而且系统还要分配内存资源</li>
+<li>对于每一次数据库连接，使用完后都得断开。否则如果程序出现异常而未能关闭，将会导致数据库系统中的内存泄漏</li>
+<li>不能控制被创建的连接对象数，连接过多可能导致内存泄漏</li>
+</ul>
+<h3 id="每次请求访问连接池"><a href="#每次请求访问连接池" class="headerlink" title="每次请求访问连接池"></a>每次请求访问连接池</h3><p>改进：</p>
+<ul>
+<li>预先在缓冲池中放入一定数量的连接。</li>
+<li>查询完数据库后，不关闭连接，而是暂时存放起来，当别人使用时，把这个连接给他们使用。</li>
+</ul>
+<p>优点：</p>
+<ul>
+<li>避免了一次建立数据库连接和断开的操作时间消耗</li>
+<li>通过设定连接池最大连接数来防止系统无限地与数据库连接。</li>
+<li>通过连接池的管理机制监视数据库的连接的数量﹑使用情况，为系统开发﹑测试及性能调整提供依据。</li>
+</ul>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><h3 id="DataSource作用"><a href="#DataSource作用" class="headerlink" title="DataSource作用"></a>DataSource作用</h3><p>DataSource是javax.sql包中的类，是Java原生rt.jar包中的类。<!--就是Bootstrap Class Loader加载的jar包--></p>
+<p>javax.sql.DataSource定义的是抽象方法，通过Java JNDI的方式将具体实现开放给各个厂商、个人自己实现。</p>
+<p>在Spring框架中，通过DataSource + 配置的方式，来定义具体的数据库源。并向Spring框架提供数据源的Connection服务。</p>
+<blockquote>
+<p>在Spring中若想实现多数据源，那么就需要在DataSource下手</p>
+</blockquote>
+<h3 id="Connection作用"><a href="#Connection作用" class="headerlink" title="Connection作用"></a>Connection作用</h3><ul>
+<li>connection可以当成是服务器和数据库的一个会话</li>
+<li>statemant用来在会话的上下文中执行sql以及返回结果。一个connection可以包含多个statement</li>
+<li>在两者中间存在事务的概念。在java语言中，connection类本身提供了对事务的ACID特性的支持，可以通过设置connection的autocommit属性为false 然后显式的调用commit或rollback方法来实现。但要高效的进行connection复用，就必须提供相应的事务支持机制。<a href="">可采用每一个事务独占一个连接来实现</a>，这种方法可以大大降低事务管理的复杂性。</li>
+</ul>
+<!--这句话不严谨，其实一个Connection只能被一个线程独享，即只有当某一线程完成了本次数据操作，将连接放回到连接池之后，其他线程才能够再次获取该Connection并使用-->
+
+<blockquote>
+<p>一个连接对应一个事务，多个连接的事务是不一样的</p>
+</blockquote>
+<h4 id="连接池代码"><a href="#连接池代码" class="headerlink" title="连接池代码"></a>连接池代码</h4><ul>
+<li>编写class 实现DataSource 接口</li>
+<li>在class构造器一次性创建10个连接，将连接保存LinkedList中</li>
+<li>实现getConnection 从 LinkedList中返回一个连接 <!--注意：这里原作者写的有问题，实际上这个连接是被某个线程独享的--></li>
+<li>提供将连接放回连接池中方法</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyDataSource</span> <span class="keyword">implements</span> <span class="title">DataSource</span> </span>&#123;</span><br><span class="line">  <span class="comment">//链表 --- 实现栈结构</span></span><br><span class="line">  <span class="keyword">private</span> LinkedList&lt;Connection&gt; dataSources = <span class="keyword">new</span> LinkedList&lt;Connection&gt;();</span><br><span class="line"></span><br><span class="line">  <span class="comment">//初始化连接数量</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">MyDataSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//一次性创建10个连接</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        <span class="comment">//1、装载sqlserver驱动对象</span></span><br><span class="line">        DriverManager.registerDriver(<span class="keyword">new</span> SQLServerDriver());</span><br><span class="line">        <span class="comment">//2、通过JDBC建立数据库连接</span></span><br><span class="line">        Connection con =DriverManager.getConnection(</span><br><span class="line">          <span class="string">&quot;jdbc:sqlserver://192.168.2.6:1433;DatabaseName=customer&quot;</span>, <span class="string">&quot;sa&quot;</span>, <span class="string">&quot;123&quot;</span>);</span><br><span class="line">        <span class="comment">//3、将连接加入连接池中</span></span><br><span class="line">        dataSources.add(con);  </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Connection <span class="keyword">synchronized</span> <span class="title">getConnection</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> dataSources.removeFirst(); <span class="comment">// 删除第一个连接返回</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//将连接放回连接池</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">releaseConnection</span><span class="params">(Connection conn)</span> </span>&#123;</span><br><span class="line">    dataSources.add(conn);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用连接池"><a href="#使用连接池" class="headerlink" title="使用连接池"></a>使用连接池</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//查询所有用户</span></span><br><span class="line"><span class="function">Public <span class="keyword">void</span> <span class="title">FindAllUsers</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//1、使用连接池建立数据库连接</span></span><br><span class="line">    MyDataSource dataSource = <span class="keyword">new</span> MyDataSource();</span><br><span class="line">    Connection conn =dataSource.getConnection();        </span><br><span class="line">    <span class="comment">//2、创建状态</span></span><br><span class="line">    Statement state =con.createStatement();           </span><br><span class="line">    <span class="comment">//3、查询数据库并返回结果</span></span><br><span class="line">    ResultSet result =state.executeQuery(<span class="string">&quot;select * from users&quot;</span>);           </span><br><span class="line">    <span class="comment">//4、输出查询结果</span></span><br><span class="line">    <span class="keyword">while</span>(result.next())&#123;</span><br><span class="line">      System.out.println(result.getString(<span class="string">&quot;email&quot;</span>));</span><br><span class="line">    &#125;            </span><br><span class="line">    <span class="comment">//5、断开数据库连接</span></span><br><span class="line">    result.close();</span><br><span class="line">    state.close();</span><br><span class="line">    <span class="comment">//6、归还数据库连接给连接池</span></span><br><span class="line">    dataSource.releaseConnection(conn);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="ThreadLocal作用"><a href="#ThreadLocal作用" class="headerlink" title="ThreadLocal作用"></a>ThreadLocal作用</h3><h4 id="ThreadLocal能存共享变量么？"><a href="#ThreadLocal能存共享变量么？" class="headerlink" title="ThreadLocal能存共享变量么？"></a><strong>ThreadLocal能存共享变量么？</strong></h4><p>存肯定能存，但不建议，因为将Connection set进ThreadLocalMap，也其实是保存一个内存对象的地址引用而已，真正使用的时候，还是唯一的那个对象在起作用。</p>
+<p><a href=""><em>ThreadLocal最常用的功能，是为了避免层层传递而提供了对象保存和获取方法，把同一个数据库连接“分享”给同一个线程的不同调用方法。</em></a></p>
+<h4 id="ThreadLocal完成数据库连接隔离的功能，需要怎么做"><a href="#ThreadLocal完成数据库连接隔离的功能，需要怎么做" class="headerlink" title="ThreadLocal完成数据库连接隔离的功能，需要怎么做?"></a>ThreadLocal完成数据库连接隔离的功能，需要怎么做?</h4><p>如果非要用ThreadLocal实现这个连接隔离的功能，那么，只能是为每个线程创建新的连接，然后保存在Threadlocal中，这样，每个线程在自己的生命周期范围内只会使用这个连接，即可实现线程隔离。</p>
+<h4 id="druid、zdal中，threadlocal的作用体现在哪里呢？"><a href="#druid、zdal中，threadlocal的作用体现在哪里呢？" class="headerlink" title="druid、zdal中，threadlocal的作用体现在哪里呢？"></a>druid、zdal中，threadlocal的作用体现在哪里呢？</h4><p>druid、zdal等优秀的中间件，可不止是数据库连接池这一个作用，<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzA4ODUzMDg5NQ==&mid=2650001189&idx=1&sn=87606749ae2be031a9171d272fd73819&scene=21#wechat_redirect">阿里数据库中间件zdal源码解析</a> 文中也有提及。</p>
+<p>就以zdal为例，因为阿里的数据库规模基本都非常大，但又有一套完备的数据库库表拆分规范，因此，分库键、分表键、主键、虚拟表名等在设计和存储时需要遵循规范，而zdal中的解析操作，也需要与之相匹配。这个解析工作是相对复杂且繁重的，然而，针对同一用户的操作，通常库表的路由是相对固定的，因此，当我们解析过一次sql，通过各个字段和配置规则，计算出了库表路由</p>
+<p>===&gt; (划重点) 那么，<a href="">可以直接put进线程上下文，供本次请求的后续数据库操作使用</a>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">parse</span><span class="params">(...)</span></span>&#123;</span><br><span class="line">    SimpleCondition simpleCondition = <span class="keyword">new</span> SimpleCondition();</span><br><span class="line">    simpleCondition.setVirtualTableName(<span class="string">&quot;user&quot;</span>);</span><br><span class="line">    simpleCondition.put(<span class="string">&quot;age&quot;</span>, <span class="number">10</span>);</span><br><span class="line">    ThreadLocalMap.put(ThreadLocalString.ROUTE_CONDITION, simpleCondition);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> 后续操作()&#123;</span><br><span class="line">   RouteCondition rc = (RouteCondition) ThreadLocalMap.get(ThreadLocalString.ROUTE_CONDITION);</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span> (rc != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">//不走解析SQL，由ThreadLocal传入的指定对象（RouteCondition），决定库表目的地</span></span><br><span class="line">       metaData = sqlDispatcher.getDBAndTables(rc);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">// 通过解析SQL来分库分表</span></span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">          metaData = sqlDispatcher.getDBAndTables(originalSql, parameters);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (ZdalCheckedExcption e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(e.getMessage());</span><br><span class="line">       &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个也正好是对前面ThreadLocal正确使用方法的补充</p>
+<h2 id="开源数据库连接池的原理"><a href="#开源数据库连接池的原理" class="headerlink" title="开源数据库连接池的原理"></a>开源数据库连接池的原理</h2><p><strong>zdal的连接池管理源码一览：</strong></p>
+<ul>
+<li>druid维护一个数组来存放连接</li>
+<li>同时维护了多个变量来检测连接池的状态，其中poolingCount用来表示池中连接的数量</li>
+<li>当有线程来获取连接时，需要先加锁，对数量进行减一操作。</li>
+<li>当获取连接时发现数量为0 ，则返回为空</li>
+<li>当连接关闭时，会将连接资源放回数组，并对数量做加一操作。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="title">InternalManagedConnectionPool</span><span class="params">(...)</span></span>&#123;</span><br><span class="line">     <span class="comment">//构造函数中，初始化了连接池大小和信号量大小</span></span><br><span class="line">     connectionListeners = <span class="keyword">new</span> ArrayList(<span class="keyword">this</span>.maxSize);</span><br><span class="line">      permits = <span class="keyword">new</span> InternalSemaphore(<span class="keyword">this</span>.maxSize);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//获取连接</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> ConnectionListener <span class="title">getConnection</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//信号量尝试获取许可</span></span><br><span class="line">   <span class="keyword">if</span> (permits.tryAcquire(poolParams.blockingTimeout, TimeUnit.MILLISECONDS)) &#123;</span><br><span class="line">         ConnectionListener cl = <span class="keyword">null</span>;</span><br><span class="line">         <span class="keyword">do</span> &#123;</span><br><span class="line">         <span class="comment">//加锁资源池</span></span><br><span class="line">         <span class="keyword">synchronized</span> (connectionListeners) &#123;</span><br><span class="line"></span><br><span class="line">           <span class="keyword">if</span> (connectionListeners.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="comment">//获取list的最后一个</span></span><br><span class="line">                cl = (ConnectionListener) connectionListeners.remove(connectionListeners.size() - <span class="number">1</span>);</span><br><span class="line">                    </span><br><span class="line">                <span class="comment">//最大连接数 减去 正在工作的信号量 </span></span><br><span class="line">                <span class="keyword">int</span> size = (maxSize - permits.availablePermits());</span><br><span class="line">                <span class="keyword">if</span> (size &gt; maxUsedConnections)&#123;</span><br><span class="line">                     maxUsedConnections = size;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">           &#125;</span><br><span class="line">        <span class="keyword">if</span> (cl != <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">return</span> cl;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;<span class="keyword">while</span>(connectionListeners.size() &gt; <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//OK, 在连接池中找不到正在工作的连接了. 那就创建个新的</span></span><br><span class="line">      createNewConnection()&#123;...&#125;</span><br><span class="line"></span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.maxSize == <span class="keyword">this</span>.maxUsedConnections) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> ResourceException(</span><br><span class="line">         <span class="string">&quot;数据源最大连接数已满，并且在超时时间范围内没有新的连接释放,poolName = &quot;</span></span><br><span class="line">         + poolName</span><br><span class="line">         + <span class="string">&quot; blocking timeout=&quot;</span></span><br><span class="line">         + poolParams.blockingTimeout +</span><br><span class="line">         <span class="string">&quot;(ms)&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>volatile 标识的maxUsedConnections用来完成线程间数据可见</li>
+<li>隶属于AQS系列的Semaphone，用来控制共享资源并发访问量。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>假设同一时间多个线程从数据库连接池获取连接，那肯定拿的是不同的连接，当前线程和别的线程拿的连接不一样，那当前线程在crud的时候，和其他线程不在一个事务之内。</li>
+<li><del>假设不同时间的多个线程要从数据库连接池后获取连接，那这个时候就可能拿到的是同一个连接了，那多个线程线程拿到的是同一个连接，也就是说在多个线程在同一个事务之内。</del>“<del>为了避免不同时间的多个线程可能是同一个连接，那么引入了threadlocal后，每个线程之间都会创建独立的连接副本，将collection各自copy一份，这样就互相不干扰了。</del>“ <strong>这句话是错误的</strong>，<a href="">因为threadLocal只保留同一个connection内存对象的不同引用，线程操作的对象其实还是同一个</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/13/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/java%E6%8E%A2%E9%92%88/" rel="prev" title="java探针">
+                  <i class="fa fa-chevron-left"></i> java探针
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/16/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2021-05-16/" rel="next" title="2021-05-16主日讲道">
+                  2021-05-16主日讲道 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

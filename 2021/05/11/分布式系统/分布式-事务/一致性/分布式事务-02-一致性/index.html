@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="分布式事务–数据一致性引擎概览应用场景一般，广告检索系统都承载着公司很大比重的营收占比。 计费系统是广告系统的偏底层一环，承担着反作弊、计算费用、优惠扣减、费用实际扣除等职责。整个扣费流程涉及到了计费单、营销系统、支付账务系统、预算系统等的上下游数据一致性问题。 并且，由于存在CPT、CPA、CPC等不同类型的计费方式，而广告点击有流量不可回溯等特点（普通支付场景可以让用户重试），计费的数据一致性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性-02-分布式事务">
+<meta property="og:url" content="http://example.com/2021/05/11/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-02-%E4%B8%80%E8%87%B4%E6%80%A7/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="分布式事务–数据一致性引擎概览应用场景一般，广告检索系统都承载着公司很大比重的营收占比。 计费系统是广告系统的偏底层一环，承担着反作弊、计算费用、优惠扣减、费用实际扣除等职责。整个扣费流程涉及到了计费单、营销系统、支付账务系统、预算系统等的上下游数据一致性问题。 并且，由于存在CPT、CPA、CPC等不同类型的计费方式，而广告点击有流量不可回溯等特点（普通支付场景可以让用户重试），计费的数据一致性">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT531rYZT3GBGOAHYiaBqrVEmcZHSCLhUsnUzqJjRWp0V1Rep93Bpjicqs1bbp5U4KEx1LWibdnYicCBL2bQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPVkfHP9DkJ8CSICmttBZeQDwYTMnlwH9HACOiaQcvdEeo9hqsBjxn7LYQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPV6iafWicVp2q6BkiakhygY9bm6pz9ez7W4ooSehcXORuPehagNfwg3NiaMg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPVuhotJZBDuYibcmOwGXNR2H9pHROkpBTjduuKHjicJAVmr0xj8iaSzTq8Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530yxTpTWvojyJtiaOx7PibGLmKicicpErWQMicaMx4Qia15njNTb2icCwTibIskpo1zNMfFxLVjJqGDn2GbyA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="article:published_time" content="2021-05-11T04:55:26.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.162Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT531rYZT3GBGOAHYiaBqrVEmcZHSCLhUsnUzqJjRWp0V1Rep93Bpjicqs1bbp5U4KEx1LWibdnYicCBL2bQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/05/11/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-02-%E4%B8%80%E8%87%B4%E6%80%A7/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>一致性-02-分布式事务 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E2%80%93%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%BC%95%E6%93%8E%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">分布式事务–数据一致性引擎概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7%E4%BF%9D%E9%9A%9C%E6%96%B9%E6%A1%88%E9%80%89%E6%8B%A9"><span class="nav-number">1.2.</span> <span class="nav-text">一致性保障方案选择</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E5%9E%8B%E6%B6%88%E6%81%AF"><span class="nav-number">1.2.1.</span> <span class="nav-text">事务型消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TCC%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">TCC模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#saga%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.3.</span> <span class="nav-text">saga模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%BC%95%E6%93%8E-saga%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">数据一致性引擎: saga模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E6%93%8E%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">1.3.1.</span> <span class="nav-text">引擎架构图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E7%BB%84%E6%88%90"><span class="nav-number">1.3.2.</span> <span class="nav-text">结构组成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.3.</span> <span class="nav-text">其他特性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%9C%BA%E9%85%8D%E7%BD%AE%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.3.4.</span> <span class="nav-text">状态机配置实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E6%93%8E%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.3.5.</span> <span class="nav-text">引擎初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E6%93%8E%E8%B0%83%E7%94%A8"><span class="nav-number">1.3.6.</span> <span class="nav-text">引擎调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E5%8C%96%EF%BC%88%E5%8F%82%E8%80%83dubbo%E7%9A%84%E5%BC%82%E6%AD%A5%E5%8C%96%E5%AE%9E%E7%8E%B0%E7%9A%84%EF%BC%89"><span class="nav-number">1.3.7.</span> <span class="nav-text">异步化（参考dubbo的异步化实现的）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A12%E2%80%93-%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E5%BC%95%E6%93%8E%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">分布式事务2– 数据一致性引擎原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DT-%E5%BC%95%E6%93%8E%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E4%B8%9C%E8%A5%BF"><span class="nav-number">2.1.</span> <span class="nav-text">DT 引擎是个什么东西</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DT-%E5%BC%95%E6%93%8E%E5%8E%9F%E7%90%86%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.2.</span> <span class="nav-text">DT 引擎原理介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.3.</span> <span class="nav-text">模块设计详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E5%8D%8F%E8%B0%83%E5%99%A8"><span class="nav-number">2.3.1.</span> <span class="nav-text">事务协调器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%9C%BA%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%92%8C%E7%BB%B4%E6%8A%A4"><span class="nav-number">2.3.2.</span> <span class="nav-text">状态机的设计和维护</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%AF%95%E5%92%8C%E5%9B%9E%E6%BB%9A"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">重试和回滚</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E6%8D%95%E8%8E%B7"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">异常捕获</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%AF%95%E6%97%B6%E9%97%B4%E8%A1%B0%E5%87%8F"><span class="nav-number">2.3.2.3.</span> <span class="nav-text">重试时间衰减</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%88%86%E6%94%AF%E4%BA%8B%E5%8A%A1"><span class="nav-number">2.3.3.</span> <span class="nav-text">主事务和分支事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B%E4%B8%B2%E8%81%94"><span class="nav-number">2.3.4.</span> <span class="nav-text">流程串联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8C%B9%E9%85%8D%E5%92%8C%E8%B0%83%E8%B5%B7"><span class="nav-number">2.3.5.</span> <span class="nav-text">服务匹配和调起</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%92%A9%E5%AD%90%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.6.</span> <span class="nav-text">钩子函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E8%A1%A5%E5%81%BF"><span class="nav-number">2.3.7.</span> <span class="nav-text">异步补偿</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">2.4.</span> <span class="nav-text">结束语</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E5%B9%B6%E5%8F%91%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E8%A1%A5%E5%85%85%E7%AF%87%EF%BC%9A%E5%9C%A8%E6%89%80%E4%BE%9D%E8%B5%96%E5%AD%98%E5%82%A8%E4%B8%8D%E6%8E%88%E4%BF%A1%E7%9A%84%E5%9C%BA%E6%99%AF%E4%B8%8B%E5%AE%9E%E7%8E%B0%E6%9F%94%E6%80%A7%E4%BA%8B%E5%8A%A1%E9%99%8D%E7%BA%A7"><span class="nav-number">3.</span> <span class="nav-text">高并发消息队列补充篇：在所依赖存储不授信的场景下实现柔性事务降级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%9C%8D%E5%8A%A1%E6%94%AF%E6%8C%81%E4%B8%8D%E5%88%B0%E4%BD%8D%E7%9A%84%E5%9D%91"><span class="nav-number">3.1.</span> <span class="nav-text">基础服务支持不到位的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%83%8C%E6%99%AF%E5%92%8C%E6%95%B4%E7%90%86%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-number">3.1.1.</span> <span class="nav-text">项目背景和整理设计思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AF%E7%BC%BA%E5%B0%91%E7%9A%84%E5%BC%BA%E4%BE%9D%E8%B5%96%E2%80%93%E5%AD%98%E5%82%A8"><span class="nav-number">3.1.2.</span> <span class="nav-text">不可缺少的强依赖–存储</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%9A%84%E8%B0%83%E7%A0%94%E5%92%8C%E9%80%89%E6%8B%A9"><span class="nav-number">3.1.3.</span> <span class="nav-text">存储的调研和选择</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%9A%E7%95%8C%E7%9A%84%E9%80%89%E6%8B%A9%E2%80%93%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">3.1.3.1.</span> <span class="nav-text">业界的选择–数据库</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E7%89%B9%E6%80%A7%E5%86%B3%E5%AE%9A%E4%BA%86%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8D%E5%90%88%E9%80%82"><span class="nav-number">3.1.3.2.</span> <span class="nav-text">业务特性决定了数据库不合适</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%AC%E5%8F%B8%E8%87%AA%E7%A0%94%E5%AD%98%E5%82%A8%E7%9A%84%E9%80%89%E6%8B%A9%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="nav-number">3.1.3.3.</span> <span class="nav-text">公司自研存储的选择和使用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E4%BB%8B%E5%85%A5"><span class="nav-number">3.2.</span> <span class="nav-text">消息队列的介入</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E5%BC%BA%E4%B8%80%E8%87%B4%E5%AD%98%E5%82%A8%E4%B8%BA%E5%95%A5%E4%BC%9A%E4%B8%A2%E6%95%B0%E6%8D%AE"><span class="nav-number">3.2.1.</span> <span class="nav-text">非强一致存储为啥会丢数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%99%BB%E5%9C%BA"><span class="nav-number">3.2.2.</span> <span class="nav-text">消息队列登场</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E8%BF%9B%E4%B8%80%E6%AD%A5%E2%80%93%E5%AD%98%E5%82%A8%E9%99%8D%E7%BA%A7"><span class="nav-number">3.2.3.</span> <span class="nav-text">更进一步–存储降级</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/11/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-02-%E4%B8%80%E8%87%B4%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一致性-02-分布式事务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-11 12:55:26" itemprop="dateCreated datePublished" datetime="2021-05-11T12:55:26+08:00">2021-05-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="分布式事务–数据一致性引擎概览"><a href="#分布式事务–数据一致性引擎概览" class="headerlink" title="分布式事务–数据一致性引擎概览"></a>分布式事务–数据一致性引擎概览</h2><h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><p>一般，广告检索系统都承载着公司很大比重的营收占比。</p>
+<p>计费系统是广告系统的偏底层一环，承担着反作弊、计算费用、优惠扣减、费用实际扣除等职责。整个扣费流程涉及到了计费单、营销系统、支付账务系统、预算系统等的上下游数据一致性问题。</p>
+<p>并且，由于存在CPT、CPA、CPC等不同类型的计费方式，而广告点击有流量不可回溯等特点（普通支付场景可以让用户重试），计费的数据一致性引擎的合理设计就变得尤为重要了。</p>
+<h3 id="一致性保障方案选择"><a href="#一致性保障方案选择" class="headerlink" title="一致性保障方案选择"></a>一致性保障方案选择</h3><p>支付业务一般的可以分为两种</p>
+<ul>
+<li>一种是有支付牌照的公司，直接和账户和银行打交道<ul>
+<li>一般需要非常强硬的保障手段来实现分布式下数据的强一致性。比如TCC的类二阶段提交方式</li>
+</ul>
+</li>
+<li>另一种是调用第三方支付服务，实现支付业务。<ul>
+<li>相对来说，一致性要求不是非常苛刻，有不少的解决方案可供选择，比如本地消息表、事务型消息等等</li>
+</ul>
+</li>
+</ul>
+<p>当前项目的场景显然属于第二种。那么，应该怎么合理选择实现方式呢：</p>
+<h4 id="事务型消息"><a href="#事务型消息" class="headerlink" title="事务型消息"></a>事务型消息</h4><p>优点：实现方案轻量，改造成本小，适合为对实时性不是特别高的场景。</p>
+<p>缺点：就是每个系统只能负责自己这一块，流程变得冗长，不利于问题排查。业务耦合程度可能要高一些。</p>
+<h4 id="TCC模式"><a href="#TCC模式" class="headerlink" title="TCC模式"></a>TCC模式</h4><p>系统实现真的是非常的重。</p>
+<ul>
+<li>需要流程中的所有系统，按照既定的规范来实现一套包含了try/commit/cancel三个处理逻辑的调用模板。 </li>
+<li>需要流程中的所有系统，按照既定的规范来创建主事务表和分支事务表，来记录事务状态和调用参数及路由。</li>
+<li>需要参与者创建事务幂等表，实现拒绝空回滚或拒绝后到达的资源扣减等的防悬挂逻辑。</li>
+</ul>
+<p>光是让各系统配合实现几个接口，我觉得，如果没有非常大的资金风险压迫，没几个人会配合。</p>
+<p>而且，TCC可能更适用于有用户直接参与的资源扣减场景，因为引擎的基本思路是失败时操作回滚，保证上下游一致。</p>
+<p>但是，上面也说过了，广告点击流的特点是流量不可回放，用户不可能因为这次计费没成功，就帮我们再点一次。所以，我们的一致性引擎的恢复逻辑，不仅要支持回滚，还要支持重试。不可漏掉每一次点击计费。</p>
+<h4 id="saga模式"><a href="#saga模式" class="headerlink" title="saga模式"></a>saga模式</h4><p>最终，我们参考saga模式，选择的是类saga的状态机引擎的补偿模式。</p>
+<p>这种方式的优点是，对老系统改造成本友好，即使实现接口也比较方便，通过状态机编排执行节点链，并配置重试回滚方式、实时异步策略。</p>
+<p>事务信息存储方式相对灵活，主要看自己公司的各种存储的可靠性和一致性的承诺。</p>
+<h3 id="数据一致性引擎-saga模式"><a href="#数据一致性引擎-saga模式" class="headerlink" title="数据一致性引擎: saga模式"></a>数据一致性引擎: saga模式</h3><h4 id="引擎架构图"><a href="#引擎架构图" class="headerlink" title="引擎架构图"></a>引擎架构图</h4><p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT531rYZT3GBGOAHYiaBqrVEmcZHSCLhUsnUzqJjRWp0V1Rep93Bpjicqs1bbp5U4KEx1LWibdnYicCBL2bQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h4 id="结构组成"><a href="#结构组成" class="headerlink" title="结构组成"></a>结构组成</h4><ul>
+<li><em>状态机</em> 实现节点执行顺序编排及其他执行特性</li>
+<li><em>节点</em> 业务需要实现的逻辑节点，比如计费的cpc扣费逻辑，需要有前置check、price调价、coupon优惠券、pmc扣费等执行节点</li>
+<li><em>补偿逻辑</em> 属于节点的一部分实现，每个执行节点需要实现当前节点的补偿逻辑，以供执行异常时进行恢复操作</li>
+<li><em>钩子函数</em> 在引擎执行前和执行后，允许业务系统执行自有的特殊操作</li>
+<li><em>定时任务</em> 异常数据恢复的触发入口</li>
+</ul>
+<h4 id="其他特性"><a href="#其他特性" class="headerlink" title="其他特性"></a>其他特性</h4><ul>
+<li><em>补偿方式</em> 可配置，有重试/回滚 两种补偿方式可选；重试补偿时，执行顺便和正常顺序一致，回滚补偿时，从最后一个执行节点往前回滚</li>
+<li><em>补偿触发时效</em> 可配置，有实时/异步延时 两种触发策略可选，如果有资源悬挂的风险，建议选异步延时触发</li>
+<li><em>重试次数及时间衰减</em> 可配置，按业务实际情况定制衰减序列</li>
+</ul>
+<h4 id="状态机配置实例"><a href="#状态机配置实例" class="headerlink" title="状态机配置实例"></a>状态机配置实例</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;name&quot;: &quot;xxxx_xxxx_xxxx&quot;,</span><br><span class="line">  &quot;comment&quot;: &quot;cpc计费状态机&quot;,</span><br><span class="line">  &quot;firstNodeName&quot;: &quot;check&quot;,</span><br><span class="line">  &quot;nodes&quot;: &#123;</span><br><span class="line">    &quot;check&quot;: &#123;</span><br><span class="line">      &quot;nextNodeName&quot;: &quot;land&quot;,</span><br><span class="line">      &quot;preNodeName&quot;: &quot;&quot;,</span><br><span class="line">      &quot;skipRecover&quot;: true</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;land&quot;: &#123;</span><br><span class="line">      &quot;nextNodeName&quot;: &quot;antiFraud&quot;,</span><br><span class="line">      &quot;preNodeName&quot;: &quot;check&quot;,</span><br><span class="line">      &quot;skipRecover&quot;: false</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;antiFraud&quot;: &#123;</span><br><span class="line">      &quot;nextNodeName&quot;: &quot;realPrice&quot;,</span><br><span class="line">      &quot;preNodeName&quot;: &quot;land&quot;,</span><br><span class="line">      &quot;skipRecover&quot;: false</span><br><span class="line">    &#125;,&quot;...&quot;:&#123;&quot;...&quot;&#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  #重试次数</span><br><span class="line">  &quot;retryCount&quot;: &quot;4&quot;, </span><br><span class="line">  #重试时间衰减</span><br><span class="line">  &quot;timeDecaySeries&quot;: [&quot;1&quot;,&quot;3&quot;,&quot;5&quot;,&quot;10&quot;], </span><br><span class="line">  #补偿策略，重试&#x2F;回滚</span><br><span class="line">  &quot;recoverType&quot;: &quot;Retry&quot;,</span><br><span class="line">  #触发时效，实时触发&#x2F;异步触发</span><br><span class="line">  &quot;compensateTimeliness&quot;: &quot;ASYNC&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="引擎初始化"><a href="#引擎初始化" class="headerlink" title="引擎初始化"></a>引擎初始化</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DTConfig.builder()</span><br><span class="line">    .setAppName(&quot;billing&quot;)&#x2F;&#x2F;配置appName</span><br><span class="line">    .setLogStoreStrategy(StoreStrategyEnum.DEFAULT_STORE)&#x2F;&#x2F;存储策略</span><br><span class="line">    .setRedisConfig(redisConfigPath) &#x2F;&#x2F;设置redis配置</span><br><span class="line">    .setDBTableConfig(mysqlConfigPath) &#x2F;&#x2F;mysql配置</span><br><span class="line">    .setZKConfig(configPath) &#x2F;&#x2F; wConfig 配置 ，切流灰度使用</span><br><span class="line">    .setStateMachinePath(stateMachinePath)&#x2F;&#x2F;状态机配置项地址</span><br><span class="line">    .setNegligibleErrorCode(BillingDTConstants.serious_error_code_str) &#x2F;&#x2F;当前系统关键异常code集合（不可忽略的致命异常，供恢复逻辑使用）</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure>
+
+<h4 id="引擎调用"><a href="#引擎调用" class="headerlink" title="引擎调用"></a>引擎调用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;本次调用所使用的状态机名称</span><br><span class="line">String stateMachineName&#x3D;&quot;ecpm_state_machine&quot;; &#x2F;&#x2F;当前请求使用到的状态机名称（和状态机配置中的name一致）</span><br><span class="line">&#x2F;&#x2F;获取引擎实例</span><br><span class="line">DTBizEngine dtBizEngine&#x3D;new SagaDTBizEngine();</span><br><span class="line">&#x2F;&#x2F;组装入参执行调用</span><br><span class="line">DTResponse response&#x3D;  dtBizEngine.start(new DTEngineRequest(bizType,bizId,stateMachineName,originContext));</span><br><span class="line">&#x2F;&#x2F;打印结果</span><br><span class="line">System.out.println(response.getData());</span><br></pre></td></tr></table></figure>
+
+<h4 id="异步化（参考dubbo的异步化实现的）"><a href="#异步化（参考dubbo的异步化实现的）" class="headerlink" title="异步化（参考dubbo的异步化实现的）"></a>异步化（参考dubbo的异步化实现的）</h4><p>主线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">   &#x2F;&#x2F;创建 DTFurure ,传入 (DTEngineRequest request , int timeout)</span><br><span class="line">   DTFuture mFuture&#x3D;new DTFuture(request, 1000);</span><br><span class="line">   &#x2F;&#x2F;将该future传递下去，也可以用其他方式传递，这里直接放到了request扩展字段做示例</span><br><span class="line">   request.getExtendField().put(&quot;MY_KEY&quot;,mFuture);</span><br><span class="line">   &#x2F;&#x2F;异步线程调用 </span><br><span class="line">   EcpmEventBus.getInstance().post(new EcpmBillingEvent(request));</span><br><span class="line">   &#x2F;&#x2F;有限时间超时等待，get到的结果是业务完成时设置进来的对象，业务系统可以按自己的场景转换</span><br><span class="line">   Object future&#x3D; mFuture.get(1000); &#x2F;&#x2F;单位是毫秒</span><br><span class="line">   &#x2F;&#x2F;do something</span><br><span class="line"></span><br><span class="line">  &#125; catch (Exception e) &#123;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行线程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;do something ...</span><br><span class="line"></span><br><span class="line">DTFurure futrue&#x3D;(DTFurure)request.getExtendField().get(&quot;MY_KEY&quot;);</span><br><span class="line"></span><br><span class="line">DTFuture.received(futrue.getId(),response);</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="分布式事务2–-数据一致性引擎原理"><a href="#分布式事务2–-数据一致性引擎原理" class="headerlink" title="分布式事务2– 数据一致性引擎原理"></a>分布式事务2– 数据一致性引擎原理</h2><blockquote>
+<p>分布式事务解决什么问题</p>
+<ul>
+<li><em>准备调用下游扣费，或刚调起下游扣费接口，服务宕机了，怎么办？</em></li>
+<li><em>调用下游超时，不知道下游是否执行怎么办？</em></li>
+<li><em>调用下游时发生网路堵塞，回滚先到扣费操作后到被悬挂怎么办？</em></li>
+<li><em>整个事务需要同时满足重试和回滚操作怎么办？</em></li>
+<li><em>因为支付系统大面积重试时，优惠券节点也要重试么？</em></li>
+<li><em>重试失败怎么办？重试间隔怎么设置？</em></li>
+</ul>
+</blockquote>
+<p>下面就带着这些待解决的场景问题，看看 DT 引擎是个什么东西</p>
+<h3 id="DT-引擎是个什么东西"><a href="#DT-引擎是个什么东西" class="headerlink" title="DT 引擎是个什么东西"></a>DT 引擎是个什么东西</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPVkfHP9DkJ8CSICmttBZeQDwYTMnlwH9HACOiaQcvdEeo9hqsBjxn7LYQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">从上图可以看到，DT 的核心组成包括三大部分：</p>
+<ul>
+<li><em>事务协调器</em>：负责节点编排、结果判断、分支路由等主要功能。</li>
+<li><em>业务执行及补偿节点</em> ：负责调用业务系统实现的多个执行节点。</li>
+<li><em>异步补偿触发</em>：负责在执行异常时，异步调起恢复任务并触发执行。</li>
+</ul>
+<p><strong>「总结下，DT 是个以状态机为基础的，补偿式的分布式长事务一致性保障引擎。」</strong></p>
+<p>下面将详述每个模块的实现方案和细节。</p>
+<h3 id="DT-引擎原理介绍"><a href="#DT-引擎原理介绍" class="headerlink" title="DT 引擎原理介绍"></a>DT 引擎原理介绍</h3><p><strong>「理论基础」</strong>：是从Hector&amp;Kenneth在1987年发表的《Sagas》论文中演化而来：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPV6iafWicVp2q6BkiakhygY9bm6pz9ez7W4ooSehcXORuPehagNfwg3NiaMg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>图中绿色的部分是正向执行逻辑，发起方逐个调用，参与者不分阶段，直接执行并提交本地事务.</p>
+<p>当链路中某个参与者执行逻辑发生异常时，则依据实际配置，执行补偿–回滚或重试。</p>
+<p><em>适用场景</em>：</p>
+<ul>
+<li>业务流程长、业务流程多</li>
+<li>业务场景除了回滚还有重试等场景。</li>
+<li>参与者没法保证提供 TCC 接口。</li>
+</ul>
+<p>优势：</p>
+<ul>
+<li>一阶段提交本地事务，无锁，高性能、事件驱动架构；</li>
+<li>参与者可异步执行，高吞吐；补偿服务易于实现。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不保证隔离性</li>
+</ul>
+<h3 id="模块设计详解"><a href="#模块设计详解" class="headerlink" title="模块设计详解"></a>模块设计详解</h3><p>相比Seate里的saga， 原理都是一样的，但是内部实现很多实现方案进行了精炼和一些专属定制化的开发。</p>
+<p>比如，saga 中的状态机定义内容非常庞大，几乎所有的内容都出现在了配置文件中，而 DT 精简到了只剩下节点编排，且顺序固定，不支持节点间路由跳转（因为感觉也没必要~）。</p>
+<p>诸如此类的定制等等~</p>
+<p>其目的，不是为了重复造轮子，是为了有一致性诉求，但是不想对接庞大的解决方案的同学们，提供一种轻量级的处理方案。</p>
+<h4 id="事务协调器"><a href="#事务协调器" class="headerlink" title="事务协调器"></a>事务协调器</h4><p>协调器的主要职责，是执行节点的流程编排、事务的开启、节点状态的维护和上报、全局状态的维护和更新、全局事务完结后的后续处理等。<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT532jLJNoZH2DKo0XkmGoibsPVuhotJZBDuYibcmOwGXNR2H9pHROkpBTjduuKHjicJAVmr0xj8iaSzTq8Q/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">整个事务协调器类图如图所示：</p>
+<ol>
+<li><code>DTBizEngine</code>接口定义了引擎的执行入口，具体实现策略都继承自它。</li>
+<li><code>SagaDTBizEngine</code> 是saga模式的具体实现类。</li>
+<li>通过<code>DTStart</code> 注解实现启动拦截器，执行事务启动初始化操作。</li>
+<li>通过<code>DTAction</code> 注解实现业务节点拦截器，执行数据上报和状态维护。</li>
+<li>引擎通过<code>config</code>类拿到业务配置的<code>DTactionService</code>实例执行链，执行 <code>action</code>方法以触发业务逻辑。</li>
+<li><code>TriggerManager</code>负责调取<em>框架定义+业务自定义</em>的<strong>「钩子函数」</strong>，负责处理各个不同的执行阶段的特殊处理。</li>
+<li>整个业务流程，均由事务协调器协调处理。业务系统只需要实现每个节点的 <code>DTactionService.action</code> 接口和 <code>compensate</code> 接口</li>
+</ol>
+<p><strong>「为了达到进度协调且保证各节点之间的数据一致性，有一些核心的问题需要解决。下面我们详细说明」</strong></p>
+<h4 id="状态机的设计和维护"><a href="#状态机的设计和维护" class="headerlink" title="状态机的设计和维护"></a>状态机的设计和维护</h4><p>状态机的配置决定了事务的节点编排和执行流程。既要决定正常的业务执行流程，还要考虑不同场景下的可配置策略。</p>
+<h5 id="重试和回滚"><a href="#重试和回滚" class="headerlink" title="重试和回滚"></a>重试和回滚</h5><p>回滚，需要从最后一个节点往前回滚。而重试，则需要从前往后执行，因此，状态机节点需要和二叉树一样，将pre 和next节点维护起来。</p>
+<p>目前这种方式，是一种极简方式，适用于业务流程比较固定的场景。如果有节点路由的诉求，那另当别论了。</p>
+<h5 id="异常捕获"><a href="#异常捕获" class="headerlink" title="异常捕获"></a>异常捕获</h5><p>业务执行过程中可能会遇到不同类别的异常。</p>
+<p>有些异常是可以忽略的，比如某作弊流量查某个关键配置时未查到，可以直接过滤，不进行后续流程。而个别的严重异常是我们不希望忽略的，比如调支付系统失败，超时等等。</p>
+<p>而有些节点，包含了上述两种异常，而有些节点，所有异常均不能忽略。</p>
+<p>所以，我们在捕获异常方面会支持两种配置方式：<br><strong>「整个节点异常不可忽略」</strong><br><strong>「不可忽略的异常码列表」</strong></p>
+<p>如果当前节点配置了所有异常不可忽略，会直接进入补偿流程。如果没有配置该参数，则会在不可忽略的异常码列表中查询匹配。</p>
+<h5 id="重试时间衰减"><a href="#重试时间衰减" class="headerlink" title="重试时间衰减"></a>重试时间衰减</h5><p>为了防止下游系统异常恢复不及时和异常请求因特殊情况被防止无限期补偿等场景，我们做了重试时间衰减策略。该时间衰减序列被维护在状态机配置中，比如<br><strong>「1,3,5,10」</strong><br>则，框架在捞取异常数据进行处理时，会计算上次补偿的时间是否满足该时间序列，再进行执行。</p>
+<h4 id="主事务和分支事务"><a href="#主事务和分支事务" class="headerlink" title="主事务和分支事务"></a>主事务和分支事务</h4><p><em>我们需要依赖主事务串联整个流程，依赖分支事务在执行异常时感知各参与者的执行结果。</em></p>
+<p>一般在TCC模式下，绝大部分情况都以<em>本地数据库事务</em>为依托，会把主事务的创建、参与者的调用包在本地事务内部，这样，使用同一个数据库创建主事务和分支事务表，天然保证和本地业务数据的一致性。这样数据的压力也会有所增加，基本都是在分库分表之后，把压力均摊到分库上完成性能要求。</p>
+<p>但是，还有一些情况另外，比如我们目前的业务，为了提高性能，没有启动本地事务，相当于是在裸跑。</p>
+<p>那么，一个关键的问题就是数据存储的稳定性和流程阻断方案的完善。</p>
+<p><em>一是</em>需要一个高性能的存储来满足数据的强一致性要求，可以允许存储操作失败，但是决不允许接口返回成功，实际上数据丢失的情况发生。<br><em>二是</em>一个完善的流程阻断方案：我们的存储操作一般分为前置操作和后置操作，如主事务插入和分支事务插入都是前置操作，而分支事务状态更新则是后置操作。在前置操作时失败，则流程阻断，返回失败，让调用方重试或框架补偿。</p>
+<p><em>最终希望起到的作用是</em>：<br>(1)只要存储中没有，那就是肯定没执行；<br>(2)而如果在存储中查到了记录，框架会认为，曾经有可能执行过，还需要看对应的状态执行对应的补偿。</p>
+<h4 id="流程串联"><a href="#流程串联" class="headerlink" title="流程串联"></a>流程串联</h4><p>框架需要确定后置处理器和钩子函数的注册时机和方式，需要把主事务的开启，执行节点状态的更新，全部执行完成后的处理逻辑编织在一起，等等。</p>
+<p><em>具体方法</em>：使用拦截器的方式，在事务开启前后、节点执行前后，进行事务信息维护和更新，保证流程和数据相互匹配</p>
+<h4 id="服务匹配和调起"><a href="#服务匹配和调起" class="headerlink" title="服务匹配和调起"></a>服务匹配和调起</h4><p>执行到每个节点，都需要获取参与者的对应服务实例。这个地方之前还会面试问过，问我异常恢复的时候怎么做到通过分支事务表里记录的字符串，调起对方的rpc服务。</p>
+<p>这块的实现其实也有很多种，之前工作中用到的tcc模式的dtx引擎，是依托spring框架，使用XMap技术将配置在xml中的对应服务解析成对应的 Javabean,并匹配本地注册中心的服务端信息，调起对应服务。</p>
+<p>DT中，我们用了一种比较简单的方法，那就是<code>「ServiceLoader」</code>，非常有用的一个获取同一接口下所有实现类服务的方法。</p>
+<p>只需三步:</p>
+<ul>
+<li>创建接口。<br><code>com.cjh.test.Hello</code></li>
+<li>创建实现类。<br><code>com.cjh.test.AHelloImpl</code><br><code>com.cjh.test.BHelloImpl</code></li>
+<li>指定位置创建接口文件. 在<br><code>resource/META-INF/service</code><br>文件夹下，创建名为<br><strong>「com.cjh.test.Hello」</strong><br>的文件，将<br><code>com.cjh.test.AHelloImpl</code><br><code>com.cjh.test.BHelloImpl</code><br>这两行文本填入</li>
+</ul>
+<p>ok 完事~ 所以只要框架指定一个包含了 action 和 compesate 的接口，而业务系统的各个节点都实现了该接口，我们就可以方便的调起这些服务~</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;示例代码</span><br><span class="line">ServiceLoader&lt;AAA&gt; serviceLoader&#x3D;ServiceLoader.load(AAA.class);</span><br><span class="line"></span><br><span class="line">for (AAA load : serviceLoader) &#123;</span><br><span class="line">  System.out.println(load);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">LoadInterface loadInterface&#x3D; EnhancedServiceLoader.load(LoadInterface.class,&quot;BLoad&quot;);</span><br><span class="line">loadInterface.execute();</span><br><span class="line"></span><br><span class="line">Method method &#x3D; loadInterface.getClass().getMethod(&quot;execute&quot;);</span><br><span class="line">method.invoke(loadInterface);</span><br><span class="line"></span><br><span class="line">EnhancedServiceLoader.load(LoadInterface.class,&quot;ALoad&quot;).execute();</span><br></pre></td></tr></table></figure>
+
+<h4 id="钩子函数"><a href="#钩子函数" class="headerlink" title="钩子函数"></a>钩子函数</h4><p>框架支持业务系统在流程执行开始前、完成后、成功后、异常后执行对应的自定义处理，以满足业务系统的特殊需求。</p>
+<h4 id="异步补偿"><a href="#异步补偿" class="headerlink" title="异步补偿"></a>异步补偿</h4><p>采用分布式调用方法，定时触发未处理数据的捞取操作，并用数据总线的方式，让系统快速执行补偿。为了防止某条数据被多台机器同时捞取，会加分布式锁进行拒绝拦截。</p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>那么，DT是如何解决开篇提到的那些问题的呢：</p>
+<ol>
+<li>在调用扣费服务时发生本服务宕机，说明主事务一定是插入成功的，异步补偿会捞取该主事务记录，并捞取对应的分支事务记录，执行异步补偿。</li>
+<li>调用下游超时，说明分支事务已经插入成功，我们更新分支事务为状态未知，等待补偿。</li>
+<li>用异步补偿的方式，处理一分钟之前的未完成数据，尽可能避免网络阻塞带来的影响<em>拒绝空回滚，扣费请求后置的幂等处理，需要下游保障</em></li>
+<li>支付系统大面积超时，我们会根据分支事务记录来判断其他节点是否已经执行成功，如果执行成功，则跳过重试操作，以避免不必要的系统调用，防止因为冗余的重试调用触发某一系统瓶颈导致全链路崩溃。</li>
+<li>时间衰减等  略</li>
+</ol>
+<h2 id="高并发消息队列补充篇：在所依赖存储不授信的场景下实现柔性事务降级"><a href="#高并发消息队列补充篇：在所依赖存储不授信的场景下实现柔性事务降级" class="headerlink" title="高并发消息队列补充篇：在所依赖存储不授信的场景下实现柔性事务降级"></a>高并发消息队列补充篇：在所依赖存储不授信的场景下实现柔性事务降级</h2><h3 id="基础服务支持不到位的坑"><a href="#基础服务支持不到位的坑" class="headerlink" title="基础服务支持不到位的坑"></a>基础服务支持不到位的坑</h3><h4 id="项目背景和整理设计思路"><a href="#项目背景和整理设计思路" class="headerlink" title="项目背景和整理设计思路"></a>项目背景和整理设计思路</h4><p>项目背景其实还是我们的数据一致性保证长事务引擎。</p>
+<p>整体架构如下：<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530yxTpTWvojyJtiaOx7PibGLmKicicpErWQMicaMx4Qia15njNTb2icCwTibIskpo1zNMfFxLVjJqGDn2GbyA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<ul>
+<li>通过状态机来组织和支持多种不同的业务流</li>
+<li>通过将外部服务节点化来抽象和规范化参与者的服务</li>
+<li>通过节点的异常捕获来感知参与方的执行结果</li>
+<li>通过实时或异步的恢复机制，实现柔性事务·</li>
+</ul>
+<h4 id="不可缺少的强依赖–存储"><a href="#不可缺少的强依赖–存储" class="headerlink" title="不可缺少的强依赖–存储"></a>不可缺少的强依赖–存储</h4><p>想要业务请求保证最终一致，不可能是没有存储参与的一锤子买卖，因为还要考虑本身服务器的抖动，业务上的异步要求等等。所以，存储是一个不可缺少的依赖，如下图所示：<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image">存储服务作用在引擎的整个生命周期：</p>
+<ul>
+<li>在请求进入初期，进行上下文落地(因为广告流量只有一次操作，不像普通支付可以允许用户重试，广告场景下，用户的多次操作需要进行分别计费，并且不太适合利用MQ的ack机制进行重试，因为那需要等流程全部执行完，会影响消息消费速率)</li>
+<li>在节点执行结束，进行节点执行状态落地(这样，在遇到需要补偿的情况，可以避免冗余调用，防止不需要重试的系统被其他抖动的系统冲击)</li>
+<li>在异步恢复时，获取上下文和节点执行状态集合，以完成事务的最终一致性处理。</li>
+</ul>
+<h4 id="存储的调研和选择"><a href="#存储的调研和选择" class="headerlink" title="存储的调研和选择"></a>存储的调研和选择</h4><h5 id="业界的选择–数据库"><a href="#业界的选择–数据库" class="headerlink" title="业界的选择–数据库"></a>业界的选择–数据库</h5><p>对于支付类业务，其实，最好的是用数据库。业务层的订单表相当于业务请求上下文，会将请求的所需信息落地(没有上下文落地其实也没关系，返回用户失败即可)。</p>
+<p>节点执行状态数据存在和订单表同库的另一个表中，即可支持一个在一个本地事务内保证分布式事务的最终一致性逻辑。</p>
+<h5 id="业务特性决定了数据库不合适"><a href="#业务特性决定了数据库不合适" class="headerlink" title="业务特性决定了数据库不合适"></a>业务特性决定了数据库不合适</h5><p>由于种种原因，我们这里不太适合用数据库，一个是广告上下文太大，且绝大多时候没有用，为了少数异常存到订单表的话太浪费；二是目前采用实时库+历史库的方式进行，没有分库，如果增加了中间状态表，目前的并发量，对数据库压力会很大，但目前搞分库又不是那么必要。</p>
+<p>所以数据库不太适合。</p>
+<h5 id="公司自研存储的选择和使用"><a href="#公司自研存储的选择和使用" class="headerlink" title="公司自研存储的选择和使用"></a>公司自研存储的选择和使用</h5><p>正好，公司自研了一套基于rocksdb的高性能存储，在读写性能和数据结构方面基本可以代替MySQL和Redis。在公司内部被广泛使用。</p>
+<p>两个版本，一个是paxos强一致版本，读写性能稍弱，但保证数据强一致；另一个是普通版本，读写性能更高，但不保证强一致，即有可能主从切换会丢数据。</p>
+<p>对于带金融属性的业务来说，在理论上的读写性能满足业务要求的情况下，当然是首选强一致的版本了。特别是业务上下文，丢失的结果就是该请求的整个异常恢复流程无法被正常唤起。</p>
+<p>然而，理想照进现实，由于该版本之前应对的业务场景较为简单，并发也没有我们这么大，一些底层调优不到位导致服务抖动频繁。</p>
+<p>如果是在大厂，就像之前用OB，只要OB有承若数据不丢，那基本不用考虑丢失的问题。如果丢了，我想可能大概率就会把锅抛给存储团队，限时优化之类。</p>
+<p>但，我们小厂可都是<em>相亲相爱的一家人</em>，怎么能干这种事。所以选了另一个版本，使用更广泛，更成熟的非强一致版本。而数据丢失的问题由业务自己来想办法。</p>
+<h3 id="消息队列的介入"><a href="#消息队列的介入" class="headerlink" title="消息队列的介入"></a>消息队列的介入</h3><h4 id="非强一致存储为啥会丢数据"><a href="#非强一致存储为啥会丢数据" class="headerlink" title="非强一致存储为啥会丢数据"></a>非强一致存储为啥会丢数据</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image">如上图所示，该存储架构采用的是主从模式，数据由主写入，同步到从，当主异常时，进行主从切换，恢复服务。</p>
+<p>但是，由于不是强一致协议，写主成功即为成功，当主宕机时，虽然主从切换很快，10秒完成，但还没有来得及同步到从的那部分数据，就会因为因为主从切换而丢失。</p>
+<p>怎么办？</p>
+<h4 id="消息队列登场"><a href="#消息队列登场" class="headerlink" title="消息队列登场"></a>消息队列登场</h4><p>为了应对存储不授信的情况，我们引入了消息队列来实现存储的丢失补偿。<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image">如上图所示，引入延迟消息进入处理流程。</p>
+<ul>
+<li>当节点执行发生异常时，发送当前业务上下文到消息队列。如果是正常执行的情况则无需发送。</li>
+<li>消息的延迟间隔，要大于主从切换的时间，并且需要小于定时任务的触发间隔。比如，主从切换需要10s，那延迟消息的延迟间隔就设置为30s , 接收消息都重新插入上下文到存储。在节点异常一分钟之后，被定时任务捞取，执行处理。</li>
+</ul>
+<p>用两个时间差来覆盖掉主从切换带来的数据丢失的影响。</p>
+<h4 id="更进一步–存储降级"><a href="#更进一步–存储降级" class="headerlink" title="更进一步–存储降级"></a>更进一步–存储降级</h4><p>那么，更极端的情况，如果整个存储服务持续不可用怎么办？</p>
+<p><strong>降级：</strong> 自己的命运要把握在自己手中。目的是保证绝大部分服务正常。<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"></p>
+<ul>
+<li>监控系统。用于收集和汇报操作存储时的异常，并统计错误率和超时率</li>
+<li>一旦错误率和超时率达到阈值（比如持续30s，所有服务全部超时）执行关联脚本。</li>
+<li>脚本负责触发配置中心的配置切换，由正常模式切换为柔性模式。</li>
+<li>柔性模式下，所有涉及存储读写的操作将被忽略，以保障绝大部分请求可以正常执行。</li>
+<li>遇到执行异常的节点，将上下文发送至消息队列，消费时不再插入存储，而是改为直接消费。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/11/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%88%86%E5%B8%83%E5%BC%8F-01-subject%E7%BB%B4%E6%8A%A4/" rel="prev" title="shiro分布式-01-subject维护">
+                  <i class="fa fa-chevron-left"></i> shiro分布式-01-subject维护
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/11/%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/%E5%8E%8B%E6%B5%8B%E5%B7%A5%E5%85%B7/%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E5%8F%8A%E7%93%B6%E9%A2%88%E5%88%A4%E6%96%AD%E5%88%86%E6%9E%90/" rel="next" title="性能测试常见问题及瓶颈判断分析">
+                  性能测试常见问题及瓶颈判断分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

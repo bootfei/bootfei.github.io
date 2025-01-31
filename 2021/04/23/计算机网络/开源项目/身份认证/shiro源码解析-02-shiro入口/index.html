@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="源码shiro入口我们打算将 Shiro 放在 Web 应用中使用，只需在 web.xml 中做如下配置： 12345678910111213141516171819202122&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;&lt;web-app xmlns&#x3D;&quot;http:&#x2F;&#x2F;java.sun.com&#x2F;xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shiro框架">
+<meta property="og:url" content="http://example.com/2021/04/23/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-02-shiro%E5%85%A5%E5%8F%A3/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="源码shiro入口我们打算将 Shiro 放在 Web 应用中使用，只需在 web.xml 中做如下配置： 12345678910111213141516171819202122&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;&lt;web-app xmlns&#x3D;&quot;http:&#x2F;&#x2F;java.sun.com&#x2F;xml">
+<meta property="og:locale">
+<meta property="og:image" content="http://static.oschina.net/uploads/space/2014/0318/162859_TEXh_223750.png">
+<meta property="og:image" content="http://static.oschina.net/uploads/space/2014/0318/163231_w73G_223750.png">
+<meta property="og:image" content="http://static.oschina.net/uploads/space/2014/0318/163354_8Zjs_223750.png">
+<meta property="og:image" content="http://static.oschina.net/uploads/space/2014/0321/154813_mpy9_223750.png">
+<meta property="og:image" content="http://static.oschina.net/uploads/space/2014/0321/172903_VINL_223750.png">
+<meta property="article:published_time" content="2021-04-23T00:04:48.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.287Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://static.oschina.net/uploads/space/2014/0318/162859_TEXh_223750.png">
+
+
+<link rel="canonical" href="http://example.com/2021/04/23/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-02-shiro%E5%85%A5%E5%8F%A3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shiro框架 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#shiro%E5%85%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">shiro入口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EnvironmentLoader"><span class="nav-number">1.1.1.</span> <span class="nav-text">EnvironmentLoader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WebEnvironment"><span class="nav-number">1.1.2.</span> <span class="nav-text">WebEnvironment</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Abstract-Factory"><span class="nav-number">1.1.3.</span> <span class="nav-text">Abstract Factory</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shiro-filter"><span class="nav-number">1.2.</span> <span class="nav-text">shiro filter</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#filter%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.2.1.</span> <span class="nav-text">filter接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%81%E8%A3%85ServletContext"><span class="nav-number">1.2.2.</span> <span class="nav-text">封装ServletContext</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB"><span class="nav-number">2.1.</span> <span class="nav-text">前后端分离</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/23/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90-02-shiro%E5%85%A5%E5%8F%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shiro框架
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-23 08:04:48" itemprop="dateCreated datePublished" datetime="2021-04-23T08:04:48+08:00">2021-04-23</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><h3 id="shiro入口"><a href="#shiro入口" class="headerlink" title="shiro入口"></a>shiro入口</h3><p>我们打算将 Shiro 放在 Web 应用中使用，只需在 web.xml 中做如下配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://java.sun.com/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://java.sun.com/xml/ns/javaee</span></span></span><br><span class="line"><span class="tag"><span class="string">         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">version</span>=<span class="string">&quot;3.0&quot;</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">    <span class="tag">&lt;<span class="name">listener</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>org.apache.shiro.web.env.EnvironmentLoaderListener<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">    <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>ShiroFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.shiro.web.servlet.ShiroFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>ShiroFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p> web.xml 才是整个 Web 应用的核心所在，Web 容器（例如：Tomcat）会提供一些监听器，用于监听 Web 应用的生命周期事件，有两个重要的点可以监听，一个是出生，另一个是死亡，具备这类特性的监听器就是 ServletContextListener。</p>
+<p>Shiro 的 EnvironmentLoaderListener 就是一个典型的 ServletContextListener，它也是整个 Shiro Web 应用的入口，不妨先来看看它的静态结构吧：</p>
+<p><img src="http://static.oschina.net/uploads/space/2014/0318/162859_TEXh_223750.png" alt="img"></p>
+<ol>
+<li><p>EventListener 是一个标志接口，里面没有任何的方法，Servlet 容器中所有的 Listener 都要继承这个接口<!--这是 Servlet 规范--></p>
+</li>
+<li><p>ServletContextListener 是一个 ServletContext 的监听器，用于监听容器的启动与关闭事件，包括如下两个方法：<br>  - void contextInitialized(ServletContextEvent sce); // 当容器启动时调用<br>  - void contextDestroyed(ServletContextEvent sce); // 当容器关闭时调用<br>  可以从 ServletContextEvent 中直接获取 ServletContext 对象。</p>
+</li>
+<li><p>EnvironmentLoaderListener 不仅实现了 ServletContextListener 接口，也扩展了 EnvironmentLoader 类，是为了在 Servlet 容器中调用 EnvironmentLoader 对象的生命周期方法。</p>
+</li>
+</ol>
+<h4 id="EnvironmentLoader"><a href="#EnvironmentLoader" class="headerlink" title="EnvironmentLoader"></a>EnvironmentLoader</h4><p>EnvironmentLoaderListener 开始：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class EnvironmentLoaderListener extends EnvironmentLoader implements ServletContextListener &#123;</span><br><span class="line"> </span><br><span class="line">    &#x2F;&#x2F; 容器启动时调用</span><br><span class="line">    public void contextInitialized(ServletContextEvent sce) &#123;</span><br><span class="line">        initEnvironment(sce.getServletContext());</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    &#x2F;&#x2F; 当容器关闭时调用</span><br><span class="line">    public void contextDestroyed(ServletContextEvent sce) &#123;</span><br><span class="line">        destroyEnvironment(sce.getServletContext());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看来 EnvironmentLoaderListener 只是一个空架子而已，真正干活的人是它“爹”（EnvironmentLoader）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EnvironmentLoader</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 可在 web.xml 的 context-param 中定义 WebEnvironment 接口的实现类（默认为 IniWebEnvironment）</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ENVIRONMENT_CLASS_PARAM = <span class="string">&quot;shiroEnvironmentClass&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 可在 web.xml 的 context-param 中定义 Shiro 配置文件的位置</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String CONFIG_LOCATIONS_PARAM = <span class="string">&quot;shiroConfigLocations&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 在 ServletContext 中存放 WebEnvironment 的 key</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ENVIRONMENT_ATTRIBUTE_KEY = EnvironmentLoader.class.getName() + <span class="string">&quot;.ENVIRONMENT_ATTRIBUTE_KEY&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 从 ServletContext 中获取相关信息，并创建 WebEnvironment 实例</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> WebEnvironment <span class="title">initEnvironment</span><span class="params">(ServletContext servletContext)</span> <span class="keyword">throws</span> IllegalStateException </span>&#123;</span><br><span class="line">        <span class="comment">// 确保 WebEnvironment 只能创建一次</span></span><br><span class="line">        <span class="keyword">if</span> (servletContext.getAttribute(ENVIRONMENT_ATTRIBUTE_KEY) != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 创建 WebEnvironment 实例</span></span><br><span class="line">            WebEnvironment environment = createEnvironment(servletContext);</span><br><span class="line"> </span><br><span class="line">            <span class="comment">// 将 WebEnvironment 实例放入 ServletContext 中</span></span><br><span class="line">            servletContext.setAttribute(ENVIRONMENT_ATTRIBUTE_KEY, environment);</span><br><span class="line">            <span class="keyword">return</span> environment;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">            <span class="comment">// 将异常对象放入 ServletContext 中</span></span><br><span class="line">            servletContext.setAttribute(ENVIRONMENT_ATTRIBUTE_KEY, ex);</span><br><span class="line">            <span class="keyword">throw</span> ex;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Error err) &#123;</span><br><span class="line">            <span class="comment">// 将错误对象放入 ServletContext 中</span></span><br><span class="line">            servletContext.setAttribute(ENVIRONMENT_ATTRIBUTE_KEY, err);</span><br><span class="line">            <span class="keyword">throw</span> err;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> WebEnvironment <span class="title">createEnvironment</span><span class="params">(ServletContext sc)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 确定 WebEnvironment 接口的实现类</span></span><br><span class="line">        Class&lt;?&gt; clazz = determineWebEnvironmentClass(sc);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 确保该实现类实现了 MutableWebEnvironment 接口</span></span><br><span class="line">        <span class="keyword">if</span> (!MutableWebEnvironment.class.isAssignableFrom(clazz)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 从 ServletContext 中获取 Shiro 配置文件的位置参数，并判断该参数是否已定义</span></span><br><span class="line">        String configLocations = sc.getInitParameter(CONFIG_LOCATIONS_PARAM);</span><br><span class="line">        <span class="keyword">boolean</span> configSpecified = StringUtils.hasText(configLocations);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 若配置文件位置参数已定义，则需确保该实现类实现了 ResourceConfigurable 接口</span></span><br><span class="line">        <span class="keyword">if</span> (configSpecified &amp;&amp; !(ResourceConfigurable.class.isAssignableFrom(clazz))) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 通过反射创建 WebEnvironment 实例，将其转型为 MutableWebEnvironment 类型，并将 ServletContext 放入该实例中</span></span><br><span class="line">        MutableWebEnvironment environment = (MutableWebEnvironment) ClassUtils.newInstance(clazz);</span><br><span class="line">        environment.setServletContext(sc);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 若配置文件位置参数已定义，且该实例是 ResourceConfigurable 接口的实例（实现了该接口），则将此参数放入该实例中</span></span><br><span class="line">        <span class="keyword">if</span> (configSpecified &amp;&amp; (environment <span class="keyword">instanceof</span> ResourceConfigurable)) &#123;</span><br><span class="line">            ((ResourceConfigurable) environment).setConfigLocations(configLocations);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 可进一步定制 WebEnvironment 实例（在子类中扩展）</span></span><br><span class="line">        customizeEnvironment(environment);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 调用 WebEnvironment 实例的 init 方法</span></span><br><span class="line">        LifecycleUtils.init(environment);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 返回 WebEnvironment 实例</span></span><br><span class="line">        <span class="keyword">return</span> environment;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> Class&lt;?&gt; determineWebEnvironmentClass(ServletContext servletContext) &#123;</span><br><span class="line">        <span class="comment">// 从初始化参数（context-param）中获取 WebEnvironment 接口的实现类</span></span><br><span class="line">        String className = servletContext.getInitParameter(ENVIRONMENT_CLASS_PARAM);</span><br><span class="line">        <span class="comment">// 若该参数已定义，则加载该实现类</span></span><br><span class="line">        <span class="keyword">if</span> (className != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> ClassUtils.forName(className);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (UnknownClassException ex) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(ex);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 否则使用默认的实现类</span></span><br><span class="line">            <span class="keyword">return</span> IniWebEnvironment.class;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">customizeEnvironment</span><span class="params">(WebEnvironment environment)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 销毁 WebEnvironment 实例</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroyEnvironment</span><span class="params">(ServletContext servletContext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 从 ServletContext 中获取 WebEnvironment 实例</span></span><br><span class="line">            Object environment = servletContext.getAttribute(ENVIRONMENT_ATTRIBUTE_KEY);</span><br><span class="line">            <span class="comment">// 调用 WebEnvironment 实例的 destroy 方法</span></span><br><span class="line">            LifecycleUtils.destroy(environment);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">// 移除 ServletContext 中存放的 WebEnvironment 实例</span></span><br><span class="line">            servletContext.removeAttribute(ENVIRONMENT_ATTRIBUTE_KEY);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看来 EnvironmentLoader 就是为了：</p>
+<ol>
+<li><p>当容器启动时，读取 web.xml 文件，从中获取 WebEnvironment 接口的实现类（默认是 IniWebEnvironment），初始化该实例，并将其加载到 ServletContext 中。</p>
+</li>
+<li><p>当容器关闭时，销毁 WebEnvironment 实例，并从 ServletContext 将其移除。</p>
+</li>
+</ol>
+<p>这里有两个配置项可以在 web.xml 中进行配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>shiroEnvironmentClass<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>WebEnvironment 接口的实现类<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">context-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>shiroConfigLocations<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>shiro.ini 配置文件的位置<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">context-param</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 EnvironmentLoader 中仅用于创建 WebEnvironment 接口的实现类，随后将由这个实现类来加载并解析 shiro.ini 配置文件。</p>
+<h4 id="WebEnvironment"><a href="#WebEnvironment" class="headerlink" title="WebEnvironment"></a>WebEnvironment</h4><p>既然 WebEnvironment 如此重要，那么很有必要了解一下它的静态结构：</p>
+<p><img src="http://static.oschina.net/uploads/space/2014/0318/163231_w73G_223750.png" alt="img"></p>
+<ol>
+<li><p>最底层的 IniWebEnvironment 是 WebEnvironment 接口的默认实现类，它将读取 ini 配置文件，并创建 WebEnvironment 实例。</p>
+</li>
+<li><p>可以断言，如果需要将 Shiro 配置定义在 XML 或 Properties 配置文件中，那就需要自定义一些WebEnvironment 实现类了。</p>
+</li>
+<li><p>WebEnvironment 的实现类不仅需要实现最顶层的 Environment 接口，还需要实现具有生命周期功能的 Initializable 与 Destroyable 接口。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IniWebEnvironment</span> <span class="keyword">extends</span> <span class="title">ResourceBasedWebEnvironment</span> <span class="keyword">implements</span> <span class="title">Initializable</span>, <span class="title">Destroyable</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 默认 shiro.ini 路径</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_WEB_INI_RESOURCE_PATH = <span class="string">&quot;/WEB-INF/shiro.ini&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 定义一个 Ini 对象，用于封装 ini 配置项</span></span><br><span class="line">    <span class="keyword">private</span> Ini ini;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Ini <span class="title">getIni</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setIni</span><span class="params">(Ini ini)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.ini = ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 当初始化时调用</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 从成员变量中获取 Ini 对象</span></span><br><span class="line">        Ini ini = getIni();</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 从 web.xml 中获取配置文件位置（在 EnvironmentLoader 中已设置）</span></span><br><span class="line">        String[] configLocations = getConfigLocations();</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 若成员变量中不存在，则从已定义的配置文件位置获取</span></span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            ini = getSpecifiedIni(configLocations);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 若已定义的配置文件中仍然不存在，则从默认的位置获取</span></span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            ini = getDefaultIni();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 若还不存在，则抛出异常</span></span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 初始化成员变量</span></span><br><span class="line">        setIni(ini);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 解析配置文件，完成初始化工作</span></span><br><span class="line">        configure();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Ini <span class="title">getSpecifiedIni</span><span class="params">(String[] configLocations)</span> <span class="keyword">throws</span> ConfigurationException </span>&#123;</span><br><span class="line">        Ini ini = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (configLocations != <span class="keyword">null</span> &amp;&amp; configLocations.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 只能通过第一个配置文件的位置来创建 Ini 对象，且必须有一个配置文件，否则就会报错</span></span><br><span class="line">            ini = createIni(configLocations[<span class="number">0</span>], <span class="keyword">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Ini <span class="title">createIni</span><span class="params">(String configLocation, <span class="keyword">boolean</span> required)</span> <span class="keyword">throws</span> ConfigurationException </span>&#123;</span><br><span class="line">        Ini ini = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (configLocation != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 从指定路径下读取配置文件</span></span><br><span class="line">            ini = convertPathToIni(configLocation, required);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (required &amp;&amp; CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">private</span> Ini <span class="title">convertPathToIni</span><span class="params">(String path, <span class="keyword">boolean</span> required)</span> </span>&#123;</span><br><span class="line">        Ini ini = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (StringUtils.hasText(path)) &#123;</span><br><span class="line">            InputStream is = <span class="keyword">null</span>;</span><br><span class="line">            <span class="comment">// 若路径不包括资源前缀（classpath:、url:、file:），则从 ServletContext 中读取，否则从这些资源路径下读取</span></span><br><span class="line">            <span class="keyword">if</span> (!ResourceUtils.hasResourcePrefix(path)) &#123;</span><br><span class="line">                is = getServletContextResourceStream(path);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    is = ResourceUtils.getInputStreamForPath(path);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (required) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(e);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 将流中的数据加载到 Ini 对象中</span></span><br><span class="line">            <span class="keyword">if</span> (is != <span class="keyword">null</span>) &#123;</span><br><span class="line">                ini = <span class="keyword">new</span> Ini();</span><br><span class="line">                ini.load(is);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (required) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">private</span> InputStream <span class="title">getServletContextResourceStream</span><span class="params">(String path)</span> </span>&#123;</span><br><span class="line">        InputStream is = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">// 需要将路径进行标准化</span></span><br><span class="line">        path = WebUtils.normalize(path);</span><br><span class="line">        ServletContext sc = getServletContext();</span><br><span class="line">        <span class="keyword">if</span> (sc != <span class="keyword">null</span>) &#123;</span><br><span class="line">            is = sc.getResourceAsStream(path);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> is;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Ini <span class="title">getDefaultIni</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Ini ini = <span class="keyword">null</span>;</span><br><span class="line">        String[] configLocations = getDefaultConfigLocations();</span><br><span class="line">        <span class="keyword">if</span> (configLocations != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 先找到的先使用，后面的无需使用</span></span><br><span class="line">            <span class="keyword">for</span> (String location : configLocations) &#123;</span><br><span class="line">                ini = createIni(location, <span class="keyword">false</span>);</span><br><span class="line">                <span class="keyword">if</span> (!CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ini;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> String[] getDefaultConfigLocations() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> String[]&#123;</span><br><span class="line">            DEFAULT_WEB_INI_RESOURCE_PATH,              <span class="comment">// /WEB-INF/shiro.ini</span></span><br><span class="line">            IniFactorySupport.DEFAULT_INI_RESOURCE_PATH <span class="comment">// classpath:shiro.ini</span></span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 清空这个 Bean 容器（一个 Map&lt;String, Object&gt; 对象，在 DefaultEnvironment 中定义）</span></span><br><span class="line">        <span class="keyword">this</span>.objects.clear();</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 创建基于 Web 的 SecurityManager 对象（WebSecurityManager）</span></span><br><span class="line">        WebSecurityManager securityManager = createWebSecurityManager();</span><br><span class="line">        setWebSecurityManager(securityManager);</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 初始化 Filter Chain 解析器（用于解析 Filter 规则）</span></span><br><span class="line">        FilterChainResolver resolver = createFilterChainResolver();</span><br><span class="line">        <span class="keyword">if</span> (resolver != <span class="keyword">null</span>) &#123;</span><br><span class="line">            setFilterChainResolver(resolver);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> WebSecurityManager <span class="title">createWebSecurityManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 通过工厂对象来创建 WebSecurityManager 实例</span></span><br><span class="line">        WebIniSecurityManagerFactory factory;</span><br><span class="line">        Ini ini = getIni();</span><br><span class="line">        <span class="keyword">if</span> (CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            factory = <span class="keyword">new</span> WebIniSecurityManagerFactory();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            factory = <span class="keyword">new</span> WebIniSecurityManagerFactory(ini);</span><br><span class="line">        &#125;</span><br><span class="line">        WebSecurityManager wsm = (WebSecurityManager) factory.getInstance();</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 从工厂中获取 Bean Map 并将其放入 Bean 容器中</span></span><br><span class="line">        Map&lt;String, ?&gt; beans = factory.getBeans();</span><br><span class="line">        <span class="keyword">if</span> (!CollectionUtils.isEmpty(beans)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.objects.putAll(beans);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">return</span> wsm;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> FilterChainResolver <span class="title">createFilterChainResolver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        FilterChainResolver resolver = <span class="keyword">null</span>;</span><br><span class="line">        Ini ini = getIni();</span><br><span class="line">        <span class="keyword">if</span> (!CollectionUtils.isEmpty(ini)) &#123;</span><br><span class="line">            <span class="comment">// Filter 可以从 [urls] 或 [filters] 片段中读取</span></span><br><span class="line">            Ini.Section urls = ini.getSection(IniFilterChainResolverFactory.URLS);</span><br><span class="line">            Ini.Section filters = ini.getSection(IniFilterChainResolverFactory.FILTERS);</span><br><span class="line">            <span class="keyword">if</span> (!CollectionUtils.isEmpty(urls) || !CollectionUtils.isEmpty(filters)) &#123;</span><br><span class="line">                <span class="comment">// 通过工厂对象创建 FilterChainResolver 实例</span></span><br><span class="line">                IniFilterChainResolverFactory factory = <span class="keyword">new</span> IniFilterChainResolverFactory(ini, <span class="keyword">this</span>.objects);</span><br><span class="line">                resolver = factory.getInstance();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> resolver;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看来 IniWebEnvironment 就是为了：</p>
+<ol>
+<li><p>查找并加载 shiro.ini 配置文件，首先从自身成员变量里查找，然后从 web.xml 中查找，然后从 /WEB-INF 下查找，然后从 classpath 下查找，若均未找到，则直接报错。</p>
+</li>
+<li><p>当找到了 ini 配置文件后就开始解析，此时构造了一个 Bean 容器（相当于一个轻量级的 IOC 容器），最终的目标是为了创建 WebSecurityManager 对象与 FilterChainResolver 对象，创建过程使用了 Abstract Factory 模式</p>
+</li>
+</ol>
+<h4 id="Abstract-Factory"><a href="#Abstract-Factory" class="headerlink" title="Abstract Factory"></a>Abstract Factory</h4><p><img src="http://static.oschina.net/uploads/space/2014/0318/163354_8Zjs_223750.png" alt="img"></p>
+<p>其中有两个 Factory 需要关注：<br>- WebIniSecurityManagerFactory 用于创建 WebSecurityManager。<br>- IniFilterChainResolverFactory 用于创建 FilterChainResolver。</p>
+<p>通过以上分析，相信 EnvironmentLoaderListener 已经不再神秘了，无非就是在容器启动时创建 WebEnvironment 对象，并由该对象来读取 Shiro 配置文件，创建WebSecurityManager 与 FilterChainResolver 对象，它们都在后面将要出现的 ShiroFilter 中起到了重要作用。</p>
+<p>从 web.xml 中同样可以得知，ShiroFilter 是整个 Shiro 框架的门面，因为它拦截了所有的请求，后面是需要 Authentication（认证）还是需要 Authorization（授权）都由它说了算。</p>
+<h3 id="shiro-filter"><a href="#shiro-filter" class="headerlink" title="shiro filter"></a>shiro filter</h3><p>在上一篇中，我们分析了 Shiro Web 应用的入口 —— EnvironmentLoaderListener，它是一个 ServletContextListener，在 Web 容器启动的时候，它为我们创建了两个非常重要的对象：</p>
+<ul>
+<li><p>WebSecurityManager：它是用于 Web 环境的 SecurityManager 对象，通过读取 shiro.ini 中 [main] 片段生成的，我们可以通过 SecurityUtils.getSecurityManager 方法获取该对象。</p>
+</li>
+<li><p>FilterChainResolver：它是 shiro.ini 中 [urls] 片段所配置的 Filter Chain 的解析器，可对一个 URL 配置一个或多个 Filter（用逗号分隔），Shiro 也为我们提供了几个默认的 Filter。</p>
+<p>Shiro Web 的第二个核心对象 —— ShiroFilter，它是在整个 Shiro Web 应用中请求的门户，也就是说，所有的请求都会被 ShiroFilter 拦截并进行相应的链式处理。</p>
+</li>
+</ul>
+<p><img src="http://static.oschina.net/uploads/space/2014/0321/154813_mpy9_223750.png" alt="img"></p>
+<h4 id="filter接口"><a href="#filter接口" class="headerlink" title="filter接口"></a>filter接口</h4><p>上图可见，ShiroFilter 往上竟然有五层，最上层是 Filter（即 javax.servlet.Filter），它是 Servlet 规范中的 Filter 接口，代码如下：<!--只有实现的sevlet的filter接口，才能被web容器识别和加载为filter--></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public interface Filter &#123;</span><br><span class="line"></span><br><span class="line">    void init(FilterConfig filterConfig) throws ServletException;</span><br><span class="line"></span><br><span class="line">    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException;</span><br><span class="line"></span><br><span class="line">    void destroy();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Filter 接口中的三个方法分别在 Filter 生命周期的三个时期内由 Web 容器来调用，分别是：初始化、执行、销毁。</p>
+<p>但与 Filter 接口同一级别下竟然还有一个名为 ServletContextSupport 的类，它又是起什么作用的呢？</p>
+<h4 id="封装ServletContext"><a href="#封装ServletContext" class="headerlink" title="封装ServletContext"></a>封装ServletContext</h4><p>打开 ServletContextSupport 的源码便知，它是 Shiro 为了封装 ServletContext 的而提供的一个类，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 封装 ServletContext</span><br><span class="line"> *&#x2F;</span><br><span class="line">public class ServletContextSupport &#123;</span><br><span class="line"></span><br><span class="line">    private ServletContext servletContext;</span><br><span class="line"></span><br><span class="line">    public ServletContext getServletContext() &#123;</span><br><span class="line">        return servletContext;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setServletContext(ServletContext servletContext) &#123;</span><br><span class="line">        this.servletContext &#x3D; servletContext;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected String getContextInitParam(String paramName) &#123;</span><br><span class="line">        return getServletContext().getInitParameter(paramName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private ServletContext getRequiredServletContext() &#123;</span><br><span class="line">        ServletContext servletContext &#x3D; getServletContext();</span><br><span class="line">        if (servletContext &#x3D;&#x3D; null) &#123;</span><br><span class="line">            throw new IllegalStateException();</span><br><span class="line">        &#125;</span><br><span class="line">        return servletContext;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected void setContextAttribute(String key, Object value) &#123;</span><br><span class="line">        if (value &#x3D;&#x3D; null) &#123;</span><br><span class="line">            removeContextAttribute(key);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            getRequiredServletContext().setAttribute(key, value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected Object getContextAttribute(String key) &#123;</span><br><span class="line">        return getRequiredServletContext().getAttribute(key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void removeContextAttribute(String key) &#123;</span><br><span class="line">        getRequiredServletContext().removeAttribute(key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public String toString() &#123;</span><br><span class="line">        return toStringBuilder().toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected StringBuilder toStringBuilder() &#123;</span><br><span class="line">        return new StringBuilder(super.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>通过这个类，我们可以方便的操纵 ServletContext 对象（使用其中的属性），那么这个 ServletContext 对象又是如何来初始化的呢？</p>
+<p>不妨看看 Filter 与 ServletContextSupport 的子类 AbstractFilter 吧，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 初始化 ServletContext 并封装 FilterConfig</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract class AbstractFilter extends ServletContextSupport implements Filter &#123;</span><br><span class="line"></span><br><span class="line">    protected FilterConfig filterConfig;</span><br><span class="line"></span><br><span class="line">    public FilterConfig getFilterConfig() &#123;</span><br><span class="line">        return filterConfig;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setFilterConfig(FilterConfig filterConfig) &#123;</span><br><span class="line">        &#x2F;&#x2F; 初始化 FilterConfig 与 ServletContext</span><br><span class="line">        this.filterConfig &#x3D; filterConfig;</span><br><span class="line">        setServletContext(filterConfig.getServletContext());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected String getInitParam(String paramName) &#123;</span><br><span class="line">        &#x2F;&#x2F; 从 FilterConfig 中获取初始参数</span><br><span class="line">        FilterConfig config &#x3D; getFilterConfig();</span><br><span class="line">        if (config !&#x3D; null) &#123;</span><br><span class="line">            return StringUtils.clean(config.getInitParameter(paramName));</span><br><span class="line">        &#125;</span><br><span class="line">        return null;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public final void init(FilterConfig filterConfig) throws ServletException &#123;</span><br><span class="line">        &#x2F;&#x2F; 初始化 FilterConfig</span><br><span class="line">        setFilterConfig(filterConfig);</span><br><span class="line">        try &#123;</span><br><span class="line">            &#x2F;&#x2F; 在子类中实现该模板方法</span><br><span class="line">            onFilterConfigSet();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            if (e instanceof ServletException) &#123;</span><br><span class="line">                throw (ServletException) e;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                throw new ServletException(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void onFilterConfigSet() throws Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void destroy() &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>看到这个类的第一感觉就是，它对 FilterConfig 进行了封装，为什么要封装 FilterConfig 呢？就是想通过它来获取 ServletContext。可见，在 init 方法中完成了 FilterConfig 的初始化，并提供了一个名为 onFilterConfigSet 的模板方法，让它的子类去实现其中的细节。</p>
+<p>在阅读 AbstractFilter 的子类 NameableFilter 的源码之前，不妨先看看 NameableFilter 实现了一个很有意思的接口 Nameable，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 确保实现该接口的类可进行命名（具有唯一的名称）</span><br><span class="line"> *&#x2F;</span><br><span class="line">public interface Nameable &#123;</span><br><span class="line"></span><br><span class="line">    void setName(String name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>仅提供了一个 setName 的方法，目的就是为了让其子类能够提供一个唯一的 Filter Name，如果子类不提供怎么办呢？</p>
+<p>相信 Nameable 的实现类也就是 AbstractFilter 的子类 NameableFilter 会告诉我们想要的答案，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 提供 Filter Name 的 get&#x2F;set 方法</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract class NameableFilter extends AbstractFilter implements Nameable &#123;</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line"></span><br><span class="line">    protected String getName() &#123;</span><br><span class="line">        &#x2F;&#x2F; 若成员变量 name 为空，则从 FilterConfig 中获取 Filter Name</span><br><span class="line">        if (this.name &#x3D;&#x3D; null) &#123;</span><br><span class="line">            FilterConfig config &#x3D; getFilterConfig();</span><br><span class="line">            if (config !&#x3D; null) &#123;</span><br><span class="line">                this.name &#x3D; config.getFilterName();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return this.name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setName(String name) &#123;</span><br><span class="line">        this.name &#x3D; name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected StringBuilder toStringBuilder() &#123;</span><br><span class="line">        String name &#x3D; getName();</span><br><span class="line">        if (name &#x3D;&#x3D; null) &#123;</span><br><span class="line">            return super.toStringBuilder();</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            StringBuilder sb &#x3D; new StringBuilder();</span><br><span class="line">            sb.append(name);</span><br><span class="line">            return sb;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>看到了 NameableFilter 中的 getName 方法，我们应该清楚了，每个 Filter 必须有一个名字，可通过 setName 方法设置的，如果不设置就取该 Filter 默认的名字，也就是在 web.xml 中配置的 filter-name 了。此外，这里还通过一个 toStringBuilder 方法完成了类似 toString 方法，不过暂时还没什么用途，可能以后会有用。</p>
+<p>以上这一切都是为了让每个 Filter 有一个名字，而且这个名字最好是唯一的（这一点在 Shiro 源码中没有得到控制）。此外，在 shiro.ini 的 [urls] 片段的配置满足一定规则的，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[urls]</span><br><span class="line">&#x2F;foo &#x3D; ssl, authc</span><br></pre></td></tr></table></figure>
+
+
+
+<p>等号左边的是 URL，右边的是 Filter Chian，一个或多个 Filter，每个 Filter 用逗号进行分隔。</p>
+<p>对于 /foo 这个 URL 而言，可先后通过 ssl 与 authc 这两个 Filter。如果我们同时配置了两个 ssl，这个 URL 会被 ssl 拦截两次吗？答案是否定的，因为 Shiro 为我们提供了一个“一次性 Filter”的原则，也就是保证了每个请求只能被同一个 Filter 拦截一次，而且仅此一次。</p>
+<p>这样的机制是如何实现的呢？我们不妨看看 NameableFilter 的子类 OncePerRequestFilter 吧，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 确保每个请求只能被 Filter 过滤一次</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract class OncePerRequestFilter extends NameableFilter &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 已过滤属性的后缀名</span><br><span class="line">    public static final String ALREADY_FILTERED_SUFFIX &#x3D; &quot;.FILTERED&quot;;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 是否开启过滤功能</span><br><span class="line">    private boolean enabled &#x3D; true;</span><br><span class="line"></span><br><span class="line">    public boolean isEnabled() &#123;</span><br><span class="line">        return enabled;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setEnabled(boolean enabled) &#123;</span><br><span class="line">        this.enabled &#x3D; enabled;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws ServletException, IOException &#123;</span><br><span class="line">        &#x2F;&#x2F; 获取 Filter 已过滤的属性名</span><br><span class="line">        String alreadyFilteredAttributeName &#x3D; getAlreadyFilteredAttributeName();</span><br><span class="line">        &#x2F;&#x2F; 判断是否已过滤</span><br><span class="line">        if (request.getAttribute(alreadyFilteredAttributeName) !&#x3D; null) &#123;</span><br><span class="line">            &#x2F;&#x2F; 若已过滤，则进入 FilterChain 中下一个 Filter</span><br><span class="line">            filterChain.doFilter(request, response);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            &#x2F;&#x2F; 若未过滤，则判断是否未开启过滤功能（其中 shouldNotFilter 方法将被废弃，由 isEnabled 方法取代）</span><br><span class="line">            if (!isEnabled(request, response) || shouldNotFilter(request)) &#123;</span><br><span class="line">                &#x2F;&#x2F; 若未开启，则进入 FilterChain 中下一个 Filter</span><br><span class="line">                filterChain.doFilter(request, response);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                &#x2F;&#x2F; 若已开启，则将已过滤属性设置为 true（只要保证 Request 中有这个属性即可）</span><br><span class="line">                request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);</span><br><span class="line">                try &#123;</span><br><span class="line">                    &#x2F;&#x2F; 在子类中执行具体的过滤操作</span><br><span class="line">                    doFilterInternal(request, response, filterChain);</span><br><span class="line">                &#125; finally &#123;</span><br><span class="line">                    &#x2F;&#x2F; 当前 Filter 执行结束需移除 Request 中的已过滤属性</span><br><span class="line">                    request.removeAttribute(alreadyFilteredAttributeName);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected String getAlreadyFilteredAttributeName() &#123;</span><br><span class="line">        String name &#x3D; getName();</span><br><span class="line">        if (name &#x3D;&#x3D; null) &#123;</span><br><span class="line">            name &#x3D; getClass().getName();</span><br><span class="line">        &#125;</span><br><span class="line">        return name + ALREADY_FILTERED_SUFFIX;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedParameters&quot;&#125;)</span><br><span class="line">    protected boolean isEnabled(ServletRequest request, ServletResponse response) throws ServletException, IOException &#123;</span><br><span class="line">        return isEnabled();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Deprecated</span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected boolean shouldNotFilter(ServletRequest request) throws ServletException &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected abstract void doFilterInternal(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>如何确保每个请求只会被同一个 Filter 拦截一次呢？Shiro 提供了一个超简单的解决方案：在 Requet 中放置一个后缀为 .FILTERED 的属性，在执行具体拦截操作（即 doFilterInternal 方法）之前放入该属性，执行完毕后移除该属性。</p>
+<p>在 Shiro 的 Filter Chian 配置中，如果我们想禁用某个 Filter，如何实现呢？OncePerRequestFilter 也为我们提供了一个 enabled 的属性，方便我们可以在 shiro.ini 中随时禁用某个 Filter，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[main]</span><br><span class="line">ssl.enabled &#x3D; false</span><br><span class="line"></span><br><span class="line">[urls]</span><br><span class="line">&#x2F;foo &#x3D; ssl, authc</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这样一来 ssl 这个 Filter 就被我们给禁用了，以后想开启 ssl 的话，完全不需要在 urls 配置中一个个手工来添加，只需把 ssl.enabled 设置为 true，或注释掉该行，或直接删除该行即可。</p>
+<p>可见，OncePerRequestFilter 给我们提供了一个模板方法 doFilterInternal，在其子类中我们需要实现该方法的具体细节，那么谁来实现呢？不妨继续看下面的 AbstractShiroFilter 吧，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 确保可通过 SecurityUtils 获取 SecurityManager，并执行过滤器操作</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract class AbstractShiroFilter extends OncePerRequestFilter &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 是否可以通过 SecurityUtils 获取 SecurityManager</span><br><span class="line">    private static final String STATIC_INIT_PARAM_NAME &#x3D; &quot;staticSecurityManagerEnabled&quot;;</span><br><span class="line"></span><br><span class="line">    private WebSecurityManager securityManager;</span><br><span class="line">    private FilterChainResolver filterChainResolver;</span><br><span class="line">    private boolean staticSecurityManagerEnabled;</span><br><span class="line"></span><br><span class="line">    protected AbstractShiroFilter() &#123;</span><br><span class="line">        this.staticSecurityManagerEnabled &#x3D; false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public WebSecurityManager getSecurityManager() &#123;</span><br><span class="line">        return securityManager;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setSecurityManager(WebSecurityManager sm) &#123;</span><br><span class="line">        this.securityManager &#x3D; sm;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public FilterChainResolver getFilterChainResolver() &#123;</span><br><span class="line">        return filterChainResolver;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setFilterChainResolver(FilterChainResolver filterChainResolver) &#123;</span><br><span class="line">        this.filterChainResolver &#x3D; filterChainResolver;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public boolean isStaticSecurityManagerEnabled() &#123;</span><br><span class="line">        return staticSecurityManagerEnabled;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void setStaticSecurityManagerEnabled(boolean staticSecurityManagerEnabled) &#123;</span><br><span class="line">        this.staticSecurityManagerEnabled &#x3D; staticSecurityManagerEnabled;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 这是 AbstractFilter 提供的在 init 时需要执行的方法</span><br><span class="line">    protected final void onFilterConfigSet() throws Exception &#123;</span><br><span class="line">        &#x2F;&#x2F; 从 web.xml 中读取 staticSecurityManagerEnabled 参数（默认为 false）</span><br><span class="line">        applyStaticSecurityManagerEnabledConfig();</span><br><span class="line">        &#x2F;&#x2F; 初始化（在子类中实现）</span><br><span class="line">        init();</span><br><span class="line">        &#x2F;&#x2F; 确保 SecurityManager 必须存在</span><br><span class="line">        ensureSecurityManager();</span><br><span class="line">        &#x2F;&#x2F; 若已开启 static 标志，则将当前的 SecurityManager 放入 SecurityUtils 中，以后可以随时获取</span><br><span class="line">        if (isStaticSecurityManagerEnabled()) &#123;</span><br><span class="line">            SecurityUtils.setSecurityManager(getSecurityManager());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void applyStaticSecurityManagerEnabledConfig() &#123;</span><br><span class="line">        String value &#x3D; getInitParam(STATIC_INIT_PARAM_NAME);</span><br><span class="line">        if (value !&#x3D; null) &#123;</span><br><span class="line">            Boolean b &#x3D; Boolean.valueOf(value);</span><br><span class="line">            if (b !&#x3D; null) &#123;</span><br><span class="line">                setStaticSecurityManagerEnabled(b);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void init() throws Exception &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private void ensureSecurityManager() &#123;</span><br><span class="line">        &#x2F;&#x2F; 首先获取当前的 SecurityManager，若不存在，则创建默认的 SecurityManager（即 DefaultWebSecurityManager）</span><br><span class="line">        WebSecurityManager securityManager &#x3D; getSecurityManager();</span><br><span class="line">        if (securityManager &#x3D;&#x3D; null) &#123;</span><br><span class="line">            securityManager &#x3D; createDefaultSecurityManager();</span><br><span class="line">            setSecurityManager(securityManager);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected WebSecurityManager createDefaultSecurityManager() &#123;</span><br><span class="line">        return new DefaultWebSecurityManager();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 这是 OncePerRequestFilter 提供的在 doFilter 时需要执行的方法</span><br><span class="line">    protected void doFilterInternal(ServletRequest servletRequest, ServletResponse servletResponse, final FilterChain chain) throws ServletException, IOException &#123;</span><br><span class="line">        Throwable t &#x3D; null;</span><br><span class="line">        try &#123;</span><br><span class="line">            &#x2F;&#x2F; 返回被 Shiro 包装过的 Request 与 Response 对象</span><br><span class="line">            final ServletRequest request &#x3D; prepareServletRequest(servletRequest, servletResponse, chain);</span><br><span class="line">            final ServletResponse response &#x3D; prepareServletResponse(request, servletResponse, chain);</span><br><span class="line">            &#x2F;&#x2F; 创建 Shiro 的 Subject 对象</span><br><span class="line">            final Subject subject &#x3D; createSubject(request, response);</span><br><span class="line">            &#x2F;&#x2F; 使用异步的方式执行相关操作</span><br><span class="line">            subject.execute(new Callable() &#123;</span><br><span class="line">                public Object call() throws Exception &#123;</span><br><span class="line">                    &#x2F;&#x2F; 更新 Session 的最后访问时间</span><br><span class="line">                    updateSessionLastAccessTime(request, response);</span><br><span class="line">                    &#x2F;&#x2F; 执行 Shiro 的 Filter Chain</span><br><span class="line">                    executeChain(request, response, chain);</span><br><span class="line">                    return null;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125; catch (ExecutionException ex) &#123;</span><br><span class="line">            t &#x3D; ex.getCause();</span><br><span class="line">        &#125; catch (Throwable throwable) &#123;</span><br><span class="line">            t &#x3D; throwable;</span><br><span class="line">        &#125;</span><br><span class="line">        if (t !&#x3D; null) &#123;</span><br><span class="line">            if (t instanceof ServletException) &#123;</span><br><span class="line">                throw (ServletException) t;</span><br><span class="line">            &#125;</span><br><span class="line">            if (t instanceof IOException) &#123;</span><br><span class="line">                throw (IOException) t;</span><br><span class="line">            &#125;</span><br><span class="line">            throw new ServletException(t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected ServletRequest prepareServletRequest(ServletRequest request, ServletResponse response, FilterChain chain) &#123;</span><br><span class="line">        ServletRequest toUse &#x3D; request;</span><br><span class="line">        if (request instanceof HttpServletRequest) &#123;</span><br><span class="line">            &#x2F;&#x2F; 获取包装后的 Request 对象（使用 ShiroHttpServletRequest 进行包装）</span><br><span class="line">            HttpServletRequest http &#x3D; (HttpServletRequest) request;</span><br><span class="line">            toUse &#x3D; wrapServletRequest(http);</span><br><span class="line">        &#125;</span><br><span class="line">        return toUse;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected ServletRequest wrapServletRequest(HttpServletRequest orig) &#123;</span><br><span class="line">        return new ShiroHttpServletRequest(orig, getServletContext(), isHttpSessions());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected boolean isHttpSessions() &#123;</span><br><span class="line">        return getSecurityManager().isHttpSessionMode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected ServletResponse prepareServletResponse(ServletRequest request, ServletResponse response, FilterChain chain) &#123;</span><br><span class="line">        ServletResponse toUse &#x3D; response;</span><br><span class="line">        if (!isHttpSessions() &amp;&amp; (request instanceof ShiroHttpServletRequest) &amp;&amp; (response instanceof HttpServletResponse)) &#123;</span><br><span class="line">            &#x2F;&#x2F; 获取包装后的 Response 对象（使用 ShiroHttpServletResponse 进行包装）</span><br><span class="line">            toUse &#x3D; wrapServletResponse((HttpServletResponse) response, (ShiroHttpServletRequest) request);</span><br><span class="line">        &#125;</span><br><span class="line">        return toUse;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected ServletResponse wrapServletResponse(HttpServletResponse orig, ShiroHttpServletRequest request) &#123;</span><br><span class="line">        return new ShiroHttpServletResponse(orig, getServletContext(), request);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected WebSubject createSubject(ServletRequest request, ServletResponse response) &#123;</span><br><span class="line">        return new WebSubject.Builder(getSecurityManager(), request, response).buildWebSubject();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @SuppressWarnings(&#123;&quot;UnusedDeclaration&quot;&#125;)</span><br><span class="line">    protected void updateSessionLastAccessTime(ServletRequest request, ServletResponse response) &#123;</span><br><span class="line">        &#x2F;&#x2F; 仅对本地 Session 做如下操作</span><br><span class="line">        if (!isHttpSessions()) &#123;</span><br><span class="line">            &#x2F;&#x2F; 获取 Subject（实际上是从 ThreadLocal 中获取的）</span><br><span class="line">            Subject subject &#x3D; SecurityUtils.getSubject();</span><br><span class="line">            if (subject !&#x3D; null) &#123;</span><br><span class="line">                &#x2F;&#x2F; 从 Subject 中获取 Session</span><br><span class="line">                Session session &#x3D; subject.getSession(false);</span><br><span class="line">                if (session !&#x3D; null) &#123;</span><br><span class="line">                    &#x2F;&#x2F; 更新 Session 对象的 lastAccessTime 属性</span><br><span class="line">                    session.touch();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected void executeChain(ServletRequest request, ServletResponse response, FilterChain origChain) throws IOException, ServletException &#123;</span><br><span class="line">        &#x2F;&#x2F; 获取 Shiro 代理后的 FilterChain 对象，并进行链式处理</span><br><span class="line">        FilterChain chain &#x3D; getExecutionChain(request, response, origChain);</span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    protected FilterChain getExecutionChain(ServletRequest request, ServletResponse response, FilterChain origChain) &#123;</span><br><span class="line">        FilterChain chain &#x3D; origChain;</span><br><span class="line">        &#x2F;&#x2F; 获取 FilterChainResolver，若不存在，则返回原始的 FilterChain</span><br><span class="line">        FilterChainResolver resolver &#x3D; getFilterChainResolver();</span><br><span class="line">        if (resolver &#x3D;&#x3D; null) &#123;</span><br><span class="line">            return origChain;</span><br><span class="line">        &#125;</span><br><span class="line">        &#x2F;&#x2F; 通过 FilterChainResolver 获取 ProxiedFilterChain</span><br><span class="line">        FilterChain resolved &#x3D; resolver.getChain(request, response, origChain);</span><br><span class="line">        if (resolved !&#x3D; null) &#123;</span><br><span class="line">            chain &#x3D; resolved;</span><br><span class="line">        &#125;</span><br><span class="line">        return chain;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这个 AbstractShiroFilter 类代码稍微有点长，因为它干了许多的事情，主要实现了两个模板方法：onFilterConfigSet 与 doFilterInternal，以上代码中均已对它们做了详细的注释。</p>
+<p>其中，在 onFilterConfigSet 中实际上提供了一个框架，只是将 SecurityManager 放入 SecurityUtils 这个工具类中，至于具体行为还是放在子类的 init 方法中去实现，而这个子类就是 ShiroFilter，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * 初始化过滤器</span><br><span class="line"> *&#x2F;</span><br><span class="line">public class ShiroFilter extends AbstractShiroFilter &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void init() throws Exception &#123;</span><br><span class="line">        &#x2F;&#x2F; 从 ServletContext 中获取 WebEnvironment（该对象已通过 EnvironmentLoader 创建）</span><br><span class="line">        WebEnvironment env &#x3D; WebUtils.getRequiredWebEnvironment(getServletContext());</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 将 WebEnvironment 中的 WebSecurityManager 放入 AbstractShiroFilter 中</span><br><span class="line">        setSecurityManager(env.getWebSecurityManager());</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; 将 WebEnvironment 中的 FilterChainResolver 放入 AbstractShiroFilter 中</span><br><span class="line">        FilterChainResolver resolver &#x3D; env.getFilterChainResolver();</span><br><span class="line">        if (resolver !&#x3D; null) &#123;</span><br><span class="line">            setFilterChainResolver(resolver);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>在 ShiroFilter 中只用做初始化的行为，就是从 WebEnvironment 中分别获取 WebSecurityManager 与 FilterChainResolver，其它的事情都由它的父类去实现了。</p>
+<p>到此为止，ShiroFilter 的源码已基本分析完毕，当然还有些非常有意思的代码，这里没有进行分析，例如：</p>
+<ul>
+<li>通过 ShiroHttpServletRequest 来包装 Request</li>
+<li>通过 ShiroHttpServletResponse 来包装 Response</li>
+<li>通过 Session 来代理 HttpSession</li>
+<li>提供 FilterChain 的代理机制</li>
+<li>使用 ThreadContext 来保证线程安全</li>
+</ul>
+<p>这些有意思的代码，我就不继续分析了，留点滋味让大家去慢慢品尝吧！</p>
+<p>最后需要补充说明的是，Shiro 的 Filter 架构体系是非常庞大的，这里仅对 ShiroFilter 进行了分析，整个 Filter 静态结构看起来是这样的：</p>
+<p><img src="http://static.oschina.net/uploads/space/2014/0321/172903_VINL_223750.png" alt="img"></p>
+<p>可见，在 OncePerRequestFilter 下有两个分支，本文只分析了 ShiroFilter 这个分支，另外还有一个 AdviceFilter 分支，它提供了 AOP 功能的 Filter，这些 Filter 就是 Shiro 为我们提供的默认 Filter：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>类名</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>anon</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authc/AnonymousFilter.html">org.apache.shiro.web.filter.authc.AnonymousFilter</a></td>
+</tr>
+<tr>
+<td>authc</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authc/FormAuthenticationFilter.html">org.apache.shiro.web.filter.authc.FormAuthenticationFilter</a></td>
+</tr>
+<tr>
+<td>authcBasic</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authc/BasicHttpAuthenticationFilter.html">org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter</a></td>
+</tr>
+<tr>
+<td>logout</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authc/LogoutFilter.html">org.apache.shiro.web.filter.authc.LogoutFilter</a></td>
+</tr>
+<tr>
+<td>noSessionCreation</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/session/NoSessionCreationFilter.html">org.apache.shiro.web.filter.session.NoSessionCreationFilter</a></td>
+</tr>
+<tr>
+<td>perms</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authz/PermissionsAuthorizationFilter.html">org.apache.shiro.web.filter.authz.PermissionsAuthorizationFilter</a></td>
+</tr>
+<tr>
+<td>port</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authz/PortFilter.html">org.apache.shiro.web.filter.authz.PortFilter</a></td>
+</tr>
+<tr>
+<td>rest</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authz/HttpMethodPermissionFilter.html">org.apache.shiro.web.filter.authz.HttpMethodPermissionFilter</a></td>
+</tr>
+<tr>
+<td>roles</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authz/RolesAuthorizationFilter.html">org.apache.shiro.web.filter.authz.RolesAuthorizationFilter</a></td>
+</tr>
+<tr>
+<td>ssl</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authz/SslFilter.html">org.apache.shiro.web.filter.authz.SslFilter</a></td>
+</tr>
+<tr>
+<td>user</td>
+<td><a target="_blank" rel="noopener" href="https://www.oschina.net/action/GoToLink?url=http://shiro.apache.org/static/current/apidocs/org/apache/shiro/web/filter/authc/UserFilter.html">org.apache.shiro.web.filter.authc.UserFilter</a></td>
+</tr>
+</tbody></table>
+<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="前后端分离"><a href="#前后端分离" class="headerlink" title="前后端分离"></a>前后端分离</h3><p>to determine the identity of the user is through the sessionId, and the sessionId is stored in the cookie, we can return the sessionId as the response header to the front end after login, each request is accompanied by this information, then we customize a SessionManager, overwrite His getSessionId method can be:<br>Return the sessionId to the frontend after logging in:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">@PostMapping(<span class="string">&quot;login&quot;</span>)</span><br><span class="line">@Responebody</span><br><span class="line">    public Result login(<span class="built_in">String</span> username, <span class="built_in">String</span> password, HttpServletResponse response)&#123;</span><br><span class="line">        Result result = <span class="literal">null</span>;</span><br><span class="line">        UsernamePasswordToken token = <span class="keyword">new</span> UsernamePasswordToken(username,password);</span><br><span class="line">        Subject subject = SecurityUtils.getSubject();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            subject.login(token);</span><br><span class="line">            Serializable id = subject.getSession().getId();</span><br><span class="line">            response.setHeader(<span class="string">&quot;token&quot;</span>,id.toString());<span class="regexp">/ /</span> Get the state <span class="keyword">of</span> the sessionId, <span class="keyword">return</span> to the front end</span><br><span class="line">            result = ResultGenerator.getSuucessResult();</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            result = ResultGenerator.getFailResult(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Custom sessionManager, the way to get the sessionId is no longer a heavy cookie but in the requsetHeader:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public <span class="class"><span class="keyword">class</span> <span class="title">MyWebSessionManager</span> <span class="keyword">extends</span> <span class="title">DefaultWebSessionManager</span> </span>&#123;</span><br><span class="line">    @Override</span><br><span class="line">    protected Serializable getSessionId(ServletRequest request, ServletResponse response) &#123;</span><br><span class="line">        HttpServletRequest httpServletRequest = WebUtils.toHttp(request);</span><br><span class="line">        <span class="built_in">String</span> token = httpServletRequest.getHeader(<span class="string">&quot;token&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;token：&quot;</span>+token);</span><br><span class="line">        request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE, <span class="string">&quot;token&quot;</span>);</span><br><span class="line">        request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID, token);</span><br><span class="line">        request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_IS_VALID, <span class="built_in">Boolean</span>.TRUE);</span><br><span class="line">        <span class="keyword">return</span> token;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Set to use the change sessionManager, generic can also use ioc injection without new:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@Bean</span><br><span class="line">    public DefaultWebSecurityManager webSecurityManager(MyRealm myRealm)&#123;</span><br><span class="line">        DefaultWebSecurityManager webSecurityManager = <span class="keyword">new</span> DefaultWebSecurityManager();</span><br><span class="line">        MyWebSessionManager webSessionManager = <span class="keyword">new</span> MyWebSessionManager();<span class="regexp">/ /</span> Use a custom sessionManager</span><br><span class="line">        webSessionManager.setGlobalSessionTimeout(<span class="number">360000</span>l);<span class="regexp">/ /</span> <span class="built_in">Set</span> the session expiration time <span class="number">1</span> hour</span><br><span class="line">        webSecurityManager.setSessionManager(webSessionManager);</span><br><span class="line">        webSecurityManager.setRealm(myRealm);</span><br><span class="line">        <span class="keyword">return</span> webSecurityManager;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>With such a simple configuration, most of the rights management of shiro can be realized by separating the front and back ends.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/19/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-ConcurrentHashMap/" rel="prev" title="JDK-JUC-ConcurrentHashMap">
+                  <i class="fa fa-chevron-left"></i> JDK-JUC-ConcurrentHashMap
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/28/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%B9%82%E7%AD%89%E6%80%A7-01-%E9%98%B2%E9%87%8D%E6%96%B9%E5%BC%8F/" rel="next" title="高并发下保证接口的幂等性">
+                  高并发下保证接口的幂等性 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

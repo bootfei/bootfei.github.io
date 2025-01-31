@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="它山之石可以攻玉 ref links: 从底层硬件、操作系统、mysql软件层面分析https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s&#x2F;Edn_gPwcAHo5sYIzLJghzA  Explain命令原理id列原理这一列总是包含一个编号，标示select所属的行。数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的就表示这是一个结果集，不需要使用它来进行查询。 row">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql:哪些因素会导致慢查询">
+<meta property="og:url" content="http://example.com/2020/11/21/database/mysql/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96-03-%E6%A1%88%E4%BE%8B/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="它山之石可以攻玉 ref links: 从底层硬件、操作系统、mysql软件层面分析https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s&#x2F;Edn_gPwcAHo5sYIzLJghzA  Explain命令原理id列原理这一列总是包含一个编号，标示select所属的行。数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的就表示这是一个结果集，不需要使用它来进行查询。 row">
+<meta property="og:locale">
+<meta property="og:image" content="https://images2015.cnblogs.com/blog/544496/201707/544496-20170711162211978-591320154.jpg">
+<meta property="article:published_time" content="2020-11-21T01:58:49.000Z">
+<meta property="article:modified_time" content="2021-05-27T06:50:04.473Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images2015.cnblogs.com/blog/544496/201707/544496-20170711162211978-591320154.jpg">
+
+
+<link rel="canonical" href="http://example.com/2020/11/21/database/mysql/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96-03-%E6%A1%88%E4%BE%8B/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>mysql:哪些因素会导致慢查询 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#ref-links"><span class="nav-number">1.</span> <span class="nav-text">ref links:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Explain%E5%91%BD%E4%BB%A4%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">Explain命令原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#id%E5%88%97%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">id列原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rows-%E8%AE%A1%E7%AE%97%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">rows 计算原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">慢查询优化基本步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%85%A2%E6%9F%A5%E8%AF%A2%E6%A1%88%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">慢查询案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E8%AF%AD%E5%8F%A5%E5%86%99%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">复杂语句写法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.2.</span> <span class="nav-text">明确应用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E4%BC%98%E5%8C%96%E7%9A%84%E8%AF%AD%E5%8F%A5"><span class="nav-number">4.3.</span> <span class="nav-text">无法优化的语句</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/21/database/mysql/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E5%88%86%E6%9E%90%E4%B8%8E%E4%BC%98%E5%8C%96-03-%E6%A1%88%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql:哪些因素会导致慢查询
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-11-21 09:58:49" itemprop="dateCreated datePublished" datetime="2020-11-21T09:58:49+08:00">2020-11-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-27 14:50:04" itemprop="dateModified" datetime="2021-05-27T14:50:04+08:00">2021-05-27</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>它山之石可以攻玉</p>
+<h3 id="ref-links"><a href="#ref-links" class="headerlink" title="ref links:"></a>ref links:</h3><ol>
+<li>从底层硬件、操作系统、mysql软件层面分析<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Edn_gPwcAHo5sYIzLJghzA">https://mp.weixin.qq.com/s/Edn_gPwcAHo5sYIzLJghzA</a></li>
+</ol>
+<h3 id="Explain命令原理"><a href="#Explain命令原理" class="headerlink" title="Explain命令原理"></a>Explain命令原理</h3><h4 id="id列原理"><a href="#id列原理" class="headerlink" title="id列原理"></a>id列原理</h4><p>这一列总是包含一个编号，标示select所属的行。数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的就表示这是一个结果集，不需要使用它来进行查询。</p>
+<h4 id="rows-计算原理"><a href="#rows-计算原理" class="headerlink" title="rows 计算原理"></a>rows 计算原理</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">select</span><br><span class="line">    c.*</span><br><span class="line">from</span><br><span class="line">    hotel_info_original c </span><br><span class="line">left join</span><br><span class="line">    hotel_info_collection h </span><br><span class="line">on</span><br><span class="line">    c.hotel_type&#x3D;h.hotel_type </span><br><span class="line">and</span><br><span class="line">    c.hotel_id &#x3D;h.hotel_id </span><br><span class="line">where</span><br><span class="line">    h.hotel_id is null</span><br></pre></td></tr></table></figure>
+
+<p>这个sql是用来查询出 c 表中有 h 表中无的记录，所以想到了用 left join 的特性（返回左边全部记录，右表不满足匹配条件的记录对应行返回 null）来满足需求，不料这个查询非常慢。先来看查询计划：</p>
+<p><strong><img src="https://images2015.cnblogs.com/blog/544496/201707/544496-20170711162211978-591320154.jpg" alt="img"></strong></p>
+<p>　　rows代表这个步骤相对上一步结果的每一行需要扫描的行数，可以看到这个sql需要扫描的行数为35773*8134，非常大的一个数字。</p>
+<p>　　<strong>在EXPLAIN结果中，第一行出现的表就是驱动表。</strong></p>
+<blockquote>
+<p><strong>rows (JSON name: rows)</strong></p>
+<p>The rows column indicates the number of rows MySQL believes it must examine to execute the query.</p>
+<p>For [InnoDB] tables, this number is an estimate, and may not always be exact.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/explain-output.html#explain_rows">http://dev.mysql.com/doc/refman/5.7/en/explain-output.html#explain_rows</a></p>
+<p>查找 MYSQL 源码来看看：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">文件1：sql&#x2F;opt_explain_traditional.cc   关键部分：push(&amp;items, column_buffer.col_rows, nil)</span><br><span class="line"></span><br><span class="line">文件2：sql&#x2F;opt_explain.cc   关键部分：select-&gt;quick-&gt;records</span><br><span class="line"></span><br><span class="line">文件3：sql&#x2F;opt_range.cc   关键部分：check_quick_select</span><br></pre></td></tr></table></figure>
+
+<p>而 check_quick_select 的功能，在 MySQL 源码中的注释为：</p>
+<blockquote>
+<p>Calculate estimate of number records that will be retrieved by a range scan on given index using given SEL_ARG intervals tree.</p>
+</blockquote>
+<p>MySQL Explain 里的 rows 这个值</p>
+<ul>
+<li>是 MySQL 认为它要检查的行数（仅做参考），而不是结果集里的行数；</li>
+<li>同时 SQL 里的 LIMIT 和这个也是没有直接关系的。</li>
+</ul>
+<p>另外，很多优化手段，例如关联缓冲区和查询缓存，都无法影响到 rows 的显示。MySQL 可能不必真的读所有它估计到的行，它也不知道任何关于操作系统或硬件缓存的信息。</p>
+<h3 id="慢查询优化基本步骤"><a href="#慢查询优化基本步骤" class="headerlink" title="慢查询优化基本步骤"></a>慢查询优化基本步骤</h3><p>0.先运行看看是否真的很慢，注意设置SQL_NO_CACHE</p>
+<p>1.where条件单表查，锁定最小返回记录表。这句话的意思是把查询语句的where都应用到表中返回的记录数最小的表开始查起，单表每个字段分别查询，看哪个字段的区分度最高</p>
+<p>2.explain查看执行计划，是否与1预期一致（从锁定记录较少的表开始查询）</p>
+<p>3.order by limit 形式的sql语句让排序的表优先查</p>
+<p>4.了解业务方使用场景</p>
+<p>5.加索引时参照建索引的几大原则</p>
+<p>6.观察结果，不符合预期继续从0分析</p>
+<h3 id="慢查询案例"><a href="#慢查询案例" class="headerlink" title="慢查询案例"></a><a target="_blank" rel="noopener" href="https://tech.meituan.com/2014/06/30/mysql-index.html">慢查询案例</a></h3><h4 id="复杂语句写法"><a href="#复杂语句写法" class="headerlink" title="复杂语句写法"></a>复杂语句写法</h4><p>很多情况下，我们写SQL只是为了实现功能，这只是第一步，不同的语句书写方式对于效率往往有本质的差别，这要求我们对mysql的执行计划和索引原则有非常清楚的认识，请看下面的语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   <span class="keyword">distinct</span> cert.emp_id </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   cm_log cl </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   (</span><br><span class="line">      <span class="keyword">select</span></span><br><span class="line">         emp.id <span class="keyword">as</span> emp_id,</span><br><span class="line">         emp_cert.id <span class="keyword">as</span> cert_id </span><br><span class="line">      <span class="keyword">from</span></span><br><span class="line">         employee emp </span><br><span class="line">      <span class="keyword">left</span> <span class="keyword">join</span></span><br><span class="line">         emp_certificate emp_cert </span><br><span class="line">            <span class="keyword">on</span> emp.id = emp_cert.emp_id </span><br><span class="line">      <span class="keyword">where</span></span><br><span class="line">         emp.is_deleted=<span class="number">0</span></span><br><span class="line">   ) cert </span><br><span class="line">      <span class="keyword">on</span> (</span><br><span class="line">         cl.ref_table=<span class="string">&#x27;Employee&#x27;</span> </span><br><span class="line">         <span class="keyword">and</span> cl.ref_oid= cert.emp_id</span><br><span class="line">      ) </span><br><span class="line">      <span class="keyword">or</span> (</span><br><span class="line">         cl.ref_table=<span class="string">&#x27;EmpCertificate&#x27;</span> </span><br><span class="line">         <span class="keyword">and</span> cl.ref_oid= cert.cert_id</span><br><span class="line">      ) </span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">   cl.last_upd_date &gt;=<span class="string">&#x27;2013-11-07 15:03:00&#x27;</span> </span><br><span class="line">   <span class="keyword">and</span> cl.last_upd_date&lt;=<span class="string">&#x27;2013-11-08 16:00:00&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>0.先运行一下，53条记录 1.87秒，又没有用聚合语句，比较慢</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">53 rows in <span class="keyword">set</span> (<span class="number">1.87</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>1.explain</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;font size=1&gt;</span><br><span class="line">+<span class="comment">----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+</span></span><br><span class="line">| id | select_type | table      | type  | possible_keys                   | key                   | key_len | ref               | rows  | Extra                          |</span><br><span class="line">+<span class="comment">----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+</span></span><br><span class="line">|  1 | PRIMARY     | cl         | range | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date     | 8       | NULL              |   379 | Using where; Using temporary   |</span><br><span class="line">|  1 | PRIMARY     | &lt;derived2&gt; | ALL   | NULL                            | NULL                  | NULL    | NULL              | 63727 | Using where; Using join buffer |</span><br><span class="line">|  2 | DERIVED     | emp        | ALL   | NULL                            | NULL                  | NULL    | NULL              | 13317 | Using where                    |</span><br><span class="line">|  2 | DERIVED     | emp_cert   | ref   | emp_certificate_empid           | emp_certificate_empid | 4       | meituanorg.emp.id |     1 | Using index                    |</span><br><span class="line">+<span class="comment">----+-------------+------------+-------+---------------------------------+-----------------------+---------+-------------------+-------+--------------------------------+</span></span><br><span class="line">&lt;/font&gt;</span><br></pre></td></tr></table></figure>
+
+<p>简述一下执行计划，</p>
+<p>首先mysql根据idx_last_upd_date索引扫描cm_log表获得379条记录；然后查表扫描了63727条记录，分为两部分，derived表示构造表，也就是不存在的表，可以简单理解成是一个语句形成的结果集，后面的数字表示语句的ID。derived2表示的是ID = 2的查询构造了虚拟表，并且返回了63727条记录。我们再来看看ID = 2的语句究竟做了写什么返回了这么大量的数据，首先全表扫描employee表13317条记录 <!--第1个derive-->，然后根据索引emp_certificate_empid关联emp_certificate表 <!--第2个derive-->，rows = 1表示，每个关联都只锁定了一条记录，效率比较高。获得后，再和cm_log的379条记录根据规则关联 <!--379 * 63727，最后只有53条记录满足要求-->。从执行过程上可以看出返回了太多的数据，返回的数据绝大部分cm_log都用不到，因为cm_log只锁定了379条记录。</p>
+<p>如何优化呢？</p>
+<p>可以看到我们在运行完后还是要和cm_log做join,那么我们能不能之前和cm_log做join呢？仔细分析语句不难发现，其基本思想是如果cm_log的ref_table是EmpCertificate就关联emp_certificate表，如果ref_table是Employee就关联employee表。我们完全可以拆成两部分，并用union连接起来。</p>
+<blockquote>
+<p>注意这里用union，而不用union all是因为原语句有“distinct”来得到唯一的记录，而union恰好具备了这种功能。如果原语句中没有distinct不需要去重，我们就可以直接使用union all了，因为使用union需要去重的动作，会影响SQL性能。</p>
+</blockquote>
+<p>优化过的语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   emp.id </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   cm_log cl </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   employee emp </span><br><span class="line">      <span class="keyword">on</span> cl.ref_table = <span class="string">&#x27;Employee&#x27;</span> </span><br><span class="line">      <span class="keyword">and</span> cl.ref_oid = emp.id  </span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">   cl.last_upd_date &gt;=<span class="string">&#x27;2013-11-07 15:03:00&#x27;</span> </span><br><span class="line">   <span class="keyword">and</span> cl.last_upd_date&lt;=<span class="string">&#x27;2013-11-08 16:00:00&#x27;</span> </span><br><span class="line">   <span class="keyword">and</span> emp.is_deleted = <span class="number">0</span>  </span><br><span class="line"><span class="keyword">union</span></span><br><span class="line"><span class="keyword">select</span></span><br><span class="line">   emp.id </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   cm_log cl </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   emp_certificate ec </span><br><span class="line">      <span class="keyword">on</span> cl.ref_table = <span class="string">&#x27;EmpCertificate&#x27;</span> </span><br><span class="line">      <span class="keyword">and</span> cl.ref_oid = ec.id  </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   employee emp </span><br><span class="line">      <span class="keyword">on</span> emp.id = ec.emp_id  </span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">   cl.last_upd_date &gt;=<span class="string">&#x27;2013-11-07 15:03:00&#x27;</span> </span><br><span class="line">   <span class="keyword">and</span> cl.last_upd_date&lt;=<span class="string">&#x27;2013-11-08 16:00:00&#x27;</span> </span><br><span class="line">   <span class="keyword">and</span> emp.is_deleted = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>4.不需要了解业务场景，只需要改造的语句和改造之前的语句保持结果一致</p>
+<p>5.现有索引可以满足，不需要建索引</p>
+<p>6.用改造后的语句实验一下，只需要10ms 降低了近200倍！</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+</span></span><br><span class="line">| id | select_type  | table      | type   | possible_keys                   | key               | key_len | ref                   | rows | Extra       |</span><br><span class="line">+<span class="comment">----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+</span></span><br><span class="line">|  1 | PRIMARY      | cl         | range  | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date | 8       | NULL                  |  379 | Using where |</span><br><span class="line">|  1 | PRIMARY      | emp        | eq_ref | PRIMARY                         | PRIMARY           | 4       | meituanorg.cl.ref_oid |    1 | Using where |</span><br><span class="line">|  2 | UNION        | cl         | range  | cm_log_cls_id,idx_last_upd_date | idx_last_upd_date | 8       | NULL                  |  379 | Using where |</span><br><span class="line">|  2 | UNION        | ec         | eq_ref | PRIMARY,emp_certificate_empid   | PRIMARY           | 4       | meituanorg.cl.ref_oid |    1 |             |</span><br><span class="line">|  2 | UNION        | emp        | eq_ref | PRIMARY                         | PRIMARY           | 4       | meituanorg.ec.emp_id  |    1 | Using where |</span><br><span class="line">| NULL | UNION RESULT | &lt;union1,2&gt; | ALL    | NULL                            | NULL              | NULL    | NULL                  | NULL |             |</span><br><span class="line">+<span class="comment">----+--------------+------------+--------+---------------------------------+-------------------+---------+-----------------------+------+-------------+</span></span><br><span class="line">53 rows in <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h4 id="明确应用场景"><a href="#明确应用场景" class="headerlink" title="明确应用场景"></a>明确应用场景</h4><p>举这个例子的目的在于颠覆我们对列的区分度的认知，一般上我们认为区分度越高的列，越容易锁定更少的记录，但在一些特殊的情况下，这种理论是有局限性的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   * </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   stage_poi sp </span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">   sp.accurate_result=<span class="number">1</span> </span><br><span class="line">   <span class="keyword">and</span> (</span><br><span class="line">      sp.sync_status=<span class="number">0</span> </span><br><span class="line">      <span class="keyword">or</span> sp.sync_status=<span class="number">2</span> </span><br><span class="line">      <span class="keyword">or</span> sp.sync_status=<span class="number">4</span></span><br><span class="line">   );</span><br></pre></td></tr></table></figure>
+
+<p>0.先看看运行多长时间,951条数据6.22秒，真的很慢。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">951 rows in <span class="keyword">set</span> (<span class="number">6.22</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>1.先explain，rows达到了361万，type = ALL表明是全表扫描。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+---------+-------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows    | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+---------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | sp    | ALL  | NULL          | NULL | NULL    | NULL | 3613155 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+---------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>2.所有字段都应用查询返回记录数，因为是单表查询 0已经做过了951条。</p>
+<p>3.让explain的rows 尽量逼近951。</p>
+<p>看一下accurate_result = 1的记录数：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*),accurate_result <span class="keyword">from</span> stage_poi  <span class="keyword">group</span> <span class="keyword">by</span> accurate_result;</span><br><span class="line">+<span class="comment">----------+-----------------+</span></span><br><span class="line">| count(*) | accurate_result |</span><br><span class="line">+<span class="comment">----------+-----------------+</span></span><br><span class="line">|     1023 |              -1 |</span><br><span class="line">|  2114655 |               0 |</span><br><span class="line">|   972815 |               1 |</span><br><span class="line">+<span class="comment">----------+-----------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>我们看到accurate_result这个字段的区分度非常低，整个表只有-1,0,1三个值，加上索引也无法锁定特别少量的数据。</p>
+<p>再看一下sync_status字段的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*),sync_status <span class="keyword">from</span> stage_poi  <span class="keyword">group</span> <span class="keyword">by</span> sync_status;</span><br><span class="line">+<span class="comment">----------+-------------+</span></span><br><span class="line">| count(*) | sync_status |</span><br><span class="line">+<span class="comment">----------+-------------+</span></span><br><span class="line">|     3080 |           0 |</span><br><span class="line">|  3085413 |           3 |</span><br><span class="line">+<span class="comment">----------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>同样的区分度也很低，根据理论，也不适合建立索引。</p>
+<p>问题分析到这，好像得出了这个表无法优化的结论，两个列的区分度都很低，即便加上索引也只能适应这种情况，很难做普遍性的优化，比如当sync_status 0、3分布的很平均，那么锁定记录也是百万级别的。</p>
+<p>4.找业务方去沟通，看看使用场景。业务方是这么来使用这个SQL语句的，每隔五分钟会扫描符合条件的数据，处理完成后把sync_status这个字段变成1,五分钟符合条件的记录数并不会太多，1000个左右。了解了业务方的使用场景后，优化这个SQL就变得简单了，因为业务方保证了数据的不平衡，如果加上索引可以过滤掉绝大部分不需要的数据。</p>
+<p>5.根据建立索引规则，使用如下语句建立索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> stage_poi <span class="keyword">add</span> <span class="keyword">index</span> idx_acc_status(accurate_result,sync_status);</span><br></pre></td></tr></table></figure>
+
+<p>6.观察预期结果,发现只需要200ms，快了30多倍。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">952 rows in <span class="keyword">set</span> (<span class="number">0.20</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>我们再来回顾一下分析问题的过程，单表查询相对来说比较好优化，大部分时候只需要把where条件里面的字段依照规则加上索引就好，如果只是这种“无脑”优化的话，显然一些区分度非常低的列，不应该加索引的列也会被加上索引，这样会对插入、更新性能造成严重的影响，同时也有可能影响其它的查询语句。所以我们第4步调差SQL的使用场景非常关键，我们只有知道这个业务场景，才能更好地辅助我们更好的分析和优化查询语句。</p>
+<h4 id="无法优化的语句"><a href="#无法优化的语句" class="headerlink" title="无法优化的语句"></a>无法优化的语句</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   c.id,</span><br><span class="line">   c.name,</span><br><span class="line">   c.position,</span><br><span class="line">   c.sex,</span><br><span class="line">   c.phone,</span><br><span class="line">   c.office_phone,</span><br><span class="line">   c.feature_info,</span><br><span class="line">   c.birthday,</span><br><span class="line">   c.creator_id,</span><br><span class="line">   c.is_keyperson,</span><br><span class="line">   c.giveup_reason,</span><br><span class="line">   c.status,</span><br><span class="line">   c.data_source,</span><br><span class="line">   from_unixtime(c.created_time) <span class="keyword">as</span> created_time,</span><br><span class="line">   from_unixtime(c.last_modified) <span class="keyword">as</span> last_modified,</span><br><span class="line">   c.last_modified_user_id  </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   contact c  </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   contact_branch cb </span><br><span class="line">      <span class="keyword">on</span>  c.id = cb.contact_id  </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   branch_user bu </span><br><span class="line">      <span class="keyword">on</span>  cb.branch_id = bu.branch_id </span><br><span class="line">      <span class="keyword">and</span> bu.status <span class="keyword">in</span> (</span><br><span class="line">         <span class="number">1</span>,</span><br><span class="line">      <span class="number">2</span>)  </span><br><span class="line">   <span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">      org_emp_info oei </span><br><span class="line">         <span class="keyword">on</span>  oei.data_id = bu.user_id </span><br><span class="line">         <span class="keyword">and</span> oei.node_left &gt;= <span class="number">2875</span> </span><br><span class="line">         <span class="keyword">and</span> oei.node_right &lt;= <span class="number">10802</span> </span><br><span class="line">         <span class="keyword">and</span> oei.org_category = - <span class="number">1</span>  </span><br><span class="line">   <span class="keyword">order</span> <span class="keyword">by</span></span><br><span class="line">      c.created_time <span class="keyword">desc</span>  <span class="keyword">limit</span> <span class="number">0</span> ,</span><br><span class="line">      <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<p>还是几个步骤。</p>
+<p>0.先看语句运行多长时间，10条记录用了13秒，已经不可忍受。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10 rows in <span class="keyword">set</span> (<span class="number">13.06</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>1.explain</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+</span></span><br><span class="line">| id | select_type | table | type   | possible_keys                       | key                     | key_len | ref                      | rows | Extra                                        |</span><br><span class="line">+<span class="comment">----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | oei   | ref    | idx_category_left_right,idx_data_id | idx_category_left_right | 5       | const                    | 8849 | Using where; Using temporary; Using filesort |</span><br><span class="line">|  1 | SIMPLE      | bu    | ref    | PRIMARY,idx_userid_status           | idx_userid_status       | 4       | meituancrm.oei.data_id   |   76 | Using where; Using index                     |</span><br><span class="line">|  1 | SIMPLE      | cb    | ref    | idx_branch_id,idx_contact_branch_id | idx_branch_id           | 4       | meituancrm.bu.branch_id  |    1 |                                              |</span><br><span class="line">|  1 | SIMPLE      | c     | eq_ref | PRIMARY                             | PRIMARY                 | 108     | meituancrm.cb.contact_id |    1 |                                              |</span><br><span class="line">+<span class="comment">----+-------------+-------+--------+-------------------------------------+-------------------------+---------+--------------------------+------+----------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>从执行计划上看，mysql先查org_emp_info表扫描8849记录，再用索引idx_userid_status关联branch_user表，再用索引idx_branch_id关联contact_branch表，最后主键关联contact表。</p>
+<p>rows返回的都非常少，看不到有什么异常情况。我们在看一下语句，发现后面有order by + limit组合，会不会是排序量太大搞的？于是我们简化SQL，去掉后面的order by 和 limit，看看到底用了多少记录来排序。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">  <span class="keyword">count</span>(*)</span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   contact c  </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   contact_branch cb </span><br><span class="line">      <span class="keyword">on</span>  c.id = cb.contact_id  </span><br><span class="line"><span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">   branch_user bu </span><br><span class="line">      <span class="keyword">on</span>  cb.branch_id = bu.branch_id </span><br><span class="line">      <span class="keyword">and</span> bu.status <span class="keyword">in</span> (</span><br><span class="line">         <span class="number">1</span>,</span><br><span class="line">      <span class="number">2</span>)  </span><br><span class="line">   <span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">      org_emp_info oei </span><br><span class="line">         <span class="keyword">on</span>  oei.data_id = bu.user_id </span><br><span class="line">         <span class="keyword">and</span> oei.node_left &gt;= <span class="number">2875</span> </span><br><span class="line">         <span class="keyword">and</span> oei.node_right &lt;= <span class="number">10802</span> </span><br><span class="line">         <span class="keyword">and</span> oei.org_category = - <span class="number">1</span>  </span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">| <span class="keyword">count</span>(*) |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line">|   <span class="number">778878</span> |</span><br><span class="line">+<span class="comment">----------+</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">5.19</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>发现排序之前居然锁定了778878条记录，如果针对70万的结果集排序，将是灾难性的，怪不得这么慢，那我们能不能换个思路，先根据contact的created_time排序，再来join会不会比较快呢？</p>
+<p>于是改造成下面的语句，也可以用straight_join来优化：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">select</span><br><span class="line">   c.id,</span><br><span class="line">   c.name,</span><br><span class="line">   c.position,</span><br><span class="line">   c.sex,</span><br><span class="line">   c.phone,</span><br><span class="line">   c.office_phone,</span><br><span class="line">   c.feature_info,</span><br><span class="line">   c.birthday,</span><br><span class="line">   c.creator_id,</span><br><span class="line">   c.is_keyperson,</span><br><span class="line">   c.giveup_reason,</span><br><span class="line">   c.status,</span><br><span class="line">   c.data_source,</span><br><span class="line">   from_unixtime(c.created_time) as created_time,</span><br><span class="line">   from_unixtime(c.last_modified) as last_modified,</span><br><span class="line">   c.last_modified_user_id   </span><br><span class="line">from</span><br><span class="line">   contact c  </span><br><span class="line">where</span><br><span class="line">   exists (</span><br><span class="line">      select</span><br><span class="line">         1 </span><br><span class="line">      from</span><br><span class="line">         contact_branch cb  </span><br><span class="line">      inner join</span><br><span class="line">         branch_user bu        </span><br><span class="line">            on  cb.branch_id &#x3D; bu.branch_id        </span><br><span class="line">            and bu.status in (</span><br><span class="line">               1,</span><br><span class="line">            2)      </span><br><span class="line">         inner join</span><br><span class="line">            org_emp_info oei           </span><br><span class="line">               on  oei.data_id &#x3D; bu.user_id           </span><br><span class="line">               and oei.node_left &gt;&#x3D; 2875           </span><br><span class="line">               and oei.node_right &lt;&#x3D; 10802           </span><br><span class="line">               and oei.org_category &#x3D; - 1      </span><br><span class="line">         where</span><br><span class="line">            c.id &#x3D; cb.contact_id    </span><br><span class="line">      )    </span><br><span class="line">   order by</span><br><span class="line">      c.created_time desc  limit 0 ,</span><br><span class="line">      10;</span><br></pre></td></tr></table></figure>
+
+<p>验证一下效果 预计在1ms内，提升了13000多倍！</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>本以为至此大工告成，但我们在前面的分析中漏了一个细节，先排序再join和先join再排序理论上开销是一样的，为何提升这么多是因为有一个limit！大致执行过程是：mysql先按索引排序得到前10条记录，然后再去join过滤，当发现不够10条的时候，再次去10条，再次join，这显然在内层join过滤的数据非常多的时候，将是灾难的，极端情况，内层一条数据都找不到，mysql还傻乎乎的每次取10条，几乎遍历了这个数据表！</p>
+<p>用不同参数的SQL试验下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   sql_no_cache   c.id,</span><br><span class="line">   c.name,</span><br><span class="line">   c.position,</span><br><span class="line">   c.sex,</span><br><span class="line">   c.phone,</span><br><span class="line">   c.office_phone,</span><br><span class="line">   c.feature_info,</span><br><span class="line">   c.birthday,</span><br><span class="line">   c.creator_id,</span><br><span class="line">   c.is_keyperson,</span><br><span class="line">   c.giveup_reason,</span><br><span class="line">   c.status,</span><br><span class="line">   c.data_source,</span><br><span class="line">   from_unixtime(c.created_time) <span class="keyword">as</span> created_time,</span><br><span class="line">   from_unixtime(c.last_modified) <span class="keyword">as</span> last_modified,</span><br><span class="line">   c.last_modified_user_id    </span><br><span class="line"><span class="keyword">from</span></span><br><span class="line">   contact c   </span><br><span class="line"><span class="keyword">where</span></span><br><span class="line">   <span class="keyword">exists</span> (</span><br><span class="line">      <span class="keyword">select</span></span><br><span class="line">         <span class="number">1</span>        </span><br><span class="line">      <span class="keyword">from</span></span><br><span class="line">         contact_branch cb         </span><br><span class="line">      <span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">         branch_user bu                     </span><br><span class="line">            <span class="keyword">on</span>  cb.branch_id = bu.branch_id                     </span><br><span class="line">            <span class="keyword">and</span> bu.status <span class="keyword">in</span> (</span><br><span class="line">               <span class="number">1</span>,</span><br><span class="line">            <span class="number">2</span>)                </span><br><span class="line">         <span class="keyword">inner</span> <span class="keyword">join</span></span><br><span class="line">            org_emp_info oei                           </span><br><span class="line">               <span class="keyword">on</span>  oei.data_id = bu.user_id                           </span><br><span class="line">               <span class="keyword">and</span> oei.node_left &gt;= <span class="number">2875</span>                           </span><br><span class="line">               <span class="keyword">and</span> oei.node_right &lt;= <span class="number">2875</span>                           </span><br><span class="line">               <span class="keyword">and</span> oei.org_category = - <span class="number">1</span>                </span><br><span class="line">         <span class="keyword">where</span></span><br><span class="line">            c.id = cb.contact_id           </span><br><span class="line">      )        </span><br><span class="line">   <span class="keyword">order</span> <span class="keyword">by</span></span><br><span class="line">      c.created_time <span class="keyword">desc</span>  <span class="keyword">limit</span> <span class="number">0</span> ,</span><br><span class="line">      <span class="number">10</span>;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">2</span> <span class="keyword">min</span> <span class="number">18.99</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>2 min 18.99 sec！比之前的情况还糟糕很多。由于mysql的nested loop机制，遇到这种情况，基本是无法优化的。这条语句最终也只能交给应用系统去优化自己的逻辑了。</p>
+<p>通过这个例子我们可以看到，并不是所有语句都能优化，而往往我们优化时，由于SQL用例回归时落掉一些极端情况，会造成比原来还严重的后果。所以，第一：不要指望所有语句都能通过SQL优化，第二：不要过于自信，只针对具体case来优化，而忽略了更复杂的情况。</p>
+<p>慢查询的案例就分析到这儿，以上只是一些比较典型的案例。我们在优化过程中遇到过超过1000行，涉及到16个表join的“垃圾SQL”，也遇到过线上线下数据库差异导致应用直接被慢查询拖死，也遇到过varchar等值比较没有写单引号，还遇到过笛卡尔积查询直接把从库搞死。再多的案例其实也只是一些经验的积累，如果我们熟悉查询优化器、索引的内部原理，那么分析这些案例就变得特别简单了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/16/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3java%E8%99%9A%E6%8B%9F%E6%9C%BA/chapter13-%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E4%B8%8E%E9%94%81%E4%BC%98%E5%8C%96/" rel="prev" title="chapter13:线程安全与锁优化">
+                  <i class="fa fa-chevron-left"></i> chapter13:线程安全与锁优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/23/database/mysql/mysql-%E6%95%B0%E6%8D%AE%E7%BB%9F%E8%AE%A1sql%E8%AF%AD%E5%8F%A5-01/" rel="next" title="mysql:工作中常用的组合sql语句">
+                  mysql:工作中常用的组合sql语句 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

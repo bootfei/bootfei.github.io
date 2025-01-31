@@ -21,7 +21,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
   <meta name="description" content="Redis调用时间严重超时，这样高速的缓存反而变成了短板，由于数据一直没有返回，导致了请求响应变慢。 网页监控通过阿里的 Grafana 监控，服务器的 CPU 负载、内存、网络输入输出都挺正常的，所以肯定是 Redis 出现了问题。 使用的是单节点的 32M 16GB 的阿里云 Redis，登录网页监控看性能监控，发现 CPU 使用情况飙升到100% QPS 虽然从 1000 多升到 6000，">
@@ -32,7 +32,7 @@
 <meta property="og:description" content="Redis调用时间严重超时，这样高速的缓存反而变成了短板，由于数据一直没有返回，导致了请求响应变慢。 网页监控通过阿里的 Grafana 监控，服务器的 CPU 负载、内存、网络输入输出都挺正常的，所以肯定是 Redis 出现了问题。 使用的是单节点的 32M 16GB 的阿里云 Redis，登录网页监控看性能监控，发现 CPU 使用情况飙升到100% QPS 虽然从 1000 多升到 6000，">
 <meta property="og:locale">
 <meta property="article:published_time" content="2021-05-05T15:10:13.000Z">
-<meta property="article:modified_time" content="2021-05-06T04:03:19.354Z">
+<meta property="article:modified_time" content="2021-06-15T00:20:54.615Z">
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
 
@@ -198,20 +198,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -283,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-05-06 12:03:19" itemprop="dateModified" datetime="2021-05-06T12:03:19+08:00">2021-05-06</time>
+        <time title="Modified: 2021-06-15 08:20:54" itemprop="dateModified" datetime="2021-06-15T08:20:54+08:00">2021-06-15</time>
       </span>
 
   
@@ -331,9 +331,6 @@
 </ul>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmdstat_XXX: calls&#x3D;XXX,usec&#x3D;XXX,usec_per_call&#x3D;XXX</span><br></pre></td></tr></table></figure>
 
-
-
-<hr>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
 <li>Redis 抖动可以先看网页监控</li>
 <li>通过命令查看 Redis 指令状态和慢命令的情况</li>
@@ -353,7 +350,7 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/Java%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/" rel="prev" title="解决Jar包依赖冲突">
+                <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/" rel="prev" title="解决Jar包依赖冲突">
                   <i class="fa fa-chevron-left"></i> 解决Jar包依赖冲突
                 </a>
             </div>
@@ -408,13 +405,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

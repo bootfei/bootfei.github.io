@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="在每一次请求需要权限的时候总是会调用授权的方法查询数据库，这样的话性能很低，因此我们可以使用缓存管理器，来达到这种要求，在Shiro中有一个内存缓存管理器，内部就是使用Map实现的，但是这种缓存并不能实现跨JVM（分布式），因此我们可以使用Redis自定义一个缓存管理器，步骤如下： Redis缓存实现RedisCache，用于实现对授权信息的缓存12345678910111213141516171">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shiro应用-04-缓存管理">
+<meta property="og:url" content="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-04-%E7%BC%93%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="在每一次请求需要权限的时候总是会调用授权的方法查询数据库，这样的话性能很低，因此我们可以使用缓存管理器，来达到这种要求，在Shiro中有一个内存缓存管理器，内部就是使用Map实现的，但是这种缓存并不能实现跨JVM（分布式），因此我们可以使用Redis自定义一个缓存管理器，步骤如下： Redis缓存实现RedisCache，用于实现对授权信息的缓存12345678910111213141516171">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-05-19T11:13:10.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.288Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-04-%E7%BC%93%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shiro应用-04-缓存管理 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E7%BC%93%E5%AD%98"><span class="nav-number">1.</span> <span class="nav-text">Redis缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0RedisCache%EF%BC%8C%E7%94%A8%E4%BA%8E%E5%AE%9E%E7%8E%B0%E5%AF%B9%E6%8E%88%E6%9D%83%E4%BF%A1%E6%81%AF%E7%9A%84%E7%BC%93%E5%AD%98"><span class="nav-number">1.1.</span> <span class="nav-text">实现RedisCache，用于实现对授权信息的缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0RedisManager"><span class="nav-number">1.2.</span> <span class="nav-text">实现RedisManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E4%B8%AD%E9%85%8D%E7%BD%AE%E4%B8%8A%E7%BC%93%E5%AD%98%E7%AE%A1%E7%90%86%E5%99%A8%EF%BC%8C%E9%9C%80%E8%A6%81%E8%AE%BE%E7%BD%AE%E5%88%B0SecurityManager%E4%B8%AD%E6%89%8D%E8%83%BD%E7%94%9F%E6%95%88"><span class="nav-number">1.3.</span> <span class="nav-text">在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B8%85%E9%99%A4%E7%BC%93%E5%AD%98"><span class="nav-number">2.</span> <span class="nav-text">清除缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">实现原理</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-04-%E7%BC%93%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shiro应用-04-缓存管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-19 19:13:10" itemprop="dateCreated datePublished" datetime="2021-05-19T19:13:10+08:00">2021-05-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在每一次请求需要权限的时候总是会调用授权的方法查询数据库，这样的话性能很低，因此我们可以使用缓存管理器，来达到这种要求，在Shiro中有一个内存缓存管理器，内部就是使用Map实现的，但是这种缓存并不能实现跨JVM（分布式），因此我们可以使用Redis自定义一个缓存管理器，步骤如下：</p>
+<h2 id="Redis缓存"><a href="#Redis缓存" class="headerlink" title="Redis缓存"></a>Redis缓存</h2><h3 id="实现RedisCache，用于实现对授权信息的缓存"><a href="#实现RedisCache，用于实现对授权信息的缓存" class="headerlink" title="实现RedisCache，用于实现对授权信息的缓存"></a>实现RedisCache，用于实现对授权信息的缓存</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Redis的Cache</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisCache</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Cache</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 存储在redis中的hash中的key</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String COMMON_NAME=<span class="string">&quot;shiro-demo&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="title">RedisCache</span><span class="params">(RedisTemplate redisTemplate, String name)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">this</span>.redisTemplate = redisTemplate;</span><br><span class="line">         <span class="keyword">this</span>.name=COMMON_NAME+<span class="string">&quot;:&quot;</span>+name;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取指定的key的缓存</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> k</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> CacheException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> V <span class="title">get</span><span class="params">(K k)</span> <span class="keyword">throws</span> CacheException </span>&#123;</span><br><span class="line">     		<span class="keyword">return</span> (V) redisTemplate.opsForHash().get(name,k);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 添加缓存</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> k</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> v</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> CacheException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K k, V v)</span> <span class="keyword">throws</span> CacheException </span>&#123;</span><br><span class="line">         redisTemplate.opsForHash().put(name, k, v);</span><br><span class="line">         <span class="comment">//设置过期时间</span></span><br><span class="line">         <span class="keyword">return</span> v;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除指定key的缓存</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> k 默认是principle对象，在AuthorizingRealm中设置</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> V <span class="title">remove</span><span class="params">(K k)</span> <span class="keyword">throws</span> CacheException </span>&#123;</span><br><span class="line">         V v = <span class="keyword">this</span>.get(k);</span><br><span class="line">         redisTemplate.opsForHash().delete(name, k);</span><br><span class="line">         <span class="keyword">return</span> v;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除所有的缓存</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span> <span class="keyword">throws</span> CacheException </span>&#123;</span><br><span class="line">     		redisTemplate.delete(name);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取总数</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">size</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     		<span class="keyword">return</span> redisTemplate.opsForHash().size(name).intValue();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> Set&lt;K&gt; <span class="title">keys</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     		<span class="keyword">return</span> redisTemplate.opsForHash().keys(name);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">public</span> Collection&lt;V&gt; <span class="title">values</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     		<span class="keyword">return</span> redisTemplate.opsForHash().values(name);</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现RedisManager"><a href="#实现RedisManager" class="headerlink" title="实现RedisManager"></a>实现RedisManager</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Redis的CacheManager</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisCacheManager</span> <span class="keyword">implements</span> <span class="title">CacheManager</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">     <span class="meta">@Autowired</span></span><br><span class="line">     <span class="keyword">private</span> RedisTemplate redisTemplate;</span><br><span class="line"></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="keyword">public</span> &lt;K, V&gt; <span class="function">Cache&lt;K, V&gt; <span class="title">getCache</span><span class="params">(String s)</span> <span class="keyword">throws</span> CacheException </span>&#123;</span><br><span class="line">     		<span class="keyword">return</span> <span class="keyword">new</span> RedisCache&lt;K,V&gt;(redisTemplate, s);</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效"><a href="#在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效" class="headerlink" title="在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效"></a>在配置类中配置上缓存管理器，需要设置到SecurityManager中才能生效</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 配置缓存管理器，使用自定义的Redis缓存管理器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="meta">@Bean</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> CacheManager <span class="title">cacheManager</span><span class="params">()</span></span>&#123;</span><br><span class="line"> 		<span class="keyword">return</span> <span class="keyword">new</span> RedisCacheManager();</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 配置安全管理器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="meta">@Bean</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> SecurityManager <span class="title">securityManager</span><span class="params">()</span></span>&#123;</span><br><span class="line">     DefaultWebSecurityManager securityManager = <span class="keyword">new</span> DefaultWebSecurityManager(userRealm());</span><br><span class="line">     <span class="comment">//设置缓存管理器</span></span><br><span class="line">     securityManager.setCacheManager(cacheManager());</span><br><span class="line">     <span class="keyword">return</span> securityManager;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="清除缓存"><a href="#清除缓存" class="headerlink" title="清除缓存"></a><strong>清除缓存</strong></h2><ul>
+<li>在CachingRelam中有一个清除缓存的方法<code>org.apache.shiro.realm.CachingRealm#clearCache</code>，在我们自定义的Realm中覆盖该方法即可，这样就能在<strong>退出或者在业务逻辑中用户的权限改变</strong>的时候能够清除缓存的数据，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 清除CacheManager中的缓存，可以在用户权限改变的时候调用，这样再次需要权限的时候就会重新查询数据库不走缓存了</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clearCache</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Subject subject = SecurityUtils.getSubject();</span><br><span class="line">    <span class="comment">//调用父类的清除缓存的方法</span></span><br><span class="line">    <span class="keyword">super</span>.clearCache(subject.getPrincipals());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>除了重写或者覆盖CachingRelam中的方法，根据源码可以知道，真正起作用的方法是<code>AuthorizingRealm</code>中的方法<code>clearCachedAuthorizationInfo</code>，因此我们也可以重写或者覆盖这个方法，这里不再演示。</strong></li>
+</ul>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a><strong>实现原理</strong></h2><ul>
+<li>在Shiro中一旦有地方调用<code>Subject.hasRole</code>等校验权限的地方，那么就会检测授权信息，在<code>org.apache.shiro.realm.AuthorizingRealm#getAuthorizationInfo</code>的方法中会先缓存中查询是否存在，否则调用授权的方法从数据库中查询，查询之后放入缓存中，源码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> AuthorizationInfo <span class="title">getAuthorizationInfo</span><span class="params">(PrincipalCollection principals)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> (principals == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       AuthorizationInfo info = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">if</span> (log.isTraceEnabled()) &#123;</span><br><span class="line">           log.trace(<span class="string">&quot;Retrieving AuthorizationInfo for principals [&quot;</span> + principals + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">       &#125;</span><br><span class="line">   </span><br><span class="line">       <span class="comment">//获取可用的缓存管理器</span></span><br><span class="line">       Cache&lt;Object, AuthorizationInfo&gt; cache = getAvailableAuthorizationCache();</span><br><span class="line">       <span class="keyword">if</span> (cache != <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">if</span> (log.isTraceEnabled()) &#123;</span><br><span class="line">               log.trace(<span class="string">&quot;Attempting to retrieve the AuthorizationInfo from cache.&quot;</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//获取缓存的key，这里获取的就是principal主体信息</span></span><br><span class="line">           Object key = getAuthorizationCacheKey(principals);</span><br><span class="line">           <span class="comment">//从缓存中获取数据</span></span><br><span class="line">           info = cache.get(key);</span><br><span class="line">           <span class="keyword">if</span> (log.isTraceEnabled()) &#123;</span><br><span class="line">               <span class="keyword">if</span> (info == <span class="keyword">null</span>) &#123;</span><br><span class="line">                   log.trace(<span class="string">&quot;No AuthorizationInfo found in cache for principals [&quot;</span> + principals + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                   log.trace(<span class="string">&quot;AuthorizationInfo found in cache for principals [&quot;</span> + principals + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">//如果缓存中没有查到</span></span><br><span class="line">       <span class="keyword">if</span> (info == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="comment">//调用重写的授权方法，从数据库中查询</span></span><br><span class="line">           info = doGetAuthorizationInfo(principals);</span><br><span class="line">       <span class="comment">//如果查询到了，添加到缓存中</span></span><br><span class="line">           <span class="keyword">if</span> (info != <span class="keyword">null</span> &amp;&amp; cache != <span class="keyword">null</span>) &#123;</span><br><span class="line">               <span class="keyword">if</span> (log.isTraceEnabled()) &#123;</span><br><span class="line">                   log.trace(<span class="string">&quot;Caching authorization info for principals: [&quot;</span> + principals + <span class="string">&quot;].&quot;</span>);</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">//获取缓存的key</span></span><br><span class="line">               Object key = getAuthorizationCacheKey(principals);</span><br><span class="line">               <span class="comment">//放入缓存</span></span><br><span class="line">               cache.put(key, info);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> info;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/19/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-03-%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/" rel="prev" title="shiro应用-03-会话管理">
+                  <i class="fa fa-chevron-left"></i> shiro应用-03-会话管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/20/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81-01-redis%E5%AE%9E%E7%8E%B0/" rel="next" title="分布式锁-01-redis实现">
+                  分布式锁-01-redis实现 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

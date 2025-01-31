@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="https:&#x2F;&#x2F;www.sevenyuan.cn&#x2F; 报错原因应用突然无法启动，查看 tomcat 报错原因，发现是 类转换失败 ClassCastException 1234567Class path contains multiple SLF4J binding23-May-2019 16:04:25.300 INFO [localhost-startStop-1] org.apache.jas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决Jar包依赖冲突">
+<meta property="og:url" content="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="https:&#x2F;&#x2F;www.sevenyuan.cn&#x2F; 报错原因应用突然无法启动，查看 tomcat 报错原因，发现是 类转换失败 ClassCastException 1234567Class path contains multiple SLF4J binding23-May-2019 16:04:25.300 INFO [localhost-startStop-1] org.apache.jas">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucAM1dSp7ycZAXYI5C2Do953p5wHIylj4Owbjn4dxhRFlKac8xbQ1JU4GYfMnqAibw68ulsq2W0ggQ/640">
+<meta property="og:image" content="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==">
+<meta property="article:published_time" content="2021-05-05T11:10:53.000Z">
+<meta property="article:modified_time" content="2021-11-16T05:30:17.959Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucAM1dSp7ycZAXYI5C2Do953p5wHIylj4Owbjn4dxhRFlKac8xbQ1JU4GYfMnqAibw68ulsq2W0ggQ/640">
+
+
+<link rel="canonical" href="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>解决Jar包依赖冲突 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A5%E9%94%99%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.</span> <span class="nav-text">报错原因</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%8A%A5%E9%94%99%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">查看报错代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">思考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6"><span class="nav-number">3.1.</span> <span class="nav-text">类加载机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ClassLoader"><span class="nav-number">3.2.</span> <span class="nav-text">ClassLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%A1%BA%E5%BA%8F"><span class="nav-number">3.3.</span> <span class="nav-text">类加载顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%8A%A0%E8%BD%BD%E9%A1%BA%E5%BA%8F"><span class="nav-number">3.4.</span> <span class="nav-text">查看加载顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inode-%E6%B5%8B%E8%AF%95%E5%8A%A0%E8%BD%BD%E9%A1%BA%E5%BA%8F"><span class="nav-number">3.5.</span> <span class="nav-text">inode 测试加载顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0-Tomcat8-%E6%B5%8B%E8%AF%95%EF%BC%88%E6%AD%A3%E5%B8%B8%E5%90%AF%E5%8A%A8%EF%BC%89"><span class="nav-number">3.5.1.</span> <span class="nav-text">本地 Tomcat8 测试（正常启动）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0-Tomcat8-%E6%B5%8B%E8%AF%95%EF%BC%88%E5%88%A0%E5%8C%85%EF%BC%8C%E5%85%88%E6%B7%BB%E5%8A%A0-slf4j%EF%BC%8C%E5%90%8E%E6%B7%BB%E5%8A%A0-logback%EF%BC%89"><span class="nav-number">3.5.2.</span> <span class="nav-text">本地 Tomcat8 测试（删包，先添加 slf4j，后添加 logback）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8-uat-%E7%8E%AF%E5%A2%83%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B5%8B%E8%AF%95"><span class="nav-number">3.5.3.</span> <span class="nav-text">在 uat 环境服务器测试</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9D%9F"><span class="nav-number">3.6.</span> <span class="nav-text">测试结束</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%B2%E7%AA%81%E6%8F%90%E7%A4%BA%E4%BF%A1%E6%81%AF"><span class="nav-number">4.1.</span> <span class="nav-text">冲突提示信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF"><span class="nav-number">4.2.</span> <span class="nav-text">排查思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%89%8D%E9%A2%84%E9%98%B2"><span class="nav-number">4.3.</span> <span class="nav-text">提前预防</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解决Jar包依赖冲突
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-05 19:10:53" itemprop="dateCreated datePublished" datetime="2021-05-05T19:10:53+08:00">2021-05-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-16 13:30:17" itemprop="dateModified" datetime="2021-11-16T13:30:17+08:00">2021-11-16</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><a target="_blank" rel="noopener" href="https://www.sevenyuan.cn/">https://www.sevenyuan.cn/</a></p>
+<h2 id="报错原因"><a href="#报错原因" class="headerlink" title="报错原因"></a>报错原因</h2><p>应用突然无法启动，查看 tomcat 报错原因，发现是 <strong>类转换失败 <code>ClassCastException</code></strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Class path contains multiple SLF4J binding</span><br><span class="line">23-May-2019 16:04:25.300 INFO [localhost-startStop-1] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.</span><br><span class="line">SLF4J: Class path contains multiple SLF4J bindings.</span><br><span class="line">SLF4J: Found binding in [jar:file:/home/admin/xxx/WEB-INF/lib/slf4j-log4j12-1.6.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: Found binding in [jar:file:/home/admin/xxx/WEB-INF/lib/logback-classic-1.1.3.jar!/org/slf4j/impl/StaticLoggerBinder.class]</span><br><span class="line">SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.</span><br><span class="line">SLF4J: Actual binding is of type [org.slf4j.impl.Log4jLoggerFactory]</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">org.slf4j.impl.Log4jLoggerFactory cannot be cast to ch.qos.logback.classic.LoggerContext</span><br><span class="line">org.springframework.beans.factory.BeanCreationException: Error creating bean with name &#x27;cn.com.xxx.framework.log.integration.LogbackInitializer#0&#x27; defined in class path resource [spring/spring-log-init.xml]: Invocation of init method failed; nested exception is java.lang.ClassCastException: org.slf4j.impl.Log4jLoggerFactory cannot be cast to ch.qos.logback.classic.LoggerContext</span><br><span class="line">    ...    </span><br><span class="line">Caused by: java.lang.ClassCastException: org.slf4j.impl.Log4jLoggerFactory cannot be cast to ch.qos.logback.classic.LoggerContext</span><br><span class="line">    # 出问题的加载地方</span><br><span class="line"> at ch.qos.logback.ext.spring.LogbackConfigurer.initLogging(LogbackConfigurer.java:72)</span><br><span class="line"> at cn.com.xxx.framework.log.integration.LogbackInitializer.init(LogbackInitializer.java:49)</span><br><span class="line"> at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span><br><span class="line"> at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)</span><br><span class="line"> at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span><br><span class="line"> at java.lang.reflect.Method.invoke(Method.java:498)</span><br><span class="line"> at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeCustomInitMethod(AbstractAutowireCapableBeanFactory.java:1706)</span><br><span class="line"> at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1645)</span><br><span class="line"> at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1574)</span><br><span class="line"> ... 26 more</span><br><span class="line">23-May-2019 15:59:12.398 SEVERE [localhost-startStop-1] org.apache.catalina.core.StandardContext.startInternal One or more listeners failed to start. Full details will be found in the appropriate container log file</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看报错代码"><a href="#查看报错代码" class="headerlink" title="查看报错代码"></a>查看报错代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initLogging</span><span class="params">(String location)</span> <span class="keyword">throws</span> FileNotFoundException, JoranException </span>&#123;</span><br><span class="line">   String resolvedLocation = SystemPropertyUtils.resolvePlaceholders(location);</span><br><span class="line">   URL url = ResourceUtils.getURL(resolvedLocation);</span><br><span class="line">   LoggerContext loggerContext = (LoggerContext)StaticLoggerBinder.getSingleton().getLoggerFactory();</span><br><span class="line">   loggerContext.reset();</span><br><span class="line">   <span class="keyword">new</span> ContextInitializer(loggerContext).configureByResource(url);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，通过 <code>StaticLoggerBinder.getSingleton().getLoggerFactory()</code> 获取 logger 上下文这段代码报错了，通过仔细定位，发现了有两个 <code>StaticLoggerBinder</code> 类</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/eQPyBffYbucAM1dSp7ycZAXYI5C2Do953p5wHIylj4Owbjn4dxhRFlKac8xbQ1JU4GYfMnqAibw68ulsq2W0ggQ/640" alt="Image"></p>
+<p><strong>更重要的是，他们两兄弟竟然虽然不是同一个 jar 包，但是包路径和名称都一模一样！！！</strong></p>
+<p>由于我们需要的是 <code>logback</code> 包，而不是 <code>slf4j-log4j12</code> 包，所以需要排除掉 <code>slf4j-log4j12</code> 依赖。</p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a><strong>解决方法</strong></h2><p>① 通过 POM 文件排查包冲突</p>
+<p>② 安装 IDEA 的插件 <code>Maven Helper</code></p>
+<p>③ 定位到编译 WAR 包的 POM 文件（我们框架定义的在 Deploy 模块中）</p>
+<p>④ 在搜索框中，输入搜索内容，点击右键可以看到选项框</p>
+<ul>
+<li>Jump To Source（跳转到源文件处）</li>
+<li>Exclude（排除掉）</li>
+</ul>
+<p>例如我点击了 <code>Exclude</code> ，就能看到 pom 文件中，这个依赖就被排除掉了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;cn.com.xxx&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;framework-conf-client&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;$&#123;xqy.framework.version&#125;&lt;&#x2F;version&gt;</span><br><span class="line">    &lt;exclusions&gt;</span><br><span class="line">        &lt;exclusion&gt;</span><br><span class="line">            &lt;artifactId&gt;slf4j-log4j12&lt;&#x2F;artifactId&gt;</span><br><span class="line">            &lt;groupId&gt;org.slf4j&lt;&#x2F;groupId&gt;</span><br><span class="line">        &lt;&#x2F;exclusion&gt;</span><br><span class="line">    &lt;&#x2F;exclusions&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a><strong>思考</strong></h2><p>包冲突解决是简单的，通过 maven 插件可以精确找到依赖，然后进行 Exclude，可是在本地开发、测试环境都没有出现的问题，却在预发环境出现了，所以排除了业务逻辑代码的原因，简单考虑了几个因素和原因：</p>
+<ul>
+<li>jdk 版本</li>
+<li>tomcat 版本</li>
+<li>类加载机制</li>
+<li>第三方 jar 互相依赖</li>
+</ul>
+<p>由于 jdk 和 tomcat 这两者没有明显的报错原因，所以先去排查类的加载机制</p>
+<hr>
+<h3 id="类加载机制"><a href="#类加载机制" class="headerlink" title="类加载机制"></a>类加载机制</h3><p>我们写的 Java 应用代码，一般是通过 <code>App ClassLoader</code> 应用加载器进行加载，它不会自己先去加载它，而是通过 <code>Extension ClassLoader</code> 扩展类加载器进行加载（其中扩展类加载器又会去找 <code>Bootstrap ClassLoader</code> 启动类加载器进行加载），只有父加载器无法加载情况下，才会让下级加载器进行加载。</p>
+<hr>
+<h3 id="ClassLoader"><a href="#ClassLoader" class="headerlink" title="ClassLoader"></a>ClassLoader</h3><p>Java 使用的是双亲委派加载机制，通过查看 <code>ClassLoader</code> 类，可以对此有所了解。</p>
+<p>类被成功加载后，将被放入到JVM Heap中存放 Class 实例对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">protected Class&lt;?&gt; loadClass(String name, boolean resolve)</span><br><span class="line">    throws ClassNotFoundException</span><br><span class="line">&#123;</span><br><span class="line">    synchronized (getClassLoadingLock(name)) &#123;</span><br><span class="line">        &#x2F;&#x2F; First, check if the class has already been loaded</span><br><span class="line">        &#x2F;&#x2F; 首先，检查 class 是否已经被加载</span><br><span class="line">        Class&lt;?&gt; c &#x3D; findLoadedClass(name);</span><br><span class="line">        if (c &#x3D;&#x3D; null) &#123;</span><br><span class="line">            &#x2F;&#x2F; 如果没有被加载</span><br><span class="line">            long t0 &#x3D; System.nanoTime();</span><br><span class="line">            try &#123;</span><br><span class="line">                if (parent !&#x3D; null) &#123;</span><br><span class="line">                    &#x2F;&#x2F; 寻找 parent 加载器</span><br><span class="line">                    c &#x3D; parent.loadClass(name, false);</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    &#x2F;&#x2F; 如果父加载器不存在，则委托给启动类加载器加载</span><br><span class="line">                    c &#x3D; findBootstrapClassOrNull(name);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; catch (ClassNotFoundException e) &#123;</span><br><span class="line">                &#x2F;&#x2F; ClassNotFoundException thrown if class not found</span><br><span class="line">                &#x2F;&#x2F; from the non-null parent class loader</span><br><span class="line">            &#125;</span><br><span class="line">            if (c &#x3D;&#x3D; null) &#123;</span><br><span class="line">                &#x2F;&#x2F; If still not found, then invoke findClass in order</span><br><span class="line">                &#x2F;&#x2F; to find the class.</span><br><span class="line">                &#x2F;&#x2F; 如果仍然无法加载，才会尝试自身加载</span><br><span class="line">                long t1 &#x3D; System.nanoTime();</span><br><span class="line">                c &#x3D; findClass(name);</span><br><span class="line">                &#x2F;&#x2F; this is the defining class loader; record the stats</span><br><span class="line">                sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);</span><br><span class="line">                sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);</span><br><span class="line">                sun.misc.PerfCounter.getFindClasses().increment();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        if (resolve) &#123;</span><br><span class="line">            resolveClass(c);</span><br><span class="line">        &#125;</span><br><span class="line">        return c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="类加载顺序"><a href="#类加载顺序" class="headerlink" title="类加载顺序"></a>类加载顺序</h3><p>从代码中了解到，如果某个名字的类 <!--名字 = 类路径+类名称--> 被加载后，类加载器是不会再重新加载，所以我们的问题根本原因可以是出现在：</p>
+<p><strong>先加载了 <code>org.slf4j</code> 包的 <code>org.slf4j.impl.StaticLoggerBinder</code>，同名的 <code>ch.qos.logback</code> 包下的 <code>StaticLoggerBinder</code> 类没有被加载</strong></p>
+<blockquote>
+<p>跟JAR文件的文件名有关。按照字母的顺序加载JAR文件。有了这个类以后，后面的类则不会加载了。</p>
+<p>jvm 加载包名和类名相同的类时，先加载classpath中jar路径放在前面的，包名类名都相同，那jvm没法区分了，如果使用ide一般情况下是会提示发生冲突而报错，若不报错，只有第一个包被引入（在classpath路径下排在前面的包），第二个包会在classloader加载类时判断重复而忽略。</p>
+</blockquote>
+<hr>
+<h3 id="查看加载顺序"><a href="#查看加载顺序" class="headerlink" title="查看加载顺序"></a>查看加载顺序</h3><p>在 jvm 启动脚本中，添加 <code>-verbose</code> 参数或者 <code>-XX:+TraceClassLoading</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[Loaded java.lang.CloneNotSupportedException from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.lang.Thread$State from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$NavigableSubMap from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$AscendingSubMap from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$NavigableSubMap$EntrySetView from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$AscendingSubMap$AscendingEntrySetView from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$NavigableSubMap$SubMapIterator from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br><span class="line">[Loaded java.util.TreeMap$NavigableSubMap$SubMapEntryIterator from &#x2F;Users&#x2F;jingqi&#x2F;.jrebel&#x2F;bootcache&#x2F;jrebel-bootstrap-89f567048120ef32b965233b5ba2f7ca.jar]</span><br></pre></td></tr></table></figure>
+
+<p>之前在本地开发中，IDEA 优化先加载了 <code>ch.qos.logback</code> 的 <code>StaticLoggerBinder</code> 类，然后后面的 <code>org.slf4j</code> 包下的同名类就没有被加载。</p>
+<p>但这样也有个不明白，按理说加载顺序按照<strong>字母顺序</strong>加载，预发环境还是能够跟本地开发一样，加载到我们需要的类。实际上，加载器加载到的是另一个类，导致应用无法启动。</p>
+<blockquote>
+<p>问题就是jar的加载顺序问题，而这个顺序实际上是由文件系统决定的，linux内部是用inode来指示文件的。</p>
+<p>这种储存文件元信息的区域就叫做inode，中文译名为”索引节点”。每一个文件都有对应的inode，里面包含了与该文件有关的一些信息。</p>
+<p>Unix/linux系统内部不使用文件名，而使用inode号码来识别文件。对于系统来说，文件名只是inode号码便于识别的别称或者绰号。</p>
+</blockquote>
+<p>为了验证 <code>inode</code> 是否是问题的原因，我做了以下测试：</p>
+<hr>
+<h3 id="inode-测试加载顺序"><a href="#inode-测试加载顺序" class="headerlink" title="inode 测试加载顺序"></a>inode 测试加载顺序</h3><h4 id="本地-Tomcat8-测试（正常启动）"><a href="#本地-Tomcat8-测试（正常启动）" class="headerlink" title="本地 Tomcat8 测试（正常启动）"></a>本地 Tomcat8 测试（正常启动）</h4><p>将之前在 uat 环境有问题的代码版本重新打包，不使用 idea 工具，直接用 tomcat8 启动，并且在 <code>catalina.sh</code> 脚本中加入类加载打印参数 <code>-XX:+TraceClassLoading</code></p>
+<p>catalina.sh</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Register custom URL handlers</span><br><span class="line"># Do this here so custom URL handles (specifically &#39;war:...&#39;) can be used in the security policy</span><br><span class="line">JAVA_OPTS&#x3D;&quot;$JAVA_OPTS -XX:+TraceClassLoading&quot;</span><br></pre></td></tr></table></figure>
+
+<p>查看 <code>catalina.out</code> 输入日志，发现先加载的是 logback 包中 <code>StaticLoggerBinder</code></p>
+<p>在 <code>WEB-INF/lib</code> 下比较 inode 大小（正常解压和启动 logback &lt; slf4j)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ll -i logback-classic-1.1.3.jar slf4j-log4j12-1.6.1.jar</span><br><span class="line">34153162 -rw-r-----  1 jingqi  staff   274K  8  1  2018 logback-classic-1.1.3.jar</span><br><span class="line">34153180 -rw-r-----  1 jingqi  staff   9.5K 10 17  2018 slf4j-log4j12-1.6.1.jar</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="本地-Tomcat8-测试（删包，先添加-slf4j，后添加-logback）"><a href="#本地-Tomcat8-测试（删包，先添加-slf4j，后添加-logback）" class="headerlink" title="本地 Tomcat8 测试（删包，先添加 slf4j，后添加 logback）"></a>本地 Tomcat8 测试（删包，先添加 slf4j，后添加 logback）</h4><ul>
+<li>清理掉 catalina.out</li>
+<li>重新上传包</li>
+<li>比较 inode 大小</li>
+<li>重新启动，查看类加载日志</li>
+</ul>
+<p><strong>比较 inode 大小（发现 slf4j &lt; logback)</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># ll -i logback-classic-1.1.3.jar slf4j-log4j12-1.6.1.jar</span><br><span class="line">34162396 -rw-r--r--  1 jingqi  staff   274K  8  1  2018 logback-classic-1.1.3.jar</span><br><span class="line">34162361 -rw-r--r--  1 jingqi  staff   9.5K 10 17  2018 slf4j-log4j12-1.6.1.jar</span><br></pre></td></tr></table></figure>
+
+<p>重新启动后，查看 <code>catalina.out</code> 日志，发现类加载顺序与之前的一致，应用也能正常启动，所以本地开发无法复现 =-=</p>
+<hr>
+<h4 id="在-uat-环境服务器测试"><a href="#在-uat-环境服务器测试" class="headerlink" title="在 uat 环境服务器测试"></a>在 uat 环境服务器测试</h4><p>在 <code>WEB-INF/lib</code> 路径下，先将这两个包删掉，尝试有不同的上传顺序，模拟 tomcat 解压 war 包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[admin@uat-96-0-248 lib]$ rm logback-classic-1.1.3.jar  slf4j-log4j12-1.6.1.jar</span><br><span class="line">[admin@uat-96-0-248 lib]$ rz</span><br><span class="line">[admin@uat-96-0-248 lib]$ # Received &#x2F;Users&#x2F;jingqi&#x2F;Downloads&#x2F;slf4j-log4j12-1.6.1.jar</span><br><span class="line">[admin@uat-96-0-248 lib]$ rz</span><br><span class="line">[admin@uat-96-0-248 lib]$ # Received &#x2F;Users&#x2F;jingqi&#x2F;Downloads&#x2F;logback-classic-1.1.3.jar</span><br><span class="line"># 第一次上传顺序 1、slf4j-log4j12-1.6.1.jar 2、logback-classic-1.1.3.jar</span><br><span class="line"># inode 比较：slf4j &lt; logback</span><br><span class="line">[admin@uat-96-0-248 lib]$ ll -i logback-classic-1.1.3.jar slf4j-log4j12-1.6.1.jar</span><br><span class="line">396731 -rw-r--r-- 1 admin admin 280928 8月   1 2018 logback-classic-1.1.3.jar</span><br><span class="line">394075 -rw-r--r-- 1 admin admin   9753 10月 17 2018 slf4j-log4j12-1.6.1.jar</span><br><span class="line">[admin@uat-96-0-248 lib]$ rm logback-classic-1.1.3.jar  slf4j-log4j12-1.6.1.jar</span><br><span class="line">[admin@uat-96-0-248 lib]$ rz</span><br><span class="line">[admin@uat-96-0-248 lib]$ # Received &#x2F;Users&#x2F;jingqi&#x2F;Downloads&#x2F;logback-classic-1.1.3.jar</span><br><span class="line">[admin@uat-96-0-248 lib]$ rz</span><br><span class="line">[admin@uat-96-0-248 lib]$ # Received &#x2F;Users&#x2F;jingqi&#x2F;Downloads&#x2F;slf4j-log4j12-1.6.1.jar</span><br><span class="line"># 第二次上传顺序 1、logback-classic-1.1.3.jar 2、slf4j-log4j12-1.6.1.jar</span><br><span class="line"># inode 比较：logback &lt; slf4j</span><br><span class="line">[admin@uat-96-0-248 lib]$ ll -i logback-classic-1.1.3.jar slf4j-log4j12-1.6.1.jar</span><br><span class="line">394075 -rw-r--r-- 1 admin admin 280928 8月   1 2018 logback-classic-1.1.3.jar</span><br><span class="line">396731 -rw-r--r-- 1 admin admin   9753 10月 17 2018 slf4j-log4j12-1.6.1.jar</span><br></pre></td></tr></table></figure>
+
+<p>分别测试了两种场景，发现只要这两个包都存在的情况下，无论 <code>inode</code> 两者的大小，都是先加载了 <code>slf4j</code> 包的类，导致启动报错</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="Image"></p>
+<hr>
+<h3 id="测试结束"><a href="#测试结束" class="headerlink" title="测试结束"></a>测试结束</h3><p>通过多种测试场景，发现本地开发、测试环境都无法复现的问题，在 uat 环境下，只要这两个包同时存在，都会启动报错</p>
+<p>最后在官方文档发现这个：</p>
+<blockquote>
+<p>The order in which the JAR files in a directory are enumerated in the expanded class path is not specified and may vary from platform to platform and even from moment to moment on the same machine. A well-constructed application should not depend upon any particular order. If a specific order is required, then the JAR files can be enumerated explicitly in the class path.</p>
+</blockquote>
+<p>大意为：同一个目录下，jvm加载jar包顺序是无法保证的，每个系统的都不一样，甚至同一个系统不同的时刻加载都不一样。</p>
+<p>于是乎，我也不纠结某台服务器上的类加载顺序，在开发阶段就先将这个包冲突的情况，给提前解决掉~</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h2><h3 id="冲突提示信息"><a href="#冲突提示信息" class="headerlink" title="冲突提示信息"></a>冲突提示信息</h3><ul>
+<li><strong>java.lang.ClassNotFoundException</strong>：类型转换错误，这个报错跟我这次遇到的一样，本应该引入的是 <code>logback</code> 包的类，但是实际引入的是 <code>slf4j</code> 下的同名类，导致类型转换错误</li>
+<li><strong>java.lang.NoSuchMethodError</strong>：找不到特定方法，如果有两个同名的包但是不同版本，例如 xxx-1.1和 xxx-1.2包同时存在，先加载了 1.1 版本的类，但是 1.2 版本中才提供了新方法，导致提示找不到特定方法</li>
+<li><strong>java.lang.NoClassDefFoundError，java.lang.LinkageError</strong></li>
+</ul>
+<h3 id="排查思路"><a href="#排查思路" class="headerlink" title="排查思路"></a>排查思路</h3><p>1、查看 <code>catalina.sh</code> 堆栈信息，找到有问题的类</p>
+<p>2、通过 IDEA ，在打包的 POM 文件中，使用 <code>Maven Helper</code> 插件找出冲突的依赖，确定项目需要的 jar 包，<code>Exclude</code> 掉不需要的依赖。</p>
+<h3 id="提前预防"><a href="#提前预防" class="headerlink" title="提前预防"></a>提前预防</h3><p><strong>1、使用工具检查依赖冲突</strong></p>
+<p>冲突检测插件 ：<code>maven-enforcer-plugin</code></p>
+<p>引用新的第三方依赖（工具包或者框架包），通过 Maven 插件检查一下 conflict 依赖，提前进行 Exclude</p>
+<p><strong>2、统一服务器版本</strong></p>
+<p>在测试阶段，准备好和生产环境一样的服务器，提前进行测试，避免依赖冲突的 <code>WAR</code> 包上传到生产环境，例如我们有一台 UAT 服务器，与生产环境一样配置，提前测试</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="解决Jar包依赖冲突">
+                  <i class="fa fa-chevron-left"></i> 解决Jar包依赖冲突
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" rel="next" title="Redis-线上CPU飙升排查">
+                  Redis-线上CPU飙升排查 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

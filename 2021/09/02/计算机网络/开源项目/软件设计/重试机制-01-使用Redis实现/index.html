@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s&#x2F;rBJYGiV4Jq8qhSb4Fcmb9A 使用场景 超时重试，一方面保障业务成功，另一方面保障重试操作不会积压  Redis实现方式方案 将回调任务丢入一个回调队列中，由指定的线程去处理队列中的回调任务。  为了避免本地内存的丢失，所以队列可以使用高可用的redis集群。  就绪队列     设计锚点回调任务失败如何处理，直接重新丢入回调队">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重试机制-01-使用Redis实现">
+<meta property="og:url" content="http://example.com/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="https:&#x2F;&#x2F;mp.weixin.qq.com&#x2F;s&#x2F;rBJYGiV4Jq8qhSb4Fcmb9A 使用场景 超时重试，一方面保障业务成功，另一方面保障重试操作不会积压  Redis实现方式方案 将回调任务丢入一个回调队列中，由指定的线程去处理队列中的回调任务。  为了避免本地内存的丢失，所以队列可以使用高可用的redis集群。  就绪队列     设计锚点回调任务失败如何处理，直接重新丢入回调队">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolmjWs1XAFicqE1Wtc8cLMsIxeuUM6xiau1wCLuCJn8tU4MWLrNN9OFhO4w/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolm57lXIGDCsusx8eUDCV6UTkCScChtpTAiaGuHgB96dK6GVfooqPrTNoA/640">
+<meta property="article:published_time" content="2021-09-02T05:54:44.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.283Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolmjWs1XAFicqE1Wtc8cLMsIxeuUM6xiau1wCLuCJn8tU4MWLrNN9OFhO4w/640">
+
+
+<link rel="canonical" href="http://example.com/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>重试机制-01-使用Redis实现 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Redis实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88"><span class="nav-number">2.1.</span> <span class="nav-text">方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E9%94%9A%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">设计锚点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E4%BB%BB%E5%8A%A1%E5%A4%B1%E8%B4%A5%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%EF%BC%8C%E7%9B%B4%E6%8E%A5%E9%87%8D%E6%96%B0%E4%B8%A2%E5%85%A5%E5%9B%9E%E8%B0%83%E9%98%9F%E5%88%97%E5%90%97%EF%BC%9F"><span class="nav-number">2.2.1.</span> <span class="nav-text">回调任务失败如何处理，直接重新丢入回调队列吗？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E9%98%9F%E5%88%97%E7%9A%84%E4%BB%BB%E5%8A%A1%E8%8E%B7%E5%8F%96%E5%88%B0%E4%B9%8B%E5%90%8E%EF%BC%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E6%89%A7%E8%A1%8C%E4%BB%BB%E5%8A%A1%EF%BC%9F"><span class="nav-number">2.2.2.</span> <span class="nav-text">回调队列的任务获取到之后，什么时候执行任务？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E9%98%9F%E5%88%97%E7%9A%84%E4%BB%BB%E5%8A%A1%EF%BC%8C%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%88%A0%E9%99%A4%EF%BC%9F"><span class="nav-number">2.2.3.</span> <span class="nav-text">回调队列的任务，什么时候删除？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.3.</span> <span class="nav-text">代码设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.3.1.</span> <span class="nav-text">回调任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E9%98%9F%E5%88%97-RedisDelayQueue"><span class="nav-number">2.3.2.</span> <span class="nav-text">回调队列 RedisDelayQueue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E7%BA%BF%E7%A8%8B-RedisDelayQueueHandler"><span class="nav-number">2.3.3.</span> <span class="nav-text">回调线程 RedisDelayQueueHandler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%B1%E7%BB%AA%E9%98%9F%E5%88%97-RedisReadyQueue"><span class="nav-number">2.3.4.</span> <span class="nav-text">就绪队列 RedisReadyQueue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%B1%E7%BB%AA%E7%BA%BF%E7%A8%8B-RedisReadyQueueHandler"><span class="nav-number">2.3.5.</span> <span class="nav-text">就绪线程 RedisReadyQueueHandler</span></a></li></ol></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/02/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6-01-%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          重试机制-01-使用Redis实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-09-02 13:54:44" itemprop="dateCreated datePublished" datetime="2021-09-02T13:54:44+08:00">2021-09-02</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A">https://mp.weixin.qq.com/s/rBJYGiV4Jq8qhSb4Fcmb9A</a></p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><ul>
+<li>超时重试，一方面保障业务成功，另一方面保障重试操作不会积压</li>
+</ul>
+<h2 id="Redis实现方式"><a href="#Redis实现方式" class="headerlink" title="Redis实现方式"></a>Redis实现方式</h2><h3 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h3><ul>
+<li><p>将<strong>回调任务</strong>丢入一个<strong>回调队列</strong>中，由指定的线程去处理队列中的<strong>回调任务</strong>。</p>
+</li>
+<li><p>为了避免本地内存的丢失，所以队列可以使用<strong>高可用</strong>的redis集群。</p>
+</li>
+<li><p>就绪队列</p>
+</li>
+</ul>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolmjWs1XAFicqE1Wtc8cLMsIxeuUM6xiau1wCLuCJn8tU4MWLrNN9OFhO4w/640" alt="Image"></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/48MFTQpxichlDnH6mldQ6LZseXgnLkolm57lXIGDCsusx8eUDCV6UTkCScChtpTAiaGuHgB96dK6GVfooqPrTNoA/640" alt="Image"></p>
+<h3 id="设计锚点"><a href="#设计锚点" class="headerlink" title="设计锚点"></a>设计锚点</h3><h4 id="回调任务失败如何处理，直接重新丢入回调队列吗？"><a href="#回调任务失败如何处理，直接重新丢入回调队列吗？" class="headerlink" title="回调任务失败如何处理，直接重新丢入回调队列吗？"></a><strong>回调任务失败如何处理，直接重新丢入回调队列吗？</strong></h4><p>一般出现回调失败的原因大部分都是因为系统存在一定的bug因素导致的，需要人工介入手工修复的机率较大，所以回调的间隔一般不会是连续性的立即回调，而是呈现一个阶段性的回调处理，例如分别间隔3秒，30秒，1min，3min，9min，30min，60min…的间隔进行回调尝试，如果经过多次回调都始终处于失败状态，则需要进行专门的记录。</p>
+<h4 id="回调队列的任务获取到之后，什么时候执行任务？"><a href="#回调队列的任务获取到之后，什么时候执行任务？" class="headerlink" title="回调队列的任务获取到之后，什么时候执行任务？"></a><strong>回调队列的任务获取到之后，什么时候执行任务？</strong></h4><p>这里可以利用到一个redis的zset数据结构。zset结构中基本存储信息和set结构类似，但是会给每个元素都有一个排分的score标示，根据排分的大小会在内存中进行排序操作。所以可以将时间戳作为排分的计数项，时间戳靠前的排在zset的前头，那么在进行回调任务处理的时候就会被优先读取出来。</p>
+<p>从回调队列取出的任务，判断当前的时间戳是否小于或等于预期的执行时间：是，进行业务回调了。否，？</p>
+<h4 id="回调队列的任务，什么时候删除？"><a href="#回调队列的任务，什么时候删除？" class="headerlink" title="回调队列的任务，什么时候删除？"></a><strong>回调队列的任务，什么时候删除？</strong></h4><p><strong>回调任务</strong>必须在<strong>回调成功</strong>之后再去进行删除。但是如果回调过程中如果网络通信较慢，可能会导致回调队列的消费效率较低，容易出现堵塞的情况发生。</p>
+<p>所以这里引入了一个<strong>就绪队列</strong>的设计  <!--这里过度设计了，因为实际情况中，回调队列的长度是正常业务的千分之一--></p>
+<p>当回调队列中的任务的执行时间达到预期的时候，就将其放入到就绪队列中，这份转移的工作交给了专门的就绪线程去处理。并且一旦转移到就绪队列之后，便将其从回调队列移除。</p>
+<p>就绪队列是采用了redis的queue队列进行存储，满足了先进先出的优先级设计需求。</p>
+<h3 id="代码设计"><a href="#代码设计" class="headerlink" title="代码设计"></a>代码设计</h3><h4 id="回调任务"><a href="#回调任务" class="headerlink" title="回调任务"></a>回调任务</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskInfo</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">1003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTaskSortItem</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2003963035927679825L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> taskId;</span><br><span class="line">    <span class="keyword">private</span> String topic;</span><br><span class="line">    <span class="keyword">private</span> Long executeTime;</span><br><span class="line">    <span class="keyword">private</span> Long executeTimeout;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> retryTimes;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="回调队列-RedisDelayQueue"><a href="#回调队列-RedisDelayQueue" class="headerlink" title="回调队列 RedisDelayQueue"></a>回调队列 RedisDelayQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">RedisQueue</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 弹出任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">T <span class="title">pop</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 放入任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">put</span><span class="params">(T t)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 删除队列中的一项内容</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(T item)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisDelayQueue&quot;)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskSortItem</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String redisDelayQueueKey = <span class="string">&quot;redis:delay:pay:notify&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object mutex = <span class="keyword">new</span> Object();</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskSortItem <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (mutex) &#123;</span><br><span class="line">            Set&lt;Tuple&gt; rangeSet = redisService.zRangeWithScores(redisDelayQueueKey, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">for</span> (Tuple tuple : rangeSet) &#123;</span><br><span class="line">                <span class="keyword">long</span> currentTimeMillis = System.currentTimeMillis();</span><br><span class="line">                <span class="keyword">double</span> expireTime = tuple.getScore();</span><br><span class="line">                <span class="keyword">if</span> ((currentTimeMillis - expireTime) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    DelayTaskSortItem delayTaskInfo = JSON.parseObject(tuple.getElement(), DelayTaskSortItem.class);</span><br><span class="line">                    <span class="keyword">return</span> delayTaskInfo;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zAdd(redisDelayQueueKey, delayTaskSortItem.getExecuteTime(), JSON.toJSONString(delayTaskSortItem));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskSortItem delayTaskSortItem)</span> </span>&#123;</span><br><span class="line">        redisService.zRem(redisDelayQueueKey, Arrays.asList(String.valueOf(JSON.toJSONString(delayTaskSortItem))));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="回调线程-RedisDelayQueueHandler"><a href="#回调线程-RedisDelayQueueHandler" class="headerlink" title="回调线程 RedisDelayQueueHandler"></a>回调线程 RedisDelayQueueHandler</h4><p>将回调队列中的元素转换到就绪队列的专门处理线程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDelayQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisDelayQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskSortItem&gt; redisDelayQueue;</span><br><span class="line">    <span class="meta">@Resource(name = &quot;redisReadyQueue&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> RedisQueue&lt;DelayTaskInfo&gt; redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> IDistributionLock distributionLock;</span><br><span class="line">   </span><br><span class="line">  <span class="comment">/*@SneakyThrows - Project Lombok</span></span><br><span class="line"><span class="comment">@SneakyThrows can be used to sneakily throw checked exceptions without actually declaring this in your method&#x27;s throws clause.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                DelayTaskSortItem delayTaskSortItem= redisDelayQueue.pop();</span><br><span class="line">                <span class="keyword">if</span> (delayTaskSortItem == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                String lockKey = <span class="string">&quot;pay:notify:dequeue:lock&quot;</span> + delayTaskSortItem.getTaskId();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">boolean</span> lockStatus = distributionLock.tryLockTimeOut(lockKey, <span class="number">3000</span>);</span><br><span class="line">                    <span class="keyword">if</span> (!lockStatus) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span>(delayTaskSortItem.getExecuteTime() &gt; System.currentTimeMillis())&#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"> </span><br><span class="line">                    <span class="keyword">if</span>(delayTaskInfo.getExecuteTime() &gt; System.currentTimeMillis()) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">//推入任务到达就绪队列之前需要检查是否符合条件：执行任务时间，任务池和延迟队列任务是否一致，任务id是否一致</span></span><br><span class="line">                    log.info(<span class="string">&quot;推入任务：&quot;</span>+delayTaskInfo);</span><br><span class="line">                    redisReadyQueue.put(delayTaskInfo);</span><br><span class="line">                    redisDelayQueue.delete(delayTaskSortItem);</span><br><span class="line">                   </span><br><span class="line">                &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付的延迟队列出现异常情况1：&quot;</span>, e);</span><br><span class="line">                &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">                    distributionLock.releaseLock(lockKey);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.info(<span class="string">&quot;支付的延迟队列出现异常情况2：&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="就绪队列-RedisReadyQueue"><a href="#就绪队列-RedisReadyQueue" class="headerlink" title="就绪队列 RedisReadyQueue"></a>就绪队列 RedisReadyQueue</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;redisReadyQueue&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueue</span> <span class="keyword">implements</span> <span class="title">RedisQueue</span>&lt;<span class="title">DelayTaskInfo</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisService redisService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String REDIS_READY_QUEUE_KEY = <span class="string">&quot;redis:ready:queue:pay&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> DelayTaskInfo <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String item = redisService.rpop(REDIS_READY_QUEUE_KEY);</span><br><span class="line">        <span class="keyword">return</span> JSON.parseObject(item,DelayTaskInfo.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">put</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        Long id = -<span class="number">1L</span>;</span><br><span class="line">        id = redisService.lpush(REDIS_READY_QUEUE_KEY, JSON.toJSONString(delayTaskInfo));</span><br><span class="line">        <span class="keyword">return</span> id &gt; <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">delete</span><span class="params">(DelayTaskInfo delayTaskInfo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="就绪线程-RedisReadyQueueHandler"><a href="#就绪线程-RedisReadyQueueHandler" class="headerlink" title="就绪线程 RedisReadyQueueHandler"></a>就绪线程 RedisReadyQueueHandler</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisReadyQueueHandler</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisReadyQueue redisReadyQueue;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> RedisDelayQueue redisDelayQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SneakyThrows</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            DelayTaskInfo delayTaskInfo = redisReadyQueue.pop();</span><br><span class="line">            log.info(<span class="string">&quot;弹出任务：delayTaskInfo is &#123;&#125;&quot;</span>,delayTaskInfo);</span><br><span class="line">            ResponseEntity&lt;String&gt; responseEntity = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (HttpStatus.OK.equals(responseEntity.getStatusCode())) &#123;</span><br><span class="line">                    log.info(<span class="string">&quot;支付回调成功！====== &quot;</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;支付业务回调失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">                retryAgain(delayTaskInfo);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 进入重试，放入回调队列</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">retryAgain</span><span class="params">(DelayTaskInfo delayTaskInfo)</span></span>&#123;</span><br><span class="line">        <span class="comment">//进入重试环节，放入回调队列</span></span><br><span class="line">        DelayTaskSortItem delayTaskSortItem = <span class="keyword">new</span> DelayTaskSortItem(delayTaskInfo.getTaskId(),PAY_TOPIC,delayTaskInfo.getExecuteTime());</span><br><span class="line">      </span><br><span class="line">        redisDelayQueue.put(delayTaskSortItem);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/31/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-03-%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8Feign/" rel="prev" title="spring-cloud-03-REST请求框架Feign">
+                  <i class="fa fa-chevron-left"></i> spring-cloud-03-REST请求框架Feign
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/09/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-Exception/" rel="next" title="JDK-lang-Exception">
+                  JDK-lang-Exception <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="数据库中间件应用场景数据库中间件可以理解为是一种具有连接池功能，但比连接池更高级的、带很多附加功能的辅助组件 zdal整体架构它提供分库分表，结果集合并，sql解析，数据库failover动态切换等数据访问层统一解决方案     如上图所示，zdal有四个重要的组成部分：  价值体现–客户端Client包。对外暴露基本操作接口，用于业务层简单黑盒的操作数据源；业务只和client交互，动态切换&#x2F;路">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zdal">
+<meta property="og:url" content="http://example.com/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/zdal/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="数据库中间件应用场景数据库中间件可以理解为是一种具有连接池功能，但比连接池更高级的、带很多附加功能的辅助组件 zdal整体架构它提供分库分表，结果集合并，sql解析，数据库failover动态切换等数据访问层统一解决方案     如上图所示，zdal有四个重要的组成部分：  价值体现–客户端Client包。对外暴露基本操作接口，用于业务层简单黑盒的操作数据源；业务只和client交互，动态切换&#x2F;路">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlsjBvGtjIvnBGkwo2aCk2RL8nkM3lOnYGUe7OiaviaD6tUvmmVSic5oc8g/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlmiavmffCxvvYmNMSdJGm2ACSD6TaSia0NLzc1qJ7MoPib8ibia7YfVj3pwQ/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlr3yDerBNFgibYWn2f1TysZXualq6yxgsVEvwoF1ickSDWiaibEIOibRmWBA/640">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlNXzP18BUjaOKovJbI1MGAzfvJJJfp8hncBuwAvE6QdkLicQwXE7B4icA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-06-14T15:41:50.000Z">
+<meta property="article:modified_time" content="2021-09-08T10:32:32.251Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlsjBvGtjIvnBGkwo2aCk2RL8nkM3lOnYGUe7OiaviaD6tUvmmVSic5oc8g/640">
+
+
+<link rel="canonical" href="http://example.com/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/zdal/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>zdal | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">数据库中间件应用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#zdal%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">zdal整体架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#zdal%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">zdal运行原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%8A%A0%E8%BD%BD%E5%92%8Cbean%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">配置加载和bean初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB"><span class="nav-number">3.2.</span> <span class="nav-text">读写分离</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E9%85%8D%E7%BD%AE%E7%9A%84%E5%8A%A0%E8%BD%BD"><span class="nav-number">3.2.1.</span> <span class="nav-text">读写分离配置的加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E6%80%8E%E4%B9%88%E8%B5%B7%E4%BD%9C%E7%94%A8"><span class="nav-number">3.2.2.</span> <span class="nav-text">读写分离怎么起作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/14/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/zdal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          zdal
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-06-14 23:41:50" itemprop="dateCreated datePublished" datetime="2021-06-14T23:41:50+08:00">2021-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-08 18:32:32" itemprop="dateModified" datetime="2021-09-08T18:32:32+08:00">2021-09-08</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="数据库中间件应用场景"><a href="#数据库中间件应用场景" class="headerlink" title="数据库中间件应用场景"></a>数据库中间件应用场景</h1><p>数据库中间件可以理解为是一种具有连接池功能，但比连接池更高级的、带很多附加功能的辅助组件</p>
+<h1 id="zdal整体架构"><a href="#zdal整体架构" class="headerlink" title="zdal整体架构"></a>zdal整体架构</h1><p>它提供分库分表，结果集合并，sql解析，数据库failover动态切换等数据访问层统一解决方案</p>
+<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlsjBvGtjIvnBGkwo2aCk2RL8nkM3lOnYGUe7OiaviaD6tUvmmVSic5oc8g/640" alt="Image" style="zoom: 33%;" />
+
+
+
+<p>如上图所示，zdal有四个重要的组成部分：</p>
+<ul>
+<li><strong>价值体现–客户端Client包</strong>。对外暴露基本操作接口，用于业务层简单黑盒的操作数据源；业务只和client交互，动态切换/路由等逻辑只需要进行规则配置，相关逻辑由zdal实现。</li>
+<li><strong>核心功能–连接管理datasource包</strong>。最核心的能力，提供多种类型数据库的连接管理；</li>
+<li><strong>关键能力–SQL解析parser包</strong>。基础SQL解析能力；解析sql类型、字段名称、数据库等等，配合规则进行路由</li>
+<li><strong>扩展能力–库表路由rule包</strong>。根据parser解析出的字段确定逻辑库表和物理库表。</li>
+</ul>
+<p>组件图对整体架构和各组件及相互联系的理解可以起到很好的帮助。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlmiavmffCxvvYmNMSdJGm2ACSD6TaSia0NLzc1qJ7MoPib8ibia7YfVj3pwQ/640" alt="Image"></p>
+<ul>
+<li>Client对应用层暴露的数据源、负责监听配置动态变更的监听组件、负责加载组织各部分的配置组件、负责加载spring bean 和库表规则的配置组件；</li>
+<li>Client中加载了规则组件，实现逻辑表和数据库的路由规则。</li>
+<li>Client中的库表配置调用datasource中的数据源管理服务并构建连接池的连接池；</li>
+<li>Client中的SqlDispatcher服务调用SQL解析组件实现SQL解析。</li>
+</ul>
+<h1 id="zdal运行原理"><a href="#zdal运行原理" class="headerlink" title="zdal运行原理"></a>zdal运行原理</h1><h2 id="配置加载和bean初始化"><a href="#配置加载和bean初始化" class="headerlink" title="配置加载和bean初始化"></a>配置加载和bean初始化</h2><p>大部分情况下，我们使用如mybatis这样的ORM框架来进行数据库操作，其实不管是ORM还是其他方式，应用层都需要对数据源进行配置。</p>
+<p>所以，client对外暴露了一个符合JDBC标准的datasource数据源，用来满足应用层ORM等框架配置数据源的要求–<strong>ZdalDataSource</strong></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlr3yDerBNFgibYWn2f1TysZXualq6yxgsVEvwoF1ickSDWiaibEIOibRmWBA/640" alt="Image"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;只提供了一个init方法，这也是spring启动时时，必须要调用的初始化方法，所有功能，都从这里开始</span><br><span class="line">public class ZdalDataSource extends AbstractZdalDataSource implements DataSource&#123;</span><br><span class="line">    public void init() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            super.initZdalDataSource();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            CONFIG_LOGGER.error(&quot;...&quot;);</span><br><span class="line">            throw new ZdalClientException(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>ZdalDataSource#init()</strong> 方法即为配置加载的核心入口，init中负责加载spring配置，根据配置初始化数据源，并创建连接池，同时，将逻辑表和物理库的对应关系都维护起来供后续路由调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">    &#x2F;*父类的init方法*&#x2F;</span><br><span class="line">protected void initZdalDataSource() &#123;</span><br><span class="line">    &#x2F;*用FileSystemXmlApplicationContext方式加载配置文件中的数据源和规则，转化成zdalConfig对象*&#x2F;</span><br><span class="line">    this.zdalConfig &#x3D; ZdalConfigurationLoader.getInstance().getZdalConfiguration(appName,dbmode, appDsName, configPath);</span><br><span class="line">    this.dbConfigType &#x3D; zdalConfig.getDataSourceConfigType();</span><br><span class="line">   this.dbType &#x3D; zdalConfig.getDbType();</span><br><span class="line">   &#x2F;&#x2F;初始化数据源</span><br><span class="line">   this.initDataSources(zdalConfig);</span><br><span class="line">   this.inited.set(true);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的类图和这里的两个入口方法大概了解到zdal配置加载的启动流程。下面我们就来详细看一下，读写分离和分库分表的规则是怎么被加载，怎么起作用的。</p>
+<h2 id="读写分离"><a href="#读写分离" class="headerlink" title="读写分离"></a>读写分离</h2><h3 id="读写分离配置的加载"><a href="#读写分离配置的加载" class="headerlink" title="读写分离配置的加载"></a>读写分离配置的加载</h3><p>首先，我们需要有数据源的相关配置，如下图：<img src="https://mmbiz.qpic.cn/mmbiz_png/xE6oscyT530nUqCzH4yRGt1CU99NeiaIlNXzP18BUjaOKovJbI1MGAzfvJJJfp8hncBuwAvE6QdkLicQwXE7B4icA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image">此XML配置会在init方法被调用时，被初始化，解析成ZdalConfig类的属性，ZdalConfig类的主要成员见下面代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZdalConfig</span> </span>&#123;</span><br><span class="line">    <span class="comment">/** key=dsName;value=DataSourceParameter 所有物理数据源的配置项,比如用户名，密码，库名等 */</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, DataSourceParameter&gt; dataSourceParameters = <span class="keyword">new</span> ConcurrentHashMap&lt;String, DataSourceParameter&gt;();</span><br><span class="line">    <span class="comment">/** 逻辑数据源和物理数据源的对应关系:key=logicDsName,value=physicDsName */</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt;  logicPhysicsDsNames  = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">/** 数据源的读写规则，比如只读，或读写等配置*/</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; groupRules = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">/** 异常转移的数据源规则*/</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; failoverRules = <span class="keyword">new</span> ConcurrentHashMap&lt;String, String&gt;();</span><br><span class="line">    <span class="comment">//一份完整的读写分离和分库分表规则配置</span></span><br><span class="line">    <span class="keyword">private</span> AppRule appRootRule;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，xml中的规则，被解析到xxxRules里。这里以groupRules为例，failover同理。</p>
+<p>下一步则是通过解析得到的zdalConfig 来初始化数据源：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">protected final void initDataSources(ZdalConfig zdalConfig) &#123;</span><br><span class="line">    &#x2F;&#x2F;DataSourceParameter中存的是数据源参数，如用户名密码，最大最小连接数等</span><br><span class="line">    for (Entry&lt;String, DataSourceParameter&gt; entry : zdalConfig.getDataSourceParameters().entrySet()) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">           &#x2F;&#x2F;初始化连接池</span><br><span class="line">           ZDataSource zDataSource &#x3D; new ZDataSource(&#x2F;*设置最大最小连接数*&#x2F;createDataSourceDO(entry.getValue(),zdalConfig.getDbType(), appDsName + &quot;.&quot; + entry.getKey()));</span><br><span class="line">           this.dataSourcesMap.put(entry.getKey(), zDataSource);</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            &#x2F;&#x2F;...</span><br><span class="line">        &#125;</span><br><span class="line">   &#125;</span><br><span class="line">  &#x2F;&#x2F;其他分支略，只看最简单的分组模式</span><br><span class="line">  if (dbConfigType.isGroup()) &#123;</span><br><span class="line">       &#x2F;&#x2F;读写配置赋值</span><br><span class="line">       this.rwDataSourcePoolConfig &#x3D; zdalConfig.getGroupRules();</span><br><span class="line">       &#x2F;&#x2F;初始化多份读库下的负载均衡</span><br><span class="line">       this.initForLoadBalance(zdalConfig.getDbType());</span><br><span class="line">  &#125;</span><br><span class="line">  &#x2F;&#x2F;注册监听：为了满足动态切换</span><br><span class="line">  this.initConfigListener();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>initForLoadBalance的方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">private void initForLoadBalance(DBType dbType) &#123;</span><br><span class="line">    Map&lt;String, DBSelector&gt; dsSelectors &#x3D; this.buildRwDbSelectors(this.rwDataSourcePoolConfig);</span><br><span class="line">    this.runtimeConfigHolder.set(new ZdalRuntime(dsSelectors));</span><br><span class="line">    this.setDbTypeForDBSelector(dbType);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，首先构建出了DB选择器，然后赋值给了runtimeConfigHolder供运行时获取。而构建DB选择器的时候，其实是按读写两个维度，把所有数据源都构建了一遍，即group_r和group_w下都包含5个数据源，只不过各自的权重不一样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;比如按上面的配置写库只有一个，但是也会包含全数据源</span><br><span class="line"></span><br><span class="line">group_0_w_0 :&lt; bean:read0DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_1 :&lt; bean:writeDataSource , writeWeight:10&gt;</span><br><span class="line">group_0_w_2 :&lt; bean:read1DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_3 :&lt; bean:read2DataSource , writeWeight:0&gt;</span><br><span class="line">group_0_w_4 :&lt; bean:read3DataSource , writeWeight:0&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;上述就是写相关的DBSelecter的内容。</span><br></pre></td></tr></table></figure>
+
+<h3 id="读写分离怎么起作用"><a href="#读写分离怎么起作用" class="headerlink" title="读写分离怎么起作用"></a>读写分离怎么起作用</h3><p>以delete为例，更新删除是要操作写库的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public void delete(ZdalDataSource dataSource) &#123;</span><br><span class="line">    String deleteSql &#x3D; &quot;delete from test&quot;;</span><br><span class="line">    Connection conn &#x3D; null;</span><br><span class="line">    PreparedStatement pst &#x3D; null;</span><br><span class="line">    try &#123;</span><br><span class="line">       conn &#x3D; dataSource.getConnection();</span><br><span class="line">       pst &#x3D; conn.prepareStatement(deleteSql);</span><br><span class="line">       pst.execute();</span><br><span class="line">    &#125; catch (Exception e) &#123;</span><br><span class="line">           &#x2F;&#x2F;...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">          &#x2F;&#x2F;资源关闭</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>getConnection会从上文中提到的runtimeConfigHolder中获取DBSelecter，然后执行execute方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> public boolean execute() throws SQLException &#123;</span><br><span class="line">    SqlType sqlType &#x3D; getSqlType(sql);</span><br><span class="line">    &#x2F;&#x2F; SELECT相关的就选择group_r对应的DBSelecter</span><br><span class="line">   if (sqlType &#x3D;&#x3D; SqlType.SELECT || sqlType &#x3D;&#x3D; SqlType.SELECT_FOR_UPDATE|| sqlType &#x3D;&#x3D; SqlType.SELECT_FROM_DUAL) &#123;</span><br><span class="line">     &#x2F;&#x2F;略</span><br><span class="line">    return true;</span><br><span class="line">    &#x2F;&#x2F;update&#x2F;delete相关的就选择group_w对应的DBSelecter</span><br><span class="line">  &#125; else if (sqlType &#x3D;&#x3D; SqlType.INSERT || sqlType &#x3D;&#x3D; SqlType.UPDATE|| sqlType &#x3D;&#x3D; SqlType.DELETE) &#123;</span><br><span class="line">       if (super.dbConfigType &#x3D;&#x3D; DataSourceConfigType.GROUP) &#123;</span><br><span class="line">           executeUpdate0();</span><br><span class="line">       &#125; else &#123;</span><br><span class="line">           executeUpdate();</span><br><span class="line">      &#125;</span><br><span class="line">      return false;</span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是读取相关的，那就选_r的DBSelecter，如果是写相关的，那就选_W的DBSelecter。那么executeUpdate0中是怎么执行区分读写数据源的呢，其实就是把这一组的数据源根据权重筛选一遍。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; WeightRandom#select(int[], java.lang.String[])</span><br><span class="line">private String select(int[] areaEnds, String[] keys) &#123;</span><br><span class="line">   &#x2F;&#x2F;这里的areaEnds数组，是一个累加范围值数据</span><br><span class="line">   &#x2F;&#x2F;比如三个库权重    10   9   8</span><br><span class="line">   &#x2F;&#x2F;那么areaEnds就是  10  19  27 是对每个权重的累加，最后一个值是总和</span><br><span class="line">   int sum &#x3D; areaEnds[areaEnds.length - 1];</span><br><span class="line">   &#x2F;&#x2F;这样随机出来的数，是符合权重分布的</span><br><span class="line">   int rand &#x3D; random.nextInt(sum);</span><br><span class="line">   for (int i &#x3D; 0; i &lt; areaEnds.length; i++) &#123;</span><br><span class="line">       if (rand &lt; areaEnds[i]) &#123;</span><br><span class="line">           return keys[i];</span><br><span class="line">   &#125;</span><br><span class="line">   return null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇文章，把阿里数据库中间件相关的组件和加载流程进行了总结，就一个最基本的分组读写分离的流程，对内部实现进行了阐述。看源码时，比如dubbo这些中间件其实是比较容易入手的，因为他们都依托于Spring进行JavaBean的装载，所有，对Spring容器暴露的那些init、load方法，就是很好的切入点。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E5%8D%8F%E8%AE%AE/%E5%86%85%E6%A0%B8%E8%B0%83%E4%BC%98%E5%8F%82%E6%95%B0/" rel="prev" title="内核调优参数">
+                  <i class="fa fa-chevron-left"></i> 内核调优参数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/15/database/redis/redis%E5%AE%9E%E8%B7%B5-01-%E5%AE%9E%E7%8E%B0%E7%A7%AF%E5%88%86%E6%8E%92%E8%A1%8C%E6%A6%9C/" rel="next" title="redis实践-01-实现积分排行榜">
+                  redis实践-01-实现积分排行榜 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

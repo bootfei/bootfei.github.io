@@ -21,7 +21,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
   <meta name="description" content="Redis 数据类型【问题】  Redis 有哪些数据类型？ Redis 的数据类型分别适用于什么样的场景？   【解答】  Redis 数据类型和应用\ 数据类型的特性和应用细节点较多，详情可以参考：Redis 数据类型(opens new window)  （1）Redis 支持五种基本数据类型：  String：常用于 KV 缓存 Hash：存储结构化数据，如：产品信息、用户信息等。 Lis">
@@ -31,15 +31,18 @@
 <meta property="og:site_name" content="BootFei&#39;s Blog">
 <meta property="og:description" content="Redis 数据类型【问题】  Redis 有哪些数据类型？ Redis 的数据类型分别适用于什么样的场景？   【解答】  Redis 数据类型和应用\ 数据类型的特性和应用细节点较多，详情可以参考：Redis 数据类型(opens new window)  （1）Redis 支持五种基本数据类型：  String：常用于 KV 缓存 Hash：存储结构化数据，如：产品信息、用户信息等。 Lis">
 <meta property="og:locale">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210516211822874.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210516211842414.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/e15884cf9931cea8d8c2e88b94c7858c.webp?x-oss-process=image/format,png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/cca8d7792e4958d52a43ff661ef7de74.webp?x-oss-process=image/format,png">
 <meta property="og:image" content="http://dunwu.test.upcdn.net/snap/20200131135847.png">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2018/4/18/162d7773080d4570?imageView2/0/w/1280/h/960/format/webp/ignore-error/1">
 <meta property="article:published_time" content="2021-02-20T02:22:35.000Z">
-<meta property="article:modified_time" content="2021-02-20T02:33:27.289Z">
+<meta property="article:modified_time" content="2023-03-21T06:14:32.646Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="leetcode">
 <meta property="article:tag" content="interview">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://dunwu.test.upcdn.net/snap/20200131135847.png">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20210516211822874.png">
 
 
 <link rel="canonical" href="http://example.com/2021/02/20/database/redis/redis-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
@@ -189,7 +192,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Redis 数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0"><span class="nav-number">2.</span> <span class="nav-text">Redis 内存淘汰</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">Redis 持久化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E4%BA%8B%E5%8A%A1"><span class="nav-number">4.</span> <span class="nav-text">Redis 事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E7%AE%A1%E9%81%93"><span class="nav-number">5.</span> <span class="nav-text">Redis 管道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E9%AB%98%E5%B9%B6%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text">Redis 高并发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%A4%8D%E5%88%B6"><span class="nav-number">7.</span> <span class="nav-text">Redis 复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%93%A8%E5%85%B5"><span class="nav-number">8.</span> <span class="nav-text">Redis 哨兵</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-vs-Memcached"><span class="nav-number">9.</span> <span class="nav-text">Redis vs. Memcached</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Redis 数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-zset%E8%B7%B3%E8%A1%A8%E5%92%8C%E5%8E%8B%E7%BC%A9%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">Redis zset跳表和压缩表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0"><span class="nav-number">3.</span> <span class="nav-text">Redis 内存淘汰</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E5%A4%A7Key%E5%88%A0%E9%99%A4"><span class="nav-number">4.</span> <span class="nav-text">Redis大Key删除</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%BC%82%E6%AD%A5%E5%88%A0%E9%99%A4"><span class="nav-number">4.1.</span> <span class="nav-text">(1) 异步删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BD%BF%E7%94%A8%E5%88%86%E6%89%B9%E5%88%A0%E9%99%A4"><span class="nav-number">4.2.</span> <span class="nav-text">(2) 使用分批删除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis%E5%AE%9E%E7%8E%B0%E9%99%90%E6%B5%81"><span class="nav-number">5.</span> <span class="nav-text">Redis实现限流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%EF%BC%9A%E5%9F%BA%E4%BA%8ERedis%E7%9A%84setnx%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">5.1.</span> <span class="nav-text">第一种：基于Redis的setnx的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%EF%BC%9A%E5%9F%BA%E4%BA%8ERedis%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84zset"><span class="nav-number">5.2.</span> <span class="nav-text">第二种：基于Redis的数据结构zset</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">Redis 持久化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E4%BA%8B%E5%8A%A1"><span class="nav-number">7.</span> <span class="nav-text">Redis 事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E7%AE%A1%E9%81%93"><span class="nav-number">8.</span> <span class="nav-text">Redis 管道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E9%AB%98%E5%B9%B6%E5%8F%91"><span class="nav-number">9.</span> <span class="nav-text">Redis 高并发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%A4%8D%E5%88%B6"><span class="nav-number">10.</span> <span class="nav-text">Redis 复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-%E5%93%A8%E5%85%B5"><span class="nav-number">11.</span> <span class="nav-text">Redis 哨兵</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-vs-Memcached"><span class="nav-number">12.</span> <span class="nav-text">Redis vs. Memcached</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -203,20 +206,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -280,10 +283,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2021-02-20 10:22:35 / Modified: 10:33:27" itemprop="dateCreated datePublished" datetime="2021-02-20T10:22:35+08:00">2021-02-20</time>
+      <time title="Created: 2021-02-20 10:22:35" itemprop="dateCreated datePublished" datetime="2021-02-20T10:22:35+08:00">2021-02-20</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2023-03-21 14:14:32" itemprop="dateModified" datetime="2023-03-21T14:14:32+08:00">2023-03-21</time>
+      </span>
 
   
 </div>
@@ -315,7 +324,13 @@
 <li>Sorted Set：存储含评分的去重列表，如：各种排行榜。</li>
 </ul>
 <p>（2）除此以外，还有 Bitmaps、HyperLogLogs、GEO、Streams 等高级数据类型。</p>
-<h2 id="Redis-内存淘汰"><a href="#Redis-内存淘汰" class="headerlink" title="#Redis 内存淘汰"></a><a target="_blank" rel="noopener" href="https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0">#</a>Redis 内存淘汰</h2><p>【问题】</p>
+<h2 id="Redis-zset跳表和压缩表"><a href="#Redis-zset跳表和压缩表" class="headerlink" title="Redis zset跳表和压缩表"></a>Redis zset跳表和压缩表</h2><p>ZSet 有两种不同的实现，分别是 ziplist 和 skiplist。具体使用哪种结构进行存储，规则如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ziplist：满足以下两个条件</span><br><span class="line"></span><br><span class="line">- [value,score] 键值对数量少于 128 个</span><br><span class="line"></span><br><span class="line">- 每个元素的长度小于 64 字节</span><br><span class="line"></span><br><span class="line">skiplist：不满足以上两个条件时使用跳表、组合了 hash 和 skiplist</span><br><span class="line"></span><br><span class="line">- hash 用来存储 value 到 score 的映射，这样就可以在 O(1) 时间内找到 value 对应的分数</span><br><span class="line"></span><br><span class="line">- skiplist 按照从小到大的顺序存储分数</span><br></pre></td></tr></table></figure>
+
+<p>skiplist 每个元素的值都是 [value,score] 对使用 ziplist 的示意图如下所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210516211822874.png" alt="在这里插入图片描述"><br>使用跳表时的示意图：</p>
+<p><img src="https://img-blog.csdnimg.cn/20210516211842414.png" alt="在这里插入图片描述"><br>ziplist 压缩列表本文不是重点讨论范围，我们着重来看下跳跃表 skiplist。</p>
+<h2 id="Redis-内存淘汰"><a href="#Redis-内存淘汰" class="headerlink" title="Redis 内存淘汰"></a>Redis 内存淘汰</h2><p>【问题】</p>
 <ul>
 <li>Redis 有哪些内存淘汰策略？</li>
 <li>这些淘汰策略分别适用于什么场景？</li>
@@ -347,7 +362,27 @@
 <li>将 key 设置过期时间实际上会消耗更多的内存，因此我们建议使用 <code>allkeys-lru</code> 策略从而更有效率的使用内存。</li>
 </ul>
 <p>（4）LRU 算法实现思路：可以继承 LinkedHashMap，并覆写 removeEldestEntry 方法来实现一个最简单的 LRUCache</p>
-<h2 id="Redis-持久化"><a href="#Redis-持久化" class="headerlink" title="#Redis 持久化"></a><a target="_blank" rel="noopener" href="https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-%E6%8C%81%E4%B9%85%E5%8C%96">#</a>Redis 持久化</h2><p>【问题】</p>
+<h2 id="Redis大Key删除"><a href="#Redis大Key删除" class="headerlink" title="Redis大Key删除"></a>Redis大Key删除</h2><h3 id="1-异步删除"><a href="#1-异步删除" class="headerlink" title="(1) 异步删除"></a>(1) 异步删除</h3><ul>
+<li>开启lazy free功能，如果触发自动过期删除，则会异步执行</li>
+<li>使用unlink命令手动触发，会异步执行删除操作</li>
+</ul>
+<h3 id="2-使用分批删除"><a href="#2-使用分批删除" class="headerlink" title="(2) 使用分批删除"></a>(2) 使用分批删除</h3><p>对于集合类型的数据，可以通过客户端手动scan轮询的方式，每次只删除一部分的数据</p>
+<h2 id="Redis实现限流"><a href="#Redis实现限流" class="headerlink" title="Redis实现限流"></a>Redis实现限流</h2><h3 id="第一种：基于Redis的setnx的操作"><a href="#第一种：基于Redis的setnx的操作" class="headerlink" title="第一种：基于Redis的setnx的操作"></a>第一种：基于Redis的setnx的操作</h3><p>我们在使用Redis的分布式锁的时候，大家都知道是依靠了setnx的指令，在CAS（Compare and swap）的操作的时候，同时给指定的key设置了过期实践（expire），我们在限流的主要目的就是为了在单位时间内，有且仅有N数量的请求能够访问我的代码程序。所以依靠setnx可以很轻松的做到这方面的功能。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setNx(key, 20, 10,TimeUnit.Seconds)</span><br></pre></td></tr></table></figure>
+
+<p>比如我们需要在10秒内限定20个请求，那么我们在setnx的时候可以设置过期时间10，当请求的setnx数量达到20时候即达到了限流效果。代码比较简单就不做展示了。当然这种做法的弊端是很多的，比如当统计1-10秒的时候，无法统计2-11秒之内，如果需要统计N秒内的M个请求，那么我们的Redis中需要保持N个key等等问题</p>
+<h3 id="第二种：基于Redis的数据结构zset"><a href="#第二种：基于Redis的数据结构zset" class="headerlink" title="第二种：基于Redis的数据结构zset"></a>第二种：基于Redis的数据结构zset</h3><p>其实限流涉及的最主要的就是滑动窗口，上面也提到1-10怎么变成2-11。其实也就是起始值和末端值都各+1即可。</p>
+<p>而我们如果用Redis的list数据结构可以轻而易举的实现该功能</p>
+<p>我们可以将请求打造成一个zset数组，当每一次请求进来的时候，value保持唯一，可以用UUID生成，而score可以用当前时间戳表示，因为score我们可以用来计算当前时间戳之内有多少的请求数量。而zset数据结构也提供了range方法让我们可以很轻易的获取到2个时间戳内有多少请求</p>
+<img src="https://img-blog.csdnimg.cn/img_convert/e15884cf9931cea8d8c2e88b94c7858c.webp?x-oss-process=image/format,png" alt="image.png" style="zoom:50%;" />
+
+
+
+
+
+<img src="https://img-blog.csdnimg.cn/img_convert/cca8d7792e4958d52a43ff661ef7de74.webp?x-oss-process=image/format,png" alt="image.png" style="zoom:67%;" />
+
+<h2 id="Redis-持久化"><a href="#Redis-持久化" class="headerlink" title="Redis 持久化"></a>Redis 持久化</h2><p>【问题】</p>
 <ul>
 <li>Redis 有几种持久化方式？</li>
 <li>Redis 的不同持久化方式的特性和原理是什么？</li>
@@ -371,7 +406,7 @@
 <p>一般，AOF 设置 <code>appendfsync</code> 同步频率为 <strong><code>everysec</code></strong> 即可。</p>
 <p>（4）RDB or AOF</p>
 <p>建议同时使用 RDB 和 AOF。用 AOF 来保证数据不丢失，作为数据恢复的第一选择; 用 RDB 来做不同程度的冷备，在 AOF 文件都丢失或损坏不可用的时候，还可以使用 RDB 来进行快速的数据恢复。</p>
-<h2 id="Redis-事务"><a href="#Redis-事务" class="headerlink" title="#Redis 事务"></a><a target="_blank" rel="noopener" href="https://dunwu.github.io/db-tutorial/nosql/redis/redis-interview.html#redis-%E4%BA%8B%E5%8A%A1">#</a>Redis 事务</h2><p>【问题】</p>
+<h2 id="Redis-事务"><a href="#Redis-事务" class="headerlink" title="Redis 事务"></a>Redis 事务</h2><p>【问题】</p>
 <ul>
 <li>Redis 的并发竞争问题是什么？如何解决这个问题？</li>
 <li>Redis 支持事务吗？</li>
@@ -492,9 +527,6 @@
 <p>Redis 支持数据的持久化，可以将内存中的数据保持在磁盘中，重启的时候可以再次加载进行使用,而 Memecache 把数据全部存在内存之中</p>
 <p>redis 的速度比 memcached 快很多</p>
 <p>Memcached 是多线程，非阻塞 IO 复用的网络模型；Redis 使用单线程的 IO 复用模型。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2018/4/18/162d7773080d4570?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="Redis与Memcached的区别与比较"></p>
-<p>如果想要更详细了解的话，可以查看慕课网上的这篇手记（非常推荐） <strong>：《脚踏两只船的困惑 - Memcached 与 Redis》</strong>：<a target="_blank" rel="noopener" href="https://www.imooc.com/article/23549">www.imooc.com/article/23549(opens new window)</a></p>
-<p><strong>终极策略：</strong> 使用 Redis 的 String 类型做的事，都可以用 Memcached 替换，以此换取更好的性能提升； 除此以外，优先考虑 Redis；</p>
 
     </div>
 
@@ -512,13 +544,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/02/19/database/redis/redis-6-%E9%94%81%E4%B8%8E%E5%B8%B8%E8%A7%81%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/" rel="prev" title="redis-6-锁与常见缓存问题">
+                <a href="/2021/02/19/database/redis/redis-6-%E9%94%81%E4%B8%8E3%E7%A7%8D%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98/" rel="prev" title="redis-6-锁与常见缓存问题">
                   <i class="fa fa-chevron-left"></i> redis-6-锁与常见缓存问题
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/02/20/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/IO%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8/" rel="next" title="IO模型与多路复用">
-                  IO模型与多路复用 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/03/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/RocketMQ/RocketMQ-01-%E5%85%A5%E9%97%A8/" rel="next" title="RocketMQ-01-入门">
+                  RocketMQ-01-入门 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
@@ -567,13 +599,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="传统IO在开始谈零拷贝之前，首先要对传统的IO方式有一个概念。 基于传统的IO方式，底层实际上通过调用read()和write()来实现。 通过read()把数据从硬盘读取到内核缓冲区，再复制到用户缓冲区；然后再通过write()写入到socket缓冲区，最后写入网卡设备。  整个过程发生了4次用户态和内核态的上下文切换和4次拷贝，具体流程如下：  用户进程通过read()方法向操作系统发起调用，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="由kakfa引深的零copy技术">
+<meta property="og:url" content="http://example.com/2021/04/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/Kafka-04-%E9%9B%B6copy%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="传统IO在开始谈零拷贝之前，首先要对传统的IO方式有一个概念。 基于传统的IO方式，底层实际上通过调用read()和write()来实现。 通过read()把数据从硬盘读取到内核缓冲区，再复制到用户缓冲区；然后再通过write()写入到socket缓冲区，最后写入网卡设备。  整个过程发生了4次用户态和内核态的上下文切换和4次拷贝，具体流程如下：  用户进程通过read()方法向操作系统发起调用，">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZxMVCAtvqB7vjPIJneciauiaqibxcMblRMQoDmgMWB1dEVuNI4URSIbKUA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZxcm1fbqD965WCQRm9yiayVyMheVyRFHXo19M0pfeomCaH8O2OBicpicgA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZ9veTtLOR5gXvOpfiaf5P2SS40KOOm3rKvAsdzRSnHOKVpia2iaeNdO8KA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZibzJ5E3HGYYh1MYJp2Qog7fyXwYjXkqNKkDWO94rZMbAp2MOSPpUj1g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZmMb5P3kcAF4oa244rgSpks8tSLKicDE5U0v7Kice2aLxQUUm1dCyCvxg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-04-01T04:36:24.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.152Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZxMVCAtvqB7vjPIJneciauiaqibxcMblRMQoDmgMWB1dEVuNI4URSIbKUA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/04/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/Kafka-04-%E9%9B%B6copy%E6%8A%80%E6%9C%AF/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>由kakfa引深的零copy技术 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9FIO"><span class="nav-number">1.</span> <span class="nav-text">传统IO</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9B%B6%E6%8B%B7%E8%B4%9D"><span class="nav-number">2.</span> <span class="nav-text">零拷贝</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mmap-write"><span class="nav-number">2.0.1.</span> <span class="nav-text">mmap+write</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sendfile"><span class="nav-number">2.0.2.</span> <span class="nav-text">sendfile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sendfile-DMA-Scatter-Gather"><span class="nav-number">2.0.3.</span> <span class="nav-text">sendfile+DMA Scatter&#x2F;Gather</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">3.</span> <span class="nav-text">应用场景</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/Kafka-04-%E9%9B%B6copy%E6%8A%80%E6%9C%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          由kakfa引深的零copy技术
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-04-01 12:36:24" itemprop="dateCreated datePublished" datetime="2021-04-01T12:36:24+08:00">2021-04-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="传统IO"><a href="#传统IO" class="headerlink" title="传统IO"></a>传统IO</h1><p>在开始谈零拷贝之前，首先要对传统的IO方式有一个概念。</p>
+<p>基于传统的IO方式，底层实际上通过调用<code>read()</code>和<code>write()</code>来实现。</p>
+<p>通过<code>read()</code>把数据从硬盘读取到内核缓冲区，再复制到用户缓冲区；然后再通过<code>write()</code>写入到<code>socket缓冲区</code>，最后写入网卡设备。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZxMVCAtvqB7vjPIJneciauiaqibxcMblRMQoDmgMWB1dEVuNI4URSIbKUA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>整个过程发生了<strong>4次用户态和内核态的上下文切换</strong>和<strong>4次拷贝</strong>，具体流程如下：</p>
+<ol>
+<li>用户进程通过<code>read()</code>方法向操作系统发起调用，此时上下文从用户态转向内核态</li>
+<li>DMA控制器把数据从硬盘中拷贝到读缓冲区</li>
+<li>CPU把读缓冲区数据拷贝到应用缓冲区，上下文从内核态转为用户态，<code>read()</code>返回</li>
+<li>用户进程通过<code>write()</code>方法发起调用，上下文从用户态转为内核态</li>
+<li>CPU将应用缓冲区中数据拷贝到socket缓冲区</li>
+<li>DMA控制器把数据从socket缓冲区拷贝到网卡，上下文从内核态切换回用户态，<code>write()</code>返回</li>
+</ol>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZxcm1fbqD965WCQRm9yiayVyMheVyRFHXo19M0pfeomCaH8O2OBicpicgA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>那么什么又是<strong>DMA</strong>拷贝呢？</p>
+<p>因为对于一个IO操作而言，都是通过CPU发出对应的指令来完成，但是相比CPU来说，IO的速度太慢了，CPU有大量的时间处于等待IO的状态。因此就产生了DMA（Direct Memory Access）直接内存访问技术，本质上来说他就是一块主板上独立的芯片，通过它来进行内存和IO设备的数据传输，从而减少CPU的等待时间。</p>
+<h1 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h1><blockquote>
+<p>零拷贝技术是指计算机执行操作时，CPU不需要先将数据从某处内存复制到另一个特定区域，这种技术通常用于通过网络传输文件时节省CPU周期和内存带宽。</p>
+</blockquote>
+<p>那么对于零拷贝而言，并非真的是完全没有数据拷贝的过程，只不过是减少用户态和内核态的切换次数以及CPU拷贝的次数。</p>
+<p>这里，仅仅有针对性的来谈谈几种常见的零拷贝技术。</p>
+<h3 id="mmap-write"><a href="#mmap-write" class="headerlink" title="mmap+write"></a>mmap+write</h3><p>mmap+write简单来说就是使用<code>mmap</code>替换了read+write中的read操作，减少了一次CPU的拷贝。</p>
+<p><code>mmap</code>主要实现方式是将读缓冲区的地址和用户缓冲区的地址进行映射，内核缓冲区和应用缓冲区共享，从而减少了从读缓冲区到用户缓冲区的一次CPU拷贝。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZ9veTtLOR5gXvOpfiaf5P2SS40KOOm3rKvAsdzRSnHOKVpia2iaeNdO8KA/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>整个过程发生了<strong>4次用户态和内核态的上下文切换</strong>和<strong>3次拷贝</strong>，具体流程如下：</p>
+<ol>
+<li>用户进程通过<code>mmap()</code>方法向操作系统发起调用，上下文从用户态转向内核态</li>
+<li>DMA控制器把数据从硬盘中拷贝到读缓冲区</li>
+<li><strong>上下文从内核态转为用户态，mmap调用返回</strong></li>
+<li>用户进程通过<code>write()</code>方法发起调用，上下文从用户态转为内核态</li>
+<li><strong>CPU将读缓冲区中数据拷贝到socket缓冲区</strong></li>
+<li>DMA控制器把数据从socket缓冲区拷贝到网卡，上下文从内核态切换回用户态，<code>write()</code>返回</li>
+</ol>
+<p><code>mmap</code>的方式节省了一次CPU拷贝，同时由于用户进程中的内存是虚拟的，只是映射到内核的读缓冲区，所以可以节省一半的内存空间，比较适合大文件的传输。</p>
+<h3 id="sendfile"><a href="#sendfile" class="headerlink" title="sendfile"></a>sendfile</h3><p>相比<code>mmap</code>来说，<code>sendfile</code>同样减少了一次CPU拷贝，而且还减少了2次上下文切换。</p>
+<p><code>sendfile</code>是Linux2.1内核版本后引入的一个系统调用函数，通过使用<code>sendfile</code>数据可以直接在内核空间进行传输，因此避免了用户空间和内核空间的拷贝，同时由于使用<code>sendfile</code>替代了<code>read+write</code>从而节省了一次系统调用，也就是2次上下文切换。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZibzJ5E3HGYYh1MYJp2Qog7fyXwYjXkqNKkDWO94rZMbAp2MOSPpUj1g/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>整个过程发生了<strong>2次用户态和内核态的上下文切换</strong>和<strong>3次拷贝</strong>，具体流程如下：</p>
+<ol>
+<li>用户进程通过<code>sendfile()</code>方法向操作系统发起调用，上下文从用户态转向内核态</li>
+<li>DMA控制器把数据从硬盘中拷贝到读缓冲区</li>
+<li>CPU将读缓冲区中数据拷贝到socket缓冲区</li>
+<li>DMA控制器把数据从socket缓冲区拷贝到网卡，上下文从内核态切换回用户态，<code>sendfile</code>调用返回</li>
+</ol>
+<p><code>sendfile</code>方法IO数据对用户空间完全不可见，所以只能适用于完全不需要用户空间处理的情况，比如静态文件服务器。</p>
+<h3 id="sendfile-DMA-Scatter-Gather"><a href="#sendfile-DMA-Scatter-Gather" class="headerlink" title="sendfile+DMA Scatter/Gather"></a>sendfile+DMA Scatter/Gather</h3><p>Linux2.4内核版本之后对<code>sendfile</code>做了进一步优化，通过引入新的硬件支持，这个方式叫做DMA Scatter/Gather 分散/收集功能。</p>
+<p>它将读缓冲区中的数据描述信息–内存地址和偏移量记录到socket缓冲区，由 DMA 根据这些将数据从读缓冲区拷贝到网卡，相比之前版本减少了一次CPU拷贝的过程</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/ibBMVuDfkZUnVmOVDTlSicmTLLZ82HtKeZmMb5P3kcAF4oa244rgSpks8tSLKicDE5U0v7Kice2aLxQUUm1dCyCvxg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>整个过程发生了<strong>2次用户态和内核态的上下文切换</strong>和<strong>2次拷贝</strong>，其中更重要的是完全没有CPU拷贝，具体流程如下：</p>
+<ol>
+<li>用户进程通过<code>sendfile()</code>方法向操作系统发起调用，上下文从用户态转向内核态</li>
+<li>DMA控制器利用scatter把数据从硬盘中拷贝到读缓冲区离散存储</li>
+<li>CPU把读缓冲区中的文件描述符和数据长度发送到socket缓冲区</li>
+<li>DMA控制器根据文件描述符和数据长度，使用scatter/gather把数据从内核缓冲区拷贝到网卡</li>
+<li><code>sendfile()</code>调用返回，上下文从内核态切换回用户态</li>
+</ol>
+<p><code>DMA gather</code>和<code>sendfile</code>一样数据对用户空间不可见，而且需要硬件支持，同时输入文件描述符只能是文件，但是过程中完全没有CPU拷贝过程，极大提升了性能。</p>
+<h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><p>对于文章开头说的两个场景：RocketMQ和Kafka都使用到了零拷贝的技术。</p>
+<p>对于MQ而言，无非就是生产者发送数据到MQ然后持久化到磁盘，之后消费者从MQ读取数据。</p>
+<p>对于RocketMQ来说这两个步骤使用的是<code>mmap+write</code>，而Kafka则是使用<code>mmap+write</code>持久化数据，发送数据使用<code>sendfile</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-Date/" rel="prev" title="JDK-util-Date">
+                  <i class="fa fa-chevron-left"></i> JDK-util-Date
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/" rel="next" title="Ribbon的负载均衡策略及原理">
+                  Ribbon的负载均衡策略及原理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

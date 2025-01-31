@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="MySQL 脏页刷新到磁盘机制？  脏页定义：数据存储的最小单元就是数据页，当内存的数据页与磁盘的数据页不一致时，该数据页就是脏页。  脏页生成的时机：由于Write Ahead Log策略，每次事务提交时，innodb先写磁盘，再写内存  脏页落盘（刷新）的时机：  MySQL中，刷新的规则叫checkpoint机制，共2种 sharp checkpoint：在数据库关闭时，刷新所有的脏页到磁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql - 面试问题">
+<meta property="og:url" content="http://example.com/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="MySQL 脏页刷新到磁盘机制？  脏页定义：数据存储的最小单元就是数据页，当内存的数据页与磁盘的数据页不一致时，该数据页就是脏页。  脏页生成的时机：由于Write Ahead Log策略，每次事务提交时，innodb先写磁盘，再写内存  脏页落盘（刷新）的时机：  MySQL中，刷新的规则叫checkpoint机制，共2种 sharp checkpoint：在数据库关闭时，刷新所有的脏页到磁">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-03-08T07:59:03.000Z">
+<meta property="article:modified_time" content="2022-05-26T10:10:24.769Z">
+<meta property="article:author" content="Fei Qi">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="transaction">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>mysql - 面试问题 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql - 面试问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-03-08 15:59:03" itemprop="dateCreated datePublished" datetime="2022-03-08T15:59:03+08:00">2022-03-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-05-26 18:10:24" itemprop="dateModified" datetime="2022-05-26T18:10:24+08:00">2022-05-26</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ol>
+<li><p>MySQL 脏页刷新到磁盘机制？</p>
+<ul>
+<li><p>脏页定义：数据存储的最小单元就是数据页，当内存的数据页与磁盘的数据页不一致时，该数据页就是脏页。</p>
+</li>
+<li><p>脏页生成的时机：由于Write Ahead Log策略，每次事务提交时，innodb先写磁盘，再写内存</p>
+</li>
+<li><p>脏页落盘（刷新）的时机：</p>
+<ul>
+<li>MySQL中，刷新的规则叫checkpoint机制，共2种</li>
+<li>sharp checkpoint：在数据库关闭时，刷新所有的脏页到磁盘。</li>
+<li>fuzzy checkpoint：刷新一部分脏页到磁盘中。<ul>
+<li>定时刷新</li>
+<li>Flush LRUlist checkpoint ：当LRU中列表中空闲页不足时，强制LRU删除一些末尾的页，如果存在脏页，那么需要checkpoint刷新</li>
+<li>async/sync checkpoint ：指重做日志文件不可用时，需要强制将脏页列表中的一些页刷新回磁盘。这可以保证重做日志文件可循环使用</li>
+<li>dirty too much checkpoint：关注系统中的整体脏页比例，如果达到一定比例，强制刷新</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol start="2">
+<li><p>MySQL innodb 引擎的索引结构，B+树一般都多高？ 层高怎么计算？</p>
+<ul>
+<li><p>不超过3层，因为磁盘的IO查询超过3次会影响性能</p>
+</li>
+<li><p>影响层高的因素（假设一行数据大小为1kb，非叶子节点的指针是14byte）</p>
+<ul>
+<li><p>mysql的存储基本单位为数据页，大小=16kb</p>
+</li>
+<li><p>因为B+树的非叶子节点存储指针，叶子节点存储数据，所以层高与数据行数的关系：<br>*<em>数据量=（非叶子节点的存储指针数量）^ (层高-1) * 一个数据页存储的行数*</em></p>
+<ul>
+<li>1层的数据行数最大为: (16kb/1kb)^(1-1) = 16条数据</li>
+<li>2层的数据行数最大为: (16kb/14byte)^(2-1) * (16kb/1kb) = 18k 条数据</li>
+<li>3层的数据行数最大为: (16kb/14byte)^(3-1) * (16kb/1kb) = 20.89w条数据</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol start="3">
+<li><p>sql join 驱动表如何选择？</p>
+<ul>
+<li><p>mysql中的join，底层实现都是用的nested loop</p>
+</li>
+<li><p>小表驱动大表</p>
+<ul>
+<li>当使用left join时，左表是驱动表，右表是被驱动表</li>
+<li>当使用right join时，右表是驱动表，左表是被驱动表</li>
+<li>当使用inner join时，mysql会选择数据量比较小的表作为驱动表，大表作为被驱动表</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol start="4">
+<li><p>mysql 查询语句执行流程？</p>
+<ul>
+<li><strong>连接器：</strong> 身份认证和权限相关</li>
+<li><strong>查询缓存:</strong> 执行查询语句的时候，会先查询缓存（MySQL 8.0 版本后移除，因为这个功能不太实用）。</li>
+<li><strong>分析器:</strong> 没有命中缓存的话，SQL 语句就会经过分析器，分析器说白了就是要先看你的 SQL 语句要干嘛，再检查你的 SQL 语句语法是否正确。</li>
+<li><strong>优化器：</strong> 按照 MySQL 认为最优的方案去执行。</li>
+<li><strong>执行器:</strong> 执行语句，然后从存储引擎返回数据。</li>
+</ul>
+</li>
+</ol>
+<ol start="5">
+<li>造成慢sql 常见原因有哪些？<ul>
+<li>查询条件没有索引，或者索引失效</li>
+<li>操作等待锁资源，比如update，select for update</li>
+<li>单表数据量过大</li>
+</ul>
+</li>
+</ol>
+<ol start="6">
+<li>如何分析慢查询，慢查询的分析步骤？ explain 返回的列的含义？<ul>
+<li>使用慢查询定位执行慢的SQL：<ul>
+<li>慢日志存储路径：show variables like ‘%query%’;</li>
+</ul>
+</li>
+<li>explain 返回的列的含义<ul>
+<li>id:SELECT 查询的标识符. 每个 SELECT 都会自动分配一个唯一的标识符.</li>
+<li>select_type: SELECT 查询的类型.</li>
+<li>table: 查询的是哪个表</li>
+<li>partitions: 匹配的分区</li>
+<li>type: join 类型</li>
+<li>possible_keys: 此次查询中可能选用的索引</li>
+<li>key: 此次查询中确切使用到的索引. ref: 哪个字段或常数与 key 一起被使用</li>
+<li>rows: 显示此查询一共扫描了多少行. 这个是一个估计值.</li>
+<li>filtered: 表示此查询条件所过滤的数据的百分比</li>
+<li>extra: 额外的信息</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/transaction/" rel="tag"># transaction</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/17/My%20Lord%20Jesus/%E7%A5%9E%E5%AD%A6%E5%AF%BC%E8%AE%BA-%E6%9E%97%E8%80%81%E5%B8%88/44%E8%AF%BE/" rel="prev" title="44课">
+                  <i class="fa fa-chevron-left"></i> 44课
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/08/database/mysql/mysql-%E5%B8%B8%E8%A7%81%E4%BA%8B%E5%8A%A1%E5%9C%BA%E6%99%AF/" rel="next" title="mysql - 常见事务问题解决方案">
+                  mysql - 常见事务问题解决方案 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

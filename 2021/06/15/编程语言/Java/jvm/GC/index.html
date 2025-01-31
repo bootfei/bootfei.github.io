@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="为了保留足够多的“现场证据”，最好是把 GC 相关的信息打印的足够完整 。而且你的程序真的不差你GC时打印日志I&#x2F;O消耗的那点性能 打印基本 GC 信息打印 GC 日志的第一步，就是开启 GC 打印的参数了，也是最基本的参数。 1-XX:+PrintGCDetails -XX:+PrintGCDateStamps  打印对象分布为了分析 GC 时的晋升情况和晋升导致的高暂停 ，不看对象年龄分布日志">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GC">
+<meta property="og:url" content="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm/GC/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="为了保留足够多的“现场证据”，最好是把 GC 相关的信息打印的足够完整 。而且你的程序真的不差你GC时打印日志I&#x2F;O消耗的那点性能 打印基本 GC 信息打印 GC 日志的第一步，就是开启 GC 打印的参数了，也是最基本的参数。 1-XX:+PrintGCDetails -XX:+PrintGCDateStamps  打印对象分布为了分析 GC 时的晋升情况和晋升导致的高暂停 ，不看对象年龄分布日志">
+<meta property="og:locale">
+<meta property="article:published_time" content="2021-06-15T00:49:58.000Z">
+<meta property="article:modified_time" content="2021-06-15T00:50:34.362Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm/GC/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>GC | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0%E5%9F%BA%E6%9C%AC-GC-%E4%BF%A1%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text">打印基本 GC 信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0%E5%AF%B9%E8%B1%A1%E5%88%86%E5%B8%83"><span class="nav-number">2.</span> <span class="nav-text">打印对象分布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC-%E5%90%8E%E6%89%93%E5%8D%B0%E5%A0%86%E6%95%B0%E6%8D%AE"><span class="nav-number">3.</span> <span class="nav-text">GC 后打印堆数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0-STW-%E6%97%B6%E9%97%B4"><span class="nav-number">4.</span> <span class="nav-text">打印 STW 时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0-safepoint-%E4%BF%A1%E6%81%AF"><span class="nav-number">5.</span> <span class="nav-text">打印 safepoint 信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0-Reference-%E5%A4%84%E7%90%86%E4%BF%A1%E6%81%AF"><span class="nav-number">6.</span> <span class="nav-text">打印 Reference 处理信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E5%8F%82%E6%95%B0"><span class="nav-number">7.</span> <span class="nav-text">完整参数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E6%96%B9%E5%BC%8F"><span class="nav-number"></span> <span class="nav-text">输出方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM-%E7%9A%84%E6%97%A5%E5%BF%97%E5%88%86%E5%89%B2"><span class="nav-number">1.</span> <span class="nav-text">JVM 的日志分割</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%97%B6%E9%97%B4%E6%88%B3%E5%91%BD%E5%90%8D%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">使用时间戳命名文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E8%80%85%E7%BB%93%E5%90%88"><span class="nav-number">3.</span> <span class="nav-text">二者结合</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jvm/GC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GC
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-06-15 08:49:58 / Modified: 08:50:34" itemprop="dateCreated datePublished" datetime="2021-06-15T08:49:58+08:00">2021-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>为了保留足够多的“现场证据”，最好是把 GC 相关的信息打印的<strong>足够完整</strong> 。<strong>而且你的程序真的不差你GC时打印日志I/O消耗的那点性能</strong></p>
+<h3 id="打印基本-GC-信息"><a href="#打印基本-GC-信息" class="headerlink" title="打印基本 GC 信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印基本 GC 信息</a></h3><p>打印 GC 日志的第一步，就是开启 GC 打印的参数了，也是最基本的参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintGCDetails -XX:+PrintGCDateStamps</span><br></pre></td></tr></table></figure>
+
+<h3 id="打印对象分布"><a href="#打印对象分布" class="headerlink" title="打印对象分布"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印对象分布</a></h3><p>为了分析 GC 时的<strong>晋升情况和晋升导致的高暂停</strong> ，不看对象年龄分布日志怎么行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintTenuringDistribution</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Desired survivor size 59244544 bytes, new threshold 15 (max 15)</span><br><span class="line">- age   1:     963176 bytes,     963176 total</span><br><span class="line">- age   2:     791264 bytes,    1754440 total</span><br><span class="line">- age   3:     210960 bytes,    1965400 total</span><br><span class="line">- age   4:     167672 bytes,    2133072 total</span><br><span class="line">- age   5:     172496 bytes,    2305568 total</span><br><span class="line">- age   6:     107960 bytes,    2413528 total</span><br><span class="line">- age   7:     205440 bytes,    2618968 total</span><br><span class="line">- age   8:     185144 bytes,    2804112 total</span><br><span class="line">- age   9:     195240 bytes,    2999352 total</span><br><span class="line">- age  10:     169080 bytes,    3168432 total</span><br><span class="line">- age  11:     114664 bytes,    3283096 total</span><br><span class="line">- age  12:     168880 bytes,    3451976 total</span><br><span class="line">- age  13:     167272 bytes,    3619248 total</span><br><span class="line">- age  14:     387808 bytes,    4007056 total</span><br><span class="line">- age  15:     168992 bytes,    4176048 total</span><br></pre></td></tr></table></figure>
+
+<h3 id="GC-后打印堆数据"><a href="#GC-后打印堆数据" class="headerlink" title="GC 后打印堆数据"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">GC 后打印堆数据</a></h3><p>每次发生 GC 时，对比一下 GC 前后的堆内存情况，更直观</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintHeapAtGC</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;Heap before GC invocations&#x3D;0 (full 0):</span><br><span class="line"> garbage-first heap   total 1024000K, used 324609K [0x0000000781800000, 0x0000000781901f40, 0x00000007c0000000)</span><br><span class="line">  region size 1024K, 6 young (6144K), 0 survivors (0K)</span><br><span class="line"> Metaspace       used 3420K, capacity 4500K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 371K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">Heap after GC invocations&#x3D;1 (full 1):</span><br><span class="line"> garbage-first heap   total 1024000K, used 21755K [0x0000000781800000, 0x0000000781901f40, 0x00000007c0000000)</span><br><span class="line">  region size 1024K, 0 young (0K), 0 survivors (0K)</span><br><span class="line"> Metaspace       used 3420K, capacity 4500K, committed 4864K, reserved 1056768K</span><br><span class="line">  class space    used 371K, capacity 388K, committed 512K, reserved 1048576K</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="打印-STW-时间"><a href="#打印-STW-时间" class="headerlink" title="打印 STW 时间"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 STW 时间</a></h3><p>暂停时间是 GC 最重要的指标，肯定不能少</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Total time for which application threads were stopped: 0.0254260 seconds, Stopping threads took: 0.0000218 seconds</span><br></pre></td></tr></table></figure>
+
+<h3 id="打印-safepoint-信息"><a href="#打印-safepoint-信息" class="headerlink" title="打印 safepoint 信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 safepoint 信息</a></h3><p>进入STW阶段之前，需要要找到一个合适的 safepoint ，这个指标一样很重要（非必选，出现 GC 问题时最好加上此参数调试）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintSafepointStatistics -XX:PrintSafepointStatisticsCount&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.371: ParallelGCFailedAllocation       [      10          0              0    ]      [     0     0     0     0     7    ]  0</span><br><span class="line">Execute full gc...dataList has been promoted to cms old space</span><br><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.379: ParallelGCSystemGC               [      10          0              0    ]      [     0     0     0     0    16    ]  0</span><br><span class="line">         vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.396: no vm operation                  [       9          1              1    ]      [     0     0     0     0   341    ]  0</span><br></pre></td></tr></table></figure>
+
+<h3 id="打印-Reference-处理信息"><a href="#打印-Reference-处理信息" class="headerlink" title="打印 Reference 处理信息"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">打印 Reference 处理信息</a></h3><p>强引用/弱引用/软引用/虚引用/finalize 方法万一有问题，不得打印出来看看？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintReferenceGC</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出内容示例：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [SoftReference, 0 refs, 0.0000521 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [WeakReference, 0 refs, 0.0000069 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [FinalReference, 0 refs, 0.0000056 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [PhantomReference, 0 refs, 0 refs, 0.0000059 secs]</span><br><span class="line">2021-02-19T12:41:30.462+0800: 5072726.605: [JNI Weak Reference, 0.0000131 secs], 0.4635293 secs]</span><br></pre></td></tr></table></figure>
+
+<h3 id="完整参数"><a href="#完整参数" class="headerlink" title="完整参数"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">完整参数</a></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">## requireds</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-XX:+PrintTenuringDistribution</span><br><span class="line">-XX:+PrintHeapAtGC</span><br><span class="line">-XX:+PrintReferenceGC</span><br><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br><span class="line"></span><br><span class="line">## optional</span><br><span class="line">-XX:+PrintSafepointStatistics</span><br><span class="line">-XX:PrintSafepointStatisticsCount&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<h2 id="输出方式"><a href="#输出方式" class="headerlink" title="输出方式"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">输出方式</a></h2><p>上面只是定义了打印的内容，默认情况下，这些日志会输出到控制台（标准输出）。那如果你的程序日志也输出到控制台呢，这个日志内容就会很乱，分析起来很麻烦。如果你是追加的方式（比如 tomcat 的 catalina.out 就是追加），这个文件会越来越大，分析起来就要命了。</p>
+<p>所以需要一种分割日志的机制，这个机制嘛……JVM自然是提供的。</p>
+<h3 id="JVM-的日志分割"><a href="#JVM-的日志分割" class="headerlink" title="JVM 的日志分割"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">JVM 的日志分割</a></h3><p>JVM提供了几个用于分割 GC 日志的参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
+
+<p>按照这个参数，每个GC日志只要超过20M就会进行分割，最多分割5个文件，文件名依次是<code>gc.log.0,gc.log.1,gc.log.2,gc.log.3,gc.log.4, .....</code></p>
+<p>看似很美好，几行配置就搞定了输出文件的问题。但是这种方式有一些问题：</p>
+<ol>
+<li>-Xloggc 方式指定的日志文件，是覆盖写的方式，每次启动都会覆盖，历史日志会丢失</li>
+<li>当超过最大分割数后，会从第0个文件开始重新写入，而且是覆盖</li>
+<li>-XX:NumberOfGCLogFiles 并不能设置为无限</li>
+</ol>
+<p>这个覆盖的问题就有点恶心了，每次启动覆盖之前的历史日志……这谁能忍？</p>
+<h3 id="使用时间戳命名文件"><a href="#使用时间戳命名文件" class="headerlink" title="使用时间戳命名文件"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">使用时间戳命名文件</a></h3><p>于是有另一种解决方案。不使用 JVM 提供的日志分割功能，而是每次启动用时间戳命名日志文件，这样可以每次启动都使用不同的文件，就不会出现覆盖的问题了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">## 使用-%t作为日志文件名</span><br><span class="line">-XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line"></span><br><span class="line">## 生成的文件名是这种：gc-2021-03-29_20-41-47.log</span><br></pre></td></tr></table></figure>
+
+<p>可是这样就完美吗？</p>
+<p>虽然没有覆盖的问题，但由于没有日志分割的功能，每次启动后只有一个GC日志文件，单个日志文件可能会非常巨大。过大的日志文件分析起来是很麻烦的，必须得分割。</p>
+<h3 id="二者结合"><a href="#二者结合" class="headerlink" title="二者结合"></a><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzUzMTA2NTU2Ng==&mid=2247487551&idx=1&sn=18f64ba49f3f0f9d8be9d1fdef8857d9&scene=21#wechat_redirect">二者结合</a></h3><p>这里只需要稍微调整一下策略，将 JVM 分割和时间戳命名两种方案结合，就可以得到<strong>最优的方式</strong> 了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
+
+<p>配置时间戳作文 GC 日志文件名的同时，也配置JVM的GC日志分割策略。这样一来，既保证了 GC 文件不会被覆盖，又保证了单个 GC 文件的大小不会过大，完美！</p>
+<p>最终得到的日志文件名会像这个样子：</p>
+<ol>
+<li>gc-2021-03-29_20-41-47.log.0</li>
+<li>gc-2021-03-29_20-41-47.log.1</li>
+<li>gc-2021-03-29_20-41-47.log.2</li>
+<li>gc-2021-03-29_20-41-47.log.3</li>
+<li>….</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">## 必备</span><br><span class="line">-XX:+PrintGCDetails</span><br><span class="line">-XX:+PrintGCDateStamps</span><br><span class="line">-XX:+PrintTenuringDistribution</span><br><span class="line">-XX:+PrintHeapAtGC</span><br><span class="line">-XX:+PrintReferenceGC</span><br><span class="line">-XX:+PrintGCApplicationStoppedTime</span><br><span class="line"></span><br><span class="line">## 可选</span><br><span class="line">-XX:+PrintSafepointStatistics</span><br><span class="line">-XX:PrintSafepointStatisticsCount&#x3D;1</span><br><span class="line"></span><br><span class="line">## GC日志输出的文件路径</span><br><span class="line">-Xloggc:&#x2F;path&#x2F;to&#x2F;gc-%t.log</span><br><span class="line">## 开启日志文件分割</span><br><span class="line">-XX:+UseGCLogFileRotation</span><br><span class="line">## 最多分割几个文件，超过之后从头文件开始写</span><br><span class="line">-XX:NumberOfGCLogFiles&#x3D;14</span><br><span class="line">## 每个文件上限大小，超过就触发分割</span><br><span class="line">-XX:GCLogFileSize&#x3D;100M</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/15/database/redis/redis%E5%AE%9E%E8%B7%B5-01-%E5%AE%9E%E7%8E%B0%E7%A7%AF%E5%88%86%E6%8E%92%E8%A1%8C%E6%A6%9C/" rel="prev" title="redis实践-01-实现积分排行榜">
+                  <i class="fa fa-chevron-left"></i> redis实践-01-实现积分排行榜
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/15/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Golang/golang%E7%9A%84%E5%88%A9%E5%BC%8A/" rel="next" title="golang的利弊">
+                  golang的利弊 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="jdk实现设置Realm域Shiro要从Realm域中获取安全、正确的数据。该类必须继承org.apache.shiro.realm.AuthorizingRealm； 　　并重写doGetAuthorizationInfo与doGetAuthenticationInfo方法。doGetAuthorizationInfo是对角色权限的认证，这里暂且不详述；doGetAuthenticationI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shiro应用-01-使用流程">
+<meta property="og:url" content="http://example.com/2021/05/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-01-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="jdk实现设置Realm域Shiro要从Realm域中获取安全、正确的数据。该类必须继承org.apache.shiro.realm.AuthorizingRealm； 　　并重写doGetAuthorizationInfo与doGetAuthenticationInfo方法。doGetAuthorizationInfo是对角色权限的认证，这里暂且不详述；doGetAuthenticationI">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/JfTPiahTHJhpmuJOMKBHpBCC00gwWgjwZW67mVRo4ffmBpibDMLQicgZJuicvNNnPaiaeXFxOPYY4OXATuhDj6Wnq6Q/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-05-10T05:25:09.000Z">
+<meta property="article:modified_time" content="2021-11-07T05:00:50.289Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/JfTPiahTHJhpmuJOMKBHpBCC00gwWgjwZW67mVRo4ffmBpibDMLQicgZJuicvNNnPaiaeXFxOPYY4OXATuhDj6Wnq6Q/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/05/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-01-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>shiro应用-01-使用流程 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#jdk%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">jdk实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AERealm%E5%9F%9F"><span class="nav-number">1.1.</span> <span class="nav-text">设置Realm域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%EF%BC%8C%E4%BD%BFsecurityManager%E8%8E%B7%E5%8F%96%E5%88%B0%E8%AF%A5Realm%E5%9F%9F"><span class="nav-number">1.2.</span> <span class="nav-text">配置文件，使securityManager获取到该Realm域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%EF%BC%9Amain%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">测试：main函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spring-mvc%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">spring mvc实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEShiro%E7%9A%84%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">配置Shiro的过滤器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AERealm%E5%9F%9F%EF%BC%8C%E4%B8%94%E5%AE%89%E5%85%A8%E6%95%B0%E6%8D%AE%E6%9D%A5%E6%BA%90%E4%BA%8E%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">2.2.</span> <span class="nav-text">设置Realm域，且安全数据来源于数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%EF%BC%8C%E4%BD%BFsecurityManager%E8%8E%B7%E5%8F%96%E5%88%B0%E8%AF%A5Realm%E5%9F%9F%EF%BC%8C%E4%BD%BFspring%E5%AE%B9%E5%99%A8%E8%8E%B7%E5%8F%96securityManager"><span class="nav-number">2.3.</span> <span class="nav-text">配置文件，使securityManager获取到该Realm域，使spring容器获取securityManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%EF%BC%9A%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">2.4.</span> <span class="nav-text">测试：拦截器</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/shiro%E5%BA%94%E7%94%A8-01-%E8%BA%AB%E4%BB%BD%E8%AE%A4%E8%AF%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shiro应用-01-使用流程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-10 13:25:09" itemprop="dateCreated datePublished" datetime="2021-05-10T13:25:09+08:00">2021-05-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-07 13:00:50" itemprop="dateModified" datetime="2021-11-07T13:00:50+08:00">2021-11-07</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/JfTPiahTHJhpmuJOMKBHpBCC00gwWgjwZW67mVRo4ffmBpibDMLQicgZJuicvNNnPaiaeXFxOPYY4OXATuhDj6Wnq6Q/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h2 id="jdk实现"><a href="#jdk实现" class="headerlink" title="jdk实现"></a>jdk实现</h2><h3 id="设置Realm域"><a href="#设置Realm域" class="headerlink" title="设置Realm域"></a>设置Realm域</h3><p>Shiro要从Realm域中获取安全、正确的数据。该类必须继承org.apache.shiro.realm.AuthorizingRealm；</p>
+<p>　　并重写doGetAuthorizationInfo与doGetAuthenticationInfo方法。doGetAuthorizationInfo是对角色权限的认证，这里暂且不详述；doGetAuthenticationInfo对用户的认证，这里正是我们要详细讲述的地方。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomRealm</span> <span class="keyword">implements</span> <span class="title">Realm</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> AuthenticationInfo <span class="title">getAuthenticationInfo</span><span class="params">(AuthenticationToken token)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">        String username = (String)token.getPrincipal();  <span class="comment">//得到用户名</span></span><br><span class="line">        String password = <span class="keyword">new</span> String((<span class="keyword">char</span>[])token.getCredentials()); <span class="comment">//得到密码</span></span><br><span class="line">        <span class="keyword">if</span>(!<span class="string">&quot;zhang&quot;</span>.equals(username)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnknownAccountException(); <span class="comment">//如果用户名错误</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(!<span class="string">&quot;123&quot;</span>.equals(password)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IncorrectCredentialsException(); <span class="comment">//如果密码错误</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//如果身份认证验证成功，返回一个AuthenticationInfo实现；</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SimpleAuthenticationInfo(username, password, getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件，使securityManager获取到该Realm域"><a href="#配置文件，使securityManager获取到该Realm域" class="headerlink" title="配置文件，使securityManager获取到该Realm域"></a>配置文件，使securityManager获取到该Realm域</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1 [main]</span><br><span class="line">2 <span class="comment">#自定义 realm</span></span><br><span class="line">3 customRealm=org.ssm.service.CustomRealm</span><br><span class="line">4 <span class="comment">#将realm设置到securityManager</span></span><br><span class="line">5 securityManager.realms=<span class="variable">$customRealm</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="测试：main函数"><a href="#测试：main函数" class="headerlink" title="测试：main函数"></a>测试：main函数</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testShiro</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">//通过工厂加载配置</span></span><br><span class="line">  Factory&lt;SecurityManager&gt; factory = <span class="keyword">new</span> IniSecurityManagerFactory(<span class="string">&quot;classpath:shiro-shiro.ini&quot;</span>);</span><br><span class="line">  <span class="comment">//通过工厂获取安全管理器</span></span><br><span class="line">  SecurityManager securityManager = factory.getInstance();</span><br><span class="line">  <span class="comment">//注册Subject工具</span></span><br><span class="line">  SecurityUtils.setSecurityManager(securityManager);</span><br><span class="line">  <span class="comment">//获取Subject对象</span></span><br><span class="line">  Subject subject = SecurityUtils.getSubject();</span><br><span class="line">  <span class="comment">//获取验证对象</span></span><br><span class="line">  AuthenticationToken authenticationToken = <span class="keyword">new</span> UsernamePasswordToken(<span class="string">&quot;admin&quot;</span>, <span class="string">&quot;hello&quot;</span>);</span><br><span class="line">  <span class="comment">//        验证</span></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    subject.login(authenticationToken);</span><br><span class="line">    System.out.println(<span class="string">&quot;通过...&quot;</span> + <span class="string">&quot;\t&quot;</span> + authenticationToken.getPrincipal());</span><br><span class="line">  &#125; <span class="keyword">catch</span> (UnknownAccountException e) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;未通过:用户不存在&quot;</span> + <span class="string">&quot;\t&quot;</span> + authenticationToken.getPrincipal());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="spring-mvc实现"><a href="#spring-mvc实现" class="headerlink" title="spring mvc实现"></a>spring mvc实现</h2><h3 id="配置Shiro的过滤器"><a href="#配置Shiro的过滤器" class="headerlink" title="配置Shiro的过滤器"></a>配置Shiro的过滤器</h3><p>对所有访问进行过滤；需要在web.xml中加上如下配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--配置上shiro过滤器，使其生效--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>shiroFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.springframework.web.filter.DelegatingFilterProxy<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--设置url由servlet容器控制filter的生命周期--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>transformWsdlLocations<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>shiroFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="设置Realm域，且安全数据来源于数据库"><a href="#设置Realm域，且安全数据来源于数据库" class="headerlink" title="设置Realm域，且安全数据来源于数据库"></a>设置Realm域，且安全数据来源于数据库</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserRealm</span> <span class="keyword">extends</span> <span class="title">AuthorizingRealm</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">      * 引入users操作的整合操作</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">     <span class="meta">@Autowired</span></span><br><span class="line">     <span class="meta">@Qualifier(&quot;usersService&quot;)</span></span><br><span class="line">     <span class="keyword">private</span> UsersService usersService;</span><br><span class="line"> </span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">      *获取授权信息</span></span><br><span class="line"><span class="comment">      * <span class="doctag">@param</span> principalCollection</span></span><br><span class="line"><span class="comment">      * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">protected</span> AuthorizationInfo <span class="title">doGetAuthorizationInfo</span><span class="params">(PrincipalCollection principalCollection)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">      * 获取获取身份验证相关信息</span></span><br><span class="line"><span class="comment">      * <span class="doctag">@param</span> authenticationToken</span></span><br><span class="line"><span class="comment">      * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">      * <span class="doctag">@throws</span> AuthenticationException</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">     <span class="meta">@Override</span></span><br><span class="line">     <span class="function"><span class="keyword">protected</span> AuthenticationInfo <span class="title">doGetAuthenticationInfo</span><span class="params">(AuthenticationToken authenticationToken)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line"> <span class="comment">//        获取用户输入的用户名</span></span><br><span class="line">         String userName = (String) authenticationToken.getPrincipal();</span><br><span class="line"> <span class="comment">//        根据用户名查询该数据</span></span><br><span class="line">         Users user = usersService.selectByName(userName);</span><br><span class="line"> </span><br><span class="line">         <span class="keyword">if</span> (user == <span class="keyword">null</span>)&#123;</span><br><span class="line"> <span class="comment">//            没有找到账号</span></span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> UnknownAccountException();</span><br><span class="line">         &#125;</span><br><span class="line">         SimpleAuthenticationInfo authenticationInfo = <span class="keyword">new</span> SimpleAuthenticationInfo(user.getUserName(), user.getPassWord(),</span><br><span class="line"> <span class="comment">//                此为realm内的方法，用于获取realm的name</span></span><br><span class="line">                 getName()</span><br><span class="line">         );</span><br><span class="line">         <span class="keyword">return</span> authenticationInfo;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件，使securityManager获取到该Realm域，使spring容器获取securityManager"><a href="#配置文件，使securityManager获取到该Realm域，使spring容器获取securityManager" class="headerlink" title="配置文件，使securityManager获取到该Realm域，使spring容器获取securityManager"></a>配置文件，使securityManager获取到该Realm域，使spring容器获取securityManager</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--shiro的配置--&gt;</span><br><span class="line"></span><br><span class="line">    &lt;!--注入自定义的Realm--&gt;</span><br><span class="line">    &lt;bean id&#x3D;&quot;userRealm&quot; class&#x3D;&quot;org.ssm.shiro.realm.UserRealm&quot;&#x2F;&gt;</span><br><span class="line">    &lt;bean id&#x3D;&quot;securityManager&quot; class&#x3D;&quot;org.apache.shiro.web.mgt.DefaultWebSecurityManager&quot;&gt;</span><br><span class="line">        &lt;property name&#x3D;&quot;realm&quot; ref&#x3D;&quot;userRealm&quot;&#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;bean&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &lt;!--配置ShiroFilter的属性--&gt;</span><br><span class="line">    &lt;bean id&#x3D;&quot;shiroFilter&quot; class&#x3D;&quot;org.apache.shiro.spring.web.ShiroFilterFactoryBean&quot;&gt;</span><br><span class="line">        &lt;property name&#x3D;&quot;securityManager&quot; ref&#x3D;&quot;securityManager&quot;&#x2F;&gt;</span><br><span class="line">        &lt;property name&#x3D;&quot;filterChainDefinitions&quot;&gt;</span><br><span class="line">            &lt;value&gt;</span><br><span class="line">                &#x2F;login &#x3D; anon</span><br><span class="line">            &lt;&#x2F;value&gt;</span><br><span class="line">        &lt;&#x2F;property&gt;</span><br><span class="line">    &lt;&#x2F;bean&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="测试：拦截器"><a href="#测试：拦截器" class="headerlink" title="测试：拦截器"></a>测试：拦截器</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LoginInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        从该回话中获取subject</span></span><br><span class="line">        Subject subject = SecurityUtils.getSubject();</span><br><span class="line"><span class="comment">//        获取用户信息</span></span><br><span class="line">        String user = (String) subject.getPrincipal();</span><br><span class="line"><span class="comment">//        如果用户信息为空，则进行拦截</span></span><br><span class="line">        <span class="keyword">if</span> (user != <span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        response.sendRedirect(request.getContextPath() + <span class="string">&quot;/User/login&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/10/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1-%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7-01-%E7%94%9F%E4%BA%A7%E8%80%85%E9%87%8D%E8%AF%95/" rel="prev" title="一致性-01-微服务依赖的一致性">
+                  <i class="fa fa-chevron-left"></i> 一致性-01-微服务依赖的一致性
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/10/database/redis/redis-7-%E5%8D%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%A5%E5%8F%8A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="next" title="redis-7-单多线程以及线程安全">
+                  redis-7-单多线程以及线程安全 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

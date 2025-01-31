@@ -21,22 +21,22 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
-  <meta name="description" content="第四章介绍了构造线程安全类时采用的一些技术，例如将线程安全性委托给现有的线程安全类。委托是创建线程安全类的一个最有效的策略，只需让现有的线程安全类管理所有的状态即可。JAVA平台类库中包含了一个并发构建块的丰富集合，如线程安全的容器与同步工具。 5.1 同步容器类同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchron">
+  <meta name="description" content="第四章介绍了构造线程安全类时采用的一些技术，例如将线程安全性委托给现有的线程安全类。委托是创建线程安全类的一个最有效的策略，只需让现有的线程安全类管理所有的状态即可。JAVA平台类库中包含了一个并发构建块的丰富集合，如线程安全的容器与同步工具。 同步容器类同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchronized">
 <meta property="og:type" content="article">
 <meta property="og:title" content="chapter5基础构建模块">
 <meta property="og:url" content="http://example.com/2020/12/19/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java%20concurrency%20in%20practice/chapter5%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/index.html">
 <meta property="og:site_name" content="BootFei&#39;s Blog">
-<meta property="og:description" content="第四章介绍了构造线程安全类时采用的一些技术，例如将线程安全性委托给现有的线程安全类。委托是创建线程安全类的一个最有效的策略，只需让现有的线程安全类管理所有的状态即可。JAVA平台类库中包含了一个并发构建块的丰富集合，如线程安全的容器与同步工具。 5.1 同步容器类同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchron">
+<meta property="og:description" content="第四章介绍了构造线程安全类时采用的一些技术，例如将线程安全性委托给现有的线程安全类。委托是创建线程安全类的一个最有效的策略，只需让现有的线程安全类管理所有的状态即可。JAVA平台类库中包含了一个并发构建块的丰富集合，如线程安全的容器与同步工具。 同步容器类同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchronized">
 <meta property="og:locale">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/63543475d08cb404311697b63efe6a76.png">
 <meta property="og:image" content="https://chengfeng96.com/blog/2018/10/24/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%A4%BA%E4%BE%8B%E4%B9%8B%E6%9E%84%E5%BB%BA%E9%AB%98%E6%95%88%E4%B8%94%E5%8F%AF%E4%BC%B8%E7%BC%A9%E7%9A%84%E7%BB%93%E6%9E%9C%E7%BC%93%E5%AD%98/1.png">
 <meta property="og:image" content="https://chengfeng96.com/blog/2018/10/24/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%A4%BA%E4%BE%8B%E4%B9%8B%E6%9E%84%E5%BB%BA%E9%AB%98%E6%95%88%E4%B8%94%E5%8F%AF%E4%BC%B8%E7%BC%A9%E7%9A%84%E7%BB%93%E6%9E%9C%E7%BC%93%E5%AD%98/2.png">
 <meta property="og:image" content="https://chengfeng96.com/blog/2018/10/24/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%A4%BA%E4%BE%8B%E4%B9%8B%E6%9E%84%E5%BB%BA%E9%AB%98%E6%95%88%E4%B8%94%E5%8F%AF%E4%BC%B8%E7%BC%A9%E7%9A%84%E7%BB%93%E6%9E%9C%E7%BC%93%E5%AD%98/3.png">
 <meta property="article:published_time" content="2020-12-19T13:07:28.000Z">
-<meta property="article:modified_time" content="2020-12-21T10:52:05.209Z">
+<meta property="article:modified_time" content="2022-05-04T12:01:48.855Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="并发">
 <meta name="twitter:card" content="summary">
@@ -190,7 +190,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E5%90%8C%E6%AD%A5%E5%AE%B9%E5%99%A8%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">5.1 同步容器类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-1-%E5%90%8C%E6%AD%A5%E5%AE%B9%E5%99%A8%E7%B1%BB%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">5.1.1 同步容器类的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-2-%E8%BF%AD%E4%BB%A3%E5%99%A8%E4%B8%8EConcurrentModificationException"><span class="nav-number">1.2.</span> <span class="nav-text">5.1.2 迭代器与ConcurrentModificationException</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-3-%E9%9A%90%E8%97%8F%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">1.3.</span> <span class="nav-text">5.1.3 隐藏迭代器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">5.2 并发容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-1-ConcurrentHashMap"><span class="nav-number">2.1.</span> <span class="nav-text">5.2.1 ConcurrentHashMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-2-%E9%A2%9D%E5%A4%96%E7%9A%84%E5%8E%9F%E5%AD%90Map%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.</span> <span class="nav-text">5.2.2 额外的原子Map操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-3-CopyOnWriteArrayList"><span class="nav-number">2.3.</span> <span class="nav-text">5.2.3 CopyOnWriteArrayList</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%92%8C%E7%94%9F%E4%BA%A7%E8%80%85%E2%80%94%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">5.3 阻塞队列和生产者—消费者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-1-%E7%A4%BA%E4%BE%8B%EF%BC%9A%E6%A1%8C%E9%9D%A2%E6%90%9C%E7%B4%A2"><span class="nav-number">3.1.</span> <span class="nav-text">5.3.1 示例：桌面搜索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-2-%E4%B8%B2%E8%A1%8C%E7%BA%BF%E7%A8%8B%E5%B0%81%E9%97%AD"><span class="nav-number">3.2.</span> <span class="nav-text">5.3.2 串行线程封闭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-3-%E5%8F%8C%E7%AB%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%B7%A5%E4%BD%9C%E5%AF%86%E5%8F%96"><span class="nav-number">3.3.</span> <span class="nav-text">5.3.3 双端队列与工作密取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-%E9%98%BB%E5%A1%9E%E6%96%B9%E6%B3%95%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">5.4 阻塞方法与中断方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">5.5 同步工具类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-1-%E9%97%AD%E9%94%81"><span class="nav-number">5.1.</span> <span class="nav-text">5.5.1 闭锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-2-FutureTask"><span class="nav-number">5.2.</span> <span class="nav-text">5.5.2 FutureTask</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-3-%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="nav-number">5.3.</span> <span class="nav-text">5.5.3 信号量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-4-%E6%A0%85%E6%A0%8F"><span class="nav-number">5.4.</span> <span class="nav-text">5.5.4 栅栏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-6-%E6%9E%84%E5%BB%BA%E9%AB%98%E6%95%88%E4%B8%94%E5%8F%AF%E4%BC%B8%E7%BC%A9%E7%9A%84%E7%BB%93%E6%9E%9C%E7%BC%93%E5%AD%98"><span class="nav-number">6.</span> <span class="nav-text">5.6 构建高效且可伸缩的结果缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">第一部分小结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%AE%B9%E5%99%A8%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">同步容器类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%AE%B9%E5%99%A8%E7%B1%BB%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">同步容器类的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E4%B8%8EConcurrentModificationException"><span class="nav-number">1.2.</span> <span class="nav-text">迭代器与ConcurrentModificationException</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">1.3.</span> <span class="nav-text">隐藏迭代器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">并发容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ConcurrentHashMap"><span class="nav-number">2.1.</span> <span class="nav-text">ConcurrentHashMap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%9D%E5%A4%96%E7%9A%84%E5%8E%9F%E5%AD%90Map%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.</span> <span class="nav-text">额外的原子Map操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CopyOnWriteArrayList"><span class="nav-number">2.3.</span> <span class="nav-text">CopyOnWriteArrayList</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%92%8C%E7%94%9F%E4%BA%A7%E8%80%85%E2%80%94%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">阻塞队列和生产者—消费者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E6%A1%8C%E9%9D%A2%E6%90%9C%E7%B4%A2"><span class="nav-number">3.1.</span> <span class="nav-text">示例：桌面搜索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B2%E8%A1%8C%E7%BA%BF%E7%A8%8B%E5%B0%81%E9%97%AD"><span class="nav-number">3.2.</span> <span class="nav-text">串行线程封闭</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E7%AB%AF%E9%98%9F%E5%88%97%E4%B8%8E%E5%B7%A5%E4%BD%9C%E5%AF%86%E5%8F%96"><span class="nav-number">3.3.</span> <span class="nav-text">双端队列与工作密取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E6%96%B9%E6%B3%95%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%96%B9%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">阻塞方法与中断方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">同步工具类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E9%94%81"><span class="nav-number">5.1.</span> <span class="nav-text">闭锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FutureTask"><span class="nav-number">5.2.</span> <span class="nav-text">FutureTask</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="nav-number">5.3.</span> <span class="nav-text">信号量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%85%E6%A0%8F"><span class="nav-number">5.4.</span> <span class="nav-text">栅栏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E9%AB%98%E6%95%88%E4%B8%94%E5%8F%AF%E4%BC%B8%E7%BC%A9%E7%9A%84%E7%BB%93%E6%9E%9C%E7%BC%93%E5%AD%98"><span class="nav-number">6.</span> <span class="nav-text">构建高效且可伸缩的结果缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">第一部分小结</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -204,20 +204,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -289,7 +289,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2020-12-21 18:52:05" itemprop="dateModified" datetime="2020-12-21T18:52:05+08:00">2020-12-21</time>
+        <time title="Modified: 2022-05-04 20:01:48" itemprop="dateModified" datetime="2022-05-04T20:01:48+08:00">2022-05-04</time>
       </span>
 
   
@@ -303,8 +303,8 @@
     
     <div class="post-body" itemprop="articleBody">
         <p>第四章介绍了构造线程安全类时采用的一些技术，例如将线程安全性委托给现有的线程安全类。委托是创建线程安全类的一个最有效的策略，只需让现有的线程安全类管理所有的状态即可。<br>JAVA平台类库中包含了一个并发构建块的丰富集合，如线程安全的容器与同步工具。</p>
-<h2 id="5-1-同步容器类"><a href="#5-1-同步容器类" class="headerlink" title="5.1 同步容器类"></a>5.1 同步容器类</h2><p>同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchronizedXxx工厂方法创建的。这些类实现线程安全的方式是：将它们的状态封装起来，并对每个公有方法都进行同步，使得每次只有一个线程能访问容器的状态。<!--哎，这些同步，即阻塞，实际上是避免了并发访问，降低了性能--></p>
-<h3 id="5-1-1-同步容器类的问题"><a href="#5-1-1-同步容器类的问题" class="headerlink" title="5.1.1 同步容器类的问题"></a>5.1.1 同步容器类的问题</h3><p>同步容器类都是线程安全的，但在某些情况下，可能需要额外的客户端加锁来保护复合操作。</p>
+<h2 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h2><p>同步容器类包括Vector和HashTable，此外还包括JDK1.2中才被加入的类。同步包装类Collections.synchronizedXxx工厂方法创建的。这些类实现线程安全的方式是：将它们的状态封装起来，并对每个公有方法都进行同步，使得每次只有一个线程能访问容器的状态。<!--哎，这些同步，即阻塞，实际上是避免了并发访问，降低了性能--></p>
+<h3 id="同步容器类的问题"><a href="#同步容器类的问题" class="headerlink" title="同步容器类的问题"></a>同步容器类的问题</h3><p>同步容器类都是线程安全的，但在某些情况下，可能需要额外的客户端加锁来保护复合操作。</p>
 <p>容器上常见的复合操作包括：</p>
 <ul>
 <li>迭代<ul>
@@ -321,7 +321,7 @@
 </li>
 </ul>
 <p>在同步容器类中，这些复合操作在没有客户端加锁的情况下仍然是线程安全的，但当其他线程并发地修改容器时，它们可能会出现意料之外的行为。</p>
-<!--也就是在单线程情况下使用同步容器进行复合操作是线程安全的，但是如果有多个线程对同步容器同时进行操作，也会出现并发问题。-->
+<!--同步容器的这些复合操作，本身是没有线程问题的，但是如果有多个线程对同步容器同时进行操作，那么就会造成这些复合操作互相影响对方的情况， 即并发问题。-->
 
 <p>操作Vector（同步容器）的复合操作可能导致混乱的结果：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getLast</span><span class="params">(Vector list)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> lastIndex = list.size() - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> list.get(lastIndex);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">deleteLast</span><span class="params">(Vector list)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> lastIndex = list.size() - <span class="number">1</span>;</span><br><span class="line">	list.remove(lastIndex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -339,15 +339,15 @@
 <p>造成迭代不可靠的问题同样可以通过在客户端加锁来完成，通过在迭代期间持有Vector的锁，防止其他线程在迭代期间修改Vector，这样完全阻止了其他线程在这期间访问它，如果集合很大或者对每个元素执行的任务耗时比较长，<strong>这会削弱并发性</strong>。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span> (vector) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; vector.size(); i++)</span><br><span class="line">        doSomething(vector.get(i));<span class="comment">//还要持有另一个锁，这是一个产生死锁风险的因素</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="5-1-2-迭代器与ConcurrentModificationException"><a href="#5-1-2-迭代器与ConcurrentModificationException" class="headerlink" title="5.1.2 迭代器与ConcurrentModificationException"></a>5.1.2 迭代器与ConcurrentModificationException</h3><p>尽管上面讨论的Vector是“遗留”下来的容器类，这只是说明同步容器有这样的问题。其实，“现代”的容器类也并没有消除复合操作产生的问题，比如迭代复合操作，当其他线程并发修改容器时，使用迭代器仍然避免不了在使用的地方加锁，在设计同步容器返回迭代器时，并没有使用同步（注，这里讲的是说返回的迭代器不是线程安全，而不是指返回迭代器的方法iterator() 没有使用同步，它本身就是经过同步了的。），因为他们是“及时失败”——只要有其他线程修改容器结果，立马就会抛出未检查性异常ConcurrentModificationException。</p>
+<h3 id="迭代器与ConcurrentModificationException"><a href="#迭代器与ConcurrentModificationException" class="headerlink" title="迭代器与ConcurrentModificationException"></a>迭代器与ConcurrentModificationException</h3><p>尽管上面讨论的Vector是“遗留”下来的容器类，这只是说明同步容器有这样的问题。其实，“现代”的容器类也并没有消除复合操作产生的问题，比如迭代复合操作，当其他线程并发修改容器时，使用迭代器仍然避免不了在使用的地方加锁，在设计同步容器返回迭代器时，并没有使用同步（注，这里讲的是说返回的迭代器不是线程安全，而不是指返回迭代器的方法iterator() 没有使用同步，它本身就是经过同步了的。），因为他们是“及时失败”——只要有其他线程修改容器结果，立马就会抛出未检查性异常ConcurrentModificationException。</p>
 <p>这种”及时失败“的迭代器并不是一种完备的处理机制，而只是”善意地“捕获并发错误，因此只能作为并发问题的预警指示器。它们采用的实现方式是，将计算器的变化与容器关联起来：如果在迭代期间计数器被修改，那么hasNext或next将抛出ConcurrentModificationException。然而，这种检查是在没有同步的情况下进行的，因此可能会看到失效的计数值，而迭代器可能并没有意识到已经发生了修改。这是设计上得权衡，从而降低并发修改并发操作的检测代码对程序性能带来的影响。</p>
 <p>注：ConcurrentModificationException也可能出现在单线程的代码中，如果对象不是调用Iterator.remove，而是直接从容器中删除就会出现这种情况。</p>
 <p>for-each循环语法对容器进行迭代时，也是隐式地用到了Iterator，从内部来看，javac将生成使用Iterator的代码，反复调用hasNext和next来迭代List对象，与迭代Vector一样，想要避免ConcurrentModificationException，就必须在迭代过程持有容器的锁：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Widget&gt; widgetList = Collections.synchronizedList(<span class="keyword">new</span> ArrayList&lt;Widget&gt;());</span><br><span class="line">...</span><br><span class="line"><span class="comment">// May throw ConcurrentModificationException</span></span><br><span class="line"><span class="keyword">for</span> (Widget w : widgetList)</span><br><span class="line">    doSomething(w);</span><br></pre></td></tr></table></figure>
 
-<p>有时候开发人员并不希望在迭代期间对容器加锁，例如，某些线程在可以访问容器之前，必须等待迭代过程结束，如果容器规模很大，或者在每个元素上执行操作的时间很长，那么这些线程将长时间等待。即使不存在饥饿或者死锁等风险，长时间地对容器加锁也会降低程序的可伸缩性。持有锁的时间越长，那么在锁上的竞争就可能越激烈，如果许多线程在等待锁被释放，那么将极大地降低吞吐量和CPU的利用率。</p>
+<p>有时候开发人员并不希望在迭代期间对容器加锁，例如，某些线程在可以访问容器之前，必须等待迭代过程结束，如果容器规模很大，或者在每个元素上执行操作的时间很长，那么这些线程将长时间等待。即使不存在饥饿或者死锁等风险，长时间地对容器加锁也会降低程序的可伸缩性。持有锁的时间越长，那么在锁上的竞争就可能越激烈，如果许多线程在等待锁被释放，那么将极大地降低吞吐量和CPU的利用率。<!--这一点如同mysql的Update操作，导致数据被加上行锁（排他），其他读写操作就会一直等待甚至超时报错--></p>
 <p><strong>如果不希望在迭代期间对容器加锁，那么一种替代方法就是”克隆“容器，并在副本上进行迭代。</strong>由于副本被封闭在线程内，因此其他线程不会在迭代期间对其进行修改，这样就避免了抛出ConcurrentModificationException（在克隆过程中仍然需要对容器加锁）。在克隆容器时存在显著地性能开销。这种方式的好坏取决于多个因素，包括容器的大小，在每个元素上执行的工作，迭代操作相对于容器其他操作的调用频率，以及在响应时间和吞吐量等方面的需求。</p>
-<h3 id="5-1-3-隐藏迭代器"><a href="#5-1-3-隐藏迭代器" class="headerlink" title="5.1.3 隐藏迭代器"></a>5.1.3 隐藏迭代器</h3><p>你必须要记住，所有需要对共享容器进行迭代的地方都需要加锁。实际情况更加复杂，因为迭代器有时是隐藏的，就像下面代码一样，容器的toString方法的实现是通过迭代容器中的每个元素。编译器将字符串的连接操作转换为调用StringBuilder.append(Object),而这个方法又会调用容器的toString方法，标准容器的toString方法将迭代容器，并在每个元素上调用toString来生成容器内容的格式化表示。</p>
+<h3 id="隐藏迭代器"><a href="#隐藏迭代器" class="headerlink" title="隐藏迭代器"></a>隐藏迭代器</h3><p>你必须要记住，所有需要对共享容器进行迭代的地方都需要加锁。实际情况更加复杂，因为迭代器有时是隐藏的，就像下面代码一样，容器的toString方法的实现是通过迭代容器中的每个元素。编译器将字符串的连接操作转换为调用StringBuilder.append(Object),而这个方法又会调用容器的toString方法，标准容器的toString方法将迭代容器，并在每个元素上调用toString来生成容器内容的格式化表示。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HiddenIterator</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;Integer&gt; set = <span class="keyword">new</span> HashSet&lt;Integer&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(Integer i)</span> </span>&#123; set.add(i); &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addTenThings</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Random r = <span class="keyword">new</span> Random();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">            add(r.nextInt());</span><br><span class="line">        System.out.println(<span class="string">&quot;DEBUG: added ten elements to &quot;</span> + set);<span class="comment">//这里会隐式地使用迭代</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>toString对容器进行迭代。当然真正的问题是HiddenIterator不是线程安全的。在使用println的set之前必须首先获取HiddenIterator的锁，但在调试代码和日志代码中通常会忽视这个要求。</p>
@@ -356,7 +356,7 @@
 <p>正如封装对象的状态有助于维持不变性条件一样，封装对象的同步机制同样有助于确保实施同步策略。</p>
 </blockquote>
 <p>容器的hashCode和equals等方法也会间接地执行迭代操作，当容器作为另一个容器的元素或键值时，就会出现这种情况。同样，containsAll、removeAll和retainAll等方法，以及把容器作为参数的构造函数，都会对容器进行迭代。所有这些间接地迭代操作都可能抛出ConcurrentModificationException。</p>
-<h2 id="5-2-并发容器"><a href="#5-2-并发容器" class="headerlink" title="5.2 并发容器"></a>5.2 并发容器</h2><p>Java5.0提供了多种并发容器类来改进同步容器的性能。同步容器将所有对容器状态的访问都串行化，以实现它们的线程安全性。<strong>代价是降低并发性，当多个线程竞争容器的锁时，吞吐量将严重减低</strong>。<!--就是就是，锁这种依靠同步，来排斥和阻塞其他线程的设计，分明是搞串行化设计，多核系统还有什么用--></p>
+<h2 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h2><p>Java5.0提供了多种并发容器类来改进同步容器的性能。同步容器将所有对容器状态的访问都串行化，以实现它们的线程安全性。<strong>代价是降低并发性，当多个线程竞争容器的锁时，吞吐量将严重减低</strong>。<!--就是就是，锁这种依靠同步，来排斥和阻塞其他线程的设计，分明是搞串行化设计，多核系统还有什么用--></p>
 <p>另一方面，并发容器是针对多个线程并发访问设计的。在JAVA5.0中，增加了<code>ConcurrentHashMap</code>用来替代同步且基于散列的Map。增加了<code>CopyOnWriteArrayList</code>，用于在遍历操作为主要操作情况下代替同步的<code>List</code>。</p>
 <p>在新的ConcurrentMap接口中增加了对一些常见复合操作的支持，例如”若没有刚添加”、替换以及有条件删除等。</p>
 <blockquote>
@@ -373,9 +373,11 @@
 <p><code>Queue</code>上的操作<strong>不会阻塞</strong>，如果队列为空，返回空。虽然可以用List来模拟Queue的行为 — 事实上Queue是用LinkedList来实现Queue，但是<strong>还是需要一个Queue类，因为Queue能去掉List的随机访问需求，从而实现更高效的并发</strong>。</p>
 <p><code>BlockingQueue</code><strong>扩展了</strong>Queue，<strong>增加了可阻塞的插入和获取等操作</strong>。队列为空，阻塞获取直到出现一个可用元素。如果队列满了（对于有界队列），那么插入元素的操作将一直阻塞，直到队列中出现可用的空间。<!--在生产者----消费者设计模式中，阻塞队列是非常有用的。--></p>
 <p>Java6引入了<code>ConcurrentListMap</code>和<code>ConcurrentSkipListSet</code>，分别作为同步的<code>SortedMap</code>和<code>SortedSet</code>的并发替代品。例如用synchronizedMap包装的TreeMap或TreeSet。</p>
-<h3 id="5-2-1-ConcurrentHashMap"><a href="#5-2-1-ConcurrentHashMap" class="headerlink" title="5.2.1 ConcurrentHashMap"></a>5.2.1 ConcurrentHashMap</h3><p><strong>同步容器类在执行每个操作期间都持有一个锁。</strong><!--先给出了一个重要的结论--></p>
+<h3 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h3><p><strong>同步容器类在执行每个操作期间都持有一个锁。</strong><!--先给出了一个重要的结论--></p>
 <p>在一些操作中，例如HashMap.get或List.contains, 可能包含大最的工作： 当遍历散列桶或链表来查找某个特定的对象时，必须在许多元素上调用equals (而equals本身还包含一定的计算量）。在基于散列的容器中， 如果<code>hashCode</code><strong>不能很均匀地分布散列值，那么容器中的元素就不会均匀地分布在整个容器中</strong>。</p>
+<blockquote>
 <p>某些情况下，某个糟糕的散列函数还会把一个<strong>散列表变成线性链表</strong>。当遍历很长的链表并且在某些或者全部元素上调用equals方法时，会花费很长的时间，而其他线程在这段时间内都不能访问该容器。</p>
+</blockquote>
 <!--【使用同步容器类在并发环境下的窘境，所以 JDK5的时候引入了并发包，引入了并发容器，这是并发容器为什么出现的技术背景】-->
 
 <p>与HashMap 一样，ConcurrentHashMap也是一个基于散列的Map, 但它使用了一种完全不同的加锁策略来提供更高的并发性和伸缩性。</p>
@@ -388,19 +390,19 @@
 </ul>
 <p>尽管有这些改进，但仍然需要一些权衡的因素。 对于一些需要在整个 Map 上进行计算的方法，例如 <code>size</code> 和 <code>isEmpty</code> ，<strong>这些方法的语义被略微减弱了，以反映容器的并发特性</strong>。</p>
 <p>由于 <code>size</code>返回的结果在计算时可能已经过期了，它实际上只是一个估计值，因此允许 <code>size</code> 返回一个近似值而不是 精确值。 虽然这看上去令人有些不安，但事实上， <code>size</code> 和 <code>isEmpty</code>这样的方法在并发环境下的用处很小，因为它们的返回值总在不断地变化。因此，这些操作的需求被弱化了，以换取对其他更重要操作的性能优化：比如 get、put、containsKey 和 remove 等。</p>
-<!--**【这就是典型的根据场景，决定需求，然后进行 trade-off 取舍，舍弃相对不重要的东西，强化使用的更多，更重要的操作，这设计理念太清晰了。】**-->
+<!--这就是典型的根据场景，决定需求，舍弃相对不重要的东西，这种思想对于一个工科的工程师来说，都是非常重要的。-->
 
 <p><strong>在ConcurrentHashMap 中没有实现对Map 加锁以提供独占访问</strong>。在Hashtable 和synchronizedMap中， 获得Map 的锁能防止其他线程访问这个Map。在一些不常见的情况中需要这种功能，例如通过原子方式添加一些映射， 或者对Map 迭代若干次并在此期间保持元素顺序相同。然而， 总体来说这种权衡还是合理的， <strong>因为并发容器的内容会持续变化</strong>。<!--【这是并发容器要面对的场景的核心特性】--></p>
-<h3 id="5-2-2-额外的原子Map操作"><a href="#5-2-2-额外的原子Map操作" class="headerlink" title="5.2.2 额外的原子Map操作"></a>5.2.2 额外的原子Map操作</h3><p><strong>ConcurrentHashMap不能被加锁 来执行独占访问，因此我们无法使用客户端加锁来创建新的原子操作。</strong><!--惨兮兮，无法使用组合的方式对ConcurrentHashMap进行自定义拓展了-->但是一些常见的复合操作，例如”若没有则添加”，”若相等则移除”，”若相等则替换”等，都已经实现为原子操作并且在ConcurrentMap接口中声明。</p>
-<h3 id="5-2-3-CopyOnWriteArrayList"><a href="#5-2-3-CopyOnWriteArrayList" class="headerlink" title="5.2.3 CopyOnWriteArrayList"></a>5.2.3 CopyOnWriteArrayList</h3><p>CopyOnWriteArrayList 用于替代同步List, 在某些情况下它提供了更好的并发性能，<strong>并且在迭代期间不需要对容器进行加锁或复制。</strong>（类似地， CopyOnWriteArraySet 的作用是替代同步Set。)</p>
+<h3 id="额外的原子Map操作"><a href="#额外的原子Map操作" class="headerlink" title="额外的原子Map操作"></a>额外的原子Map操作</h3><p><strong>ConcurrentHashMap不能被加锁 来执行独占访问，因此我们无法使用客户端加锁来创建新的原子操作。</strong><!--惨兮兮，但是可以用第二种方式 -- 组合的方式对ConcurrentHashMap进行自定义拓展了-->但是一些常见的复合操作，例如”若没有则添加”，”若相等则移除”，”若相等则替换”等，都已经实现为原子操作并且在ConcurrentMap接口中声明。</p>
+<h3 id="CopyOnWriteArrayList"><a href="#CopyOnWriteArrayList" class="headerlink" title="CopyOnWriteArrayList"></a>CopyOnWriteArrayList</h3><p>CopyOnWriteArrayList 用于替代同步List, 在某些情况下它提供了更好的并发性能，<strong>并且在迭代期间不需要对容器进行加锁或复制。</strong>（类似地， CopyOnWriteArraySet 的作用是替代同步Set。)</p>
 <p>“ 写入时复制(Copy-On-Write)” 容器的线程安全性在于， <strong>只要正确地发布一个事实不可变的对象， 那么</strong></p>
 <ul>
 <li>在访问该对象时，就不再需要进一步的同步。</li>
 <li>在每次修改时， 都会创建并重新发布一个新的容器副本， 从而实现可变性。</li>
 </ul>
 <p>“ 写入时复制 ” 容器的迭代器<strong>保留一个指向底层基础数组的引用</strong>， 这个数组当前位于迭代器的起始位置， 由于它不会被修改， 因此在对其进行同步时只需确保数组内容的可见性。因此， 多个线程可以同时对这个容器进行迭代， 而不会彼此干扰或者与修改容器的线程相互干扰。 “ 写入时复制 ” 容器返回的迭代器不会抛出ConcurrentModificationException, 并且返回的元素与迭代器创建时的元素完全一致， 而不必考虑之后修改操作所带来的影响。</p>
-<p>显然， 每当修改容器时都会复制底层数组， 这需要一定的开销， 特别是当容器的规模较大时。 <strong>仅当迭代操作远远多于修改操作时， 才应该使用 “ 写入时复制” 容器</strong>。 这个准则很好地描述了许多事件通知系统：在分发通知时需要迭代已注册监听器链表， 并调用每一个监听器， 在 大多数情况下， 注册和注销事件监听器的操作远少于接收事件通知的操作。<!--给我的感觉是，像InnoDB事务中的读锁和写锁，多个线程读的时候，是不会相互干扰的；写的时候，是会阻塞其他线程的--></p>
-<h2 id="5-3-阻塞队列和生产者—消费者模式"><a href="#5-3-阻塞队列和生产者—消费者模式" class="headerlink" title="5.3 阻塞队列和生产者—消费者模式"></a>5.3 阻塞队列和生产者—消费者模式</h2><p>阻塞队列提供了<strong>可阻塞的put和take方法</strong>，以及<strong>支持实时的offer和poll方法</strong>。</p>
+<p>显然， 每当修改容器时都会复制底层数组， 这需要一定的开销， 特别是当容器的规模较大时。 <strong>仅当迭代操作远远多于修改操作时， 才应该使用 “ 写入时复制” 容器</strong>。 这个准则很好地描述了许多事件通知系统：在分发通知时需要迭代已注册监听器链表， 并调用每一个监听器， 在 大多数情况下， 注册和注销事件监听器的操作远少于接收事件通知的操作。<!--给我的感觉是，像InnoDB事务中的MVCC和写锁，多个线程写的时候，不仅加上写锁，而且在MVCC中添加一个版本号--></p>
+<h2 id="阻塞队列和生产者—消费者模式"><a href="#阻塞队列和生产者—消费者模式" class="headerlink" title="阻塞队列和生产者—消费者模式"></a>阻塞队列和生产者—消费者模式</h2><p>阻塞队列提供了<strong>可阻塞的put和take方法</strong>，以及<strong>支持实时的offer和poll方法</strong>。</p>
 <ul>
 <li>如果队列满了，那么put方法将阻塞直到有空间可用；</li>
 <li>如果队列为空，那么take方法会阻塞到直到有元素可用。</li>
@@ -421,7 +423,7 @@
 <li>PriorityBlockingQueue是一个按优先级排序的队列，当你希望按照某种顺序而不是FIFO来处理元素时，这个队列将非常有用。正如其他有序的容器一样，PriorityBlockingQueue既可以根据元素的自然顺序来比较元素（如果它们实现了Comparable方法），也可以使用Comparator来比较。</li>
 <li>SynchronousQueue实际上不是一个真正的队列，因为它不会为队列中元素维护存储空间。与其他队列不同的是，它维护一组线程，这些线程在等待着把元素加入或移出队列。如果以洗盘子的比喻为例，那么这就相当于没有盘架，而是将洗好的盘子直接放入下一个空闲的烘干机中。这种实现队列的方式看似很奇怪，但由于可以直接交付工作，<strong>从而降低了将数据从生产者移动到消费者的延迟</strong>。（在传统的队列中，在一个工作单元可以交付之前，必须通过串行方式首先完成入列[Enqueue]或者出列[Dequeue]等操作。）直接交付方式还会将更多关于任务状态的信息反馈给生产者。当交付被接受时，它就知道消费者已经得到了任务，而不是简单地把任务放入一个队列——这种区别就好比将文件直接交给同事，还是将文件放到她的邮箱中并希望她能尽快拿到文件<!--一个是及时的，一个是异步的-->。因为SynchronousQueue没有存储功能，因此put和take会一直阻塞，直到有另一个线程已经准备好参与到交付过程中。仅当有足够多的消费者，并且总是有一个消费者准备好获取交付的工作时，才适合使用同步队列。</li>
 </ul>
-<h3 id="5-3-1-示例：桌面搜索"><a href="#5-3-1-示例：桌面搜索" class="headerlink" title="5.3.1 示例：桌面搜索"></a>5.3.1 示例：桌面搜索</h3><p>有一种类型的程序适合被分解为 生产者 和 消费者，例如 代理程序，它将扫描本地驱动器上的文件并建立索引以便随后进行搜索，类似于某些桌面搜索程序或者 Windows 索引服务。</p>
+<h3 id="示例：桌面搜索"><a href="#示例：桌面搜索" class="headerlink" title="示例：桌面搜索"></a>示例：桌面搜索</h3><p>有一种类型的程序适合被分解为 生产者 和 消费者，例如 代理程序，它将扫描本地驱动器上的文件并建立索引以便随后进行搜索，类似于某些桌面搜索程序或者 Windows 索引服务。</p>
 <p>在 **程序清单 5-8 ** 的 <code>DiskCrawler</code> 中给出了一个生产者任务，即在某个文件层次结构中搜索 符合索引标准的文件，并将它们的文件名 放入 「工作队列」。而且 <code>Indexer</code> 中还给出了一个消费者任务，从队列中取出文件名称并对它们建立索引。</p>
 <blockquote>
 <p><strong>程序清单 5-8</strong> 桌面搜索应用程序中的生产者任务和消费者任务</p>
@@ -444,16 +446,16 @@
 
 
 
-<h3 id="5-3-2-串行线程封闭"><a href="#5-3-2-串行线程封闭" class="headerlink" title="5.3.2 串行线程封闭"></a>5.3.2 串行线程封闭</h3><p>在 <code>java.util.concurrent</code> Java 并发包中实现的各种阻塞队列 都包含了足够的 内部同步机制，从而安全地将对象从 「生产者线程」 发布到 「消费者线程」。</p>
+<h3 id="串行线程封闭"><a href="#串行线程封闭" class="headerlink" title="串行线程封闭"></a>串行线程封闭</h3><p>在 <code>java.util.concurrent</code> Java 并发包中实现的各种阻塞队列 都包含了足够的 内部同步机制，从而安全地将对象从 「生产者线程」 发布到 「消费者线程」。</p>
 <p>对于可变对象， 生产者—消费者 这种设计与阻塞队列一起，促进了<strong>线程封闭</strong>，从而将对象所有权从生产者交付给消费者。</p>
 <p>线程封闭对象只能被单个线程持有，但可以通过安全地 「发布」 该对象来 “转移” 对象的所有权。 在转移所有权之后也只有另一个线程能获得这个对象的访问权限，并且发布对象的线程不会再访问它。</p>
 <p>这种安全的发布确保了对象状态对于 新的所有者 来说是可见的，并且由于最初的所有者不会再访问它，因此对象被封闭在新的 线程中。</p>
 <p>新的所有者线程可以任意对该对象进行修改，因为它具有 独占 的访问权。</p>
 <p>「对象池」 利用了 串行线程封闭，将对象 “借给” 一个请求线程。 只要对象池内包含足够的 内部同步 来安全地发布池中的对象，并且只要客户代码本身不会发布池中对象，或者在将对象返回给对象池之后就不再使用它，那么就可以安全地在线程之间传递所有权。</p>
-<!--【 这段话有点绕的，作者陈述了线程之间安全传递对象的前提，里面包含了好几个要点，需要总结出来】-->
+<!-- 串行体现在流程上： 比如 生产者线程持有对象 -> 生产者线程放弃对象，交给Queue-> 消费者获取对象；又比如, 客户端持有对象 -> 客户端放弃对象，交给对象池 -> 对象池中某个线程获取对象。 看到没，这些流程都是串行进行的  -->
 
-<p>我们也可以使用其他发布机制来传递 可变对象 的所有权，<strong>但必须确保只有一个线程能接受被转移的对象。</strong>&lt;—【基本条件】 阻塞队列简化了这项工作，除此之外，还可以通过 <code>ConcurrentMap</code> 的原子方法 <code>remove</code> 或者 <code>AtomicReference</code> 的原子方法 <code>compareAndSet</code> 来完成这项工作。<!--【这里只给出了结论，同样缺少了具体案例，需要我们自己进行补充】--></p>
-<h3 id="5-3-3-双端队列与工作密取"><a href="#5-3-3-双端队列与工作密取" class="headerlink" title="5.3.3 双端队列与工作密取"></a>5.3.3 双端队列与工作密取</h3><p>Java 6 增加了两种容器类型 ，<code>Deque</code>（发音为 “deck”）和 <code>BlockingDeque</code> ，它们分别对 <code>Queue</code> 和 <code>BlockingQueue</code> 进行了扩展。</p>
+<p>我们也可以使用其他发布机制来传递 可变对象 的所有权，<strong>但必须确保只有一个线程能接受被转移的对象。</strong>【基本条件】 阻塞队列简化了这项工作，除此之外，还可以通过 <code>ConcurrentMap</code> 的原子方法 <code>remove</code> 或者 <code>AtomicReference</code> 的原子方法 <code>compareAndSet</code> 来完成这项工作。</p>
+<h3 id="双端队列与工作密取"><a href="#双端队列与工作密取" class="headerlink" title="双端队列与工作密取"></a>双端队列与工作密取</h3><p>Java 6 增加了两种容器类型 ，<code>Deque</code>（发音为 “deck”）和 <code>BlockingDeque</code> ，它们分别对 <code>Queue</code> 和 <code>BlockingQueue</code> 进行了扩展。</p>
 <p>Deque 是一个 「双端队列」，实现了在队列头和队列尾的<strong>高效插入和移除</strong><!--也就是高效修改操作-->，具体实现包括 <code>ArrayDeque</code> 和 <code>LinkedBlockingDeque</code>。</p>
 <p>正如阻塞队列适用于 “生产者—消费者” 模式，所有消费者有一个共享的工作队列，而在 「工作密取」设计中，每个消费者都有各自的双端队列。<!--从共享变为了独享--></p>
 <p>如果一个消费者完成了自己双端队列中的全部工作，那么它可以从其他消费者双端队列末尾 「秘密地获取工作」。<!--说明消费者可以获取其他消费者队列的末尾的数据--></p>
@@ -465,8 +467,7 @@
 <p>「工作密取」非常适用于既是消费者，也是生产者的问题 —— 当执行某个工作时可能导致出现更多的工作。</p>
 <p>例如： 在网页爬虫程序中处理一个页面时，通常会发现有更多的页面需要处理。类似的还有很多 图 搜索的算法，例如在 垃圾回收阶段对 堆进行标记，都可以通过 工作密取 机制来实现 「高效并行」。 当一个工作线程找到新的任务单元时，它会将其放到自己队列的末尾（或者在<strong>工作共享设计模式</strong>中，放入其他工作者线程队列中）。</p>
 <p>当「双端队列」 为空时，它会在另一个线程的队列队伍查找新的任务，从而确保每个线程都保持忙碌状态。<strong>【这个设计可以很好的提高线程的利用率】</strong></p>
-<p><strong>【这一节的信息量很大，引入了很多数据结构和概念名词，例子却少了点，所以有很多是需要自己去寻找和探索来对文章进行补充的，因为光靠概念是没办法深入学习的，talk is cheap，但是第一遍的时候我不打算去做这件事，先过一遍，第二遍才是深度学习与精度】</strong></p>
-<h2 id="5-4-阻塞方法与中断方法"><a href="#5-4-阻塞方法与中断方法" class="headerlink" title="5.4 阻塞方法与中断方法"></a>5.4 阻塞方法与中断方法</h2><p>线程可能会阻塞或暂停执行，原因有多种：</p>
+<h2 id="阻塞方法与中断方法"><a href="#阻塞方法与中断方法" class="headerlink" title="阻塞方法与中断方法"></a>阻塞方法与中断方法</h2><p>线程可能会阻塞或暂停执行，原因有多种：</p>
 <ul>
 <li><strong>等待 I/O 操作结束</strong></li>
 <li><strong>等待获取一个锁</strong></li>
@@ -500,7 +501,7 @@
 
 <p>还可以采用一些更复杂的终端处理方法，但是上述两种方法已经可以应付大多数情况了。 然而在出现 <code>InterruptedException</code> 时<strong>不应该</strong>做的事情是：<strong>捕获它但是不做出任何响应</strong>。【也就是异常的侵吞，这种操作在任何时候应该都是不推荐的】。这将使调用栈更上层的代码无法对中断采取处理措施，因为线程被中断的证据已经丢失。</p>
 <p>只有在一种特殊的情况下才能屏蔽中断 —— 对 Thread 进行扩展，并且能够调用栈上更高层的代码。 <a target="_blank" rel="noopener" href="https://github.com/funnycoding/blog/issues/28">第7章</a> 将进一步介绍 <strong>「取消」 和 「中断」</strong> 等操作。</p>
-<h2 id="5-5-同步工具类"><a href="#5-5-同步工具类" class="headerlink" title="5.5 同步工具类"></a>5.5 同步工具类</h2><p>在容器类中，「<strong>阻塞队列」是一种独特的类</strong>：它们不仅作为保存对象的<strong>容器</strong>，还能协调生产者和消费者等线程之间的<strong>控制流</strong>。【也就是除了容器功能还带有逻辑控制功能】，因为 take 和 put 方法将阻塞，直到队列到达期望的状态。（队列既非空，也非满）。</p>
+<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>在容器类中，「<strong>阻塞队列」是一种独特的类</strong>：它们不仅作为保存对象的<strong>容器</strong>，还能协调生产者和消费者等线程之间的<strong>控制流</strong>。【也就是除了容器功能还带有逻辑控制功能】，因为 take 和 put 方法将阻塞，直到队列到达期望的状态。（队列既非空，也非满）。</p>
 <p>同步工具类可以是任何一个对象，只要它根据自身的状态来协调线程的控制流。&lt;—【这里任何一个对象 怎么理解？不是就那几个容器类吗？】</p>
 <p>阻塞队列可以作为同步工具类，其他类型的同步工具类还包括：</p>
 <ul>
@@ -510,7 +511,7 @@
 </ul>
 <p>在 JDK 中还包含其他一些同步工具类的类，如果这些类无法满足需要，那么可以按照 <a target="_blank" rel="noopener" href="https://github.com/funnycoding/blog/issues/29">第14章</a> 中给出的机制来创建自己的同步工具类。</p>
 <p>所有的同步工具类都包含一些特定的「结构化属性」：它们封装了一些状态，这些状态将决定执行同步工具类的线程是继续执行还是等待，此外还提供了一些方法对「状态」进行操作，以及另一些方法用于高效地等待同步工具类进入到 「预期状态。」</p>
-<h3 id="5-5-1-闭锁"><a href="#5-5-1-闭锁" class="headerlink" title="5.5.1 闭锁"></a>5.5.1 闭锁</h3><p>「闭锁」是一种「同步工具类」，可以延迟线程的进度直到其到达终止状态。</p>
+<h3 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h3><p>「闭锁」是一种「同步工具类」，可以延迟线程的进度直到其到达终止状态。</p>
 <p>闭锁的作用相当于一扇门：在闭锁到达结束状态之前，这扇门一直是关闭的，并且没有任何线程能够通过，当到达结束状态时，这扇门会打开并允许所有线程通过。</p>
 <p>当闭锁到达结束状态后，将不会再改变状态，因此这扇门将永远保持打开状态。<!--所以说这是一次性的--></p>
 <p>闭锁可以用来确保某些活动直到其他活动都完成才继续执行 ，例如：</p>
@@ -537,7 +538,7 @@
 <p>为什么要在 <code>TestHarness</code> 中使用闭锁而不是在线程创建后就立即启动？ 或许我们希望测试 N 个线程并发执行某个任务需要的时间。</p>
 <p>如果在创建线程后立即启动它们，那么先启动的线程将 “领先” 后启动的线程，并且活跃线程数量会随着时间的推移而增加或减少，竞争程度也在不断发生变化。</p>
 <p>「启动门 」 <code>startGate</code> 将使得 主线程能够同时释放所有工作线程，而 「结束门」 <code>endGate</code> 则使主线程能够等待最后一个线程执行完成，而不是顺序地等待每个线程执行完成。</p>
-<h3 id="5-5-2-FutureTask"><a href="#5-5-2-FutureTask" class="headerlink" title="5.5.2 FutureTask"></a>5.5.2 FutureTask</h3><p><code>FutureTask</code> 也可以用做闭锁（<code>FutureTask</code> 实现了 <strong>Future</strong>语义，<strong>表示一种抽象的可生成结果的计算</strong> )。</p>
+<h3 id="FutureTask"><a href="#FutureTask" class="headerlink" title="FutureTask"></a>FutureTask</h3><p><code>FutureTask</code> 也可以用做闭锁（<code>FutureTask</code> 实现了 <strong>Future</strong>语义，<strong>表示一种抽象的可生成结果的计算</strong> )。</p>
 <p><code>FutureTask</code> 表示的计算是通过 <code>Callable</code> 来实现的，相当于一种可生成结果的 <code>Runnable</code>，并且可以处于以下 3种状态：</p>
 <ul>
 <li><strong>等待运行（Wating to run）</strong></li>
@@ -576,7 +577,7 @@
 </blockquote>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LaunderThrowable</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Coerce an unchecked Throwable to a RuntimeException</span></span><br><span class="line"><span class="comment">     * &lt;p/&gt;</span></span><br><span class="line"><span class="comment">     * If the Throwable is an Error, throw it; if it is a</span></span><br><span class="line"><span class="comment">     * RuntimeException return it, otherwise throw IllegalStateException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException)</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error)</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="5-5-3-信号量"><a href="#5-5-3-信号量" class="headerlink" title="5.5.3 信号量"></a>5.5.3 信号量</h3><p><strong>计数信号量</strong>（<strong>Counting Semaphore</strong>） 用来控制同时访问某个特定资源的操作数量，或者同时执行某个指定操作的数量。<strong>计数信号量还可以用来实现某种资源池，或者对容器施加边界。</strong></p>
+<h3 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h3><p><strong>计数信号量</strong>（<strong>Counting Semaphore</strong>） 用来控制同时访问某个特定资源的操作数量，或者同时执行某个指定操作的数量。<strong>计数信号量还可以用来实现某种资源池，或者对容器施加边界。</strong></p>
 <p><code>Semaphore</code> 中管理一组虚拟的许可（<code>permit</code>），许可的初始数量可以通过构造函数来指定。在执行操作时可以首先获得许可（只要还有剩余的许可），并在使用以后释放许可。</p>
 <ul>
 <li><p>如果没有许可<code>permit</code>，那么 <strong><code>acquire</code> 将阻塞直到有许可</strong>（或者直到被中断或者操作超时）。</p>
@@ -601,7 +602,7 @@
 </blockquote>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用信号量 Semaphore 给 容器设置边界</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BoundedHashSet</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;T&gt; set;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Semaphore sem;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BoundedHashSet</span><span class="params">(<span class="keyword">int</span> bound)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.set = Collections.synchronizedSet(<span class="keyword">new</span> HashSet&lt;&gt;());</span><br><span class="line">        <span class="comment">// 设置边界</span></span><br><span class="line">        sem = <span class="keyword">new</span> Semaphore(bound);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(T o)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        sem.acquire();<span class="comment">// 信号量 +1</span></span><br><span class="line">        <span class="keyword">boolean</span> wasAdded = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            wasAdded = set.add(o);</span><br><span class="line">            <span class="keyword">return</span> wasAdded;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!wasAdded) &#123;</span><br><span class="line">                sem.release(); <span class="comment">// 如果没有成功保存元素，则信号量 -1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">remove</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> wasRemoved = set.remove(o);</span><br><span class="line">        <span class="keyword">if</span> (wasRemoved) &#123;</span><br><span class="line">            sem.release(); <span class="comment">// 信号量 -1</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> wasRemoved;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        BoundedHashSet&lt;String&gt; strSet = <span class="keyword">new</span> BoundedHashSet&lt;&gt;(<span class="number">3</span>);</span><br><span class="line">        strSet.add(<span class="string">&quot;1&quot;</span>);</span><br><span class="line">        strSet.add(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">        strSet.add(<span class="string">&quot;3&quot;</span>);</span><br><span class="line">        System.out.println(strSet.set);</span><br><span class="line">        System.out.println(strSet.sem.toString());</span><br><span class="line">        strSet.add(<span class="string">&quot;4&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">输出</span></span><br><span class="line"><span class="comment">[1, 2, 3]</span></span><br><span class="line"><span class="comment">java.util.concurrent.Semaphore@6f94fa3e[Permits = 0]</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="5-5-4-栅栏"><a href="#5-5-4-栅栏" class="headerlink" title="5.5.4 栅栏"></a>5.5.4 栅栏</h3><ul>
+<h3 id="栅栏"><a href="#栅栏" class="headerlink" title="栅栏"></a>栅栏</h3><ul>
 <li><p>闭锁是<strong>一次性对象</strong>，一旦进入终止状态，就不能被重置。</p>
 </li>
 <li><p><strong>栅栏（Barrier) 类似于闭锁，它能阻塞一组线程直到某个事件发生。</strong></p>
@@ -644,7 +645,7 @@
 <p>数据交换的时机取决于应用程序的响应需求。最简单的方案是：当缓冲区被填满时，由填充任务进行交换，当缓冲区为空时，由清空任务进行交换。</p>
 <p><strong>这样会把需要交换的次数降至最低。</strong></p>
 <p>但如果新数据的到达率不可预测，那么一些数据的处理过程就将延迟。另一个方法是：不仅当缓冲区被填满时进行交换，并且当缓冲区被填充到一定程度并保持一定的时间后，也进行交换。</p>
-<h2 id="5-6-构建高效且可伸缩的结果缓存"><a href="#5-6-构建高效且可伸缩的结果缓存" class="headerlink" title="5.6 构建高效且可伸缩的结果缓存"></a>5.6 构建高效且可伸缩的结果缓存</h2><p>几乎所有的服务器应用程序都会使用 「某种形式的缓存」。重用之前的计算结果能降低延迟，提高吞吐量，但却需要消耗更多的内存。【空间与时间之间的转换】</p>
+<h2 id="构建高效且可伸缩的结果缓存"><a href="#构建高效且可伸缩的结果缓存" class="headerlink" title="构建高效且可伸缩的结果缓存"></a>构建高效且可伸缩的结果缓存</h2><p>几乎所有的服务器应用程序都会使用 「某种形式的缓存」。重用之前的计算结果能降低延迟，提高吞吐量，但却需要消耗更多的内存。【空间与时间之间的转换】</p>
 <p>像许多”重复发明的轮子”一样，缓存看上去非常简单。然而，简单的缓存可能会将 「性能瓶颈」 转换成 「可伸缩瓶颈」，即使缓存是用于提升单线程的性能，本节我们将开发一个 「高效」 且 「可伸缩」 的缓存，用于改进一个<strong>高计算开销</strong>的函数。</p>
 <p>我们首先从简单的 <code>HashMap</code> 开始，然后分析它的<strong>「并发性缺陷」</strong>，并讨论如何修复它们。</p>
 <p>在程序清单 5-16 的 <code>Computable&lt;A,V&gt;</code> 接口中声明了一个 函数 <code>Computable</code>，其输入类型为A，输出类型为V。</p>
@@ -722,7 +723,7 @@
 
 <h2 id="第一部分小结"><a href="#第一部分小结" class="headerlink" title="第一部分小结"></a>第一部分小结</h2><p>目前为止，第一部分就结束了。这一部分中介绍了许多关于并发的基础知识，下面这个 “并发技巧清单” 列举了在第一部分中介绍的主要概念和规则：</p>
 <ul>
-<li>可变状态是至关重要的（It’s tje mutable state,stupid)<ul>
+<li>可变状态是至关重要的（It’s the mutable state,stupid)<ul>
 <li>所有的并发问题都可以总结为如何协调对并发状态的访问。 可变状态越少，就越容易确保线程安全性。【当没有可变状态时，该类就是安全的，不存在线程安全性问题】</li>
 </ul>
 </li>
@@ -814,13 +815,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

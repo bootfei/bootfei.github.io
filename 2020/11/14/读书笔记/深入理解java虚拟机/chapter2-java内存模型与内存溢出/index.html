@@ -21,7 +21,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
   </script>
 
   <meta name="description" content="运行时数据区域Java 虚拟机会在程序执行时将数据划分为几个不同的数据区域。 这些区域有着**不同的用途，创建和销毁的时间**，有的区域随着虚拟机进程的启动而一直存在，有的区域则随着用户线程的启动和结束而建立和销毁。 根据 《Java虚拟机规范》的规定，Java虚拟机管理的内存区域包括以下几个**运行时**区域：    程序计数器**性质：线程私有，占用空间小，不会发生OOM，是当前线程执行字节码">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="http://static.oschina.net/uploads/space/2012/0219/232926_WTnX_103999.png">
 <meta property="og:image" content="http://static.oschina.net/uploads/space/2012/0219/232935_FM5T_103999.png">
 <meta property="article:published_time" content="2020-11-14T00:17:53.000Z">
-<meta property="article:modified_time" content="2021-03-02T01:03:19.617Z">
+<meta property="article:modified_time" content="2021-06-01T07:45:01.102Z">
 <meta property="article:author" content="Fei Qi">
 <meta property="article:tag" content="java">
 <meta name="twitter:card" content="summary">
@@ -204,20 +204,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">177</span>
+          <span class="site-state-item-count">305</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">categories</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
@@ -289,7 +289,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-03-02 09:03:19" itemprop="dateModified" datetime="2021-03-02T09:03:19+08:00">2021-03-02</time>
+        <time title="Modified: 2021-06-01 15:45:01" itemprop="dateModified" datetime="2021-06-01T15:45:01+08:00">2021-06-01</time>
       </span>
 
   
@@ -476,7 +476,6 @@
 <p>使用直接指针访问最大的好处就是速度更快，省去了一次指针定位的时间开销，由于对象访问这个操作在虚拟机中非常频繁，所以这类开销积少成多也是一项极为客观的执行成本。</p>
 <p><code>HotSpot</code> 主要使用第二种方式进行对象访问（也存在例外，如果使用了 <code>Shenandoah</code> 收集器也会有一次额外的转发）。</p>
 <p>但是在各种语言、框架中使用句柄来访问对象的方式也十分常见。</p>
-<p>​            </p>
 <h2 id="实验课："><a href="#实验课：" class="headerlink" title="实验课："></a>实验课：</h2><p>-XX:+PrintGCDetails</p>
 <ol>
 <li>堆异常<ol>
@@ -516,7 +515,7 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2020/11/16/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%94%B1%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%9D%A5%E7%90%86%E8%A7%A3%E4%B8%8BTCP/" rel="next" title="由一次线上故障来理解下TCP">
+                <a href="/2020/11/16/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/tcp/%E7%94%B1%E4%B8%80%E6%AC%A1%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%9D%A5%E7%90%86%E8%A7%A3%E4%B8%8BTCP/" rel="next" title="由一次线上故障来理解下TCP">
                   由一次线上故障来理解下TCP <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
@@ -566,13 +565,13 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Fei Qi</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
     </div>

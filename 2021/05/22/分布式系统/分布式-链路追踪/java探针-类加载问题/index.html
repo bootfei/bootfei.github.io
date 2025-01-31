@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="得益于Java SE 6提供的Instrumentation接口。基于Instrumentation可开发运行时修改class字节码的Java Agent应用（Java探针），可在类加载之前替换类的字节码、或在类加载之后通过重新加载类方式修改类的字节码。 只是实现运行时修改class字节码还不足以称为“探针”。基于Instrumentation开发的Java Agent，只需要在Java应用启动命">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java探针-类加载问题">
+<meta property="og:url" content="http://example.com/2021/05/22/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/java%E6%8E%A2%E9%92%88-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="得益于Java SE 6提供的Instrumentation接口。基于Instrumentation可开发运行时修改class字节码的Java Agent应用（Java探针），可在类加载之前替换类的字节码、或在类加载之后通过重新加载类方式修改类的字节码。 只是实现运行时修改class字节码还不足以称为“探针”。基于Instrumentation开发的Java Agent，只需要在Java应用启动命">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yibbONzdtFf2t8JVXHNXRpibzSgFAqUAMkfyP8gypoicPR23f3cqb0icdKtGjjAicYowOAHJr07HqlV9YPbqqqPE4qg/640">
+<meta property="article:published_time" content="2021-05-22T03:08:25.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.176Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/yibbONzdtFf2t8JVXHNXRpibzSgFAqUAMkfyP8gypoicPR23f3cqb0icdKtGjjAicYowOAHJr07HqlV9YPbqqqPE4qg/640">
+
+
+<link rel="canonical" href="http://example.com/2021/05/22/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/java%E6%8E%A2%E9%92%88-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>java探针-类加载问题 | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NoClassDefFoundError"><span class="nav-number">1.</span> <span class="nav-text">NoClassDefFoundError</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.1.</span> <span class="nav-text">原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3"><span class="nav-number">1.2.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">1.3.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0Agent%E4%B8%8E%E5%BA%94%E7%94%A8%E7%8E%AF%E5%A2%83%E9%9A%94%E7%A6%BB"><span class="nav-number">2.</span> <span class="nav-text">实现Agent与应用环境隔离</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8Espringboot%E9%9A%94%E7%A6%BB%E5%A4%B1%E8%B4%A5%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.1.</span> <span class="nav-text">与springboot隔离失败原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-1"><span class="nav-number">2.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%82%E9%85%8Dwebmvc%E6%A1%86%E6%9E%B6"><span class="nav-number">3.</span> <span class="nav-text">适配webmvc框架</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/22/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/java%E6%8E%A2%E9%92%88-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java探针-类加载问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-05-22 11:08:25" itemprop="dateCreated datePublished" datetime="2021-05-22T11:08:25+08:00">2021-05-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>得益于Java SE 6提供的Instrumentation接口。基于Instrumentation可开发运行时修改class字节码的Java Agent应用（Java探针），可在<a href="">类加载之前替换类的字节码</a>、或在<a href="">类加载之后通过重新加载类方式修改类的字节码</a>。</p>
+<p>只是实现运行时修改class字节码还不足以称为“探针”。基于Instrumentation开发的Java Agent，只需要在Java应用启动命令上加上虚拟机参数“-javaagent”指定Java Agent应用jar包的位置，而不需要在工程项目中引入其jar包，即可将探针插入应用代码的各个角落。通过<a href="">与应用使用不同的类加载实现环境隔离</a>，让人有种Java Agent是吸附在应用上运行的错觉。</p>
+<h2 id="NoClassDefFoundError"><a href="#NoClassDefFoundError" class="headerlink" title="NoClassDefFoundError"></a>NoClassDefFoundError</h2><h3 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h3><p>由父类加载器加载的类，不能引用子类加载器加载的类，否则会抛出NoClassDefFoundError。</p>
+<p>JDK提供的<code>java.*</code>类都由启动类加载器加载。如果我们在<code>java agent</code>中修改<code>java.*</code>包下的类，插入调用logback打印日记的代码，结果会怎样？由于<code>java agent</code>包下的logback由AppClassLoader加载，而加载<code>java.*</code>包下的类是BootClassLoader(AppClassLoader的父类加载器)，在<code>java.*</code>包下的类中插入调用logback打印日记的代码，首先在加载<code>java.*</code>包下的类时，jvm会查看BootClassLoader有没有加载过这个类，如果没有加载过尝试加载，但BootClassLoader加载不了logback包的类，而启动类加载器不会向子类加载器去询问，即使子类加载器加载了这个类。所以就会出现NoClassDefFoundError。</p>
+<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3><p>如果非要修改java包下的类，且非要在java包下的类中访问项目中我们编写的类或者第三方jar包提供的类、或者我们编写的javaagent包下的类，如何避免NoClassDefFoundError呢？</p>
+<p>研究下Arthas:</p>
+<ul>
+<li>用于接收埋点代码上报事件的类（Spy）：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Spy</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Method beforMethod;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Method completeMethod;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">before</span><span class="params">(String className, String methodName, String descriptor, Object[] params)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (beforMethod != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                beforMethod.invoke(<span class="keyword">null</span>, className, methodName, descriptor, params);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IllegalAccessException | InvocationTargetException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">complete</span><span class="params">(Object returnValueOrThrowable, String className, String methodName, String descriptor)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (completeMethod != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                completeMethod.invoke(<span class="keyword">null</span>, returnValueOrThrowable, className, methodName, descriptor);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IllegalAccessException | InvocationTargetException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>before：方法执行之前上报；</p>
+<p>complete：方法return之前或者抛出异常之前上报，当方法抛出异常时，第一个参数为异常，否则第一个参数为返回值</p>
+<p>methodName: 上报方法</p>
+</blockquote>
+<ul>
+<li>将Spy放在一个独立的jar包下，在premain、agentmain方法中调用Instrumentation的appendToBootstrapClassLoaderSearch方法，将Spy类所在的jar包交由启动类加载器扫描加载，如下代码所示。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; agent-spy.jar</span><br><span class="line">String agentSpyJar &#x3D; jarPath[1];</span><br><span class="line">File spyJarFile &#x3D; new File(agentSpyJar);</span><br><span class="line">instrumentation.appendToBootstrapClassLoaderSearch(new JarFile(spyJarFile));</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>在Spy类中打印类加载器，如果打印的结果为null，则说明Spy类是由启动类加载器加载的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public final class Spy &#123;</span><br><span class="line">    static &#123;</span><br><span class="line">        System.out.println(&quot;Spy class loader is &quot; + Spy.class.getClassLoader());</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;.......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现Agent与应用环境隔离"><a href="#实现Agent与应用环境隔离" class="headerlink" title="实现Agent与应用环境隔离"></a>实现Agent与应用环境隔离</h2><p>隔离是避免Agent污染应用自身，使开发Java Agent无需考虑引入的jar包是否与目标应用引入的jar包冲突。</p>
+<h3 id="与springboot隔离失败原因"><a href="#与springboot隔离失败原因" class="headerlink" title="与springboot隔离失败原因"></a>与springboot隔离失败原因</h3><p>Java Agent与Spring Boot应用相遇时会发生什么？</p>
+<p>Spring Boot应用打包后，将Agent附着到应用启动可能会抛出醒目的NoClassDefFoundError异常，背后的原因是<a href="">Agent与打包后的Spring Boot应用使用了不同的类加载器</a>。</p>
+<ul>
+<li>Agent的jar包由AppClassLoader加载。我们可能会在Agent中调用被监控的SpringBoot应用的代码，也可能调用Agent依赖的第三方jar包的API，而这些jar包恰好在SpringBoot应用中也有导入，就可能会出现NoClassDefFoundError。</li>
+<li>SpringBoot应用打包后，JVM进程启动入口不再是我们写的main方法，而是SpringBoot生成的启动类。SpringBoot使用自定义的类加载器（LaunchedClassLoader）加载jar中的类和第三方jar包中的类，该类加载器的父类加载器为AppClassLoader。也就是说，SpringBoot应用打包后，加载java agent包下的类加载器是SpringBoot的类加载器的父类。</li>
+</ul>
+<blockquote>
+<p>疑惑？这在IDEA中测试是不会发生的</p>
+<p>因为在IDEA中，项目的class文件和第三方库是通过AppClassLoader加载的，而使用-javaagent指定的jar也是通过AppClassLoader加载，所以在idea中测试不会遇到这个问题。</p>
+</blockquote>
+<h3 id="解决-1"><a href="#解决-1" class="headerlink" title="解决"></a>解决</h3><p>让加载agent包不使用AppClassLoader加载器加载，而是使用自定义的类加载器加载。</p>
+<p>参考Alibaba开源的Arthas的实现，自定义URLClassLoader加载agent包以及agent依赖的第三方jar包。</p>
+<p>由于premain或者agentmain方法所在的类由jvm使用AppClassLoader所加载，所以必须将agent拆分为两个jar包。核心功能放在agent-core包下，premain或者agentmain方法所在的类放在agent-boot包下。在premain或者agentmain方法中使用自定义的URLClassLoader类加载器加载agent-core。</p>
+<ul>
+<li>自定义类加载器OnionClassLoader，继承URLClassLoader，如下代码所示：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OnionClassLoader</span> <span class="keyword">extends</span> <span class="title">URLClassLoader</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">OnionClassLoader</span><span class="params">(URL[] urls)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(urls, ClassLoader.getSystemClassLoader().getParent());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">synchronized</span> Class&lt;?&gt; loadClass(String name, <span class="keyword">boolean</span> resolve) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">        <span class="keyword">final</span> Class&lt;?&gt; loadedClass = findLoadedClass(name);</span><br><span class="line">        <span class="keyword">if</span> (loadedClass != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> loadedClass;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 优先从parent（SystemClassLoader）里加载系统类，避免抛出ClassNotFoundException</span></span><br><span class="line">        <span class="keyword">if</span> (name != <span class="keyword">null</span> &amp;&amp; (name.startsWith(<span class="string">&quot;sun.&quot;</span>) || name.startsWith(<span class="string">&quot;java.&quot;</span>))) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.loadClass(name, resolve);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class&lt;?&gt; aClass = findClass(name);</span><br><span class="line">            <span class="keyword">if</span> (resolve) &#123;</span><br><span class="line">                resolveClass(aClass);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> aClass;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="comment">// ignore</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.loadClass(name, resolve);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时在构造方法中指定OnionClassLoader的父类加载器为AppClassLoader的父类加载器。</p>
+<p><code>ClassLoader.getSystemClassLoader()</code>：获取系统类加载器（AppClassLoader）</p>
+<ul>
+<li>在premain或者agentmain方法中使用OnionClassLoader类加载器加载agent-core。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">File agentJarFile = <span class="keyword">new</span> File(agentJar);</span><br><span class="line"><span class="keyword">final</span> ClassLoader agentLoader = <span class="keyword">new</span> OnionClassLoader(<span class="keyword">new</span> URL[]&#123;agentJarFile.toURI().toURL()&#125;);</span><br><span class="line"></span><br><span class="line">Class&lt;?&gt; transFormer = agentLoader.loadClass(<span class="string">&quot;com.msyc.agent.core.OnionClassFileTransformer&quot;</span>);</span><br><span class="line"></span><br><span class="line">Constructor&lt;?&gt; constructor = transFormer.getConstructor(String.class);</span><br><span class="line">Object instance = constructor.newInstance(opsParams);</span><br><span class="line"></span><br><span class="line">instrumentation.addTransformer((ClassFileTransformer) instance);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>根据agent-core.jar所在绝对路径构造OnionClassLoader；</li>
+<li>加载agent-core.jar下的ClassFileTransformer；</li>
+<li>使用反射创建ClassFileTransformer实例；</li>
+<li>将ClassFileTransformer添加到Instrumentation;</li>
+</ul>
+</blockquote>
+<p>OnionClassFileTransformer类所依赖的agent-core包下的类，自然也会被使用OnionClassLoader类加载器加载，包括agent-core依赖的第三方jar包。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/yibbONzdtFf2t8JVXHNXRpibzSgFAqUAMkfyP8gypoicPR23f3cqb0icdKtGjjAicYowOAHJr07HqlV9YPbqqqPE4qg/640" alt="图片"></p>
+<h2 id="适配webmvc框架"><a href="#适配webmvc框架" class="headerlink" title="适配webmvc框架"></a><strong>适配webmvc框架</strong></h2><p>生成分布式调用链日记的难点在于方法埋点和方法调用日记串连。</p>
+<p>分布式调用链日记串连的方式有多种，笔者采用的是最简单的方式：打点id+打点时间。</p>
+<ul>
+<li>对于同进程内的同线程，可用打点id将调用的方法串连起来，根据打点时间与一个累加器的值排序方法调用日记。</li>
+<li>对于不同进程，通过传递打点id可将不同应用的打点日记串连起来，根据打点时间排序。</li>
+</ul>
+<p>例如，适配webmvc框架的目的是从请求头获取调用来源传递过来的打点ID(事务ID)。对DispatcherServlet#doDispatch方法插桩，从HttpServletRequest参数获取请求头“S-Tid”。“S-Tid”是自定义的请求头参数，用于传递打点ID。</p>
+<p>笔者在实现适配webmvc和openfeign时都遇到了同样的问题，如在适配webmvc时，修改DispatcherServlet的doDispatch方法时，asm框架抛出java.lang.TypeNotPresentException。</p>
+<ul>
+<li>java.lang.TypeNotPresentException：当应用程序试图使用表示类型名称的字符串对类型进行访问，但无法找到带有指定名称的类型定义时，抛出该异常。</li>
+</ul>
+<p>其原因是，使用asm框架改写DispatcherServlet类时，asm会使用Class.forName方法加载符号引用的类，如果加载不到目标类则抛出TypeNotPresentException。</p>
+<p>默认asm会使用加载自身的类加载器去尝试加载当前改写类所依赖的一些类，而加载asm框架使用的类加载器与加载agent-core包使用的是同一个类加载器，DispatcherServlet则由SpringBoot的LaunchedClassLoader类加载器所加载。</p>
+<p>好在ClassFileTransformer#transform方法传递了用于加载当前类的类加载器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public class OnionClassFileTransformer implements ClassFileTransformer &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public byte[] transform(ClassLoader loader, String className,                             Class&lt;?&gt; classBeingRedefined,</span><br><span class="line">                            ProtectionDomain protectionDomain,                             byte[] classfileBuffer) &#123;</span><br><span class="line">             &#x2F;&#x2F; ......</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>如果当前需要改写的类是DispatcherServlet，则transform方法的第一个参数为即将用于加载DispatcherServlet类的类加载器；</li>
+</ul>
+<p>我们只需要指定asm使用ClassFileTransformer#transform方法传递进来的类加载器加载DispatcherServlet依赖的类即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ClassWriter classWriter &#x3D; new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES) &#123;</span><br><span class="line">       @Override</span><br><span class="line">       protected ClassLoader getClassLoader() &#123;</span><br><span class="line">            return loader;</span><br><span class="line">       &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>如代码所示，我们重写asm的ClassWriter类的getClassLoader方法，返回的类加载器是ClassFileTransformer#transform方法传递进来的类加载器。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/21/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E4%BC%98-01/" rel="prev" title="kafka-分析与调优">
+                  <i class="fa fa-chevron-left"></i> kafka-分析与调优
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/23/My%20Lord%20Jesus/%E4%B8%BB%E6%97%A5%E8%AE%B2%E9%81%93/2021-05-23/" rel="next" title="2021-05-23主日讲道">
+                  2021-05-23主日讲道 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

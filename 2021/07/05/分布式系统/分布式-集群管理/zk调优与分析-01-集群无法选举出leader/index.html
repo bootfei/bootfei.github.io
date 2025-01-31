@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en,cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+  <meta name="description" content="前言ZooKeeper作为dubbo的注册中心，可谓是重中之重，线上ZK的任何风吹草动都会牵动心弦。最近笔者就碰到线上ZK Leader宕机后，选主无法成功导致ZK集群拒绝服务的现象，于是把这个case写出来分享给大家(基于ZooKeeper 3.4.5)。 Bug现场一天早上，突然接到电话，说是ZooKeeper物理机宕机了，而剩余几台机器状态都是 12sh zkServer.sh status">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zk调优与分析-01-集群无法选举出leader">
+<meta property="og:url" content="http://example.com/2021/07/05/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zk%E8%B0%83%E4%BC%98%E4%B8%8E%E5%88%86%E6%9E%90-01-%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E9%80%89%E4%B8%BE%E5%87%BAleader/index.html">
+<meta property="og:site_name" content="BootFei&#39;s Blog">
+<meta property="og:description" content="前言ZooKeeper作为dubbo的注册中心，可谓是重中之重，线上ZK的任何风吹草动都会牵动心弦。最近笔者就碰到线上ZK Leader宕机后，选主无法成功导致ZK集群拒绝服务的现象，于是把这个case写出来分享给大家(基于ZooKeeper 3.4.5)。 Bug现场一天早上，突然接到电话，说是ZooKeeper物理机宕机了，而剩余几台机器状态都是 12sh zkServer.sh status">
+<meta property="og:locale">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0m4ibVmN3CGPSxKJJdcVq2u6cHK6chnCicGLRXE5pLPt5czKt0mcPsx4w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er04xonZeWUwegNic2KQHH3jJJGgoz1ltQRxY86ajADNBCYdaAqUd5WU5g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0YyjZOzPPZ1H1iatv0dJIWewJmt33kt7bSrMMhiciasLBtdsniaq8HpACSg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0H8iawNnVj63Ic0JWnlB7EMohfSktibyMNic1ZSfa6trDQbLLoxz3rLyPg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0tttT7icMDVASzFJWML5XkY093c94IgvFkt8b1QaibWQMDGRlEbVIzbOA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0yhedbofHiaNsJib1Lg7ePTiboiaO03k5AC5SpfOpMo2AgnL6E9kvtR5mWA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0JdoibkzrcpBvl1GH9RCIqtbDdlZepmmFBZ4N3Vdr2KSU8oWebetd7Qg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="article:published_time" content="2021-07-05T11:01:00.000Z">
+<meta property="article:modified_time" content="2021-09-02T05:52:45.181Z">
+<meta property="article:author" content="Fei Qi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0m4ibVmN3CGPSxKJJdcVq2u6cHK6chnCicGLRXE5pLPt5czKt0mcPsx4w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1">
+
+
+<link rel="canonical" href="http://example.com/2021/07/05/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zk%E8%B0%83%E4%BC%98%E4%B8%8E%E5%88%86%E6%9E%90-01-%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E9%80%89%E4%B8%BE%E5%87%BAleader/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en,cn'
+  };
+</script>
+
+  <title>zk调优与分析-01-集群无法选举出leader | BootFei's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">BootFei's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bug%E7%8E%B0%E5%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">Bug现场</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E5%BD%B1%E5%93%8D"><span class="nav-number">3.</span> <span class="nav-text">业务影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E8%A1%A8%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">日志表现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ZK-A%E6%9C%BA%E5%99%A8%E6%97%A5%E5%BF%97"><span class="nav-number">4.1.</span> <span class="nav-text">ZK-A机器日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZK-B%E6%9C%BA%E5%99%A8%E6%97%A5%E5%BF%97"><span class="nav-number">5.</span> <span class="nav-text">ZK-B机器日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-number">6.</span> <span class="nav-text">时序图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E5%88%86%E6%9E%90follower-ZK-B-%E7%9A%84%E6%83%85%E5%86%B5"><span class="nav-number">6.1.</span> <span class="nav-text">首先分析follower(ZK-B)的情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9leader-ZK-A-%E8%BF%9B%E8%A1%8C%E5%88%86%E6%9E%90"><span class="nav-number">6.2.</span> <span class="nav-text">对leader(ZK-A)进行分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snapshot%E8%80%97%E6%97%B6"><span class="nav-number">7.</span> <span class="nav-text">Snapshot耗时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E5%A4%A7initLimit"><span class="nav-number">8.</span> <span class="nav-text">调大initLimit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E4%B9%88%E5%B7%A7%E5%B0%B120s%E4%B9%88%EF%BC%9F"><span class="nav-number">9.</span> <span class="nav-text">这么巧就20s么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E6%83%85%E5%86%B5"><span class="nav-number">10.</span> <span class="nav-text">第二种情况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#leader-ZK-A-%E7%AC%AC%E4%BA%8C%E7%A7%8D%E6%83%85%E5%86%B5"><span class="nav-number">10.1.</span> <span class="nav-text">leader(ZK-A)第二种情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#follower-ZK-B-%E7%AC%AC%E4%BA%8C%E7%A7%8D%E6%83%85%E5%86%B5"><span class="nav-number">10.2.</span> <span class="nav-text">follower(ZK-B)第二种情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E5%A4%A7syncLimit"><span class="nav-number">11.</span> <span class="nav-text">调大syncLimit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8B%E5%A4%8D%E7%8E%B0"><span class="nav-number">12.</span> <span class="nav-text">线下复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E4%B8%8B%E7%94%A8%E6%96%B0%E7%89%88%E6%9C%AC3-4-13%E5%B0%9D%E8%AF%95%E5%A4%8D%E7%8E%B0"><span class="nav-number">13.</span> <span class="nav-text">线下用新版本3.4.13尝试复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BD%95Dubbo-ZK%E6%9C%89%E9%82%A3%E4%B9%88%E5%A4%9A%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">14.</span> <span class="nav-text">为何Dubbo-ZK有那么多的数据</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Fei Qi</p>
+  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">305</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/05/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zk%E8%B0%83%E4%BC%98%E4%B8%8E%E5%88%86%E6%9E%90-01-%E9%9B%86%E7%BE%A4%E6%97%A0%E6%B3%95%E9%80%89%E4%B8%BE%E5%87%BAleader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          zk调优与分析-01-集群无法选举出leader
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-07-05 19:01:00" itemprop="dateCreated datePublished" datetime="2021-07-05T19:01:00+08:00">2021-07-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>ZooKeeper作为dubbo的注册中心，可谓是重中之重，线上ZK的任何风吹草动都会牵动心弦。最近笔者就碰到线上ZK Leader宕机后，选主无法成功导致ZK集群拒绝服务的现象，于是把这个case写出来分享给大家(基于ZooKeeper 3.4.5)。</p>
+<h2 id="Bug现场"><a href="#Bug现场" class="headerlink" title="Bug现场"></a>Bug现场</h2><p>一天早上，突然接到电话，说是ZooKeeper物理机宕机了，而剩余几台机器状态都是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh zkServer.sh status</span><br><span class="line">it is probably not running</span><br></pre></td></tr></table></figure>
+
+<p>笔者看了下监控，物理机宕机的正好是ZK的leader。3节点的ZK，leader宕了后，其余两台一直未能成为leader，把宕机的那台紧急拉起来之后，依旧无法选主，<br>导致ZK集群整体拒绝服务！<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0m4ibVmN3CGPSxKJJdcVq2u6cHK6chnCicGLRXE5pLPt5czKt0mcPsx4w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h2 id="业务影响"><a href="#业务影响" class="headerlink" title="业务影响"></a>业务影响</h2><p>Dubbo如果连接不上ZK，其调用元信息会一直缓存着，所以并不会对请求调用造成实际影响。麻烦的是，如果在ZK拒绝服务期间，应用无法重启或者发布，一旦遇到紧急事件而重启(发布)不能，就会造成比较重大的影响。<br>好在我们为了高可用，做了对等机房建设，所以非常淡定的将流量切到B机房，<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er04xonZeWUwegNic2KQHH3jJJGgoz1ltQRxY86ajADNBCYdaAqUd5WU5g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>双机房建设就是好啊,一键切换！<br>切换过后就可以有充裕的时间来恢复A机房的集群了。在紧张恢复的同时，笔者也开始了分析工作。</p>
+<h2 id="日志表现"><a href="#日志表现" class="headerlink" title="日志表现"></a>日志表现</h2><p>首先，查看日志，期间有大量的client连接报错，自然是直接过滤掉，以免干扰。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat zookeeper.out | grep -v &#39;client xxx&#39; | &gt; &#x2F;tmp&#x2F;1.txt</span><br></pre></td></tr></table></figure>
+
+<p>首先看到的是下面这样的日志:</p>
+<h3 id="ZK-A机器日志"><a href="#ZK-A机器日志" class="headerlink" title="ZK-A机器日志"></a>ZK-A机器日志</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Zk-A机器:</span><br><span class="line">2021-06-16 03:32:35 ... New election. My id&#x3D;3</span><br><span class="line">2021-06-16 03:32:46 ... QuoeumPeer] LEADING  &#x2F;&#x2F; 注意，这里选主成功</span><br><span class="line">2021-06-16 03:32:46 ... QuoeumPeer] LEADING - LEADER ELECTION TOOK - 7878&#39;</span><br><span class="line">2021-06-16 03:32:48 ... QuoeumPeer] Reading snapshot &#x2F;xxx&#x2F;snapshot.xxx</span><br><span class="line">2021-06-16 03:32:54 ... QuoeumPeer] Snahotting xxx to &#x2F;xxx&#x2F;snapshot.xxx</span><br><span class="line">2021-06-16 03:33:08 ... Follower sid ZK-B.IP</span><br><span class="line">2021-06-16 03:33:08 ... Unexpected exception causing shutdown while sock still open</span><br><span class="line">java.io.EOFException </span><br><span class="line">    at java.io.DataInputStream.readInt</span><br><span class="line">    ......</span><br><span class="line">    at quorum.LearnerHandler.run</span><br><span class="line">2021-06-16 03:33:08 ******* GOODBYE ZK-B.IP *******</span><br><span class="line">2021-06-16 03:33:27 Shutting down</span><br></pre></td></tr></table></figure>
+
+<p>这段日志看上去像选主成功了，但是和其它机器的通信出问题了，导致Shutdown然后重新选举。</p>
+<h2 id="ZK-B机器日志"><a href="#ZK-B机器日志" class="headerlink" title="ZK-B机器日志"></a>ZK-B机器日志</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:32:48 New election. My id&#x3D;2</span><br><span class="line">2021-06-16 03:32:48 QuoeumPeer] FOLLOWING</span><br><span class="line">2021-06-16 03:32:48 QuoeumPeer] FOLLOWING - LEADER ELECTION TOOK - 222</span><br><span class="line">2021-06-16 03:33:08.833 QuoeumPeer] Exception when following the leader</span><br><span class="line">java.net.SocketTimeoutException: Read time out</span><br><span class="line">    at java.net.SocketInputStream.socketRead0</span><br><span class="line">    ......</span><br><span class="line">    at org.apache.zookeeper.server.quorum.Follower.followLeader</span><br><span class="line">2021-06-16 03:33:08.380 Shutting down</span><br></pre></td></tr></table></figure>
+
+<p>这段日志也表明选主成功了，而且自己是Following状态，只不过Leader迟迟不返回，导致超时进而Shutdown</p>
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><p>笔者将上面的日志画成时序图，以便分析:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0YyjZOzPPZ1H1iatv0dJIWewJmt33kt7bSrMMhiciasLBtdsniaq8HpACSg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>从ZK-B的日志可以看出，其在成为follower之后，一直等待leader，直到Read time out。<br>从ZK-A的日志可以看出,其在成为LEADING后，在33:08,803才收到Follower也就是ZK-B发出的包。而这时，ZK-B已经在33:08,301的时候Read timed out了。</p>
+<h3 id="首先分析follower-ZK-B-的情况"><a href="#首先分析follower-ZK-B-的情况" class="headerlink" title="首先分析follower(ZK-B)的情况"></a>首先分析follower(ZK-B)的情况</h3><p>我们知道其在03:32:48成为follower,然后在03:33:08出错Read time out，其间正好是20s。于是笔者先从Zookeeper源码中找下其设置Read time out是多长时间。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Learner</span><br><span class="line">protected void connectToLeader(InetSocketAddress addr) &#123;</span><br><span class="line">    ......</span><br><span class="line">    sock &#x3D; new Socket()</span><br><span class="line">    &#x2F;&#x2F; self.tockTime 2000 self.initLimit 10</span><br><span class="line">    sock.setSoTimeout(self.tickTime * self.initLimit);</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其Read time out是按照zoo.cfg中的配置项而设置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tickTime&#x3D;2000 self.tickTime</span><br><span class="line">initLimit&#x3D;10 self.initLimit</span><br><span class="line">syncLimit&#x3D;5</span><br></pre></td></tr></table></figure>
+
+<p>很明显的，ZK-B在成为follower后，由于某种原因leader在20s后才响应。那么接下来对leader进行分析。</p>
+<h3 id="对leader-ZK-A-进行分析"><a href="#对leader-ZK-A-进行分析" class="headerlink" title="对leader(ZK-A)进行分析"></a>对leader(ZK-A)进行分析</h3><p>首先我们先看下Leader的初始化逻辑:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">quorumPeer</span><br><span class="line">    |-&gt;打印 LEADING</span><br><span class="line">    |-&gt;makeLeader</span><br><span class="line">        |-&gt; new ServerSocket listen and bind </span><br><span class="line">    |-&gt;leader.lead()</span><br><span class="line">        |-&gt;打印 LEADER ELECTION TOOK</span><br><span class="line">        |-&gt;loadData</span><br><span class="line">            |-&gt;loadDataBase </span><br><span class="line">                |-&gt;resore 打印Reading snapshot</span><br><span class="line">            |-&gt;takeSnapshot</span><br><span class="line">                |-&gt;save 打印Snapshotting</span><br><span class="line">            |-&gt;cnxAcceptor 处理请求Accept</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，在我们的ZK启动监听端口到正式处理请求之间，还有Reading Snapshot和Snapshotting(写)动作。从日志可以看出一个花了6s多,一个花了14s多。然后就有20s的处理空档期。如下图所示:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0H8iawNnVj63Ic0JWnlB7EMohfSktibyMNic1ZSfa6trDQbLLoxz3rLyPg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>由于在socket listen 20s之后才开始处理数据，所以ZK-B建立成功的连接实际还放在tcp的内核全连接队列(backlog)里面，由于在内核看来三次握手是成功的，所以能够正常接收ZK-B发送的follower ZK-B数据。在20s，ZK-A真正处理后，从buffer里面拿出来20s前ZK-B发送的数据，处理完回包的时候，发现ZK-B连接已经断开。<br>同样的，另一台follower(这时候我们已经把宕机的拉起来了，所以是3台)也是由于此原因gg,而leader迟迟收不到其它机器的响应，认为自己的leader没有达到1/2的票数，而Shutdown重新选举。</p>
+<h2 id="Snapshot耗时"><a href="#Snapshot耗时" class="headerlink" title="Snapshot耗时"></a>Snapshot耗时</h2><p>那么是什么导致Snapshotting读写这么耗时呢？笔者查看了下Snapshot文件大小,有将近一个G左右。</p>
+<h2 id="调大initLimit"><a href="#调大initLimit" class="headerlink" title="调大initLimit"></a>调大initLimit</h2><p>针对这种情况，其实我们只要调大initLimit，应该就可以越过这道坎。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000 &#x2F;&#x2F; 这个不要动，因为和ZK心跳机制有关</span><br><span class="line">initLimit&#x3D;100 &#x2F;&#x2F; 直接调成100,200s!</span><br></pre></td></tr></table></figure>
+
+<h2 id="这么巧就20s么？"><a href="#这么巧就20s么？" class="headerlink" title="这么巧就20s么？"></a>这么巧就20s么？</h2><p>难道就这么巧，每次选举流程都刚好卡在20s不过？反复选举了好多次，应该有一次要&lt;20s成功吧，不然运气也太差了。如果是每次需要处理Snapshot 30s也就算了，但这个20s太接近极限值了，是否还有其它因素导致选主不成功？</p>
+<h2 id="第二种情况"><a href="#第二种情况" class="headerlink" title="第二种情况"></a>第二种情况</h2><p>于是笔者翻了下日志，还真有！这次leader这边处理Snapshot快了，但是follower又拉跨了!日志如下:</p>
+<h3 id="leader-ZK-A-第二种情况"><a href="#leader-ZK-A-第二种情况" class="headerlink" title="leader(ZK-A)第二种情况"></a>leader(ZK-A)第二种情况</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:38:03 New election. My id&#x3D; 3</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] LEADING</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] LEADING - LEADER ELECTION TOOK 25703</span><br><span class="line">2021-06-16 03:38:22 QuorumPeer] Reading snapshot</span><br><span class="line">2021-06-16 03:38:29 QuorumPeer] Snapshotting</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Follower sid 1</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Follower sid 3</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Sending DIFF</span><br><span class="line">2021-06-16 03:38:42 LearnerHandler] Sending DIFF</span><br><span class="line">2021-06-16 03:38:54 LearnerHandler] Have quorum of supporters</span><br><span class="line">2021-06-16 03:38:55 client attempting to establsh new session 到这开始接收client请求了</span><br><span class="line">......</span><br><span class="line">2021-06-16 03:38:58 Shutdown callsed</span><br><span class="line">java.lang.Exception: shutdown Leader! reason: Only 1 followers,need 1</span><br><span class="line">    at org.apache.zookeeper.server.quorum.Leader.shutdown</span><br></pre></td></tr></table></figure>
+
+<p>从日志中我们可以看到选举是成功了的，毕竟处理Snapshot只处理了13s(可能是pagecache的原因处理变快)。其它两个follower顺利连接，同时给他们发送DIFF包，但是情况没好多久，又爆了一个follower不够的报错，这里的报错信息比较迷惑。<br>我们看下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Leader.lead</span><br><span class="line">void lead() &#123;</span><br><span class="line">    while(true)&#123;</span><br><span class="line">                 Thread.sleep(self.tickTime&#x2F;2);</span><br><span class="line">                 ......</span><br><span class="line">                 syncedSet.add(self.getId())</span><br><span class="line">                 for(LearnerHandler f:getLearners())&#123;</span><br><span class="line">                     if(f.synced() &amp;&amp; f.getLearnerType()&#x3D;&#x3D;LearnerType.PARTICIPANT)&#123;</span><br><span class="line">                         syncedSet.add(f.getSid());</span><br><span class="line">                     &#125;</span><br><span class="line">                     f.ping();</span><br><span class="line">                 &#125;</span><br><span class="line">                  &#x2F;&#x2F; syncedSet只有1个也就是自身，不符合&gt;1&#x2F;2的条件，报错并跳出</span><br><span class="line">                if (!tickSkip &amp;&amp; !self.getQuorumVerifier().containsQuorum(syncedSet)) &#123;</span><br><span class="line">                    shutdown(&quot;Only&quot; + syncedSet.size() + &quot; followers, need&quot; + (self.getVotingView().size()&#x2F;2));</span><br><span class="line">                    return;</span><br><span class="line">              &#125; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>报错的实质就是和leader同步的syncedSet小于固定的1/2集群，所以shutdown了。同时在代码里面我们又可以看到syncedSet的判定是通过learnerHander.synced()来决定。我们继续看下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LearnerHandler</span><br><span class="line">    public boolean synced()&#123;</span><br><span class="line">        &#x2F;&#x2F; 这边isAlive是线程的isAlive</span><br><span class="line">        return isAlive() &amp;&amp; tickOfLastAck &gt;&#x3D; leader.self.tick - leader.self.syncLimit;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显的，follower和leader的同步时间超过了leader.self.syncLimit也就是5 * 2 = 10s</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime &#x3D; 2000</span><br><span class="line">syncLimit &#x3D; 5</span><br></pre></td></tr></table></figure>
+
+<p>那么我们的tick是怎么更新的呢,答案是在follower响应UPTODATE包,也就是已经和leader同步后，follower每个包过来就更新一次，在此之前并不更新。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0tttT7icMDVASzFJWML5XkY093c94IgvFkt8b1QaibWQMDGRlEbVIzbOA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>进一步推理，也就是我们的follower处理leader的包超过了10s，导致tick未及时更新，进而syncedSet小于数量，导致leader shutdown。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0yhedbofHiaNsJib1Lg7ePTiboiaO03k5AC5SpfOpMo2AgnL6E9kvtR5mWA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h3 id="follower-ZK-B-第二种情况"><a href="#follower-ZK-B-第二种情况" class="headerlink" title="follower(ZK-B)第二种情况"></a>follower(ZK-B)第二种情况</h3><p>带着这个结论，笔者去翻了follower(ZK-B)的日志(注:ZK-C也是如此)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2021-06-16 03:38:24 New election. My id &#x3D; 3</span><br><span class="line">2021-06-16 03:38:24 FOLLOWING</span><br><span class="line">2021-06-16 03:38:24 FOLLOWING - LEADER ELECTION TOOK - 8004</span><br><span class="line">2021-06-16 03:38:42 Getting a diff from the leader</span><br><span class="line">2021-06-16 03:38:42 Snapshotting</span><br><span class="line">2021-06-16 03:38:57 Snapshotting</span><br><span class="line">2021-06-16 03:39:12 Got zxid xxx</span><br><span class="line">2021-06-16 03:39:12 Exception when following the leader</span><br><span class="line">java.net.SocketException: Broken pipe</span><br></pre></td></tr></table></figure>
+
+<p>又是Snapshot,这次我们可以看到每次Snapshot会花15s左右，远超了syncLimit。<br>从源码中我们可以得知，每次Snapshot之后都会立马writePacket(即响应)，但是第一次回包有由于不是处理的UPTODATE包,所以并不会更新Leader端对应的tick:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">learner:</span><br><span class="line">proteced void syncWithLeader(...)&#123;</span><br><span class="line">outerloop:</span><br><span class="line">    while(self.isRunning())&#123;</span><br><span class="line">        readPacket(qp);</span><br><span class="line">        switch(qp.getType())&#123;</span><br><span class="line">            case Leader.UPTODATE</span><br><span class="line">            if(!snapshotTaken)&#123;</span><br><span class="line">                zk.takeSnapshot();</span><br><span class="line">                ......</span><br><span class="line">            &#125;</span><br><span class="line">            break outerloop;</span><br><span class="line">        &#125;</span><br><span class="line">        case Leader.NEWLEADER:</span><br><span class="line">            zk.takeSnapshot();</span><br><span class="line">            ......</span><br><span class="line">            writePacket(......) &#x2F;&#x2F; leader收到后会更新tick</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">    writePacket(ack,True); &#x2F;&#x2F; leader收到后会更新tick</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，ZK-B的日志里面表明会两次Snapshotting。至于为什么两次，应该是一个微妙的Bug,(在3.4.5的官方注释里面做了fix,但看日志依旧打了两次)，笔者并没有深究。好了，整个时序图就如下所示:<br><img src="https://mmbiz.qpic.cn/mmbiz_png/yiaiaFLiaflYRSh5ibqDTrYjnj6t1bAh5er0JdoibkzrcpBvl1GH9RCIqtbDdlZepmmFBZ4N3Vdr2KSU8oWebetd7Qg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"><br>好了，第二种情况也gg了。这一次时间就不是刚刚好出在边缘了，得将近30s才能Okay, 而synedSet只有10s(2*5)。ZK集群就在这两种情况中反复选举，直到人工介入。</p>
+<h2 id="调大syncLimit"><a href="#调大syncLimit" class="headerlink" title="调大syncLimit"></a>调大syncLimit</h2><p>针对这种情况，其实我们只要调大syncLimit，应该就可以越过这道坎。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000 &#x2F;&#x2F; 这个不要动，因为和ZK心跳机制有关</span><br><span class="line">syncLimit&#x3D;50  &#x2F;&#x2F; 直接调成50,100s!</span><br></pre></td></tr></table></figure>
+
+<h2 id="线下复现"><a href="#线下复现" class="headerlink" title="线下复现"></a>线下复现</h2><p>当然了，有了分析还是不够的。我们还需要通过测试去复现并验证我们的结论。我们在线下构造了一个1024G Snapshot的ZookKeeper进行测试，在initLimit=10以及syncLimit=5的情况下确实和线上出现一模一样的那两种现象。在笔者将参数调整后:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zoo.cfg</span><br><span class="line">tickTime&#x3D;2000</span><br><span class="line">initLimit&#x3D;100 &#x2F;&#x2F; 200s</span><br><span class="line">syncLimit&#x3D;50  &#x2F;&#x2F; 100s</span><br></pre></td></tr></table></figure>
+
+<p>Zookeeper集群终于正常了。</p>
+<h2 id="线下用新版本3-4-13尝试复现"><a href="#线下用新版本3-4-13尝试复现" class="headerlink" title="线下用新版本3.4.13尝试复现"></a>线下用新版本3.4.13尝试复现</h2><p>我们在线下还用比较新的版本3.4.13尝试复现，发现Zookeeper在不调整参数的情况下，很快的就选主成功并正常提供服务了。笔者翻了翻源码，发现其直接在Leader.lead()阶段和SyncWithLeader阶段(如果是用Diff的话)将takeSnapshot去掉了。这也就避免了处理snapshot时间过长导致无法提供服务的现象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Zookeeper 3.4.13</span><br><span class="line"></span><br><span class="line">ZookeeperServer.java</span><br><span class="line">public void loadData()&#123;</span><br><span class="line">    ...</span><br><span class="line">    &#x2F;&#x2F; takeSnapshot() 删掉了最后一行的takeSnapshot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">learner.java</span><br><span class="line">protected void syncWithLeader(...)&#123;</span><br><span class="line">    boolean snapshotNeeded&#x3D;true</span><br><span class="line">    if(qp.getType() &#x3D;&#x3D; Leader.DIFF)&#123;</span><br><span class="line">        ......</span><br><span class="line">        snapshotNeeded &#x3D; false</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">    if(snapshotNeeded)&#123;</span><br><span class="line">        zk.takeSnapshot();</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是升级到高版本靠谱呀，这个版本的代码顺带把那个迷惑性的日志也改了！</p>
+<h2 id="为何Dubbo-ZK有那么多的数据"><a href="#为何Dubbo-ZK有那么多的数据" class="headerlink" title="为何Dubbo-ZK有那么多的数据"></a>为何Dubbo-ZK有那么多的数据</h2><p>最后的问题就是一个dubbo相关的ZK为什么有那么多数据了!笔者利用ZK使用的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">org.apache.zookeeper.server.SnapshotFormatter</span><br></pre></td></tr></table></figure>
+
+<p>工具dump出来并用shell(awk|unique)聚合了一把，发现dubbo的数据只占了其中的1/4。<br>有1/2是Solar的Zookeeper(已经迁移掉，遗留在上面的)。还有1/4是由于某个系统的分布式锁Bug不停的写入进去并且不删除的(已让他们修改)。所以将dubbo-zk和其它ZK数据分离是多么的重要！随便滥用就有可能导致重大事件！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/23/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-url-%E8%87%AA%E5%8A%A8%E8%BD%AC%E8%AF%91%E7%89%B9%E6%AE%8A%E7%AC%A6%E5%8F%B7%E4%B8%BA%E7%A9%BA%E6%A0%BC/" rel="prev" title="http-url自动转译特殊符号为空格">
+                  <i class="fa fa-chevron-left"></i> http-url自动转译特殊符号为空格
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/08/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/%E5%8A%A0%E5%AF%86%E8%AE%BE%E8%AE%A1/%E5%85%AC%E9%92%A5%E7%A7%81%E9%92%A5-%E5%8A%A0%E5%AF%86%E8%A7%A3%E5%AF%86/" rel="next" title="公钥私钥-加密解密">
+                  公钥私钥-加密解密 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
