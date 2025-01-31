@@ -633,106 +633,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" class="post-title-link" itemprop="url">docker-maven-build-java</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-01-11 11:01:27" itemprop="dateCreated datePublished" datetime="2021-01-11T11:01:27+08:00">2021-01-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-10-23 07:56:49" itemprop="dateModified" datetime="2022-10-23T07:56:49+08:00">2022-10-23</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Case1-使用基础镜像maven构建jar包"><a href="#Case1-使用基础镜像maven构建jar包" class="headerlink" title="Case1:使用基础镜像maven构建jar包"></a>Case1:使用基础镜像maven构建jar包</h1><h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
-<li>宿主机没有maven和jdk环境</li>
-<li>java项目是spring-boot,需要使用spring-boot-maven插件，打成可执行的jar包</li>
-<li>准备同时含有maven和jdk的docker镜像。注意：spring的pom.xml文件中一般会配置JDK的版本，这个版本号要和Maven镜像中的JDK版本一致，否则编译期间会报错；</li>
-</ul>
-<h2 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h2><p>跳过宿主机，使用具有Maven和JDK环境的docker容器，构建可执行jar包</p>
-<p>注意：docker的仓库maven官方也有相关文档：<a target="_blank" rel="noopener" href="https://hub.docker.com/_/maven">https://hub.docker.com/_/maven</a></p>
-<h4 id="Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的"><a href="#Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的" class="headerlink" title="Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;"></a>Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;</h4><img src="/Users/qifei/Documents/blog/source/_posts/虚拟化技术/docker/maven镜像.png" alt="image-20221022170407078" style="zoom:25%;" />
-
-<p>下载images</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull maven:3.3-jdk-8</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令"><a href="#Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令" class="headerlink" title="Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令"></a>Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name mvn001 -v <span class="string">&quot;<span class="variable">$PWD</span>&quot;</span>:/usr/src/mymaven  -w /usr/src/mymaven maven:3.3-jdk-8 mvn clean package -U -DskipTests</span><br></pre></td></tr></table></figure>
-
-<p>以上的命令中有下面几处需要注意：</p>
-<ol>
-<li>–name mvn001：表示容器名称为mvn001</li>
-<li>-v “$PWD”:/usr/src/mymaven：表示将当前 “$PWD”目录映射到Docker容器的/usr/src/mymaven目录，也就是Spring 工程的目录</li>
-<li>-w /usr/src/mymaven maven:maven:3.3-jdk-8：表示容器的工作目录为/usr/src/mymaven maven:maven:3.3-jdk-8</li>
-<li>mvn clean package -U -DskipTests：表示启动容器后在工作目录下执行的命令</li>
-</ol>
-<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85ing.png" alt="image-20221022184532841"></p>
-<p>可以看到 buiding spring boot项目的jar包 </p>
-<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85done.png" alt="image-20221022191550102"></p>
-<p>build jar包 done，目录就是$PWD</p>
-<h4 id="Step3-执行jar包"><a href="#Step3-执行jar包" class="headerlink" title="Step3: 执行jar包"></a>Step3: 执行jar包</h4><h1 id="case2-使用容器化环境允许java程序"><a href="#case2-使用容器化环境允许java程序" class="headerlink" title="case2:使用容器化环境允许java程序"></a>case2:使用容器化环境允许java程序</h1><h2 id="技术方案-1"><a href="#技术方案-1" class="headerlink" title="技术方案"></a>技术方案</h2><p>Step1：build images 包含jar包</p>
-<p>Step2: 在container中运行jar包</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker%20install%20redis/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -817,6 +717,106 @@
 </ul>
 <h1 id="查看是否运行成功"><a href="#查看是否运行成功" class="headerlink" title="查看是否运行成功"></a>查看是否运行成功</h1><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost docker]<span class="comment"># docker ps -a | grep redis</span></span><br><span class="line"><span class="number">602659</span>d1b445        redis                              <span class="string">&quot;docker-entrypoint.s…&quot;</span>   <span class="number">54</span> minutes ago      Up <span class="number">54</span> minutes                  <span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">0</span><span class="symbol">:</span><span class="number">6379</span>-&gt;<span class="number">6379</span>/tcp   modest_ramanujan</span><br><span class="line"><span class="number">65</span>bb6e6cab9f        redis                              <span class="string">&quot;docker-entrypoint.s…&quot;</span>   About an hour ago   Exited (<span class="number">0</span>) About an hour ago                            myredis</span><br></pre></td></tr></table></figure>
 
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" class="post-title-link" itemprop="url">docker-maven-build-java</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-01-11 11:01:27" itemprop="dateCreated datePublished" datetime="2021-01-11T11:01:27+08:00">2021-01-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2022-10-23 07:56:49" itemprop="dateModified" datetime="2022-10-23T07:56:49+08:00">2022-10-23</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Case1-使用基础镜像maven构建jar包"><a href="#Case1-使用基础镜像maven构建jar包" class="headerlink" title="Case1:使用基础镜像maven构建jar包"></a>Case1:使用基础镜像maven构建jar包</h1><h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
+<li>宿主机没有maven和jdk环境</li>
+<li>java项目是spring-boot,需要使用spring-boot-maven插件，打成可执行的jar包</li>
+<li>准备同时含有maven和jdk的docker镜像。注意：spring的pom.xml文件中一般会配置JDK的版本，这个版本号要和Maven镜像中的JDK版本一致，否则编译期间会报错；</li>
+</ul>
+<h2 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h2><p>跳过宿主机，使用具有Maven和JDK环境的docker容器，构建可执行jar包</p>
+<p>注意：docker的仓库maven官方也有相关文档：<a target="_blank" rel="noopener" href="https://hub.docker.com/_/maven">https://hub.docker.com/_/maven</a></p>
+<h4 id="Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的"><a href="#Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的" class="headerlink" title="Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;"></a>Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;</h4><img src="/Users/qifei/Documents/blog/source/_posts/虚拟化技术/docker/maven镜像.png" alt="image-20221022170407078" style="zoom:25%;" />
+
+<p>下载images</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull maven:3.3-jdk-8</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令"><a href="#Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令" class="headerlink" title="Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令"></a>Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name mvn001 -v <span class="string">&quot;<span class="variable">$PWD</span>&quot;</span>:/usr/src/mymaven  -w /usr/src/mymaven maven:3.3-jdk-8 mvn clean package -U -DskipTests</span><br></pre></td></tr></table></figure>
+
+<p>以上的命令中有下面几处需要注意：</p>
+<ol>
+<li>–name mvn001：表示容器名称为mvn001</li>
+<li>-v “$PWD”:/usr/src/mymaven：表示将当前 “$PWD”目录映射到Docker容器的/usr/src/mymaven目录，也就是Spring 工程的目录</li>
+<li>-w /usr/src/mymaven maven:maven:3.3-jdk-8：表示容器的工作目录为/usr/src/mymaven maven:maven:3.3-jdk-8</li>
+<li>mvn clean package -U -DskipTests：表示启动容器后在工作目录下执行的命令</li>
+</ol>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85ing.png" alt="image-20221022184532841"></p>
+<p>可以看到 buiding spring boot项目的jar包 </p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85done.png" alt="image-20221022191550102"></p>
+<p>build jar包 done，目录就是$PWD</p>
+<h4 id="Step3-执行jar包"><a href="#Step3-执行jar包" class="headerlink" title="Step3: 执行jar包"></a>Step3: 执行jar包</h4><h1 id="case2-使用容器化环境允许java程序"><a href="#case2-使用容器化环境允许java程序" class="headerlink" title="case2:使用容器化环境允许java程序"></a>case2:使用容器化环境允许java程序</h1><h2 id="技术方案-1"><a href="#技术方案-1" class="headerlink" title="技术方案"></a>技术方案</h2><p>Step1：build images 包含jar包</p>
+<p>Step2: 在container中运行jar包</p>
 
       
     </div>
