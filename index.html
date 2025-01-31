@@ -195,7 +195,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">215</span>
+          <span class="site-state-item-count">209</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -240,526 +240,6 @@
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-01-%E5%87%BD%E6%95%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-01-%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-16 10:40:03" itemprop="dateModified" datetime="2023-02-16T10:40:03+08:00">2023-02-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-03-%E7%A7%BB%E5%8A%A8%E5%92%8C%E5%A4%8D%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-03-%E7%A7%BB%E5%8A%A8%E5%92%8C%E5%A4%8D%E5%88%B6/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-02 12:33:50" itemprop="dateModified" datetime="2023-03-02T12:33:50+08:00">2023-03-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="2-所有权"><a href="#2-所有权" class="headerlink" title="2.所有权"></a>2.所有权</h2><p>变量A “【拥有】” 对象B：</p>
-<ul>
-<li>只有A可以释放B</li>
-<li>当A变成不可访问时，A必须释放B</li>
-</ul>
-<p>rust中</p>
-<ul>
-<li><p>引用失效了，必须释放拥有的对象，如变量a拥有对象4，在变量a失效后必须释放对象3（4）</p>
-</li>
-<li><p>引用不一定拥有某个对象，如变量a_ref，那么这个引用属于”借用”</p>
-</li>
-<li><p>引用失效了，如果没有拥有对象，则不释放对象，比如变量a_ref，并不拥有对象3（4），在括号末尾超出了【作用域】，也不能释放对象3（4）</p>
-</li>
-<li><p>【向量】是有【标头】和【缓冲区】，比如变量b只拥有向量【标头】，但是向量【标头】中的指针拥有【缓冲区】，所以b超出【作用域】时，只释放向量【标头】-&gt; 向量【标头】释放时，向量【标头】不可访问 -&gt;指针拥有【缓冲区】会被释放</p>
-</li>
-</ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> a = <span class="number">3</span>; <span class="comment">// a拥有对象3</span></span><br><span class="line">a=<span class="number">4</span>; <span class="comment">// a把对象3的值改成了4，仍然拥有这个变量</span></span><br><span class="line"><span class="keyword">let</span> b=<span class="built_in">vec!</span>[<span class="number">1</span>,<span class="number">23</span>,<span class="number">3</span>,<span class="number">4</span>]; <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> a_ref  = &amp;a <span class="comment">//a_ref不拥有对象3</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">print!</span>(<span class="string">&quot;&#123;&#125;&quot;</span>,a);</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="4-赋值语义"><a href="#4-赋值语义" class="headerlink" title="4.赋值语义"></a>4.赋值语义</h2><h3 id="赋值语义"><a href="#赋值语义" class="headerlink" title="赋值语义"></a>赋值语义</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">let</span> v1 = <span class="built_in">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">let</span> v2 = v1;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>在栈中分配变量v1，指向向量标头；由于向量具有内容，所以堆中也要分配缓冲区</li>
-<li>在栈中分配变量v2， 希望使用变量v1初始化变量v2，该如何实现呢？</li>
-</ol>
-<h3 id="3种实现"><a href="#3种实现" class="headerlink" title="3种实现"></a>3种实现</h3><ul>
-<li><p>共享语义：java</p>
-<ul>
-<li>v1和v2引用同一个堆中的对象，但是在栈中是2个不同的标头</li>
-<li>若2个线程同时写一个对象，会造成读到脏数据</li>
-<li>若2个线程同时释放一个对象，或造成内存问题；所以引入GC</li>
-</ul>
-</li>
-<li><p>复制语义：c/c++（默认语义）、rust</p>
-<ul>
-<li>v1和v2引用不同的对象</li>
-</ul>
-</li>
-<li><p>移动语义：rust（默认语义）、c/c++</p>
-<ul>
-<li>v1不再指向对象，而是移交给v2</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;c++复制语义</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;c++移动语义</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-04-%E5%80%9F%E7%94%A8%E5%92%8C%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-04-%E5%80%9F%E7%94%A8%E5%92%8C%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-02 12:35:11" itemprop="dateModified" datetime="2023-03-02T12:35:11+08:00">2023-03-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="1-所有权和借用"><a href="#1-所有权和借用" class="headerlink" title="1. 所有权和借用"></a>1. 所有权和借用</h2><p>我们已经知道，使用变量”a”赋值给变量”b”，有2种情况</p>
-<ul>
-<li>他们的类型是可复制的，即它实现了clone trait 和 copy trait。2个变量拥有2个不同的对象。这种情况就是**”复制语义”。**</li>
-<li>他们的类型是不可复制，即没有实现copy trait。只有一个变量（从a到b）拥有这个对象。这种情况就是**”移动语义”。**</li>
-</ul>
-<p>上述情况都可以保证内存的安全性，但是，如果使用了<strong>引用</strong>，情况就变得复杂</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> n = <span class="number">12</span>;</span><br><span class="line"><span class="keyword">let</span> ref_to_n = &amp;n</span><br></pre></td></tr></table></figure>
-
-<p>n和ref_to_n引用了同一个对象，<strong>但只有n有【所有权】，ref_to_n可以访问，但是无【所有权】，这是【借用】</strong></p>
-<p>关于可变性，</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> n = <span class="number">12</span>;</span><br><span class="line"><span class="keyword">let</span> ref1_to_n = &amp;<span class="keyword">mut</span> n; <span class="comment">//可变借用，只能从可变变量执行可变借用</span></span><br><span class="line"><span class="keyword">let</span> ref2_to_n = &amp;n;  <span class="comment">//不可变借用</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="2-对象生命周期"><a href="#2-对象生命周期" class="headerlink" title="2. 对象生命周期"></a>2. 对象生命周期</h2><p>【作用域】只适用于编译时变量，而不适用于运行时的对象；运行时的对象的相应概念，是【生命周期】</p>
-<h3 id="2者的开始时间不同"><a href="#2者的开始时间不同" class="headerlink" title="2者的开始时间不同"></a>2者的开始时间不同</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> a; <span class="comment">//变量a的作用域开始</span></span><br><span class="line">a = <span class="number">12</span>; <span class="comment">//对象12的生命周期开始</span></span><br><span class="line"><span class="built_in">print!</span>(a);</span><br></pre></td></tr></table></figure>
-
-<h3 id="2者的结束时间不同"><a href="#2者的结束时间不同" class="headerlink" title="2者的结束时间不同"></a>2者的结束时间不同</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> a = <span class="string">&quot;hello&quot;</span>.to_string() <span class="comment">//a的作用域开始，&quot;hello&quot;的对象生命周期开始</span></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> b = a;  <span class="comment">//a的作用域暂停，b的作用域开始，因为a所有权移动到b了，a不再能被访问</span></span><br><span class="line"><span class="built_in">print!</span>(b) <span class="comment">//错误 print!(a); </span></span><br><span class="line">a = <span class="string">&quot;cat&quot;</span>.to_string(); <span class="comment">//a的作用域恢复，&quot;cat&quot;的对象生命周期开始</span></span><br><span class="line"><span class="built_in">print!</span>(a)</span><br><span class="line">b = a <span class="comment">// a的作用域暂停, b从前拥有的&quot;hello&quot;对象被丢弃，生命周期结束，如果实现了&#x27;drop&#x27;trait，则被调用;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//首先b的作用域退出, 然后是a</span></span><br><span class="line"><span class="comment">//b拥有的&#x27;cat&#x27;对象被丢弃，生命周期结束</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="3-关于借用的错误"><a href="#3-关于借用的错误" class="headerlink" title="3.关于借用的错误"></a>3.关于借用的错误</h2><h3 id="错误1：丢弃后使用"><a href="#错误1：丢弃后使用" class="headerlink" title="错误1：丢弃后使用"></a>错误1：丢弃后使用</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> ref_to_n;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">let</span> n = <span class="number">12</span>; <span class="comment">//n变量作用域开始，12这个对象生命周期开始，并且在栈中</span></span><br><span class="line">  ref_to_n = &amp;n; <span class="comment">//ref_to_n借用12</span></span><br><span class="line">  <span class="built_in">print!</span>(*ref_to_n)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//失败 print!(*ref_to_n) //n doesn&#x27;t live enough</span></span><br></pre></td></tr></table></figure>
-
-<p>line7: n的变量死亡，其拥有的对象也已经丢弃，但是存在 ref_to_n还引用这个对象。因为ref_to_n的生命周期应该比对象12少一点</p>
-<p>c++就无法避免这种错误</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>* ref_to_n;</span><br><span class="line">&#123;</span><br><span class="line">	let n = <span class="number">12</span>; </span><br><span class="line">  ref_to_n = &amp;n; </span><br><span class="line">  print!(*ref_to_n)</span><br><span class="line">&#125;</span><br><span class="line">print!(*ref_to_n)</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="避免错误"><a href="#避免错误" class="headerlink" title="避免错误"></a>避免错误</h4>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust%E5%9F%BA%E7%A1%80-%E6%89%80%E6%9C%89%E6%9D%83%E5%92%8C%E8%A7%84%E5%88%99/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust%E5%9F%BA%E7%A1%80-%E6%89%80%E6%9C%89%E6%9D%83%E5%92%8C%E8%A7%84%E5%88%99/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-13 17:37:52" itemprop="dateModified" datetime="2023-02-13T17:37:52+08:00">2023-02-13</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="Value-in-a-scope"><a href="#Value-in-a-scope" class="headerlink" title="Value in a scope"></a>Value in a scope</h3><h4 id="Rule-1"><a href="#Rule-1" class="headerlink" title="Rule 1:"></a>Rule 1:</h4><ul>
-<li>You can have only one owner in a scope; When the owner of the value left the scope, the value droped;</li>
-<li>When passing a value to another scope, the owner moves to this scope;</li>
-</ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> arr = <span class="built_in">vec!</span>[<span class="number">1</span>]; <span class="comment">// this scope owns vec![1]</span></span><br><span class="line">  <span class="keyword">let</span> arr2= <span class="built_in">vec!</span>[<span class="number">2</span>];</span><br><span class="line">  sum(arr);  <span class="comment">//move occors so sum is the new owner of value vec![1]</span></span><br><span class="line">  <span class="built_in">println!</span>(arr); <span class="comment">// fail, </span></span><br><span class="line">&#125; <span class="comment">//arr2 dropped the value vec1[2]</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="Rule-2"><a href="#Rule-2" class="headerlink" title="Rule 2:"></a>Rule 2:</h4><ul>
-<li>A value can have multipe immutable referrences</li>
-</ul>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> arr = <span class="built_in">vec!</span>[<span class="number">1</span>]; <span class="comment">// this scope owns vec![1] </span></span><br><span class="line">  sum(&amp;arr); <span class="comment">//1st borrower: sum scope</span></span><br><span class="line">  max(&amp;arr); <span class="comment">//2nd borrower: max scope</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/wasm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/wasm/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2022-12-05 09:56:15" itemprop="dateModified" datetime="2022-12-05T09:56:15+08:00">2022-12-05</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/WebAssembly/Rust_to_wasm">https://developer.mozilla.org/zh-CN/docs/WebAssembly/Rust_to_wasm</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cargo new --lib hello-w</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-02-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/rust/rust-02-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D/" class="post-title-link" itemprop="url">wasm</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2022-12-08 18:39:15" itemprop="dateCreated datePublished" datetime="2022-12-08T18:39:15+08:00">2022-12-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-02-16 10:40:00" itemprop="dateModified" datetime="2023-02-16T10:40:00+08:00">2023-02-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
     
 
 
@@ -1322,10 +802,460 @@
 
 
 
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/" class="post-title-link" itemprop="url">交换排序-冒泡排序</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-11-20 20:40:04 / Modified: 20:40:46" itemprop="dateCreated datePublished" datetime="2021-11-20T20:40:04+08:00">2021-11-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="/Users/qifei/Documents/blog/source/_posts/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%E5%8A%A8%E5%9B%BE.gif" alt="冒泡排序动图"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F-%E7%AE%80%E5%8D%95%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F-%E7%AE%80%E5%8D%95%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F/" class="post-title-link" itemprop="url">insert-sorting</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-11-20 16:14:02 / Modified: 21:01:08" itemprop="dateCreated datePublished" datetime="2021-11-20T16:14:02+08:00">2021-11-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-quick-sorting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-quick-sorting/" class="post-title-link" itemprop="url">quick sorting</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-11-20 16:13:39 / Modified: 20:38:38" itemprop="dateCreated datePublished" datetime="2021-11-20T16:13:39+08:00">2021-11-20</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell%E5%B7%A5%E5%85%B7-01-%E5%A4%A7%E7%A5%9E%E7%9A%84%E5%BC%80%E6%BA%90%E7%81%AB%E7%84%B0%E5%9B%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell%E5%B7%A5%E5%85%B7-01-%E5%A4%A7%E7%A5%9E%E7%9A%84%E5%BC%80%E6%BA%90%E7%81%AB%E7%84%B0%E5%9B%BE/" class="post-title-link" itemprop="url">shell工具-01-大神的开源火焰图</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2021-09-08 18:39:39 / Modified: 18:40:36" itemprop="dateCreated datePublished" datetime="2021-09-08T18:39:39+08:00">2021-09-08</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p> <em>来源：<a target="_blank" rel="noopener" href="https://zhenbianshu.github.io/">https://zhenbianshu.github.io</a></em></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>火焰图</code>，之前组内大神分享过它的使用办法，但我之后很久都没有用过，以至于对它没有什么深刻印象，最近排查我们 Java 应用负载问题时试用了一下，这才对它的用途有了点心得。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><h4 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h4><p>在排查性能问题时，我们通常会把线程栈 dump 出来，然后使用 <code>grep --no-group-separator -A 1 java.lang.Thread.State jstack.log | awk &#39;NR%2==0&#39; | sort | uniq -c | sort -nr</code> 类似的 shell 语句，查看大多数线程栈都在干什么。而由线程栈的出现频率，来推断 JVM 内耗时最多的调用。</p>
+<p>至于其原理，设想广场上有一个大屏幕在不停地播放各种广告。如果我们随机对大屏幕拍照，次数多了，统计照片中各个广告出现的频率，基本可以得出每个广告的播放时长占比了。</p>
+<p>而我们应用的资源就像大屏幕，每次调用就像是播放一次广告，统计 dump 出的线程栈出现比例，也就基本能看出线程栈的耗时占比，虽然有误差，但是多次统计下应该差不了多少。这也就是为什么有些家长每次进孩子房间都发现孩子在看系统桌面后以为孩子平时喜欢对着桌面发呆的原因。:)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">2444  at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1200)</span><br><span class="line">1587  at sun.misc.Unsafe.park(Native Method)</span><br><span class="line"> 795  at java.security.Provider.getService(Provider.java:1035)</span><br><span class="line"> 293  at java.lang.Object.wait(Native Method)</span><br><span class="line"> 292  at java.lang.Thread.sleep(Native Method)</span><br><span class="line">  73  at org.apache.logging.log4j.core.layout.TextEncoderHelper.copyDataToDestination(TextEncoderHelper.java:61)</span><br><span class="line">  71  at sun.nio.ch.EPollArrayWrapper.epollWait(Native Method)</span><br><span class="line">  70  at java.lang.Class.forName0(Native Method)</span><br><span class="line">  54  at org.apache.logging.log4j.core.appender.rolling.RollingFileManager.checkRollover(RollingFileManager.java:217)</span><br></pre></td></tr></table></figure>
+
+<p>但是这样有些问题，首先写 shell 挺费事的，另外如果我想查看自栈顶第二个栈的最多调用，即使修改了 shell 命令，结果也不直观。</p>
+<p>产生这个问题的主要原因是，我们的线程栈是有调用关系的，即我们需要考虑线程栈的 <code>调用链</code> 和 <code>出现频率</code> 两个维度，而单一的文本表现这两种维度比较困难，所以，著名性能分析大师 brendan gregg 就提出了火焰图。</p>
+<h4 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h4><p>火焰图，因其形似火焰而得名，其开源代码地址：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/brendangregg/FlameGraph">https://github.com/brendangregg/FlameGraph</a></p>
+</blockquote>
+<p>它是一种 svg 可交互式图形，我们通过点击和鼠标指向可以展示出更多的信息。下图就是一个典型的火焰图，从结构上，它是由多个大小和颜色各异的方块构成，每个方块上都有字符，它们底部连接在一块，组成火焰的基底，顶部分出许多”小火苗”。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/j3gficicyOvauyA1tcQgR1fHrxzrSgcAWjq0icLIXIcCIF7hibbGlaXGxFsjibxANw4evL9xNL6nan7iaaeFIJtABg3w/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<p>当我们点击方块时，图片会从我们点击的方块为基底向上展开，而我们鼠标指向方块时，会展示出方块的详细说明。</p>
+<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p>介绍火焰图的分析前，我们要首先说明它的特性：</p>
+<ul>
+<li>由底部到顶部可以追溯一个唯一的调用链，下面的方块是上面方块的父调用。</li>
+<li>同一父调用的方块从左到右以字母序排列。</li>
+<li>方块上的字符表示一个调用名称，括号内是火焰图指向的调用在火焰图中出现的次数和这个方块占最底层方块的宽度百分比。</li>
+<li>方块的颜色没有实际意义，相邻方块的颜色差只为了便于查看。</li>
+</ul>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>那么，给我们一张火焰图，我们怎么能看出系统哪里有问题呢？</p>
+<p>由上文中的火焰图特性特性，查看火焰图时，我们最主要的关注点要放在方块的宽度上，因为宽度代表了调用栈在全局出现的次数，次数代表着出现频率，而频率也就可以说明耗时。</p>
+<p>但是观察火焰图底部或中部方块的宽度占比意义不大，如上面的火焰图，中部的 <code>do_redirections</code> 函数宽度是 24.87%，也就是说它耗用了整个应用近四分之一的时间，但是真正消耗时间的并不是 do_redirections 函数，而是 do_redirections 内部又调用的其他函数，而它的子调用分为了很多个，每个调用的耗时并没有异常。</p>
+<p>我们更应该关注的是火焰图顶部的一些 “平顶山”，顶部说明它没有子调用，方块宽说明它耗时长，长时间 hang 住，或者被非常频率地调用，这种方块指向的调用才是性能问题的罪魁祸首。</p>
+<p>找到了异常调用，直接优化它，或者再根据火焰图的调用链层层向下，找到我们的业务代码进行优化，也就大功告成。</p>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><p>每种工具都有其适合的应用场景，火焰图则适合用在：</p>
+<ul>
+<li>代码循环分析：如果代码中有很大的循环或死循环代码，那么从火焰图的顶部或接近项部的地方会有很明显的”平顶”，表示代码频繁地在某个线程栈上下切换。但需要注意的是，如果循环的总耗时不长，在火焰图上不会很明显。</li>
+<li>IO 瓶颈/锁分析：在我们的应用代码中，我们的调用普遍都是同步的，也就是说在进行网络调用、文件 I/O 操作或未成功获得锁时，线程会停留在某个调用上等待 I/O 响应或锁，如果这个等待非常耗时，会导致线程在某个调用上一直 hang 住，这在火焰图上表现得会非常清晰。与此相对的是，我们应用线程构成的火焰图无法准确地表达 CPU 的消耗，因为应用线程内没有系统的调用栈，在应用线程栈 hang 住时，CPU 可能去做其他事了，导致我们看到耗时很长，而 CPU 却很闲。</li>
+<li>火焰图倒置分析全局代码：火焰图倒置有时也会很实用，如果我们的代码 N 个不同的分支都调用某一方法，倒置后，所有栈顶相同的调用被合并在一块，我们就能看出这个方法的总耗时，也就很容易评估出优化这个方法的收益。</li>
+</ul>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>既然火焰图这么强大，那么我们该怎么实现呢？</p>
+<h4 id="生成工具"><a href="#生成工具" class="headerlink" title="生成工具"></a>生成工具</h4><p>brendan gregg 大神已经把生成火焰图的方法用 perl 实现了，开源代码就在上文的 Github 仓库中，根目录下的 <code>flamegraph.pl</code> 文件就是可执行的 perl 文件了。</p>
+<p>这个命令还可以传入各种参数，支持我们修改火焰图的颜色、大小等 。</p>
+<p>但 flamegraph.pl 只能处理特定格式的文件，像：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">a;b;c 12</span><br><span class="line">a;d 3</span><br><span class="line">b;c 3</span><br><span class="line">z;d 5</span><br><span class="line">a;c;e 3</span><br></pre></td></tr></table></figure>
+
+<p>前面是调用链，每个调用之间用 <code>;</code> 隔开，每行后面的数字是调用栈出现的次数。</p>
+<p>如上面的数据，用 flamegraph.pl 生成的火焰图如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04l8qwqLuAsZNZVtNKRsloJlTsDdd4ialwYzZTGiaAFAhl35iawbMibbwRdCClX2n6zW62gvXgA5uRKYlA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1" alt="Image"></p>
+<h4 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h4><p>至于我们的 jstack 信息如何被处理成上面的格式，大神则为常见的 dump 格式都提供了工具，像 <code>stackcollapse-perf.pl</code>可以处理 <code>perf</code> 命令的输出，<code>stackcollapse-jstack.pl</code> 处理 <code>jstack</code> 输出，<code>stackcollapse-gdb.pl</code> 处理 gdb 输出的栈等。</p>
+<p>也可以用 shell 简单地实现一下 jstack 的处理方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -v -P &#39;.+prio&#x3D;d+ os_prio&#x3D;d+&#39; | grep -v -E &#39;locked &lt;&#39; | awk &#39;&#123;if ($0&#x3D;&#x3D;&quot;&quot;)&#123;print $0&#125;else&#123;printf&quot;%s;&quot;,$0&#125;&#125;&#39; | sort | uniq -c | awk &#39;&#123;a&#x3D;$1;$1&#x3D;&quot;&quot;;print $0,a&#125;&#39;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell-01-%E7%BB%9F%E8%AE%A1stack%E4%BF%A1%E6%81%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell-01-%E7%BB%9F%E8%AE%A1stack%E4%BF%A1%E6%81%AF/" class="post-title-link" itemprop="url">shell-01-统计stack信息</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-09-08 18:39:15" itemprop="dateCreated datePublished" datetime="2021-09-08T18:39:15+08:00">2021-09-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-24 08:50:05" itemprop="dateModified" datetime="2021-11-24T08:50:05+08:00">2021-11-24</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell-03-grep%E5%88%86%E6%9E%90%E7%BB%9F%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/08/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/shell/shell-03-grep%E5%88%86%E6%9E%90%E7%BB%9F%E8%AE%A1/" class="post-title-link" itemprop="url">shell-01-统计stack信息</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-09-08 18:39:15" itemprop="dateCreated datePublished" datetime="2021-09-08T18:39:15+08:00">2021-09-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-11-08 17:37:37" itemprop="dateModified" datetime="2021-11-08T17:37:37+08:00">2021-11-08</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
