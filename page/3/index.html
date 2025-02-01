@@ -248,7 +248,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-01-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -262,7 +262,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-01-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
+            <a href="/2021/07/21/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springMVC/springMVC-02-Controller/" class="post-title-link" itemprop="url">springMVC-01-执行流程分析</a>
         </h2>
 
         <div class="post-meta-container">
@@ -280,7 +280,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-12-10 13:59:16" itemprop="dateModified" datetime="2021-12-10T13:59:16+08:00">2021-12-10</time>
+        <time title="Modified: 2021-08-16 16:33:49" itemprop="dateModified" datetime="2021-08-16T16:33:49+08:00">2021-08-16</time>
       </span>
 
   
@@ -293,87 +293,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="servlet演进到spring-mvc"><a href="#servlet演进到spring-mvc" class="headerlink" title="servlet演进到spring mvc"></a>servlet演进到spring mvc</h1><p>servlet的原理以及不足</p>
-<ul>
-<li>开发者为每个servlet重写其doGet(HttpServletRequest，HttpServletResponse)与doPost(HttpServletRequest，HttpServletResponse)方法，<strong>需要手动从HttpServletRequest解析出来业务参数</strong></li>
-<li>Servlet使用的是模板方法的设计模式，在Servlet顶层将会调用service方法，<strong>开发者需要把业务逻辑重写service()方法</strong></li>
-<li>将自定义Servlet注册到web.xml中，在web.xml中配置servlet-mapping来存储映射关系，<strong>缺乏灵活性</strong></li>
-<li>每个servlet只能处理一个请求，业务情景复杂的话，<strong>需要写众多servlet</strong></li>
-</ul>
-<p>Spring架构优化:</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/3.0.0.M4/spring-framework-reference/html/ch15.html#mvc-introduction">https://docs.spring.io/spring-framework/docs/3.0.0.M4/spring-framework-reference/html/ch15.html#mvc-introduction</a></p>
-<p>The Spring Web model-view-controller (MVC) framework is designed around a <code>DispatcherServlet</code> that dispatches requests to handlers, with configurable handler mappings, view resolution, locale and theme resolution as well as support for uploading files. The default handler is based on the <code>@Controller</code> and <code>@RequestMapping</code> annotations, offering a wide range of flexible handling methods. With the introduction of Spring 3.0, the <code>@Controller</code> mechanism also allows you to create RESTful Web sites and applications, through the <code>@PathVarariable</code> annotation and other features.</p>
-</blockquote>
-<ul>
-<li>省略众多Servlet，只用一个超级Servlet — <em>DispatcherServlet</em>。并且把和业务无关的处理都交个它。</li>
-<li>和业务有关的servlet，用业务模型进行抽象，</li>
-</ul>
-<h1 id="官网的流程图"><a href="#官网的流程图" class="headerlink" title="官网的流程图"></a>官网的流程图</h1><p><img src="https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/images/mvc.png" alt="img"></p>
-<h3 id="FrontController-抽象-，DispatcherServlet-实现"><a href="#FrontController-抽象-，DispatcherServlet-实现" class="headerlink" title="FrontController(抽象)，DispatcherServlet(实现)"></a>FrontController(抽象)，DispatcherServlet(实现)</h3><ul>
-<li>接收请求</li>
-<li>响应结果</li>
-<li>请求分发，包括获取处理类、执行处理类方法、获取处理类的处理结果</li>
-</ul>
-<h3 id="业务模型Handler-抽象-Controller-实现"><a href="#业务模型Handler-抽象-Controller-实现" class="headerlink" title="业务模型Handler(抽象), Controller(实现)"></a>业务模型Handler(抽象), Controller(实现)</h3><ul>
-<li>处理业务，需要用户自定义</li>
-<li>常见的SpringMVC提供的业务模型<ul>
-<li>注解的@Controller</li>
-<li>HttpRequestHandler</li>
-<li>SimpleControllerHandler</li>
-<li>自定义的Bean。。。。。</li>
-</ul>
-</li>
-</ul>
-<h3 id="V-视图类，view"><a href="#V-视图类，view" class="headerlink" title="V: 视图类，view"></a>V: 视图类，view</h3><p><img src="https://www.fatalerrors.org/images/blog/a432f0a05dd94c9b6d0700446c5c1e81.jpg" alt="img"></p>
-<h2 id="HandlerMapping和HandlerAdapter"><a href="#HandlerMapping和HandlerAdapter" class="headerlink" title="HandlerMapping和HandlerAdapter"></a>HandlerMapping和HandlerAdapter</h2><p>handler的种类繁多，需要做映射：</p>
-<p>HanlderMapping负责返回给Controller一个Handler</p>
-<p>HandlerAdapter负责把handler转为对应的HandlerApater，然后执行</p>
-<h2 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h2><p>DispatchServlet类</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">private HandlerMapping hm;</span><br><span class="line">public void doDispatch(req, resp)&#123;</span><br><span class="line">	&#x2F;&#x2F;查找Handler, 交给HandlerMapping处理</span><br><span class="line">	Object handler &#x3D; hm.getHandler(req);</span><br><span class="line">	</span><br><span class="line">	&#x2F;&#x2F;执行处理器方法，交给HandlerAdpater处理</span><br><span class="line">	HandlerAdpater ha &#x3D; getHandlerAdpater(handler);</span><br><span class="line">	</span><br><span class="line">	&#x2F;&#x2F;执行方法</span><br><span class="line">	ha.handlerRequest(req,resp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h3 id="DispachServlet类"><a href="#DispachServlet类" class="headerlink" title="DispachServlet类:"></a>DispachServlet类:</h3><p>初始化流程</p>
-<ul>
-<li>集成了FrameworkServlet实现类，实现了init()方法，<ul>
-<li>init()方法调用了自身的initWebApplication()方法，<ul>
-<li>initWebApplication()方法调用AbstarctApplicationContext的refresh()方法，<!--和spring的高级容器关联上了--></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><h2 id="父子容器的概念"><a href="#父子容器的概念" class="headerlink" title="父子容器的概念"></a>父子容器的概念</h2></li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#servlet被Tomat加载以后，会被调用init方法</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="comment">//从web.xml中读取Bean配置文件config.xml，创建SpringIOC容器</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">//HandlerMapping类被封装为Bean, 比如BeanNameUrlHandlerMappingBean: name = urlBeanName，比如RequestHandlerMappingBean:</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">//HandlerAdapter被封装为Bean</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>C: DispatchServlet类</p>
-<p>M: @Controller标记的类+method ， 所以@Controller不是C，而是M</p>
-</blockquote>
-<p>执行流程</p>
-<ul>
-<li>doDispatch()</li>
-</ul>
-<h3 id="HandlerMapping类"><a href="#HandlerMapping类" class="headerlink" title="HandlerMapping类"></a>HandlerMapping类</h3><ul>
-<li>BeanNameUrlHandlerMapping</li>
-<li>RequestMappingHandlerMapping：对于使用@Controller注解和@RequestBody的注解，所以在init()方法中要扫描到这些注解对应的类</li>
-<li>SimpleHanlderMapping</li>
-</ul>
-<blockquote>
-<p>在init()方法中，将config.xml中的url映射关系，交给Spring的beanFactory，所以HandlerMapping都会实现Spring的Aware()接口</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void init()&#123;</span><br><span class="line">	&#x2F;&#x2F;在config.xml中配置的bean（init-methods）</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="HandlerAdapter"><a href="#HandlerAdapter" class="headerlink" title="HandlerAdapter"></a>HandlerAdapter</h3><ul>
-<li>RequestMappingHandlerAdapter：调用RequestMappingHandlerMapping中（@Controller类）的方法</li>
-</ul>
-<blockquote>
-<p>注意：</p>
-<p>在底层反射实现中，compiler会把arguments编译为obj1 … （class文件），这就会丧失意义，所以需要在pom的maven插件中，添加</p>
-</blockquote>
+          <p>controller使用无注解的参数</p>
+<p><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam">https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-requestparam</a></p>
+<p>@RequestParam不是必须使用的，默认spring mvc使用的handler会对参数做映射</p>
 
       
     </div>

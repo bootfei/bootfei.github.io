@@ -344,6 +344,100 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">virtual machine -3-常用工具</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-08 17:56:19" itemprop="dateCreated datePublished" datetime="2020-10-08T17:56:19+08:00">2020-10-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-06-23 11:25:03" itemprop="dateModified" datetime="2021-06-23T11:25:03+08:00">2021-06-23</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="jdk"><a href="#jdk" class="headerlink" title="jdk"></a>jdk</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum search java</span><br><span class="line">yum install -y java-1.8.0-openjdk-devel.x86_64</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">java -version #</span><br><span class="line"></span><br><span class="line">1rpm -ql java-1.8.0-openjdk #查看安装目录</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="ifconfig网络工具"><a href="#ifconfig网络工具" class="headerlink" title="ifconfig网络工具"></a>ifconfig网络工具</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum search ifconfig</span><br></pre></td></tr></table></figure>
+
+<p><strong><em><img src="https://www.linuxidc.com/upload/2018_10/181011090563194.png" alt="img"></em></strong></p>
+<p>以上运行结果，我们只要分析最好一行就可以。<strong>Matched:</strong> ifconfig 这个 分割行 是用来显示 匹配结果的。</p>
+<p>最后一行 中 冒号（：）前面的数据， （<strong>net-tools.x86_64</strong> ） 是匹配的软件包；冒号（：）后面的数据，（<strong>Basic networking tools</strong> ） 是对前面包的描述。</p>
+<p>结合上面的信息， 安装ifconfig 包 只需要安装 net-tools.x86_64 即可。</p>
+<p>所以，我们执行 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install net-tools.x86_64</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h1 id="vim编辑器"><a href="#vim编辑器" class="headerlink" title="vim编辑器"></a>vim编辑器</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install vim*</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-2-internet-connection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -418,100 +512,6 @@
 </blockquote>
 <p>重启：service network restart </p>
 <p>验证：ip addr</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/08/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/vmware/virtual-machine-3-%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">virtual machine -3-常用工具</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-08 17:56:19" itemprop="dateCreated datePublished" datetime="2020-10-08T17:56:19+08:00">2020-10-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-06-23 11:25:03" itemprop="dateModified" datetime="2021-06-23T11:25:03+08:00">2021-06-23</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="jdk"><a href="#jdk" class="headerlink" title="jdk"></a>jdk</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum search java</span><br><span class="line">yum install -y java-1.8.0-openjdk-devel.x86_64</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">java -version #</span><br><span class="line"></span><br><span class="line">1rpm -ql java-1.8.0-openjdk #查看安装目录</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="ifconfig网络工具"><a href="#ifconfig网络工具" class="headerlink" title="ifconfig网络工具"></a>ifconfig网络工具</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum search ifconfig</span><br></pre></td></tr></table></figure>
-
-<p><strong><em><img src="https://www.linuxidc.com/upload/2018_10/181011090563194.png" alt="img"></em></strong></p>
-<p>以上运行结果，我们只要分析最好一行就可以。<strong>Matched:</strong> ifconfig 这个 分割行 是用来显示 匹配结果的。</p>
-<p>最后一行 中 冒号（：）前面的数据， （<strong>net-tools.x86_64</strong> ） 是匹配的软件包；冒号（：）后面的数据，（<strong>Basic networking tools</strong> ） 是对前面包的描述。</p>
-<p>结合上面的信息， 安装ifconfig 包 只需要安装 net-tools.x86_64 即可。</p>
-<p>所以，我们执行 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install net-tools.x86_64</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h1 id="vim编辑器"><a href="#vim编辑器" class="headerlink" title="vim编辑器"></a>vim编辑器</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install vim*</span><br></pre></td></tr></table></figure>
-
 
       
     </div>

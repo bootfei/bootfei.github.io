@@ -709,6 +709,147 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/" class="post-title-link" itemprop="url">jdk线程池源码解析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2023-03-20 15:17:25" itemprop="dateModified" datetime="2023-03-20T15:17:25+08:00">2023-03-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>ava语言直接提供了<code>synchronized</code>关键字用于加锁，但这种锁一是很重，二是获取时必须一直等待，没有额外的尝试机制。</p>
+<p><code>java.util.concurrent.locks</code>包提供的<code>ReentrantLock</code>用于替代<code>synchronized</code>加锁，我们来看一下传统的<code>synchronized</code>代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        synchronized(this) &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果用<code>ReentrantLock</code>替代，可以把代码改造为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为<code>synchronized</code>是Java语言层面提供的语法，所以我们不需要考虑异常，而<code>ReentrantLock</code>是Java代码实现的锁，我们就必须先获取锁，然后在<code>finally</code>中正确释放锁。</p>
+<p>顾名思义，<code>ReentrantLock</code>是可重入锁，它和<code>synchronized</code>一样，一个线程可以多次获取同一个锁。</p>
+<p>和<code>synchronized</code>不同的是，<code>ReentrantLock</code>可以尝试获取锁：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (lock.tryLock(1, TimeUnit.SECONDS)) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码在尝试获取锁的时候，最多等待1秒。如果1秒后仍未获取到锁，<code>tryLock()</code>返回<code>false</code>，程序就可以做一些额外处理，而不是无限等待下去。</p>
+<p>所以，使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，线程在<code>tryLock()</code>失败的时候不会导致死锁。</p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p><code>ReentrantLock</code>可以替代<code>synchronized</code>进行同步；</p>
+<p><code>ReentrantLock</code>获取锁更安全；</p>
+<p>必须先获取到锁，再进入<code>try &#123;...&#125;</code>代码块，最后使用<code>finally</code>保证释放锁；</p>
+<p>可以使用<code>tryLock()</code>尝试获取锁。</p>
+<h3 id="condition"><a href="#condition" class="headerlink" title="condition"></a>condition</h3><p>使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，可以替代<code>synchronized</code>进行线程同步。</p>
+<p>但是，<code>synchronized</code>可以配合<code>wait</code>和<code>notify</code>实现线程在条件不满足时等待，条件满足时唤醒，用<code>ReentrantLock</code>我们怎么编写<code>wait</code>和<code>notify</code>的功能呢？</p>
+<p>答案是使用<code>Condition</code>对象来实现<code>wait</code>和<code>notify</code>的功能。</p>
+<p>我们仍然以<code>TaskQueue</code>为例，把前面用<code>synchronized</code>实现的功能通过<code>ReentrantLock</code>和<code>Condition</code>来实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">class TaskQueue &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private final Condition condition &#x3D; lock.newCondition();</span><br><span class="line">    private Queue&lt;String&gt; queue &#x3D; new LinkedList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public void addTask(String s) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            queue.add(s);</span><br><span class="line">            condition.signalAll();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getTask() &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            while (queue.isEmpty()) &#123;</span><br><span class="line">                condition.await();</span><br><span class="line">            &#125;</span><br><span class="line">            return queue.remove();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见，使用<code>Condition</code>时，引用的<code>Condition</code>对象必须从<code>Lock</code>实例的<code>newCondition()</code>返回，这样才能获得一个绑定了<code>Lock</code>实例的<code>Condition</code>实例。</p>
+<p><code>Condition</code>提供的<code>await()</code>、<code>signal()</code>、<code>signalAll()</code>原理和<code>synchronized</code>锁对象的<code>wait()</code>、<code>notify()</code>、<code>notifyAll()</code>是一致的，并且其行为也是一样的：</p>
+<ul>
+<li><code>await()</code>会释放当前锁，进入等待状态；</li>
+<li><code>signal()</code>会唤醒某个等待线程；</li>
+<li><code>signalAll()</code>会唤醒所有等待线程；</li>
+<li>唤醒线程从<code>await()</code>返回后需要重新获得锁。</li>
+</ul>
+<p>此外，和<code>tryLock()</code>类似，<code>await()</code>可以在等待指定时间后，如果还没有被其他线程通过<code>signal()</code>或<code>signalAll()</code>唤醒，可以自己醒来：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (condition.await(1, TimeUnit.SECOND)) &#123;</span><br><span class="line">    &#x2F;&#x2F; 被其他线程唤醒</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    &#x2F;&#x2F; 指定时间内没有被其他线程唤醒</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见，使用<code>Condition</code>配合<code>Lock</code>，我们可以实现更灵活的线程同步。</p>
+<h4 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h4><p><code>Condition</code>可以替代<code>wait</code>和<code>notify</code>；</p>
+<p><code>Condition</code>对象必须从<code>Lock</code>对象获取。</p>
+<h3 id="公平锁和非公平锁"><a href="#公平锁和非公平锁" class="headerlink" title="公平锁和非公平锁"></a>公平锁和非公平锁</h3><p>学习AQS的时候，了解到AQS依赖于内部的FIFO同步队列来完成同步状态的管理，当前线程获取同步状态失败时，同步器会将当前线程以及等待状态等信息构造成一个Node对象并将其加入到同步队列，同时会阻塞当前线程，当同步状态释放时，会把首节点中的线程唤醒，使其再次尝试获取同步状态。</p>
+<p>这时，我有了一个疑问，AQS的同步队列是FIFO的，就是先来排队的先走。那怎么实现非公平锁呢？查阅了一些资料，总算知道了。</p>
+<p>首先从公平锁开始看起。</p>
+<h2 id="ReentrantLock-的公平锁"><a href="#ReentrantLock-的公平锁" class="headerlink" title="ReentrantLock 的公平锁"></a>ReentrantLock 的公平锁</h2><p>ReentrantLock 默认采用非公平锁，除非在构造方法中传入参数 true 。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//默认</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//传入true or false</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">(<span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    sync = fair ? <span class="keyword">new</span> FairSync() : <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="公平锁的-lock-方法："><a href="#公平锁的-lock-方法：" class="headerlink" title="公平锁的 lock 方法："></a>公平锁的 lock 方法：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">FairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">        <span class="keyword">int</span> c = getState();</span><br><span class="line">        <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 1. 和非公平锁相比，这里多了一个判断：是否有线程在等待</span></span><br><span class="line">            <span class="keyword">if</span> (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">                setExclusiveOwnerThread(current);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">            <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">            <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">            setState(nextc);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，在注释1的位置，有个<code>!hasQueuedPredecessors()</code>条件，意思是说当前同步队列没有前驱节点（也就是没有线程在等待）时才会去<code>compareAndSetState(0, acquires)</code>使用CAS修改同步状态变量。所以就实现了公平锁，根据线程发出请求的顺序获取锁。</p>
+<h2 id="非公平锁的lock方法"><a href="#非公平锁的lock方法" class="headerlink" title="非公平锁的lock方法"></a>非公平锁的lock方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 2. 和公平锁相比，这里会直接先进行一次CAS，成功就返回了</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, <span class="number">1</span>))</span><br><span class="line">            setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nonfairTryAcquire(acquires);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Performs non-fair tryLock.  tryAcquire is implemented in</span></span><br><span class="line"><span class="comment"> * subclasses, but both need nonfair try for trylock method.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">nonfairTryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">    <span class="keyword">int</span> c = getState();</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//3.这里也是直接CAS，没有判断前面是否还有节点。</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">            setExclusiveOwnerThread(current);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">        <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">        <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">        setState(nextc);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>非公平锁的实现在刚进入lock方法时会直接使用一次CAS去尝试获取锁，不成功才会到acquire方法中，如注释2。而在nonfairTryAcquire方法中并没有判断是否有前驱节点在等待，直接CAS尝试获取锁，如注释3。由此实现了非公平锁。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>非公平锁和公平锁的两处不同：</strong></p>
+<ol>
+<li>非公平锁在调用 lock 后，首先就会调用 CAS 进行一次抢锁，如果这个时候恰巧锁没有被占用，那么直接就获取到锁返回了。</li>
+<li>非公平锁在 CAS 失败后，和公平锁一样都会进入到 tryAcquire 方法，在 tryAcquire 方法中，如果发现锁这个时候被释放了（state == 0），非公平锁会直接 CAS 抢锁，但是公平锁会判断等待队列是否有线程处于等待状态，如果有则不去抢锁，乖乖排到后面。</li>
+</ol>
+<p>公平锁和非公平锁就这两点区别，如果这两次 CAS 都不成功，那么后面非公平锁和公平锁是一样的，都要进入到阻塞队列等待唤醒。</p>
+<p>相对来说，非公平锁会有更好的性能，因为它的吞吐量比较大。当然，非公平锁让获取锁的时间变得更加不确定，可能会导致在阻塞队列中的线程长期处于饥饿状态。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-lang-ClassLoader/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1017,147 +1158,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-locks-Reetrantlock/" class="post-title-link" itemprop="url">jdk线程池源码解析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-20 15:17:25" itemprop="dateModified" datetime="2023-03-20T15:17:25+08:00">2023-03-20</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/oom/" itemprop="url" rel="index"><span itemprop="name">oom</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p>ava语言直接提供了<code>synchronized</code>关键字用于加锁，但这种锁一是很重，二是获取时必须一直等待，没有额外的尝试机制。</p>
-<p><code>java.util.concurrent.locks</code>包提供的<code>ReentrantLock</code>用于替代<code>synchronized</code>加锁，我们来看一下传统的<code>synchronized</code>代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        synchronized(this) &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果用<code>ReentrantLock</code>替代，可以把代码改造为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public class Counter &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private int count;</span><br><span class="line"></span><br><span class="line">    public void add(int n) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            count +&#x3D; n;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>因为<code>synchronized</code>是Java语言层面提供的语法，所以我们不需要考虑异常，而<code>ReentrantLock</code>是Java代码实现的锁，我们就必须先获取锁，然后在<code>finally</code>中正确释放锁。</p>
-<p>顾名思义，<code>ReentrantLock</code>是可重入锁，它和<code>synchronized</code>一样，一个线程可以多次获取同一个锁。</p>
-<p>和<code>synchronized</code>不同的是，<code>ReentrantLock</code>可以尝试获取锁：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if (lock.tryLock(1, TimeUnit.SECONDS)) &#123;</span><br><span class="line">    try &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述代码在尝试获取锁的时候，最多等待1秒。如果1秒后仍未获取到锁，<code>tryLock()</code>返回<code>false</code>，程序就可以做一些额外处理，而不是无限等待下去。</p>
-<p>所以，使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，线程在<code>tryLock()</code>失败的时候不会导致死锁。</p>
-<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p><code>ReentrantLock</code>可以替代<code>synchronized</code>进行同步；</p>
-<p><code>ReentrantLock</code>获取锁更安全；</p>
-<p>必须先获取到锁，再进入<code>try &#123;...&#125;</code>代码块，最后使用<code>finally</code>保证释放锁；</p>
-<p>可以使用<code>tryLock()</code>尝试获取锁。</p>
-<h3 id="condition"><a href="#condition" class="headerlink" title="condition"></a>condition</h3><p>使用<code>ReentrantLock</code>比直接使用<code>synchronized</code>更安全，可以替代<code>synchronized</code>进行线程同步。</p>
-<p>但是，<code>synchronized</code>可以配合<code>wait</code>和<code>notify</code>实现线程在条件不满足时等待，条件满足时唤醒，用<code>ReentrantLock</code>我们怎么编写<code>wait</code>和<code>notify</code>的功能呢？</p>
-<p>答案是使用<code>Condition</code>对象来实现<code>wait</code>和<code>notify</code>的功能。</p>
-<p>我们仍然以<code>TaskQueue</code>为例，把前面用<code>synchronized</code>实现的功能通过<code>ReentrantLock</code>和<code>Condition</code>来实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">class TaskQueue &#123;</span><br><span class="line">    private final Lock lock &#x3D; new ReentrantLock();</span><br><span class="line">    private final Condition condition &#x3D; lock.newCondition();</span><br><span class="line">    private Queue&lt;String&gt; queue &#x3D; new LinkedList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    public void addTask(String s) &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            queue.add(s);</span><br><span class="line">            condition.signalAll();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public String getTask() &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            while (queue.isEmpty()) &#123;</span><br><span class="line">                condition.await();</span><br><span class="line">            &#125;</span><br><span class="line">            return queue.remove();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见，使用<code>Condition</code>时，引用的<code>Condition</code>对象必须从<code>Lock</code>实例的<code>newCondition()</code>返回，这样才能获得一个绑定了<code>Lock</code>实例的<code>Condition</code>实例。</p>
-<p><code>Condition</code>提供的<code>await()</code>、<code>signal()</code>、<code>signalAll()</code>原理和<code>synchronized</code>锁对象的<code>wait()</code>、<code>notify()</code>、<code>notifyAll()</code>是一致的，并且其行为也是一样的：</p>
-<ul>
-<li><code>await()</code>会释放当前锁，进入等待状态；</li>
-<li><code>signal()</code>会唤醒某个等待线程；</li>
-<li><code>signalAll()</code>会唤醒所有等待线程；</li>
-<li>唤醒线程从<code>await()</code>返回后需要重新获得锁。</li>
-</ul>
-<p>此外，和<code>tryLock()</code>类似，<code>await()</code>可以在等待指定时间后，如果还没有被其他线程通过<code>signal()</code>或<code>signalAll()</code>唤醒，可以自己醒来：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (condition.await(1, TimeUnit.SECOND)) &#123;</span><br><span class="line">    &#x2F;&#x2F; 被其他线程唤醒</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    &#x2F;&#x2F; 指定时间内没有被其他线程唤醒</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可见，使用<code>Condition</code>配合<code>Lock</code>，我们可以实现更灵活的线程同步。</p>
-<h4 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h4><p><code>Condition</code>可以替代<code>wait</code>和<code>notify</code>；</p>
-<p><code>Condition</code>对象必须从<code>Lock</code>对象获取。</p>
-<h3 id="公平锁和非公平锁"><a href="#公平锁和非公平锁" class="headerlink" title="公平锁和非公平锁"></a>公平锁和非公平锁</h3><p>学习AQS的时候，了解到AQS依赖于内部的FIFO同步队列来完成同步状态的管理，当前线程获取同步状态失败时，同步器会将当前线程以及等待状态等信息构造成一个Node对象并将其加入到同步队列，同时会阻塞当前线程，当同步状态释放时，会把首节点中的线程唤醒，使其再次尝试获取同步状态。</p>
-<p>这时，我有了一个疑问，AQS的同步队列是FIFO的，就是先来排队的先走。那怎么实现非公平锁呢？查阅了一些资料，总算知道了。</p>
-<p>首先从公平锁开始看起。</p>
-<h2 id="ReentrantLock-的公平锁"><a href="#ReentrantLock-的公平锁" class="headerlink" title="ReentrantLock 的公平锁"></a>ReentrantLock 的公平锁</h2><p>ReentrantLock 默认采用非公平锁，除非在构造方法中传入参数 true 。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//默认</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//传入true or false</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ReentrantLock</span><span class="params">(<span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    sync = fair ? <span class="keyword">new</span> FairSync() : <span class="keyword">new</span> NonfairSync();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="公平锁的-lock-方法："><a href="#公平锁的-lock-方法：" class="headerlink" title="公平锁的 lock 方法："></a>公平锁的 lock 方法：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">FairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">        <span class="keyword">int</span> c = getState();</span><br><span class="line">        <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 1. 和非公平锁相比，这里多了一个判断：是否有线程在等待</span></span><br><span class="line">            <span class="keyword">if</span> (!hasQueuedPredecessors() &amp;&amp;</span><br><span class="line">                compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">                setExclusiveOwnerThread(current);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">            <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">            <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">            setState(nextc);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们可以看到，在注释1的位置，有个<code>!hasQueuedPredecessors()</code>条件，意思是说当前同步队列没有前驱节点（也就是没有线程在等待）时才会去<code>compareAndSetState(0, acquires)</code>使用CAS修改同步状态变量。所以就实现了公平锁，根据线程发出请求的顺序获取锁。</p>
-<h2 id="非公平锁的lock方法"><a href="#非公平锁的lock方法" class="headerlink" title="非公平锁的lock方法"></a>非公平锁的lock方法</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 2. 和公平锁相比，这里会直接先进行一次CAS，成功就返回了</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, <span class="number">1</span>))</span><br><span class="line">            setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// AbstractQueuedSynchronizer.acquire(int arg)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nonfairTryAcquire(acquires);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Performs non-fair tryLock.  tryAcquire is implemented in</span></span><br><span class="line"><span class="comment"> * subclasses, but both need nonfair try for trylock method.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">nonfairTryAcquire</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Thread current = Thread.currentThread();</span><br><span class="line">    <span class="keyword">int</span> c = getState();</span><br><span class="line">    <span class="keyword">if</span> (c == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//3.这里也是直接CAS，没有判断前面是否还有节点。</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, acquires)) &#123;</span><br><span class="line">            setExclusiveOwnerThread(current);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (current == getExclusiveOwnerThread()) &#123;</span><br><span class="line">        <span class="keyword">int</span> nextc = c + acquires;</span><br><span class="line">        <span class="keyword">if</span> (nextc &lt; <span class="number">0</span>) <span class="comment">// overflow</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum lock count exceeded&quot;</span>);</span><br><span class="line">        setState(nextc);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>非公平锁的实现在刚进入lock方法时会直接使用一次CAS去尝试获取锁，不成功才会到acquire方法中，如注释2。而在nonfairTryAcquire方法中并没有判断是否有前驱节点在等待，直接CAS尝试获取锁，如注释3。由此实现了非公平锁。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>非公平锁和公平锁的两处不同：</strong></p>
-<ol>
-<li>非公平锁在调用 lock 后，首先就会调用 CAS 进行一次抢锁，如果这个时候恰巧锁没有被占用，那么直接就获取到锁返回了。</li>
-<li>非公平锁在 CAS 失败后，和公平锁一样都会进入到 tryAcquire 方法，在 tryAcquire 方法中，如果发现锁这个时候被释放了（state == 0），非公平锁会直接 CAS 抢锁，但是公平锁会判断等待队列是否有线程处于等待状态，如果有则不去抢锁，乖乖排到后面。</li>
-</ol>
-<p>公平锁和非公平锁就这两点区别，如果这两次 CAS 都不成功，那么后面非公平锁和公平锁是一样的，都要进入到阻塞队列等待唤醒。</p>
-<p>相对来说，非公平锁会有更好的性能，因为它的吞吐量比较大。当然，非公平锁让获取锁的时间变得更加不确定，可能会导致在阻塞队列中的线程长期处于饥饿状态。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-concurrent-CompletableFuture/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1221,215 +1221,6 @@
     
     <div class="post-body" itemprop="articleBody">
           <p>接口批量查询</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring-04-AOP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring-04-AOP/" class="post-title-link" itemprop="url">spring-03-aop</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-05-31 17:36:00" itemprop="dateModified" datetime="2021-05-31T17:36:00+08:00">2021-05-31</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">In</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
-        </span>
-          , 
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="aop核心概念"><a href="#aop核心概念" class="headerlink" title="aop核心概念"></a>aop核心概念</h1><h2 id="AOP相关术语介绍"><a href="#AOP相关术语介绍" class="headerlink" title="AOP相关术语介绍"></a>AOP相关术语介绍</h2><ul>
-<li>和目标类有关<ul>
-<li>Joinpoint(连接点)：所谓连接点是指那些被拦截到的点。在spring中,这些点指的是方法,因为spring只支持方法类型的连接点 </li>
-<li>Pointcut(切入点) ：所谓切入点是指我们要对哪些Joinpoint进行拦截的定义</li>
-<li>Target(目标对象) ：代理的目标对象 </li>
-</ul>
-</li>
-<li>和增强类有关<ul>
-<li>Advice(通知/增强) ：所谓通知是指拦截到Joinpoint之后所要做的事情就是通知.通知分为前置通知,后置通知,异常通知,最 终通知,环绕通知(切面要完成的功能) </li>
-<li>Introduction(引介) （了解就行） ：引介是一种特殊的通知在不修改类代码的前提下, Introduction可以在运行期为类动态地添加一些方法或Field </li>
-</ul>
-</li>
-<li>和两者都有关系<ul>
-<li>Aspect(切面) :是切入点和通知的结合，以后咱们自己来编写和配置的 </li>
-</ul>
-</li>
-</ul>
-<h2 id="AOP实现之Spring-AOP"><a href="#AOP实现之Spring-AOP" class="headerlink" title="AOP实现之Spring AOP"></a>AOP实现之Spring AOP</h2><p>实现原理分析</p>
-<ul>
-<li>Spring AOP是通过<a href="">动态代理技术</a>实现的</li>
-<li>而动态代理是基于反射设计的。（关于反射的知识，请自行学习）</li>
-<li>动态代理技术的实现方式有两种：基于接口的JDK动态代理和基于继承的CGLib动态代理。</li>
-</ul>
-<h3 id="JDK动态代理"><a href="#JDK动态代理" class="headerlink" title="JDK动态代理"></a>JDK动态代理</h3><p><a href="">目标对象必须实现接口</a></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JDK代理对象工厂&amp;代理对象方法调用处理器 </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JDKProxyFactory</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123; </span><br><span class="line">    <span class="comment">// 目标对象的引用</span></span><br><span class="line">    <span class="keyword">private</span> Object target; </span><br><span class="line">    <span class="comment">// 通过构造方法将目标对象注入到代理对象中 </span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">JDKProxyFactory</span><span class="params">(Object target)</span> </span>&#123; </span><br><span class="line">        <span class="keyword">super</span>(); </span><br><span class="line">        <span class="keyword">this</span>.target = target; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** <span class="doctag">@return</span> */</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getProxy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 如何生成一个代理类呢？ </span></span><br><span class="line">        <span class="comment">// 1、编写源文件 </span></span><br><span class="line">        <span class="comment">// 2、编译源文件为class文件 </span></span><br><span class="line">        <span class="comment">// 3、将class文件加载到JVM中(ClassLoader) </span></span><br><span class="line">        <span class="comment">// 4、将class文件对应的对象进行实例化（反射） </span></span><br><span class="line">        <span class="comment">// Proxy是JDK中的API类 </span></span><br><span class="line">        <span class="comment">// 第一个参数：目标对象的类加载器 </span></span><br><span class="line">        <span class="comment">// 第二个参数：目标对象的接口 </span></span><br><span class="line">        <span class="comment">// 第二个参数：代理对象的执行处理器, 就是InvocationHandler</span></span><br><span class="line">        Object object = Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(), <span class="keyword">this</span>); </span><br><span class="line">        <span class="keyword">return</span> object; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** 代理对象会执行的方法 */</span> </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123; </span><br><span class="line">        Method method2 = target.getClass().getMethod(<span class="string">&quot;saveUser&quot;</span>, <span class="keyword">null</span>); </span><br><span class="line">        Method method3 = Class.forName(<span class="string">&quot;com.sun.proxy.$Proxy4&quot;</span>).getMethod(<span class="string">&quot;saveUser&quot;</span>, <span class="keyword">null</span>); </span><br><span class="line">        System.out.println(<span class="string">&quot;目标对象的方法:&quot;</span> + method2.toString()); </span><br><span class="line">        System.out.println(<span class="string">&quot;目标接口的方法:&quot;</span> + method.toString()); </span><br><span class="line">        System.out.println(<span class="string">&quot;代理对象的方法:&quot;</span> + method3.toString()); System.out.println(<span class="string">&quot;这是jdk的代理方法&quot;</span>); </span><br><span class="line">        <span class="comment">// 下面的代码，是反射中的API用法 </span></span><br><span class="line">        <span class="comment">// 该行代码，实际调用的是[目标对象]的方法 </span></span><br><span class="line">        <span class="comment">// 利用反射，调用[目标对象]的方法 O</span></span><br><span class="line">        bject returnValue = method.invoke(target, args); </span><br><span class="line">        <span class="keyword">return</span> returnValue; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Cglib动态代理"><a href="#Cglib动态代理" class="headerlink" title="Cglib动态代理"></a>Cglib动态代理</h3><ul>
-<li>目标对象不需要实现接口</li>
-<li>底层是通过继承目标对象产生代理子对象（代理子对象中继承了目标对象的方法，并可以对该方法进行增强）</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CgLibProxyFactory</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123; </span><br><span class="line">    <span class="comment">/*** <span class="doctag">@param</span> clazz * <span class="doctag">@return</span> */</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getProxyByCgLib</span><span class="params">(Class clazz)</span> </span>&#123; </span><br><span class="line">        <span class="comment">// 创建增强器 Enhancer </span></span><br><span class="line">        enhancer = <span class="keyword">new</span> Enhancer(); </span><br><span class="line">        <span class="comment">// 设置需要增强的类的类对象 </span></span><br><span class="line">        enhancer.setSuperclass(clazz); </span><br><span class="line">        <span class="comment">// 设置回调函数 </span></span><br><span class="line">        enhancer.setCallback(<span class="keyword">this</span>); </span><br><span class="line">        <span class="comment">// 获取增强之后的代理对象</span></span><br><span class="line">        <span class="keyword">return</span> enhancer.create(); </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** * Object proxy:这是代理对象，也就是[目标对象]的子类 * Method method:[目标对象]的方法 * Object[] arg:参数 * MethodProxy methodProxy：代理对象的方法 */</span> </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object proxy, Method method, Object[] arg, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123; </span><br><span class="line">        <span class="comment">// 因为代理对象是目标对象的子类 </span></span><br><span class="line">        <span class="comment">// 该行代码，实际调用的是父类目标对象的方法 </span></span><br><span class="line">        System.out.println(<span class="string">&quot;这是cglib的代理方法&quot;</span>); </span><br><span class="line">        <span class="comment">// 通过调用子类[代理类]的invokeSuper方法，去实际调用[目标对象]的方法 </span></span><br><span class="line">        Object returnValue = methodProxy.invokeSuper(proxy, arg); </span><br><span class="line">        <span class="comment">// 代理对象调用代理对象的invokeSuper方法，而invokeSuper方法会去调用目标类的 invoke方法完成目标对象的调用 </span></span><br><span class="line">        <span class="keyword">return</span> returnValue; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="aop使用"><a href="#aop使用" class="headerlink" title="aop使用"></a>aop使用</h1><p>其实就是指的Spring + AspectJ整合，不过Spring已经将AspectJ收录到自身的框架中了，并且底层织入依然是采取的动态织入方式。 </p>
-<h2 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 基于AspectJ的aop依赖 --&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-aspects<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.7.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span> </span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>aopalliance<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>aopalliance<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="编写目标类和目标方法"><a href="#编写目标类和目标方法" class="headerlink" title="编写目标类和目标方法"></a>编写目标类和目标方法</h2><p>编写接口和实现类（目标对象）: UserService接口 ,  UserServiceImpl实现类</p>
-<p>配置目标类，将目标类交给spring IoC容器管理:</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">context:component-scan</span> <span class="attr">base-package</span>=<span class="string">&quot;sourcecode.ioc&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="使用XML实现"><a href="#使用XML实现" class="headerlink" title="使用XML实现"></a>使用XML实现</h2><p>编写通知（增强类，一个普通的类） </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdvice</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>配置通知，将通知类交给spring IoC容器管理 </p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">name</span>=<span class="string">&quot;MyAdvice&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.bootfei.MyAdvice&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>配置AOP 切面</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">aop:config</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">aop:aspect</span> <span class="attr">ref</span>=<span class="string">&quot;MyAdvice&quot;</span>&gt;</span></span><br><span class="line">		<span class="comment">&lt;!--method表示指定增强类的功能, pointcut表示切入点，通过表达式表--&gt;</span></span><br><span class="line">	    <span class="tag">&lt;<span class="name">aop:before</span> <span class="attr">method</span>=<span class="string">&quot;log&quot;</span> <span class="attr">pointcut</span>=<span class="string">&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">aop:before</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">aop:aspect</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">aop:config</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="使用混合注解实现"><a href="#使用混合注解实现" class="headerlink" title="使用混合注解实现"></a>使用混合注解实现</h2><p>编写切面类（注意不是通知类，因为该类中可以指定切入点）</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;myAspect&quot;)</span></span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAspect</span></span>&#123;</span><br><span class="line">	<span class="meta">@Before(value=&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment">//环绕通知</span></span><br><span class="line">  <span class="meta">@Around(value=&quot;execution(* *.*(...))&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">aroundAdvice</span><span class="params">(ProceedingJointPoint joinPoint)</span></span>&#123;</span><br><span class="line">    Object[] args= joinPoint.getArgs();</span><br><span class="line">    Object rtValue = joinPoint.proceed(args);</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment">//使用@PointCut注解在切面类中定义一个通用的切入点，其他通知可以引用该切入点</span></span><br><span class="line">  <span class="meta">@Before(value=&quot;MyAspect.fn()&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Before(value=&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>配置切面类，扫描成为Bean</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">context:component-scan</span> <span class="attr">base-package</span>=<span class="string">&quot;org.bootfei&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>开启AOP自动代理</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">aop:aspectj-autoproxy</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="使用纯注解实现"><a href="#使用纯注解实现" class="headerlink" title="使用纯注解实现"></a>使用纯注解实现</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponectScan(basePackages=&quot;org.bootfei&quot;)</span></span><br><span class="line"><span class="meta">@EnableAspectJAutoProxy</span></span><br><span class="line">pubic <span class="class"><span class="keyword">class</span> <span class="title">SpringConfiguartion</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="aop源码阅读"><a href="#aop源码阅读" class="headerlink" title="aop源码阅读"></a>aop源码阅读</h1><p><img src="https://img-blog.csdnimg.cn/20181204223004291.png" alt="在这里插入图片描述"></p>
-<h2 id="Spring-AOP核心类解析"><a href="#Spring-AOP核心类解析" class="headerlink" title="Spring AOP核心类解析"></a>Spring AOP核心类解析</h2><table>
-<thead>
-<tr>
-<th>类名</th>
-<th>作用概述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>AopNamespaceHandler</td>
-<td>AOP命名空间解析类。我们在用AOP的时候，会在Spring配置文件的beans标签中引入：xmlns:aop</td>
-</tr>
-<tr>
-<td>AspectJAutoProxyBeanDefinitionParser</td>
-<td>解析&lt;aop:aspectj-autoproxy /&gt;标签的类。在AopNamespaceHandler中创建的类。</td>
-</tr>
-<tr>
-<td>ConfigBeanDefinitionParser</td>
-<td>解析&lt;aop:config /&gt; 标签的类。同样也是在AopNamespaceHandler中创建的类。</td>
-</tr>
-<tr>
-<td>AopNamespaceUtils</td>
-<td>AOP命名空间解析工具类，在上面两个中被引用</td>
-</tr>
-</tbody></table>
-<h2 id="step1-解析磁盘配置文件中AOP空间类型的标签"><a href="#step1-解析磁盘配置文件中AOP空间类型的标签" class="headerlink" title="step1:解析磁盘配置文件中AOP空间类型的标签"></a>step1:解析磁盘配置文件中AOP空间类型的标签</h2><p><img src="https://upload-images.jianshu.io/upload_images/838913-002aef5f6aeb7fd6.png"></p>
-<blockquote>
-<p>根据自定义标签前面的值<a href="aop:">aop:</a>，找NameSpaceHandler</p>
-<p>然后再根据自定义标签后面的值&lt;:config&gt;，找BeanDefinitionParser</p>
-</blockquote>
-<p>AopNamespaceHandlerSupport解析AOP空间类型的标签前面的标签</p>
-<p>解析的目的都是为了将磁盘中的配置信息生成BeanDefinition，比如对于&lt;aop: config&gt;，解析以后内存中共有10个BeanDefinition。</p>
-<blockquote>
-<p>解析aop:config标签，最终解析10个BeanDefinition。</p>
-<ul>
-<li>产生代理对象的类对应的BeanDefinition（一种）：<a href="">AspectJAwareAdvisorAutoProxyCreator</a></li>
-<li>通知类BeanDefinition（五种）：AspectJMethodBeforeAdvice、AspectJAfterAdvice、AspectJAfterReturningAdvice、AspectJAfterThrowingAdvice、AspectJAroundAdvice</li>
-<li>通知器BeanDefinition（一种）：DefaultBeanFactoryPointcutAdvisor、AspectJPointcutAdvisor</li>
-<li>切入点BeanDefinition（一种）：AspectJExpressionPointcut</li>
-<li>其他略，我也不懂</li>
-</ul>
-</blockquote>
-<h2 id="step2-解析中配置文件中AOP空间"><a href="#step2-解析中配置文件中AOP空间" class="headerlink" title="step2:解析中配置文件中AOP空间"></a>step2:解析中配置文件中AOP空间</h2><blockquote>
-<p>根据自定义标签，找到对应的BeanDefinitionParser，比如aop:config标签，就对应着ConfigBeanDefinitionParser。</p>
-</blockquote>
-<p><a href="">DefaultBeanDefinitionDocumentReader#parseBeanDefinitions 方法的第16行或者23行：</a> </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">parseBeanDefinitions</span><span class="params">(Element root, BeanDefinitionParserDelegate delegate)</span> </span>&#123; </span><br><span class="line">    <span class="comment">// 加载的Document对象是否使用了Spring默认的XML命名空间（beans命名空间） </span></span><br><span class="line">    <span class="keyword">if</span> (delegate.isDefaultNamespace(root)) &#123; </span><br><span class="line">        <span class="comment">// 获取Document对象根元素的所有子节点（bean标签、import标签、alias标签 和其他自定义标签context、aop等） </span></span><br><span class="line">        NodeList nl = root.getChildNodes(); </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nl.getLength(); i++) &#123; </span><br><span class="line">            Node node = nl.item(i); </span><br><span class="line">            <span class="keyword">if</span> (node <span class="keyword">instanceof</span> Element) &#123; </span><br><span class="line">                Element ele = (Element) node; </span><br><span class="line">                <span class="comment">// bean标签、import标签、alias标签，则使用默认解析规则 </span></span><br><span class="line">                <span class="keyword">if</span> (delegate.isDefaultNamespace(ele)) &#123; </span><br><span class="line">                  parseDefaultElement(ele, delegate); </span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//像context标签、aop标签、tx标签，则使用用户自定义的解析规则解析 元素节点 </span></span><br><span class="line">                <span class="keyword">else</span> &#123;delegate.parseCustomElement(ele); &#125; &#125; &#125; &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果不是默认的命名空间，则使用用户自定义的解析规则解析元素节点 </span></span><br><span class="line">        delegate.parseCustomElement(root); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>解析完配置信息，最重要的是<a href="">生成BeanDefinition</a></p>
-<p>找到NamespaceHandlerSupport类的 parse 方法第6行代码： </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> BeanDefinition <span class="title">parse</span><span class="params">(Element element, ParserContext parserContext)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// NamespaceHandler里面初始化了大量的BeanDefinitionParser来分别处理不同的自 定义标签 </span></span><br><span class="line">    <span class="comment">// 从指定的NamespaceHandler中，匹配到指定的BeanDefinitionParser </span></span><br><span class="line">    BeanDefinitionParser parser = findParserForElement(element, parserContext); </span><br><span class="line">    <span class="comment">// 调用指定自定义标签的解析器，完成具体解析工作 </span></span><br><span class="line">    <span class="keyword">return</span> (parser != <span class="keyword">null</span> ? parser.parse(element, parserContext) : <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="产生AOP代理类流程分析"><a href="#产生AOP代理类流程分析" class="headerlink" title="产生AOP代理类流程分析"></a>产生AOP代理类流程分析</h2><p>AspectJAwareAdvisorAutoProxyCreator的继承体系 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">|-BeanPostProcessor </span><br><span class="line">	postProcessBeforeInitialization---初始化之前调用 </span><br><span class="line">	postProcessAfterInitialization---初始化之后调用 </span><br><span class="line"></span><br><span class="line">|--InstantiationAwareBeanPostProcessor </span><br><span class="line">	postProcessBeforeInstantiation---实例化之前调用 </span><br><span class="line">	postProcessAfterInstantiation---实例化之后调用 </span><br><span class="line">	postProcessPropertyValues---后置处理属性值 </span><br><span class="line"></span><br><span class="line">|---SmartInstantiationAwareBeanPostProcessor </span><br><span class="line">	predictBeanType </span><br><span class="line">	determineCandidateConstructors </span><br><span class="line">	getEarlyBeanReference </span><br><span class="line"></span><br><span class="line">|----AbstractAutoProxyCreator </span><br><span class="line">	postProcessBeforeInitialization </span><br><span class="line">	postProcessAfterInitialization----AOP功能入口 		</span><br><span class="line">	postProcessBeforeInstantiation </span><br><span class="line">	postProcessAfterInstantiation </span><br><span class="line">	postProcessPropertyValues ... </span><br><span class="line">	</span><br><span class="line">|-----AbstractAdvisorAutoProxyCreator </span><br><span class="line">	getAdvicesAndAdvisorsForBean </span><br><span class="line">	findEligibleAdvisors </span><br><span class="line">	findCandidateAdvisors </span><br><span class="line">	findAdvisorsThatCanApply </span><br><span class="line">	</span><br><span class="line">|------AspectJAwareAdvisorAutoProxyCreator </span><br><span class="line">	extendAdvisors </span><br><span class="line">	sortAdvisors</span><br></pre></td></tr></table></figure>
-
-
-
-<p>AbstractAutoProxyCreator类的 postProcessAfterInitialization 方法第6行代码： </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">postProcessAfterInitialization</span><span class="params">(<span class="meta">@Nullable</span> Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123; </span><br><span class="line">    <span class="keyword">if</span> (bean != <span class="keyword">null</span>) &#123; </span><br><span class="line">        Object cacheKey = getCacheKey(bean.getClass(), beanName); </span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.earlyProxyReferences.contains(cacheKey)) &#123; <span class="comment">// 使用动态代理技术，产生代理对象 </span></span><br><span class="line">            <span class="keyword">return</span> wrapIfNecessary(bean, beanName, cacheKey); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="代理对象执行流程"><a href="#代理对象执行流程" class="headerlink" title="代理对象执行流程"></a>代理对象执行流程</h2><p>主要去针对Jdk产生的动态代理对象进行分析，其实就是去分析InvocationHandler的invoke方法</p>
-<p>入口：JdkDynamicAopProxy#invoke方法</p>
 
       
     </div>
@@ -1759,6 +1550,215 @@
 <li>Bean a完成属性注入、Aware回调、初始化</li>
 <li>Bean a返回提前暴露的<code>earlySingleObject</code>。</li>
 </ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring-04-AOP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Fei Qi">
+      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BootFei's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring-04-AOP/" class="post-title-link" itemprop="url">spring-03-aop</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-10-17 19:52:16" itemprop="dateCreated datePublished" datetime="2020-10-17T19:52:16+08:00">2020-10-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-05-31 17:36:00" itemprop="dateModified" datetime="2021-05-31T17:36:00+08:00">2021-05-31</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+          , 
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="aop核心概念"><a href="#aop核心概念" class="headerlink" title="aop核心概念"></a>aop核心概念</h1><h2 id="AOP相关术语介绍"><a href="#AOP相关术语介绍" class="headerlink" title="AOP相关术语介绍"></a>AOP相关术语介绍</h2><ul>
+<li>和目标类有关<ul>
+<li>Joinpoint(连接点)：所谓连接点是指那些被拦截到的点。在spring中,这些点指的是方法,因为spring只支持方法类型的连接点 </li>
+<li>Pointcut(切入点) ：所谓切入点是指我们要对哪些Joinpoint进行拦截的定义</li>
+<li>Target(目标对象) ：代理的目标对象 </li>
+</ul>
+</li>
+<li>和增强类有关<ul>
+<li>Advice(通知/增强) ：所谓通知是指拦截到Joinpoint之后所要做的事情就是通知.通知分为前置通知,后置通知,异常通知,最 终通知,环绕通知(切面要完成的功能) </li>
+<li>Introduction(引介) （了解就行） ：引介是一种特殊的通知在不修改类代码的前提下, Introduction可以在运行期为类动态地添加一些方法或Field </li>
+</ul>
+</li>
+<li>和两者都有关系<ul>
+<li>Aspect(切面) :是切入点和通知的结合，以后咱们自己来编写和配置的 </li>
+</ul>
+</li>
+</ul>
+<h2 id="AOP实现之Spring-AOP"><a href="#AOP实现之Spring-AOP" class="headerlink" title="AOP实现之Spring AOP"></a>AOP实现之Spring AOP</h2><p>实现原理分析</p>
+<ul>
+<li>Spring AOP是通过<a href="">动态代理技术</a>实现的</li>
+<li>而动态代理是基于反射设计的。（关于反射的知识，请自行学习）</li>
+<li>动态代理技术的实现方式有两种：基于接口的JDK动态代理和基于继承的CGLib动态代理。</li>
+</ul>
+<h3 id="JDK动态代理"><a href="#JDK动态代理" class="headerlink" title="JDK动态代理"></a>JDK动态代理</h3><p><a href="">目标对象必须实现接口</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JDK代理对象工厂&amp;代理对象方法调用处理器 </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JDKProxyFactory</span> <span class="keyword">implements</span> <span class="title">InvocationHandler</span> </span>&#123; </span><br><span class="line">    <span class="comment">// 目标对象的引用</span></span><br><span class="line">    <span class="keyword">private</span> Object target; </span><br><span class="line">    <span class="comment">// 通过构造方法将目标对象注入到代理对象中 </span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">JDKProxyFactory</span><span class="params">(Object target)</span> </span>&#123; </span><br><span class="line">        <span class="keyword">super</span>(); </span><br><span class="line">        <span class="keyword">this</span>.target = target; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** <span class="doctag">@return</span> */</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getProxy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 如何生成一个代理类呢？ </span></span><br><span class="line">        <span class="comment">// 1、编写源文件 </span></span><br><span class="line">        <span class="comment">// 2、编译源文件为class文件 </span></span><br><span class="line">        <span class="comment">// 3、将class文件加载到JVM中(ClassLoader) </span></span><br><span class="line">        <span class="comment">// 4、将class文件对应的对象进行实例化（反射） </span></span><br><span class="line">        <span class="comment">// Proxy是JDK中的API类 </span></span><br><span class="line">        <span class="comment">// 第一个参数：目标对象的类加载器 </span></span><br><span class="line">        <span class="comment">// 第二个参数：目标对象的接口 </span></span><br><span class="line">        <span class="comment">// 第二个参数：代理对象的执行处理器, 就是InvocationHandler</span></span><br><span class="line">        Object object = Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(), <span class="keyword">this</span>); </span><br><span class="line">        <span class="keyword">return</span> object; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** 代理对象会执行的方法 */</span> </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123; </span><br><span class="line">        Method method2 = target.getClass().getMethod(<span class="string">&quot;saveUser&quot;</span>, <span class="keyword">null</span>); </span><br><span class="line">        Method method3 = Class.forName(<span class="string">&quot;com.sun.proxy.$Proxy4&quot;</span>).getMethod(<span class="string">&quot;saveUser&quot;</span>, <span class="keyword">null</span>); </span><br><span class="line">        System.out.println(<span class="string">&quot;目标对象的方法:&quot;</span> + method2.toString()); </span><br><span class="line">        System.out.println(<span class="string">&quot;目标接口的方法:&quot;</span> + method.toString()); </span><br><span class="line">        System.out.println(<span class="string">&quot;代理对象的方法:&quot;</span> + method3.toString()); System.out.println(<span class="string">&quot;这是jdk的代理方法&quot;</span>); </span><br><span class="line">        <span class="comment">// 下面的代码，是反射中的API用法 </span></span><br><span class="line">        <span class="comment">// 该行代码，实际调用的是[目标对象]的方法 </span></span><br><span class="line">        <span class="comment">// 利用反射，调用[目标对象]的方法 O</span></span><br><span class="line">        bject returnValue = method.invoke(target, args); </span><br><span class="line">        <span class="keyword">return</span> returnValue; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Cglib动态代理"><a href="#Cglib动态代理" class="headerlink" title="Cglib动态代理"></a>Cglib动态代理</h3><ul>
+<li>目标对象不需要实现接口</li>
+<li>底层是通过继承目标对象产生代理子对象（代理子对象中继承了目标对象的方法，并可以对该方法进行增强）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CgLibProxyFactory</span> <span class="keyword">implements</span> <span class="title">MethodInterceptor</span> </span>&#123; </span><br><span class="line">    <span class="comment">/*** <span class="doctag">@param</span> clazz * <span class="doctag">@return</span> */</span> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getProxyByCgLib</span><span class="params">(Class clazz)</span> </span>&#123; </span><br><span class="line">        <span class="comment">// 创建增强器 Enhancer </span></span><br><span class="line">        enhancer = <span class="keyword">new</span> Enhancer(); </span><br><span class="line">        <span class="comment">// 设置需要增强的类的类对象 </span></span><br><span class="line">        enhancer.setSuperclass(clazz); </span><br><span class="line">        <span class="comment">// 设置回调函数 </span></span><br><span class="line">        enhancer.setCallback(<span class="keyword">this</span>); </span><br><span class="line">        <span class="comment">// 获取增强之后的代理对象</span></span><br><span class="line">        <span class="keyword">return</span> enhancer.create(); </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*** * Object proxy:这是代理对象，也就是[目标对象]的子类 * Method method:[目标对象]的方法 * Object[] arg:参数 * MethodProxy methodProxy：代理对象的方法 */</span> </span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Object proxy, Method method, Object[] arg, MethodProxy methodProxy)</span> <span class="keyword">throws</span> Throwable </span>&#123; </span><br><span class="line">        <span class="comment">// 因为代理对象是目标对象的子类 </span></span><br><span class="line">        <span class="comment">// 该行代码，实际调用的是父类目标对象的方法 </span></span><br><span class="line">        System.out.println(<span class="string">&quot;这是cglib的代理方法&quot;</span>); </span><br><span class="line">        <span class="comment">// 通过调用子类[代理类]的invokeSuper方法，去实际调用[目标对象]的方法 </span></span><br><span class="line">        Object returnValue = methodProxy.invokeSuper(proxy, arg); </span><br><span class="line">        <span class="comment">// 代理对象调用代理对象的invokeSuper方法，而invokeSuper方法会去调用目标类的 invoke方法完成目标对象的调用 </span></span><br><span class="line">        <span class="keyword">return</span> returnValue; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="aop使用"><a href="#aop使用" class="headerlink" title="aop使用"></a>aop使用</h1><p>其实就是指的Spring + AspectJ整合，不过Spring已经将AspectJ收录到自身的框架中了，并且底层织入依然是采取的动态织入方式。 </p>
+<h2 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 基于AspectJ的aop依赖 --&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-aspects<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>5.0.7.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span> </span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">groupId</span>&gt;</span>aopalliance<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>aopalliance<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="编写目标类和目标方法"><a href="#编写目标类和目标方法" class="headerlink" title="编写目标类和目标方法"></a>编写目标类和目标方法</h2><p>编写接口和实现类（目标对象）: UserService接口 ,  UserServiceImpl实现类</p>
+<p>配置目标类，将目标类交给spring IoC容器管理:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">context:component-scan</span> <span class="attr">base-package</span>=<span class="string">&quot;sourcecode.ioc&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用XML实现"><a href="#使用XML实现" class="headerlink" title="使用XML实现"></a>使用XML实现</h2><p>编写通知（增强类，一个普通的类） </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdvice</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置通知，将通知类交给spring IoC容器管理 </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">name</span>=<span class="string">&quot;MyAdvice&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.bootfei.MyAdvice&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置AOP 切面</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">aop:config</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">aop:aspect</span> <span class="attr">ref</span>=<span class="string">&quot;MyAdvice&quot;</span>&gt;</span></span><br><span class="line">		<span class="comment">&lt;!--method表示指定增强类的功能, pointcut表示切入点，通过表达式表--&gt;</span></span><br><span class="line">	    <span class="tag">&lt;<span class="name">aop:before</span> <span class="attr">method</span>=<span class="string">&quot;log&quot;</span> <span class="attr">pointcut</span>=<span class="string">&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">aop:before</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">aop:aspect</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">aop:config</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用混合注解实现"><a href="#使用混合注解实现" class="headerlink" title="使用混合注解实现"></a>使用混合注解实现</h2><p>编写切面类（注意不是通知类，因为该类中可以指定切入点）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component(&quot;myAspect&quot;)</span></span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAspect</span></span>&#123;</span><br><span class="line">	<span class="meta">@Before(value=&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment">//环绕通知</span></span><br><span class="line">  <span class="meta">@Around(value=&quot;execution(* *.*(...))&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">aroundAdvice</span><span class="params">(ProceedingJointPoint joinPoint)</span></span>&#123;</span><br><span class="line">    Object[] args= joinPoint.getArgs();</span><br><span class="line">    Object rtValue = joinPoint.proceed(args);</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment">//使用@PointCut注解在切面类中定义一个通用的切入点，其他通知可以引用该切入点</span></span><br><span class="line">  <span class="meta">@Before(value=&quot;MyAspect.fn()&quot;)</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">log</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;logging...&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Before(value=&quot;execution(void com.bootfei.dao.UserDaoImpl.insert())&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置切面类，扫描成为Bean</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">context:component-scan</span> <span class="attr">base-package</span>=<span class="string">&quot;org.bootfei&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>开启AOP自动代理</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">aop:aspectj-autoproxy</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="使用纯注解实现"><a href="#使用纯注解实现" class="headerlink" title="使用纯注解实现"></a>使用纯注解实现</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ComponectScan(basePackages=&quot;org.bootfei&quot;)</span></span><br><span class="line"><span class="meta">@EnableAspectJAutoProxy</span></span><br><span class="line">pubic <span class="class"><span class="keyword">class</span> <span class="title">SpringConfiguartion</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="aop源码阅读"><a href="#aop源码阅读" class="headerlink" title="aop源码阅读"></a>aop源码阅读</h1><p><img src="https://img-blog.csdnimg.cn/20181204223004291.png" alt="在这里插入图片描述"></p>
+<h2 id="Spring-AOP核心类解析"><a href="#Spring-AOP核心类解析" class="headerlink" title="Spring AOP核心类解析"></a>Spring AOP核心类解析</h2><table>
+<thead>
+<tr>
+<th>类名</th>
+<th>作用概述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AopNamespaceHandler</td>
+<td>AOP命名空间解析类。我们在用AOP的时候，会在Spring配置文件的beans标签中引入：xmlns:aop</td>
+</tr>
+<tr>
+<td>AspectJAutoProxyBeanDefinitionParser</td>
+<td>解析&lt;aop:aspectj-autoproxy /&gt;标签的类。在AopNamespaceHandler中创建的类。</td>
+</tr>
+<tr>
+<td>ConfigBeanDefinitionParser</td>
+<td>解析&lt;aop:config /&gt; 标签的类。同样也是在AopNamespaceHandler中创建的类。</td>
+</tr>
+<tr>
+<td>AopNamespaceUtils</td>
+<td>AOP命名空间解析工具类，在上面两个中被引用</td>
+</tr>
+</tbody></table>
+<h2 id="step1-解析磁盘配置文件中AOP空间类型的标签"><a href="#step1-解析磁盘配置文件中AOP空间类型的标签" class="headerlink" title="step1:解析磁盘配置文件中AOP空间类型的标签"></a>step1:解析磁盘配置文件中AOP空间类型的标签</h2><p><img src="https://upload-images.jianshu.io/upload_images/838913-002aef5f6aeb7fd6.png"></p>
+<blockquote>
+<p>根据自定义标签前面的值<a href="aop:">aop:</a>，找NameSpaceHandler</p>
+<p>然后再根据自定义标签后面的值&lt;:config&gt;，找BeanDefinitionParser</p>
+</blockquote>
+<p>AopNamespaceHandlerSupport解析AOP空间类型的标签前面的标签</p>
+<p>解析的目的都是为了将磁盘中的配置信息生成BeanDefinition，比如对于&lt;aop: config&gt;，解析以后内存中共有10个BeanDefinition。</p>
+<blockquote>
+<p>解析aop:config标签，最终解析10个BeanDefinition。</p>
+<ul>
+<li>产生代理对象的类对应的BeanDefinition（一种）：<a href="">AspectJAwareAdvisorAutoProxyCreator</a></li>
+<li>通知类BeanDefinition（五种）：AspectJMethodBeforeAdvice、AspectJAfterAdvice、AspectJAfterReturningAdvice、AspectJAfterThrowingAdvice、AspectJAroundAdvice</li>
+<li>通知器BeanDefinition（一种）：DefaultBeanFactoryPointcutAdvisor、AspectJPointcutAdvisor</li>
+<li>切入点BeanDefinition（一种）：AspectJExpressionPointcut</li>
+<li>其他略，我也不懂</li>
+</ul>
+</blockquote>
+<h2 id="step2-解析中配置文件中AOP空间"><a href="#step2-解析中配置文件中AOP空间" class="headerlink" title="step2:解析中配置文件中AOP空间"></a>step2:解析中配置文件中AOP空间</h2><blockquote>
+<p>根据自定义标签，找到对应的BeanDefinitionParser，比如aop:config标签，就对应着ConfigBeanDefinitionParser。</p>
+</blockquote>
+<p><a href="">DefaultBeanDefinitionDocumentReader#parseBeanDefinitions 方法的第16行或者23行：</a> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">parseBeanDefinitions</span><span class="params">(Element root, BeanDefinitionParserDelegate delegate)</span> </span>&#123; </span><br><span class="line">    <span class="comment">// 加载的Document对象是否使用了Spring默认的XML命名空间（beans命名空间） </span></span><br><span class="line">    <span class="keyword">if</span> (delegate.isDefaultNamespace(root)) &#123; </span><br><span class="line">        <span class="comment">// 获取Document对象根元素的所有子节点（bean标签、import标签、alias标签 和其他自定义标签context、aop等） </span></span><br><span class="line">        NodeList nl = root.getChildNodes(); </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nl.getLength(); i++) &#123; </span><br><span class="line">            Node node = nl.item(i); </span><br><span class="line">            <span class="keyword">if</span> (node <span class="keyword">instanceof</span> Element) &#123; </span><br><span class="line">                Element ele = (Element) node; </span><br><span class="line">                <span class="comment">// bean标签、import标签、alias标签，则使用默认解析规则 </span></span><br><span class="line">                <span class="keyword">if</span> (delegate.isDefaultNamespace(ele)) &#123; </span><br><span class="line">                  parseDefaultElement(ele, delegate); </span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//像context标签、aop标签、tx标签，则使用用户自定义的解析规则解析 元素节点 </span></span><br><span class="line">                <span class="keyword">else</span> &#123;delegate.parseCustomElement(ele); &#125; &#125; &#125; &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果不是默认的命名空间，则使用用户自定义的解析规则解析元素节点 </span></span><br><span class="line">        delegate.parseCustomElement(root); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解析完配置信息，最重要的是<a href="">生成BeanDefinition</a></p>
+<p>找到NamespaceHandlerSupport类的 parse 方法第6行代码： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> BeanDefinition <span class="title">parse</span><span class="params">(Element element, ParserContext parserContext)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// NamespaceHandler里面初始化了大量的BeanDefinitionParser来分别处理不同的自 定义标签 </span></span><br><span class="line">    <span class="comment">// 从指定的NamespaceHandler中，匹配到指定的BeanDefinitionParser </span></span><br><span class="line">    BeanDefinitionParser parser = findParserForElement(element, parserContext); </span><br><span class="line">    <span class="comment">// 调用指定自定义标签的解析器，完成具体解析工作 </span></span><br><span class="line">    <span class="keyword">return</span> (parser != <span class="keyword">null</span> ? parser.parse(element, parserContext) : <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="产生AOP代理类流程分析"><a href="#产生AOP代理类流程分析" class="headerlink" title="产生AOP代理类流程分析"></a>产生AOP代理类流程分析</h2><p>AspectJAwareAdvisorAutoProxyCreator的继承体系 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">|-BeanPostProcessor </span><br><span class="line">	postProcessBeforeInitialization---初始化之前调用 </span><br><span class="line">	postProcessAfterInitialization---初始化之后调用 </span><br><span class="line"></span><br><span class="line">|--InstantiationAwareBeanPostProcessor </span><br><span class="line">	postProcessBeforeInstantiation---实例化之前调用 </span><br><span class="line">	postProcessAfterInstantiation---实例化之后调用 </span><br><span class="line">	postProcessPropertyValues---后置处理属性值 </span><br><span class="line"></span><br><span class="line">|---SmartInstantiationAwareBeanPostProcessor </span><br><span class="line">	predictBeanType </span><br><span class="line">	determineCandidateConstructors </span><br><span class="line">	getEarlyBeanReference </span><br><span class="line"></span><br><span class="line">|----AbstractAutoProxyCreator </span><br><span class="line">	postProcessBeforeInitialization </span><br><span class="line">	postProcessAfterInitialization----AOP功能入口 		</span><br><span class="line">	postProcessBeforeInstantiation </span><br><span class="line">	postProcessAfterInstantiation </span><br><span class="line">	postProcessPropertyValues ... </span><br><span class="line">	</span><br><span class="line">|-----AbstractAdvisorAutoProxyCreator </span><br><span class="line">	getAdvicesAndAdvisorsForBean </span><br><span class="line">	findEligibleAdvisors </span><br><span class="line">	findCandidateAdvisors </span><br><span class="line">	findAdvisorsThatCanApply </span><br><span class="line">	</span><br><span class="line">|------AspectJAwareAdvisorAutoProxyCreator </span><br><span class="line">	extendAdvisors </span><br><span class="line">	sortAdvisors</span><br></pre></td></tr></table></figure>
+
+
+
+<p>AbstractAutoProxyCreator类的 postProcessAfterInitialization 方法第6行代码： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">postProcessAfterInitialization</span><span class="params">(<span class="meta">@Nullable</span> Object bean, String beanName)</span> <span class="keyword">throws</span> BeansException </span>&#123; </span><br><span class="line">    <span class="keyword">if</span> (bean != <span class="keyword">null</span>) &#123; </span><br><span class="line">        Object cacheKey = getCacheKey(bean.getClass(), beanName); </span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.earlyProxyReferences.contains(cacheKey)) &#123; <span class="comment">// 使用动态代理技术，产生代理对象 </span></span><br><span class="line">            <span class="keyword">return</span> wrapIfNecessary(bean, beanName, cacheKey); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> bean;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代理对象执行流程"><a href="#代理对象执行流程" class="headerlink" title="代理对象执行流程"></a>代理对象执行流程</h2><p>主要去针对Jdk产生的动态代理对象进行分析，其实就是去分析InvocationHandler的invoke方法</p>
+<p>入口：JdkDynamicAopProxy#invoke方法</p>
 
       
     </div>
