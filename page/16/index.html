@@ -140,7 +140,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/" data-id="cm6lrpfhn001jiddlhtm1gzss" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/02/13/database/mysql/mysql-6-MySQL%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%AF%87/" data-id="cm6lrrhnk000hnsdl8zu82ysc" class="article-share-link">Share</a>
       
       
     </footer>
@@ -290,7 +290,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/02/13/database/mysql/mysql-5-MySQL%E9%9B%86%E7%BE%A4%E7%AF%87/" data-id="cm6lrpfhn001fiddlb8dx3pln" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/02/13/database/mysql/mysql-5-MySQL%E9%9B%86%E7%BE%A4%E7%AF%87/" data-id="cm6lrrhnk000gnsdl8ptt4tza" class="article-share-link">Share</a>
       
       
     </footer>
@@ -332,7 +332,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/26/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker%20install%20mycat/" data-id="cm6lrpfhs003diddlch59br5s" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/26/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker%20install%20mycat/" data-id="cm6lrrhnz0046nsdlaan03olx" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
@@ -494,131 +494,9 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/16/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E6%8A%80%E6%9C%AF/myCat%20intro/" data-id="cm6lrpfi5007jiddl6xf701wr" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/16/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E6%8A%80%E6%9C%AF/myCat%20intro/" data-id="cm6lrrho20052nsdl6wlnboq0" class="article-share-link">Share</a>
       
       
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-database/redis/redis-5-消息模式与消息队列" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="article-date">
-  <time datetime="2021-01-14T07:59:03.000Z" itemprop="datePublished">2021-01-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">redis-5-主从复制与集群</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Redis-消息模式-了解，现在用Stream"><a href="#Redis-消息模式-了解，现在用Stream" class="headerlink" title="Redis 消息模式(了解，现在用Stream)"></a><strong>Redis</strong> <strong>消息模式(了解，现在用</strong>Stream)</h1><h2 id="队列模式"><a href="#队列模式" class="headerlink" title="队列模式"></a><strong>队列模式</strong></h2><p>使用<strong>list</strong>类型的<strong>lpush和rpop</strong>实现消息队列</p>
-<p><strong>注意事项:</strong></p>
-<p>消息接收方如果不知道队列中是否有消息，会一直发送rpop命令，如果这样的话，会每一次都建 立一次连接，这样显然不好。 可以使用<strong>brpop</strong>命令，它如果从队列中取不出来数据，会一直阻塞，在一定范围内没有取出则返回 null</p>
-<h2 id="发布订阅模式"><a href="#发布订阅模式" class="headerlink" title="发布订阅模式"></a><strong>发布订阅模式</strong></h2><p>略</p>
-<h1 id="Redis-Stream-重点-高性能消息队列"><a href="#Redis-Stream-重点-高性能消息队列" class="headerlink" title="Redis Stream(重点, 高性能消息队列)"></a><a target="_blank" rel="noopener" href="https://www.runoob.com/redis/redis-stream.html">Redis Stream(重点, 高性能消息队列)</a></h1><p>Redis 5.0 全新的数据类型:streams，官方把它定义为:以更抽象的方式建模日志的数据结构。Redis 的streams主要是一个append only的数据结构，至少在概念上它是一种在内存中表示的抽象数据类 型，只不过它们实现了更强大的操作，以克服日志文件本身的限制。</p>
-<blockquote>
-<p>如果你了解MQ，那么可以把streams当做基于内存的MQ。如果你还了解kafka，那么甚至可以把 streams当做基于内存的kafka。</p>
-</blockquote>
-<h2 id="与订阅模式比较"><a href="#与订阅模式比较" class="headerlink" title="与订阅模式比较"></a>与订阅模式比较</h2><p>另外，这个功能有点类似于redis以前的Pub/Sub，但是也有基本的不同:</p>
-<ul>
-<li><p>streams支持多个客户端(消费者)等待数据(Linux环境开多个窗口执行XREAD即可模拟)，并 且每个客户端得到的是完全相同的数据。 </p>
-</li>
-<li><p><a href="Pub/Sub%E6%98%AF%E5%8F%91%E9%80%81%E5%BF%98%E8%AE%B0%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%B8%8D%E5%AD%98%E5%82%A8%E4%BB%BB%E4%BD%95%E6%95%B0%E6%8D%AE">Pub/Sub是发送忘记的方式，并且不存储任何数据</a>; 而streams模式下，所有消息被无限期追加在 streams中，除非用于显示执行删除(XDEL) 。 <!--像不像Kafka，不过kafka存磁盘，Redis存缓存--></p>
-</li>
-<li><p>streams的Consumer Groups也是Pub/Sub无法实现的控制方式。 </p>
-</li>
-</ul>
-<h2 id="streams数据结构"><a href="#streams数据结构" class="headerlink" title="streams数据结构"></a>streams数据结构</h2><img src="https://www.runoob.com/wp-content/uploads/2020/09/en-us_image_0167982791.png" alt="img"  />
-
-<p>它主要有消息、生产者、消费者、消费组4组成</p>
-<p>streams数据结构本身非常简单，但是streams依然是Redis到目前为止最复杂的类型，其原因是实现的 一些额外的功能:一系列的阻塞操作允许消费者等待生产者加入到streams的新数据。另外还有一个称 为Consumer Groups的概念，Consumer Group概念最先由kafka提出，Redis有一个类似实现，和 kafka的Consumer Groups的目的是一样的:<a href="">允许一组客户端协调消费相同的信息流</a>!</p>
-<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><h3 id="消息队列相关命令："><a href="#消息队列相关命令：" class="headerlink" title="消息队列相关命令："></a><strong>消息队列相关命令：</strong></h3><ul>
-<li><p><strong>XADD</strong> - 添加消息到末尾</p>
-<ul>
-<li><strong>key</strong> ：队列名称，如果不存在就创建</li>
-<li><strong>ID</strong> ：消息 id，我们使用 * 表示由 redis 生成，可以自定义，但是要自己保证递增性。</li>
-<li><strong>field value</strong> ： 记录。</li>
-</ul>
-</li>
-<li><p><strong>XTRIM</strong> - 对流进行修剪，限制长度</p>
-</li>
-<li><p><strong>XDEL</strong> - 删除消息</p>
-</li>
-<li><p><strong>XLEN</strong> - 获取流包含的元素数量，即消息长度</p>
-</li>
-<li><p><strong>XRANGE</strong> - 获取消息列表，会自动过滤已经删除的消息</p>
-</li>
-<li><p><strong>XREVRANGE</strong> - 反向获取消息列表，ID 从大到小</p>
-</li>
-<li><p><strong>XREAD</strong> - 以阻塞或非阻塞方式获取消息列表</p>
-<ul>
-<li><strong>count</strong> ：数量</li>
-<li><strong>milliseconds</strong> ：可选，阻塞毫秒数，没有设置就是非阻塞模式</li>
-<li><strong>key</strong> ：队列名</li>
-<li><strong>id</strong> ：消息 ID</li>
-</ul>
-</li>
-</ul>
-<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><p><a href="">客户端1：发布数据</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">发布的第2条记录</span></span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message apple</span><br><span class="line">&quot;1589994652300-0&quot;</span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message orange</span><br><span class="line">&quot;1589994679942-0&quot;</span><br></pre></td></tr></table></figure>
-
-<p><a href="">客户端2：读数据</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; xrange mystream - +</span><br><span class="line">1) 1) &quot;1589994652300-0&quot;</span><br><span class="line">   2) 1) &quot;message&quot;</span><br><span class="line">      2) &quot;apple&quot;</span><br><span class="line">2) 1) &quot;1589994679942-0&quot;</span><br><span class="line">   2) 1) &quot;message&quot;</span><br><span class="line">   		2) &quot;orange&quot;</span><br></pre></td></tr></table></figure>
-
-<p>也可以阻塞读，这样必须等待客户端1发布数据</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xread block 0 streams mystream $</span><br></pre></td></tr></table></figure>
-
-<p>现在<a href="">客户端1</a>发布数据</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">发布的第3条记录</span></span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message strawberry  </span><br></pre></td></tr></table></figure>
-
-<p><a href="">客户端3:</a></p>
-<p>创建消费者组</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; xgroup create mustream mygroup1 0</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; xgroup create mustream mygroup2 0</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
-
-<p>通过消费组读取消息</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">消费者组zhange消费了前2个数据</span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup1 zhange count 2 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589994652300-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;apple&quot;</span><br><span class="line">      2) 1) &quot;1589994679942-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;orange&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash">消费者组tuge消费了前2个数据</span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup1 tuge count 2 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589995171242-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;strawberry&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash">因为消费者组tuge消费了前2个数据，现在只能消费第3个数据     </span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup2 tuge count 1 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589995171242-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">						2) &quot;apple&quot;</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="Redis-Pipeline（重要的优化技术）"><a href="#Redis-Pipeline（重要的优化技术）" class="headerlink" title="Redis Pipeline（重要的优化技术）"></a><strong>Redis Pipeline</strong>（重要的优化技术）</h1><p>Pipeline (管道技术) 是客户端提供的一种批处理技术 可以批量执行一组指令，一次性返回全部结果，</p>
-<p>可以减少频繁的请求应答</p>
-<ul>
-<li>使用pipeline技术</li>
-</ul>
-<img src="https://img-blog.csdnimg.cn/20181122105251930.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3cxbGd5,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-<ul>
-<li>未使用pipeline技术<img src="https://img-blog.csdnimg.cn/20181122105343203.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3cxbGd5,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
-
-
-
-</li>
-</ul>
-<h1 id="Redis-LUA脚本（很简单）"><a href="#Redis-LUA脚本（很简单）" class="headerlink" title="Redis LUA脚本（很简单）"></a><a target="_blank" rel="noopener" href="https://www.runoob.com/redis/redis-scripting.html">Redis LUA脚本</a>（很简单）</h1><p>常用于秒杀系统</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" data-id="cm6lrpfhj000fiddl6tlgghms" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cluster/" rel="tag">cluster</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
-
     </footer>
   </div>
   
@@ -804,10 +682,132 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/14/database/redis/redis-4-%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E4%B8%8E%E9%9B%86%E7%BE%A4/" data-id="cm6lrpfhj000giddlel6eb7sw" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/14/database/redis/redis-4-%E4%B8%BB%E4%BB%8E%E4%B8%8E%E5%93%A8%E5%85%B5%E4%B8%8E%E9%9B%86%E7%BE%A4/" data-id="cm6lrrhnm000vnsdlbot49dcb" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-database/redis/redis-5-消息模式与消息队列" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="article-date">
+  <time datetime="2021-01-14T07:59:03.000Z" itemprop="datePublished">2021-01-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">redis-5-主从复制与集群</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Redis-消息模式-了解，现在用Stream"><a href="#Redis-消息模式-了解，现在用Stream" class="headerlink" title="Redis 消息模式(了解，现在用Stream)"></a><strong>Redis</strong> <strong>消息模式(了解，现在用</strong>Stream)</h1><h2 id="队列模式"><a href="#队列模式" class="headerlink" title="队列模式"></a><strong>队列模式</strong></h2><p>使用<strong>list</strong>类型的<strong>lpush和rpop</strong>实现消息队列</p>
+<p><strong>注意事项:</strong></p>
+<p>消息接收方如果不知道队列中是否有消息，会一直发送rpop命令，如果这样的话，会每一次都建 立一次连接，这样显然不好。 可以使用<strong>brpop</strong>命令，它如果从队列中取不出来数据，会一直阻塞，在一定范围内没有取出则返回 null</p>
+<h2 id="发布订阅模式"><a href="#发布订阅模式" class="headerlink" title="发布订阅模式"></a><strong>发布订阅模式</strong></h2><p>略</p>
+<h1 id="Redis-Stream-重点-高性能消息队列"><a href="#Redis-Stream-重点-高性能消息队列" class="headerlink" title="Redis Stream(重点, 高性能消息队列)"></a><a target="_blank" rel="noopener" href="https://www.runoob.com/redis/redis-stream.html">Redis Stream(重点, 高性能消息队列)</a></h1><p>Redis 5.0 全新的数据类型:streams，官方把它定义为:以更抽象的方式建模日志的数据结构。Redis 的streams主要是一个append only的数据结构，至少在概念上它是一种在内存中表示的抽象数据类 型，只不过它们实现了更强大的操作，以克服日志文件本身的限制。</p>
+<blockquote>
+<p>如果你了解MQ，那么可以把streams当做基于内存的MQ。如果你还了解kafka，那么甚至可以把 streams当做基于内存的kafka。</p>
+</blockquote>
+<h2 id="与订阅模式比较"><a href="#与订阅模式比较" class="headerlink" title="与订阅模式比较"></a>与订阅模式比较</h2><p>另外，这个功能有点类似于redis以前的Pub/Sub，但是也有基本的不同:</p>
+<ul>
+<li><p>streams支持多个客户端(消费者)等待数据(Linux环境开多个窗口执行XREAD即可模拟)，并 且每个客户端得到的是完全相同的数据。 </p>
+</li>
+<li><p><a href="Pub/Sub%E6%98%AF%E5%8F%91%E9%80%81%E5%BF%98%E8%AE%B0%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%B8%8D%E5%AD%98%E5%82%A8%E4%BB%BB%E4%BD%95%E6%95%B0%E6%8D%AE">Pub/Sub是发送忘记的方式，并且不存储任何数据</a>; 而streams模式下，所有消息被无限期追加在 streams中，除非用于显示执行删除(XDEL) 。 <!--像不像Kafka，不过kafka存磁盘，Redis存缓存--></p>
+</li>
+<li><p>streams的Consumer Groups也是Pub/Sub无法实现的控制方式。 </p>
+</li>
+</ul>
+<h2 id="streams数据结构"><a href="#streams数据结构" class="headerlink" title="streams数据结构"></a>streams数据结构</h2><img src="https://www.runoob.com/wp-content/uploads/2020/09/en-us_image_0167982791.png" alt="img"  />
+
+<p>它主要有消息、生产者、消费者、消费组4组成</p>
+<p>streams数据结构本身非常简单，但是streams依然是Redis到目前为止最复杂的类型，其原因是实现的 一些额外的功能:一系列的阻塞操作允许消费者等待生产者加入到streams的新数据。另外还有一个称 为Consumer Groups的概念，Consumer Group概念最先由kafka提出，Redis有一个类似实现，和 kafka的Consumer Groups的目的是一样的:<a href="">允许一组客户端协调消费相同的信息流</a>!</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><h3 id="消息队列相关命令："><a href="#消息队列相关命令：" class="headerlink" title="消息队列相关命令："></a><strong>消息队列相关命令：</strong></h3><ul>
+<li><p><strong>XADD</strong> - 添加消息到末尾</p>
+<ul>
+<li><strong>key</strong> ：队列名称，如果不存在就创建</li>
+<li><strong>ID</strong> ：消息 id，我们使用 * 表示由 redis 生成，可以自定义，但是要自己保证递增性。</li>
+<li><strong>field value</strong> ： 记录。</li>
+</ul>
+</li>
+<li><p><strong>XTRIM</strong> - 对流进行修剪，限制长度</p>
+</li>
+<li><p><strong>XDEL</strong> - 删除消息</p>
+</li>
+<li><p><strong>XLEN</strong> - 获取流包含的元素数量，即消息长度</p>
+</li>
+<li><p><strong>XRANGE</strong> - 获取消息列表，会自动过滤已经删除的消息</p>
+</li>
+<li><p><strong>XREVRANGE</strong> - 反向获取消息列表，ID 从大到小</p>
+</li>
+<li><p><strong>XREAD</strong> - 以阻塞或非阻塞方式获取消息列表</p>
+<ul>
+<li><strong>count</strong> ：数量</li>
+<li><strong>milliseconds</strong> ：可选，阻塞毫秒数，没有设置就是非阻塞模式</li>
+<li><strong>key</strong> ：队列名</li>
+<li><strong>id</strong> ：消息 ID</li>
+</ul>
+</li>
+</ul>
+<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><p><a href="">客户端1：发布数据</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">发布的第2条记录</span></span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message apple</span><br><span class="line">&quot;1589994652300-0&quot;</span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message orange</span><br><span class="line">&quot;1589994679942-0&quot;</span><br></pre></td></tr></table></figure>
+
+<p><a href="">客户端2：读数据</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; xrange mystream - +</span><br><span class="line">1) 1) &quot;1589994652300-0&quot;</span><br><span class="line">   2) 1) &quot;message&quot;</span><br><span class="line">      2) &quot;apple&quot;</span><br><span class="line">2) 1) &quot;1589994679942-0&quot;</span><br><span class="line">   2) 1) &quot;message&quot;</span><br><span class="line">   		2) &quot;orange&quot;</span><br></pre></td></tr></table></figure>
+
+<p>也可以阻塞读，这样必须等待客户端1发布数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xread block 0 streams mystream $</span><br></pre></td></tr></table></figure>
+
+<p>现在<a href="">客户端1</a>发布数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">发布的第3条记录</span></span><br><span class="line">127.0.0.1:6379&gt; xadd mystream * message strawberry  </span><br></pre></td></tr></table></figure>
+
+<p><a href="">客户端3:</a></p>
+<p>创建消费者组</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; xgroup create mustream mygroup1 0</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; xgroup create mustream mygroup2 0</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+
+<p>通过消费组读取消息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">消费者组zhange消费了前2个数据</span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup1 zhange count 2 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589994652300-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;apple&quot;</span><br><span class="line">      2) 1) &quot;1589994679942-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;orange&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash">消费者组tuge消费了前2个数据</span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup1 tuge count 2 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589995171242-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">            2) &quot;strawberry&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash">因为消费者组tuge消费了前2个数据，现在只能消费第3个数据     </span></span><br><span class="line">127.0.0.1:6379&gt; xreadgroup group mugroup2 tuge count 1 streams mystream &gt;</span><br><span class="line">1) 1) &quot;mystream&quot;</span><br><span class="line">   2) 1) 1) &quot;1589995171242-0&quot;</span><br><span class="line">         2) 1) &quot;message&quot;</span><br><span class="line">						2) &quot;apple&quot;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Redis-Pipeline（重要的优化技术）"><a href="#Redis-Pipeline（重要的优化技术）" class="headerlink" title="Redis Pipeline（重要的优化技术）"></a><strong>Redis Pipeline</strong>（重要的优化技术）</h1><p>Pipeline (管道技术) 是客户端提供的一种批处理技术 可以批量执行一组指令，一次性返回全部结果，</p>
+<p>可以减少频繁的请求应答</p>
+<ul>
+<li>使用pipeline技术</li>
+</ul>
+<img src="https://img-blog.csdnimg.cn/20181122105251930.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3cxbGd5,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
+
+<ul>
+<li>未使用pipeline技术<img src="https://img-blog.csdnimg.cn/20181122105343203.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3cxbGd5,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" style="zoom:50%;" />
+
+
+
+</li>
+</ul>
+<h1 id="Redis-LUA脚本（很简单）"><a href="#Redis-LUA脚本（很简单）" class="headerlink" title="Redis LUA脚本（很简单）"></a><a target="_blank" rel="noopener" href="https://www.runoob.com/redis/redis-scripting.html">Redis LUA脚本</a>（很简单）</h1><p>常用于秒杀系统</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/01/14/database/redis/redis-5-%E6%B6%88%E6%81%AF%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" data-id="cm6lrrhnm000ynsdl9d8c2hi9" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cluster/" rel="tag">cluster</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
 
     </footer>
   </div>
@@ -954,7 +954,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/14/database/redis/redis-3-%E4%BA%8B%E5%8A%A1%E4%B8%8E%E6%8C%81%E4%B9%85%E5%8C%96/" data-id="cm6lrpfhm0015iddl938je903" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/14/database/redis/redis-3-%E4%BA%8B%E5%8A%A1%E4%B8%8E%E6%8C%81%E4%B9%85%E5%8C%96/" data-id="cm6lrrhnn0016nsdl6v7dc6ik" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
@@ -1306,77 +1306,10 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/14/database/redis/redis-2-%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%9A%84%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81/" data-id="cm6lrpfie00a3iddlejxog2tb" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/14/database/redis/redis-2-%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%9A%84%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81/" data-id="cm6lrrhom00a3nsdlalvq0vhr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/" rel="tag">redis</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-虚拟化技术/docker/docker-maven-java" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" class="article-date">
-  <time datetime="2021-01-11T03:01:27.000Z" itemprop="datePublished">2021-01-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/">docker-maven-build-java</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Case1-使用基础镜像maven构建jar包"><a href="#Case1-使用基础镜像maven构建jar包" class="headerlink" title="Case1:使用基础镜像maven构建jar包"></a>Case1:使用基础镜像maven构建jar包</h1><h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
-<li>宿主机没有maven和jdk环境</li>
-<li>java项目是spring-boot,需要使用spring-boot-maven插件，打成可执行的jar包</li>
-<li>准备同时含有maven和jdk的docker镜像。注意：spring的pom.xml文件中一般会配置JDK的版本，这个版本号要和Maven镜像中的JDK版本一致，否则编译期间会报错；</li>
-</ul>
-<h2 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h2><p>跳过宿主机，使用具有Maven和JDK环境的docker容器，构建可执行jar包</p>
-<p>注意：docker的仓库maven官方也有相关文档：<a target="_blank" rel="noopener" href="https://hub.docker.com/_/maven">https://hub.docker.com/_/maven</a></p>
-<h4 id="Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的"><a href="#Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的" class="headerlink" title="Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;"></a>Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;</h4><img src="/Users/qifei/Documents/blog/source/_posts/虚拟化技术/docker/maven镜像.png" alt="image-20221022170407078" style="zoom:25%;" />
-
-<p>下载images</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull maven:3.3-jdk-8</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令"><a href="#Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令" class="headerlink" title="Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令"></a>Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name mvn001 -v <span class="string">&quot;<span class="variable">$PWD</span>&quot;</span>:/usr/src/mymaven  -w /usr/src/mymaven maven:3.3-jdk-8 mvn clean package -U -DskipTests</span><br></pre></td></tr></table></figure>
-
-<p>以上的命令中有下面几处需要注意：</p>
-<ol>
-<li>–name mvn001：表示容器名称为mvn001</li>
-<li>-v “$PWD”:/usr/src/mymaven：表示将当前 “$PWD”目录映射到Docker容器的/usr/src/mymaven目录，也就是Spring 工程的目录</li>
-<li>-w /usr/src/mymaven maven:maven:3.3-jdk-8：表示容器的工作目录为/usr/src/mymaven maven:maven:3.3-jdk-8</li>
-<li>mvn clean package -U -DskipTests：表示启动容器后在工作目录下执行的命令</li>
-</ol>
-<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85ing.png" alt="image-20221022184532841"></p>
-<p>可以看到 buiding spring boot项目的jar包 </p>
-<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85done.png" alt="image-20221022191550102"></p>
-<p>build jar包 done，目录就是$PWD</p>
-<h4 id="Step3-执行jar包"><a href="#Step3-执行jar包" class="headerlink" title="Step3: 执行jar包"></a>Step3: 执行jar包</h4><h1 id="case2-使用容器化环境允许java程序"><a href="#case2-使用容器化环境允许java程序" class="headerlink" title="case2:使用容器化环境允许java程序"></a>case2:使用容器化环境允许java程序</h1><h2 id="技术方案-1"><a href="#技术方案-1" class="headerlink" title="技术方案"></a>技术方案</h2><p>Step1：build images 包含jar包</p>
-<p>Step2: 在container中运行jar包</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" data-id="cm6lrpfhs0039iddlher67pnk" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
 
     </footer>
   </div>
@@ -1450,7 +1383,74 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker%20install%20redis/" data-id="cm6lrpfhs003aiddlc9dhhycp" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker%20install%20redis/" data-id="cm6lrrhnz0049nsdl3kth0sfa" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-虚拟化技术/docker/docker-maven-java" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" class="article-date">
+  <time datetime="2021-01-11T03:01:27.000Z" itemprop="datePublished">2021-01-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/">docker-maven-build-java</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Case1-使用基础镜像maven构建jar包"><a href="#Case1-使用基础镜像maven构建jar包" class="headerlink" title="Case1:使用基础镜像maven构建jar包"></a>Case1:使用基础镜像maven构建jar包</h1><h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
+<li>宿主机没有maven和jdk环境</li>
+<li>java项目是spring-boot,需要使用spring-boot-maven插件，打成可执行的jar包</li>
+<li>准备同时含有maven和jdk的docker镜像。注意：spring的pom.xml文件中一般会配置JDK的版本，这个版本号要和Maven镜像中的JDK版本一致，否则编译期间会报错；</li>
+</ul>
+<h2 id="技术方案"><a href="#技术方案" class="headerlink" title="技术方案"></a>技术方案</h2><p>跳过宿主机，使用具有Maven和JDK环境的docker容器，构建可执行jar包</p>
+<p>注意：docker的仓库maven官方也有相关文档：<a target="_blank" rel="noopener" href="https://hub.docker.com/_/maven">https://hub.docker.com/_/maven</a></p>
+<h4 id="Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的"><a href="#Step1-在docker-images开源仓库，找到同时含有maven环境和jdk环境的" class="headerlink" title="Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;"></a>Step1: 在docker images开源仓库，找到同时含有maven环境和jdk环境的;</h4><img src="/Users/qifei/Documents/blog/source/_posts/虚拟化技术/docker/maven镜像.png" alt="image-20221022170407078" style="zoom:25%;" />
+
+<p>下载images</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull maven:3.3-jdk-8</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令"><a href="#Step2-启动一个基于step1中的镜像的容器，并且执行mvn-build命令" class="headerlink" title="Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令"></a>Step2: 启动一个基于step1中的镜像的容器，并且执行mvn build命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name mvn001 -v <span class="string">&quot;<span class="variable">$PWD</span>&quot;</span>:/usr/src/mymaven  -w /usr/src/mymaven maven:3.3-jdk-8 mvn clean package -U -DskipTests</span><br></pre></td></tr></table></figure>
+
+<p>以上的命令中有下面几处需要注意：</p>
+<ol>
+<li>–name mvn001：表示容器名称为mvn001</li>
+<li>-v “$PWD”:/usr/src/mymaven：表示将当前 “$PWD”目录映射到Docker容器的/usr/src/mymaven目录，也就是Spring 工程的目录</li>
+<li>-w /usr/src/mymaven maven:maven:3.3-jdk-8：表示容器的工作目录为/usr/src/mymaven maven:maven:3.3-jdk-8</li>
+<li>mvn clean package -U -DskipTests：表示启动容器后在工作目录下执行的命令</li>
+</ol>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85ing.png" alt="image-20221022184532841"></p>
+<p>可以看到 buiding spring boot项目的jar包 </p>
+<p><img src="/Users/qifei/Documents/blog/source/_posts/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/%E6%9E%84%E5%BB%BAjar%E5%8C%85done.png" alt="image-20221022191550102"></p>
+<p>build jar包 done，目录就是$PWD</p>
+<h4 id="Step3-执行jar包"><a href="#Step3-执行jar包" class="headerlink" title="Step3: 执行jar包"></a>Step3: 执行jar包</h4><h1 id="case2-使用容器化环境允许java程序"><a href="#case2-使用容器化环境允许java程序" class="headerlink" title="case2:使用容器化环境允许java程序"></a>case2:使用容器化环境允许java程序</h1><h2 id="技术方案-1"><a href="#技术方案-1" class="headerlink" title="技术方案"></a>技术方案</h2><p>Step1：build images 包含jar包</p>
+<p>Step2: 在container中运行jar包</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/01/11/%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF/docker/docker-maven-java/" data-id="cm6lrrhnz004bnsdl5z2n7iel" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
