@@ -166,7 +166,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/" data-id="cm6lrrho1004znsdlh92dhsx3" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/09/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/%E4%B8%80%E8%87%B4%E6%80%A7/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E4%B8%8EMQ%E6%B6%88%E6%81%AF%E5%8F%91%E5%B8%83%E4%B8%80%E8%87%B4%E6%80%A7/" data-id="cm6lsyz5k0059k2dl04hs7k66" class="article-share-link">Share</a>
       
       
     </footer>
@@ -265,56 +265,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/" data-id="cm6lrrho60069nsdl6qpx66a1" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-编程语言/Java/其他工具类jar包/apache-csv-upload并读写csc" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/" class="article-date">
-  <time datetime="2021-04-07T00:46:02.000Z" itemprop="datePublished">2021-04-07</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/">apache-poi-upload并读写xlsx等文件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="spring-boot上传CSV文件"><a href="#spring-boot上传CSV文件" class="headerlink" title="spring boot上传CSV文件"></a>spring boot上传CSV文件</h2><h3 id="pom文件"><a href="#pom文件" class="headerlink" title="pom文件"></a>pom文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.apache.commons&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;commons-csv&lt;&#x2F;artifactId&gt;</span><br><span class="line">	&lt;version&gt;1.8&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="Spring-boot上传xlsx文件"><a href="#Spring-boot上传xlsx文件" class="headerlink" title="Spring boot上传xlsx文件"></a>Spring boot上传xlsx文件</h2><h3 id="pom文件-1"><a href="#pom文件-1" class="headerlink" title="pom文件"></a>pom文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.apache.commons&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;commons-csv&lt;&#x2F;artifactId&gt;</span><br><span class="line">	&lt;version&gt;1.8&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="读写逻辑类"><a href="#读写逻辑类" class="headerlink" title="读写逻辑类"></a>读写逻辑类</h3><ul>
-<li>如果想从指定line读取， CSVParser csvParser的构造方法可以传入lineNum参数</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVFormat;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVParser;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVRecord;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.multipart.MultipartFile;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.bezkoder.spring.files.csv.model.Tutorial;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVHelper</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> String TYPE = <span class="string">&quot;text/csv&quot;</span>;</span><br><span class="line">  <span class="keyword">static</span> String[] HEADERs = &#123; <span class="string">&quot;Id&quot;</span>, <span class="string">&quot;Title&quot;</span>, <span class="string">&quot;Description&quot;</span>, <span class="string">&quot;Published&quot;</span> &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">hasCSVFormat</span><span class="params">(MultipartFile file)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!TYPE.equals(file.getContentType())) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Tutorial&gt; <span class="title">csvToTutorials</span><span class="params">(InputStream is)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      BufferedReader fileReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(is, <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">        </span><br><span class="line">      CSVParser csvParser = <span class="keyword">new</span> CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());</span><br><span class="line">    </span><br><span class="line">      List&lt;Tutorial&gt; tutorials = <span class="keyword">new</span> ArrayList&lt;Tutorial&gt;();</span><br><span class="line"></span><br><span class="line">      Iterable&lt;CSVRecord&gt; csvRecords = csvParser.getRecords();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">for</span> (CSVRecord csvRecord : csvRecords) &#123;</span><br><span class="line">        Tutorial tutorial = <span class="keyword">new</span> Tutorial(</span><br><span class="line">              Long.parseLong(csvRecord.get(<span class="string">&quot;Id&quot;</span>)),</span><br><span class="line">              csvRecord.get(<span class="string">&quot;Title&quot;</span>),</span><br><span class="line">              csvRecord.get(<span class="string">&quot;Description&quot;</span>),</span><br><span class="line">              Boolean.parseBoolean(csvRecord.get(<span class="string">&quot;Published&quot;</span>))</span><br><span class="line">            );</span><br><span class="line"></span><br><span class="line">        tutorials.add(tutorial);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> tutorials;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;fail to parse CSV file: &quot;</span> + e.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="MVC架构"><a href="#MVC架构" class="headerlink" title="MVC架构"></a>MVC架构</h2><h3 id="service类"><a href="#service类" class="headerlink" title="service类"></a>service类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">save</span><span class="params">(MultipartFile file)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      List&lt;Tutorial&gt; tutorials = CSVHelper.csvToTutorials(file.getInputStream());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;fail to store csv data: &quot;</span> + e.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="上传csv文件"><a href="#上传csv文件" class="headerlink" title="上传csv文件"></a>上传csv文件</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/api/csv&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Autowired</span></span><br><span class="line">  CSVService fileService;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@PostMapping(&quot;/upload&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">uploadFile</span><span class="params">(<span class="meta">@RequestParam(&quot;file&quot;)</span> MultipartFile file)</span> </span>&#123;</span><br><span class="line">    String message = <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (CSVHelper.hasCSVFormat(file)) &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        fileService.save(file);</span><br><span class="line">        message = <span class="string">&quot;Uploaded the file successfully: &quot;</span> + file.getOriginalFilename();</span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        message = <span class="string">&quot;Could not upload the file: &quot;</span> + file.getOriginalFilename() + <span class="string">&quot;!&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> message</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    message = <span class="string">&quot;Please upload a csv file!&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> message;</span><br><span class="line">  </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/" data-id="cm6lrrhog008wnsdl8jtcbyvc" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-%E7%BA%BF%E7%A8%8B%E4%B8%8D%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/" data-id="cm6lsyz5n006hk2dl45nl5l4r" class="article-share-link">Share</a>
       
       
     </footer>
@@ -363,7 +314,56 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-poi-upload%E5%B9%B6%E8%AF%BB%E5%86%99xlsx/" data-id="cm6lrrhog008ynsdl0na46tbo" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-poi-upload%E5%B9%B6%E8%AF%BB%E5%86%99xlsx/" data-id="cm6lsyz5u007ok2dlhbj3hr85" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-编程语言/Java/其他工具类jar包/apache-csv-upload并读写csc" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/" class="article-date">
+  <time datetime="2021-04-07T00:46:02.000Z" itemprop="datePublished">2021-04-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/">apache-poi-upload并读写xlsx等文件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="spring-boot上传CSV文件"><a href="#spring-boot上传CSV文件" class="headerlink" title="spring boot上传CSV文件"></a>spring boot上传CSV文件</h2><h3 id="pom文件"><a href="#pom文件" class="headerlink" title="pom文件"></a>pom文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.apache.commons&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;commons-csv&lt;&#x2F;artifactId&gt;</span><br><span class="line">	&lt;version&gt;1.8&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Spring-boot上传xlsx文件"><a href="#Spring-boot上传xlsx文件" class="headerlink" title="Spring boot上传xlsx文件"></a>Spring boot上传xlsx文件</h2><h3 id="pom文件-1"><a href="#pom文件-1" class="headerlink" title="pom文件"></a>pom文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">	&lt;groupId&gt;org.apache.commons&lt;&#x2F;groupId&gt;</span><br><span class="line">	&lt;artifactId&gt;commons-csv&lt;&#x2F;artifactId&gt;</span><br><span class="line">	&lt;version&gt;1.8&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="读写逻辑类"><a href="#读写逻辑类" class="headerlink" title="读写逻辑类"></a>读写逻辑类</h3><ul>
+<li>如果想从指定line读取， CSVParser csvParser的构造方法可以传入lineNum参数</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVFormat;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVParser;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.csv.CSVRecord;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.multipart.MultipartFile;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.bezkoder.spring.files.csv.model.Tutorial;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVHelper</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> String TYPE = <span class="string">&quot;text/csv&quot;</span>;</span><br><span class="line">  <span class="keyword">static</span> String[] HEADERs = &#123; <span class="string">&quot;Id&quot;</span>, <span class="string">&quot;Title&quot;</span>, <span class="string">&quot;Description&quot;</span>, <span class="string">&quot;Published&quot;</span> &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">hasCSVFormat</span><span class="params">(MultipartFile file)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!TYPE.equals(file.getContentType())) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Tutorial&gt; <span class="title">csvToTutorials</span><span class="params">(InputStream is)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      BufferedReader fileReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(is, <span class="string">&quot;UTF-8&quot;</span>));</span><br><span class="line">        </span><br><span class="line">      CSVParser csvParser = <span class="keyword">new</span> CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());</span><br><span class="line">    </span><br><span class="line">      List&lt;Tutorial&gt; tutorials = <span class="keyword">new</span> ArrayList&lt;Tutorial&gt;();</span><br><span class="line"></span><br><span class="line">      Iterable&lt;CSVRecord&gt; csvRecords = csvParser.getRecords();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">for</span> (CSVRecord csvRecord : csvRecords) &#123;</span><br><span class="line">        Tutorial tutorial = <span class="keyword">new</span> Tutorial(</span><br><span class="line">              Long.parseLong(csvRecord.get(<span class="string">&quot;Id&quot;</span>)),</span><br><span class="line">              csvRecord.get(<span class="string">&quot;Title&quot;</span>),</span><br><span class="line">              csvRecord.get(<span class="string">&quot;Description&quot;</span>),</span><br><span class="line">              Boolean.parseBoolean(csvRecord.get(<span class="string">&quot;Published&quot;</span>))</span><br><span class="line">            );</span><br><span class="line"></span><br><span class="line">        tutorials.add(tutorial);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> tutorials;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;fail to parse CSV file: &quot;</span> + e.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="MVC架构"><a href="#MVC架构" class="headerlink" title="MVC架构"></a>MVC架构</h2><h3 id="service类"><a href="#service类" class="headerlink" title="service类"></a>service类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">save</span><span class="params">(MultipartFile file)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      List&lt;Tutorial&gt; tutorials = CSVHelper.csvToTutorials(file.getInputStream());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;fail to store csv data: &quot;</span> + e.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="上传csv文件"><a href="#上传csv文件" class="headerlink" title="上传csv文件"></a>上传csv文件</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/api/csv&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CSVController</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Autowired</span></span><br><span class="line">  CSVService fileService;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@PostMapping(&quot;/upload&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">uploadFile</span><span class="params">(<span class="meta">@RequestParam(&quot;file&quot;)</span> MultipartFile file)</span> </span>&#123;</span><br><span class="line">    String message = <span class="string">&quot;&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (CSVHelper.hasCSVFormat(file)) &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        fileService.save(file);</span><br><span class="line">        message = <span class="string">&quot;Uploaded the file successfully: &quot;</span> + file.getOriginalFilename();</span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        message = <span class="string">&quot;Could not upload the file: &quot;</span> + file.getOriginalFilename() + <span class="string">&quot;!&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> message</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    message = <span class="string">&quot;Please upload a csv file!&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> message;</span><br><span class="line">  </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/04/07/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E5%85%B6%E4%BB%96%E5%B7%A5%E5%85%B7%E7%B1%BBjar%E5%8C%85/apache-csv-upload%E5%B9%B6%E8%AF%BB%E5%86%99csc/" data-id="cm6lsyz5v007rk2dlh3ci253e" class="article-share-link">Share</a>
       
       
     </footer>
@@ -401,7 +401,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/03/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-header-%E9%A1%B5%E9%9D%A2%E5%8F%98%E6%9B%B4%E6%8F%90%E9%86%92%E7%B3%BB%E7%BB%9F/" data-id="cm6lrrhnx003mnsdlf4a4bmre" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/03/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/http%E5%8D%8F%E8%AE%AE/http-header-%E9%A1%B5%E9%9D%A2%E5%8F%98%E6%9B%B4%E6%8F%90%E9%86%92%E7%B3%BB%E7%BB%9F/" data-id="cm6lsyz5f003vk2dldofb015m" class="article-share-link">Share</a>
       
       
     </footer>
@@ -478,7 +478,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/" data-id="cm6lrrhof0088nsdladlldj9p" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/02/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/Ribbon%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E5%8F%8A%E5%8E%9F%E7%90%86/" data-id="cm6lsyz5p007fk2dl8oyt1y1k" class="article-share-link">Share</a>
       
       
     </footer>
@@ -574,7 +574,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/Kafka-04-%E9%9B%B6copy%E6%8A%80%E6%9C%AF/" data-id="cm6lrrho20056nsdlexfp52pv" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/01/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/Kafka-04-%E9%9B%B6copy%E6%8A%80%E6%9C%AF/" data-id="cm6lsyz5g004bk2dledmj73hr" class="article-share-link">Share</a>
       
       
     </footer>
@@ -648,7 +648,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-Date/" data-id="cm6lrrho6005znsdl7zv3hbrh" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-Date/" data-id="cm6lsyz5m0062k2dlbo0icmux" class="article-share-link">Share</a>
       
       
     </footer>
@@ -748,7 +748,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-CAS%E4%B8%8E%E8%87%AA%E6%97%8B%E9%94%81/" data-id="cm6lrrho4005jnsdl7eep4ohl" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/04/01/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-JUC-CAS%E4%B8%8E%E8%87%AA%E6%97%8B%E9%94%81/" data-id="cm6lsyz5l005hk2dlg2f1g62n" class="article-share-link">Share</a>
       
       
     </footer>
@@ -790,7 +790,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/03/31/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81-02-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%9B%86%E7%BE%A4%E5%8F%AA%E6%89%A7%E8%A1%8C1%E6%AC%A1/" data-id="cm6lrrhnp001snsdl6fcxe6j5" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/03/31/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%94%81/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81-02-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E9%9B%86%E7%BE%A4%E5%8F%AA%E6%89%A7%E8%A1%8C1%E6%AC%A1/" data-id="cm6lsyz560016k2dlfc689jkp" class="article-share-link">Share</a>
       
       
     </footer>
