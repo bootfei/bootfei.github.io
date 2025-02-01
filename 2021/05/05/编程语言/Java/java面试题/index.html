@@ -1,29 +1,12 @@
 <!DOCTYPE html>
-<html lang="en,cn">
+<html>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.2.0">
+  <meta charset="utf-8">
+  
 
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
-
-<script class="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
-  </script>
-
+  
+  <title>解决Jar包依赖冲突 | BootFei&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="Java的多线程同步运行2个线程轮流打印AB-&gt;AB方法1：使用wait和notify1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253public static void main( String[] args )   &amp;#123;       S">
 <meta property="og:type" content="article">
 <meta property="og:title" content="解决Jar包依赖冲突">
@@ -35,267 +18,76 @@
 <meta property="article:modified_time" content="2023-03-23T09:49:06.011Z">
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-
-<script class="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'en,cn'
-  };
-</script>
-
-  <title>解决Jar包依赖冲突 | BootFei's Blog</title>
   
-
-
-
-
-
-
-  <noscript>
-  <style>
-  body { margin-top: 2rem; }
-
-  .use-motion .menu-item,
-  .use-motion .sidebar,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header {
-    visibility: visible;
-  }
-
-  .use-motion .header,
-  .use-motion .site-brand-container .toggle,
-  .use-motion .footer { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle,
-  .use-motion .custom-logo-image {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line {
-    transform: scaleX(1);
-  }
-
-  .search-pop-overlay, .sidebar-nav { display: none; }
-  .sidebar-panel { display: block; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <h1 class="site-title">BootFei's Blog</h1>
-      <i class="logo-line"></i>
-    </a>
-      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-<nav class="site-nav">
-  <ul class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
-
-  </li>
-        <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-        
+    <link rel="alternate" href="/atom.xml" title="BootFei&#39;s Blog" type="application/atom+xml">
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
 
-  <aside class="sidebar">
+<meta name="generator" content="Hexo 5.2.0"></head>
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%90%8C%E6%AD%A5%E8%BF%90%E8%A1%8C"><span class="nav-number">1.</span> <span class="nav-text">Java的多线程同步运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E4%B8%AA%E7%BA%BF%E7%A8%8B%E8%BD%AE%E6%B5%81%E6%89%93%E5%8D%B0AB-gt-AB"><span class="nav-number">1.1.</span> <span class="nav-text">2个线程轮流打印AB-&gt;AB</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%951%EF%BC%9A%E4%BD%BF%E7%94%A8wait%E5%92%8Cnotify"><span class="nav-number">1.1.1.</span> <span class="nav-text">方法1：使用wait和notify</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%952-%EF%BC%9A%E4%BD%BF%E7%94%A8ReentractLock"><span class="nav-number">1.1.2.</span> <span class="nav-text">方法2 ：使用ReentractLock</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">Spring问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#spring%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E8%80%8C%E4%B8%8D%E6%98%AF%E4%B8%A4%E7%BA%A7%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">spring为什么使用三级缓存而不是两级？</span></a></li></ol></li></ol></div>
-        </section>
-        <!--/noindex-->
-
-        <section class="site-overview-wrap sidebar-panel">
-          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Fei Qi</p>
-  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
-</div>
-<div class="site-state-wrap site-overview-item animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">BootFei&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
         
-          <span class="site-state-item-count">209</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-          
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">categories</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">21</span>
-        <span class="site-state-item-name">tags</span></a>
-      </div>
-  </nav>
-</div>
-
-
-
-        </section>
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
       </div>
     </div>
-  </aside>
-  <div class="sidebar-dimmer"></div>
-
-
-    </header>
-
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-编程语言/Java/java面试题" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/" class="article-date">
+  <time datetime="2021-05-05T11:10:53.000Z" itemprop="datePublished">2021-05-05</time>
+</a>
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
   </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
-
-    <div class="main-inner post posts-expand">
-      
-
-      
-
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      解决Jar包依赖冲突
+    </h1>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          解决Jar包依赖冲突
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-05-05 19:10:53" itemprop="dateCreated datePublished" datetime="2021-05-05T19:10:53+08:00">2021-05-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2023-03-23 17:49:06" itemprop="dateModified" datetime="2023-03-23T17:49:06+08:00">2023-03-23</time>
-      </span>
-
-  
-</div>
-
-        </div>
       </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
+    <div class="article-entry" itemprop="articleBody">
+      
         <h2 id="Java的多线程同步运行"><a href="#Java的多线程同步运行" class="headerlink" title="Java的多线程同步运行"></a>Java的多线程同步运行</h2><h3 id="2个线程轮流打印AB-gt-AB"><a href="#2个线程轮流打印AB-gt-AB" class="headerlink" title="2个线程轮流打印AB-&gt;AB"></a>2个线程轮流打印AB-&gt;AB</h3><h4 id="方法1：使用wait和notify"><a href="#方法1：使用wait和notify" class="headerlink" title="方法1：使用wait和notify"></a>方法1：使用wait和notify</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">( String[] args )</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       System.out.println( <span class="string">&quot;Hello World!&quot;</span> );</span><br><span class="line">       </span><br><span class="line">       <span class="keyword">final</span> Object lockObj = <span class="keyword">new</span> Object();</span><br><span class="line">       <span class="comment">//A是否已经执行</span></span><br><span class="line">       AtomicBoolean aExecuted = <span class="keyword">new</span> AtomicBoolean(<span class="keyword">false</span>);</span><br><span class="line">      </span><br><span class="line">       <span class="keyword">final</span> Thread a = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">           <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">               <span class="keyword">synchronized</span> (lockObj) &#123;</span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                       <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                       <span class="keyword">while</span> (aExecuted.get())</span><br><span class="line">                           lockObj.wait();</span><br><span class="line">                       System.out.println(<span class="string">&quot;Hello from a!&quot;</span>);</span><br><span class="line">                       aExecuted.set(<span class="keyword">true</span>);</span><br><span class="line">                       lockObj.notifyAll();</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                       <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                   &#125;</span><br><span class="line"></span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> Thread b = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">           <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">               <span class="keyword">synchronized</span> (lockObj) &#123;</span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       Thread.sleep(<span class="number">1_000</span>);</span><br><span class="line">                       <span class="keyword">while</span> (!aExecuted.get())</span><br><span class="line">                           lockObj.wait();</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                       <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                   &#125;</span><br><span class="line">                   lockObj.notifyAll();</span><br><span class="line">                   System.out.println(<span class="string">&quot;Hello from b!&quot;</span>);</span><br><span class="line">                   aExecuted.set(<span class="keyword">false</span>);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line"></span><br><span class="line">       a.start();</span><br><span class="line">       b.start();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <h4 id="方法2-：使用ReentractLock"><a href="#方法2-：使用ReentractLock" class="headerlink" title="方法2 ：使用ReentractLock"></a>方法2 ：使用ReentractLock</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">( String[] args )</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> ReentrantLock lockObj = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line">        <span class="comment">//A是否已经执行</span></span><br><span class="line">        <span class="keyword">final</span> AtomicBoolean aExecuted = <span class="keyword">new</span> AtomicBoolean(<span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">final</span> Condition aCondition = lockObj.newCondition();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Thread a = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                lockObj.lock();</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                        <span class="keyword">while</span> (aExecuted.get())</span><br><span class="line">                            aCondition.await();</span><br><span class="line">                        System.out.println(<span class="string">&quot;Hello from a!&quot;</span>);</span><br><span class="line">                        aExecuted.set(<span class="keyword">true</span>);</span><br><span class="line">                        aCondition.signalAll();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                lockObj.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Thread b = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                lockObj.lock();</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1_000</span>);</span><br><span class="line">                        <span class="keyword">while</span> (!aExecuted.get())</span><br><span class="line">                            aCondition.await();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">                    &#125;</span><br><span class="line">                    aCondition.signalAll();</span><br><span class="line">                    System.out.println(<span class="string">&quot;Hello from b!&quot;</span>);</span><br><span class="line">                    aExecuted.set(<span class="keyword">false</span>);</span><br><span class="line">                lockObj.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        a.start();</span><br><span class="line">        b.start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
@@ -305,120 +97,151 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">简单来讲，就是通过第三级缓存（不是三级共同作用）的延迟初始化来达到循环依赖**一级缓存：** 存放初始化完全的 bean 实例缓存（用于查找，没有循环依赖一级缓存足够使用）</span><br><span class="line"></span><br><span class="line">**三级缓存：** bean 在实例化之后，会放入的未初始化的 bean 工厂方法来延迟初始化</span><br><span class="line">本质是调用&#96;org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#getEarlyBeanReference&#96;方法的 bean 工厂匿名类</span><br><span class="line"></span><br><span class="line">**二级缓存：** 延迟初始化后（本质调用 getEarlyBeanReference 包装了 原先的 bean 实例）</span><br><span class="line">earlySingletonObjects.put(getEarlyBeanReference 返回的实例)</span><br><span class="line">singletonFactories.remove(bean 工厂实例)</span><br><span class="line">本质是防止&#96;getEarlyBeanReference&#96;bean 方法由于每次延迟初始化返回不同实例而导致注入的 bean 不是同一个</span><br><span class="line">例如&#96;() -&gt; getEarlyBeanReference(beanName, mbd, bean)&#96;会调用到构建代理的组件</span><br><span class="line">&#96;org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getEarlyBeanReference&#96;</span><br><span class="line">如果没有二级缓存，会重复创建代理的实例的问题</span><br></pre></td></tr></table></figure>
 
 
+      
     </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/" rel="prev" title="解决Jar包依赖冲突">
-                  <i class="fa fa-chevron-left"></i> 解决Jar包依赖冲突
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" rel="next" title="Redis-线上CPU飙升排查">
-                  Redis-线上CPU飙升排查 <i class="fa fa-chevron-right"></i>
-                </a>
-            </div>
-          </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/java%E9%9D%A2%E8%AF%95%E9%A2%98/" data-id="cm6lrpfhr002viddl1etg3wk8" class="article-share-link">Share</a>
+      
+      
     </footer>
-  </article>
-</div>
-
-
-
-
-
-
-      
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      const commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      
-
-      
-
-<div class="copyright">
+  </div>
   
-  &copy; 
-  <span itemprop="copyrightYear">2025</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
-</div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+    
+<nav id="article-nav">
+  
+    <a href="/2021/05/05/database/redis/redis%E8%B0%83%E4%BC%98%E5%92%8C%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7/Redis-%E7%BA%BF%E4%B8%8ACPU%E9%A3%99%E5%8D%87%E6%8E%92%E6%9F%A5/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Redis-线上CPU飙升排查
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/05/05/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/%E8%A7%A3%E5%86%B3Jar%E5%8C%85%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">解决Jar包依赖冲突</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/">juc</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/oom/">oom</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/oom/">oom</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/spring/">spring</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a></li></ul>
+    </div>
   </div>
 
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/" rel="tag">annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cluster/" rel="tag">cluster</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interview/" rel="tag">interview</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jstack/" rel="tag">jstack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/net/" rel="tag">net</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/next/" rel="tag">next</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reflect/" rel="tag">reflect</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-starter/" rel="tag">spring starter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/startup/" rel="tag">startup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/transaction/" rel="tag">transaction</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
     </div>
-  </footer>
-
-  
-  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JDK/" style="font-size: 11.11px;">JDK</a> <a href="/tags/annotation/" style="font-size: 10px;">annotation</a> <a href="/tags/cluster/" style="font-size: 10px;">cluster</a> <a href="/tags/git/" style="font-size: 12.22px;">git</a> <a href="/tags/hexo/" style="font-size: 12.22px;">hexo</a> <a href="/tags/interview/" style="font-size: 10px;">interview</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jstack/" style="font-size: 14.44px;">jstack</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/next/" style="font-size: 11.11px;">next</a> <a href="/tags/redis/" style="font-size: 15.56px;">redis</a> <a href="/tags/reflect/" style="font-size: 10px;">reflect</a> <a href="/tags/spring-starter/" style="font-size: 10px;">spring starter</a> <a href="/tags/springboot/" style="font-size: 18.89px;">springboot</a> <a href="/tags/startup/" style="font-size: 17.78px;">startup</a> <a href="/tags/transaction/" style="font-size: 11.11px;">transaction</a> <a href="/tags/virtual-machine/" style="font-size: 12.22px;">virtual machine</a> <a href="/tags/vm/" style="font-size: 13.33px;">vm</a>
+    </div>
+  </div>
 
-
-
-
-
-
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">June 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a></li></ul>
+    </div>
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring%E6%A1%86%E6%9E%B6-04-bean%E5%8C%85-Bean/">spring框架-04-bean包-Bean</a>
+          </li>
+        
+          <li>
+            <a href="/2022/04/19/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-HashMap/">JDK-util-HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E5%B8%B8%E8%A7%81%E4%BA%8B%E5%8A%A1%E5%9C%BA%E6%99%AF/">mysql - 常见事务问题解决方案</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">mysql - 面试问题</a>
+          </li>
+        
+          <li>
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">交换排序-冒泡排序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
 
   
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2025 Fei Qi<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
 
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
 </body>
 </html>

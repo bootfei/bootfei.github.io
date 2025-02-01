@@ -1,29 +1,12 @@
 <!DOCTYPE html>
-<html lang="en,cn">
+<html>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.2.0">
+  <meta charset="utf-8">
+  
 
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
-
-<script class="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
-  </script>
-
+  
+  <title>spring-cloud-8.消息系统整合框架 Spring Cloud Stream | BootFei&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="spring boot本来就整合kafka，为什么spring cloud为什么还要整合kafka呢？ 因为spring boot使用kafka很麻烦；  简介一个轻量级的事件驱动微服务框架，用于快速构建可连接到外部系统的应用程序。 在 Spring Boot 应用程序之间使用 Kafka 或 RabbitMQ 发送和接收消息的简单声明式模型。 Spring Cloud Stream 是一个用来">
 <meta property="og:type" content="article">
 <meta property="og:title" content="spring-cloud-8.消息系统整合框架 Spring Cloud Stream">
@@ -37,267 +20,76 @@
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="data:image/png;base64,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">
-
-
-<link rel="canonical" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/">
-
-
-<script class="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'en,cn'
-  };
-</script>
-
-  <title>spring-cloud-8.消息系统整合框架 Spring Cloud Stream | BootFei's Blog</title>
   
-
-
-
-
-
-
-  <noscript>
-  <style>
-  body { margin-top: 2rem; }
-
-  .use-motion .menu-item,
-  .use-motion .sidebar,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header {
-    visibility: visible;
-  }
-
-  .use-motion .header,
-  .use-motion .site-brand-container .toggle,
-  .use-motion .footer { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle,
-  .use-motion .custom-logo-image {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line {
-    transform: scaleX(1);
-  }
-
-  .search-pop-overlay, .sidebar-nav { display: none; }
-  .sidebar-panel { display: block; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <h1 class="site-title">BootFei's Blog</h1>
-      <i class="logo-line"></i>
-    </a>
-      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-<nav class="site-nav">
-  <ul class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
-
-  </li>
-        <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-        
+    <link rel="alternate" href="/atom.xml" title="BootFei&#39;s Blog" type="application/atom+xml">
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
 
-  <aside class="sidebar">
+<meta name="generator" content="Hexo 5.2.0"></head>
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">原理模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E8%80%85"><span class="nav-number">3.1.</span> <span class="nav-text">创建消息生产者</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">附录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#spring-cloud-stream%E5%8E%9F%E7%90%86%E5%9B%BE"><span class="nav-number">4.1.</span> <span class="nav-text">spring cloud stream原理图</span></a></li></ol></li></ol></div>
-        </section>
-        <!--/noindex-->
-
-        <section class="site-overview-wrap sidebar-panel">
-          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Fei Qi</p>
-  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
-</div>
-<div class="site-state-wrap site-overview-item animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">BootFei&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
         
-          <span class="site-state-item-count">209</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-          
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">categories</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">21</span>
-        <span class="site-state-item-name">tags</span></a>
-      </div>
-  </nav>
-</div>
-
-
-
-        </section>
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
       </div>
     </div>
-  </aside>
-  <div class="sidebar-dimmer"></div>
-
-
-    </header>
-
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-编程语言/Java/springcloud/spring-cloud-08-消息系统整合框架 Spring Cloud Stream" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/" class="article-date">
+  <time datetime="2020-12-12T07:40:07.000Z" itemprop="datePublished">2020-12-12</time>
+</a>
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
   </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
-
-    <div class="main-inner post posts-expand">
-      
-
-      
-
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      spring-cloud-8.消息系统整合框架 Spring Cloud Stream
+    </h1>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          spring-cloud-8.消息系统整合框架 Spring Cloud Stream
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2020-12-12 15:40:07" itemprop="dateCreated datePublished" datetime="2020-12-12T15:40:07+08:00">2020-12-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-02-08 22:20:22" itemprop="dateModified" datetime="2021-02-08T22:20:22+08:00">2021-02-08</time>
-      </span>
-
-  
-</div>
-
-        </div>
       </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
+    <div class="article-entry" itemprop="articleBody">
+      
         <blockquote>
 <p>spring boot本来就整合kafka，为什么spring cloud为什么还要整合kafka呢？</p>
 <p>因为spring boot使用kafka很麻烦；</p>
@@ -396,120 +188,151 @@ public class SomeProducer &#123;
 </ul>
 <h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="spring-cloud-stream原理图"><a href="#spring-cloud-stream原理图" class="headerlink" title="spring cloud stream原理图"></a>spring cloud stream原理图</h2><p><img src="data:image/png;base64,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" alt="Image result for spring cloud steam"></p>
 
+      
     </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-09-%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83/" rel="prev" title="spring-cloud-8.消息系统整合框架 Spring Cloud Stream">
-                  <i class="fa fa-chevron-left"></i> spring-cloud-8.消息系统整合框架 Spring Cloud Stream
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-05-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Zuul/" rel="next" title="spring-cloud-5-微服务网关Zuul">
-                  spring-cloud-5-微服务网关Zuul <i class="fa fa-chevron-right"></i>
-                </a>
-            </div>
-          </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-08-%E6%B6%88%E6%81%AF%E7%B3%BB%E7%BB%9F%E6%95%B4%E5%90%88%E6%A1%86%E6%9E%B6%20Spring%20Cloud%20Stream/" data-id="cm6lrpfi5007kiddl3qjl6pk5" class="article-share-link">Share</a>
+      
+      
     </footer>
-  </article>
-</div>
-
-
-
-
-
-
-      
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      const commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      
-
-      
-
-<div class="copyright">
+  </div>
   
-  &copy; 
-  <span itemprop="copyrightYear">2025</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
-</div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+    
+<nav id="article-nav">
+  
+    <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-05-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3Zuul/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          spring-cloud-5-微服务网关Zuul
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/12/12/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springcloud/spring-cloud-09-%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">spring-cloud-8.消息系统整合框架 Spring Cloud Stream</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/">juc</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/oom/">oom</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/oom/">oom</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/spring/">spring</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a></li></ul>
+    </div>
   </div>
 
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/" rel="tag">annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cluster/" rel="tag">cluster</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interview/" rel="tag">interview</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jstack/" rel="tag">jstack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/net/" rel="tag">net</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/next/" rel="tag">next</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reflect/" rel="tag">reflect</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-starter/" rel="tag">spring starter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/startup/" rel="tag">startup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/transaction/" rel="tag">transaction</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
     </div>
-  </footer>
-
-  
-  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JDK/" style="font-size: 11.11px;">JDK</a> <a href="/tags/annotation/" style="font-size: 10px;">annotation</a> <a href="/tags/cluster/" style="font-size: 10px;">cluster</a> <a href="/tags/git/" style="font-size: 12.22px;">git</a> <a href="/tags/hexo/" style="font-size: 12.22px;">hexo</a> <a href="/tags/interview/" style="font-size: 10px;">interview</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jstack/" style="font-size: 14.44px;">jstack</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/next/" style="font-size: 11.11px;">next</a> <a href="/tags/redis/" style="font-size: 15.56px;">redis</a> <a href="/tags/reflect/" style="font-size: 10px;">reflect</a> <a href="/tags/spring-starter/" style="font-size: 10px;">spring starter</a> <a href="/tags/springboot/" style="font-size: 18.89px;">springboot</a> <a href="/tags/startup/" style="font-size: 17.78px;">startup</a> <a href="/tags/transaction/" style="font-size: 11.11px;">transaction</a> <a href="/tags/virtual-machine/" style="font-size: 12.22px;">virtual machine</a> <a href="/tags/vm/" style="font-size: 13.33px;">vm</a>
+    </div>
+  </div>
 
-
-
-
-
-
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">June 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a></li></ul>
+    </div>
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring%E6%A1%86%E6%9E%B6-04-bean%E5%8C%85-Bean/">spring框架-04-bean包-Bean</a>
+          </li>
+        
+          <li>
+            <a href="/2022/04/19/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-HashMap/">JDK-util-HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E5%B8%B8%E8%A7%81%E4%BA%8B%E5%8A%A1%E5%9C%BA%E6%99%AF/">mysql - 常见事务问题解决方案</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">mysql - 面试问题</a>
+          </li>
+        
+          <li>
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">交换排序-冒泡排序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
 
   
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2025 Fei Qi<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
 
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
 </body>
 </html>

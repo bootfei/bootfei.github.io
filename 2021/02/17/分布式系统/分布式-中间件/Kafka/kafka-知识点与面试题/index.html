@@ -1,29 +1,12 @@
 <!DOCTYPE html>
-<html lang="en,cn">
+<html>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.2.0">
+  <meta charset="utf-8">
+  
 
-
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
-
-<script class="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
-  </script>
-
+  
+  <title>kafka-03-知识点与面试题 | BootFei&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="请简述 Kafka 中 Broker、Topic、Partition 及 Segment 间的关系。Kafka 中的 Broker 指的就是 Kafka 集群中的一个节点，就是一台 Kafka 主机。Broker 中可以存放很多的消息，但这些消息是分类存放的，一类就是一个 Topic。每一类的消息在 一台 Broker 中都被集中存放在了一起，被放在了一个目录中，这个目录称为 Partition。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="kafka-03-知识点与面试题">
@@ -35,267 +18,76 @@
 <meta property="article:modified_time" content="2021-09-02T05:52:45.158Z">
 <meta property="article:author" content="Fei Qi">
 <meta name="twitter:card" content="summary">
-
-
-<link rel="canonical" href="http://example.com/2021/02/17/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-
-<script class="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'en,cn'
-  };
-</script>
-
-  <title>kafka-03-知识点与面试题 | BootFei's Blog</title>
   
-
-
-
-
-
-
-  <noscript>
-  <style>
-  body { margin-top: 2rem; }
-
-  .use-motion .menu-item,
-  .use-motion .sidebar,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header {
-    visibility: visible;
-  }
-
-  .use-motion .header,
-  .use-motion .site-brand-container .toggle,
-  .use-motion .footer { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle,
-  .use-motion .custom-logo-image {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line {
-    transform: scaleX(1);
-  }
-
-  .search-pop-overlay, .sidebar-nav { display: none; }
-  .sidebar-panel { display: block; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
-  <div class="headband"></div>
-
-  <main class="main">
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-        <span class="toggle-line"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <i class="logo-line"></i>
-      <h1 class="site-title">BootFei's Blog</h1>
-      <i class="logo-line"></i>
-    </a>
-      <p class="site-subtitle" itemprop="description">敬畏耶和华是智慧的开端，认识至圣者就是聪明</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-<nav class="site-nav">
-  <ul class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
-
-  </li>
-        <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
-
-  </li>
-        <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-        
+    <link rel="alternate" href="/atom.xml" title="BootFei&#39;s Blog" type="application/atom+xml">
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-    <span class="toggle-line"></span>
-  </div>
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
 
-  <aside class="sidebar">
+<meta name="generator" content="Hexo 5.2.0"></head>
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
-      <ul class="sidebar-nav">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <div class="sidebar-panel-container">
-        <!--noindex-->
-        <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E8%BF%B0-Kafka-%E4%B8%AD-Broker%E3%80%81Topic%E3%80%81Partition-%E5%8F%8A-Segment-%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB%E3%80%82"><span class="nav-number">1.</span> <span class="nav-text">请简述 Kafka 中 Broker、Topic、Partition 及 Segment 间的关系。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%8E%E5%85%B6%E5%AE%83-MQ-%E7%9B%B8%E6%AF%94%EF%BC%8C%E5%85%B6%E6%9C%80%E5%A4%A7%E7%9A%84%E7%89%B9%E7%82%B9%E5%B0%B1%E6%98%AF%E9%AB%98%E5%90%9E%E5%90%90%E7%8E%87%E3%80%82Kafka-%E4%B8%AD%E6%B6%88%E6%81%AF%E5%AD%98%E6%94%BE%E7%9A%84%E9%A1%BA%E5%BA%8F%E5%AD%98%E6%94%BE-%E6%98%AF%E5%AE%9E%E7%8E%B0%E9%AB%98%E5%90%9E%E5%90%90%E7%8E%87%E7%9A%84%E9%87%8D%E8%A6%81%E7%89%B9%E5%BE%81%E3%80%82%E8%AF%B7%E7%AE%80%E8%BF%B0%E4%B8%80%E4%B8%8B-Kafka-%E4%B8%AD%E6%B6%88%E6%81%AF%E7%9A%84%E9%A1%BA%E5%BA%8F%E5%AD%98%E6%94%BE%E7%89%B9%E6%80%A7%E3%80%82"><span class="nav-number">2.</span> <span class="nav-text">Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。Kafka 中消息存放的顺序存放 是实现高吞吐率的重要特征。请简述一下 Kafka 中消息的顺序存放特性。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E7%9A%84-Segment-%E5%AE%9E%E9%99%85%E6%98%AF%E4%B8%80%E5%A5%97%E6%96%87%E4%BB%B6%EF%BC%8C%E5%85%B6%E4%B8%AD%E6%9C%80%E4%B8%BA%E9%87%8D%E8%A6%81%E7%9A%84%E6%98%AF-log-%E4%B8%8E-index-%E6%96%87%E4%BB%B6%E3%80%82%E8%BF%99%E4%B8%A4%E4%B8%AA%E6%96%87%E4%BB%B6%E7%9A%84%E6%96%87%E4%BB%B6%E5%90%8D%E6%98%AF%E7%9B%B8%E5%90%8C%E7%9A%84%E3%80%82%E8%AF%B7%E7%AE%80%E8%BF%B0%E6%96%87%E4%BB%B6%E5%90%8D%E7%9A%84%E6%84%8F%E4%B9%89%E5%8F%8A%E8%BF%99%E4%B8%A4%E4%B8%AA%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%B3%E7%B3%BB%E3%80%82"><span class="nav-number">3.</span> <span class="nav-text">Kafka 中的 Segment 实际是一套文件，其中最为重要的是.log 与.index 文件。这两个文件的文件名是相同的。请简述文件名的意义及这两个文件的关系。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E5%87%86%E5%A4%87%E6%B6%88%E8%B4%B9%E7%BC%96%E5%8F%B7%E4%B8%BA-170213-%E7%9A%84%E6%B6%88%E6%81%AF%EF%BC%8C%E8%BF%99%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E8%BF%99%E6%9D%A1%E6%B6%88%E6%81%AF%E7%9A%84-%E8%AF%B7%E7%AE%80-%E8%BF%B0%E8%BF%99%E4%B8%AA%E6%9F%A5%E6%89%BE%E8%BF%87%E7%A8%8B%E3%80%82"><span class="nav-number">4.</span> <span class="nav-text">消费者准备消费编号为 170213 的消息，这个消费者是如何找到这条消息的?请简 述这个查找过程。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E4%B8%BA%E4%BA%86%E5%87%8F%E8%BD%BB%E5%8D%95%E5%8F%B0-broker-%E7%9A%84%E5%8E%8B%E5%8A%9B%EF%BC%8C%E4%B8%80%E8%88%AC%E4%BC%9A%E4%B8%BA-Topic-%E8%AE%BE%E7%BD%AE%E5%A4%9A%E4%B8%AA-partition%E3%80%82%E9%82%A3%E4%B9%88%EF%BC%8C%E4%B8%80-%E4%B8%AA-Topic-%E8%AE%BE%E7%BD%AE%E5%A4%9A%E5%B0%91%E4%B8%AA-partition-%E5%90%88%E9%80%82%E5%91%A2"><span class="nav-number">5.</span> <span class="nav-text">Kafka 中为了减轻单台 broker 的压力，一般会为 Topic 设置多个 partition。那么，一 个 Topic 设置多少个 partition 合适呢?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%B7%E6%80%BB%E7%BB%93%E4%B8%80%E4%B8%8BKafka%E4%B8%ADConsumer-Group%E4%B8%AD%E7%9A%84Consumer%E4%B8%8E%E5%85%B6%E8%A6%81%E6%B6%88%E8%B4%B9%E7%9A%84Topic%E4%B8%AD%E7%9A%84partition-%E9%97%B4%E7%9A%84%E6%95%B0%E9%87%8F%E5%85%B3%E7%B3%BB%E3%80%82"><span class="nav-number">6.</span> <span class="nav-text">请总结一下Kafka中Consumer Group中的Consumer与其要消费的Topic中的partition 间的数量关系。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E4%B8%80%E4%B8%AA-partition-%E5%8F%AA%E5%85%81%E8%AE%B8%E4%B8%80%E4%B8%AA-Consumer-Group-%E4%B8%AD%E7%9A%84%E4%B8%80%E4%B8%AA%E7%BB%84%E5%86%85-Consumer-%E8%BF%9B%E8%A1%8C%E6%B6%88-%E8%B4%B9%E3%80%82%E8%AF%B7%E7%AE%80%E8%BF%B0%E8%BF%99%E6%A0%B7%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%BC%98%E5%8A%A3%E3%80%82"><span class="nav-number">7.</span> <span class="nav-text">Kafka 中一个 partition 只允许一个 Consumer Group 中的一个组内 Consumer 进行消 费。请简述这样设计的优劣。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%88%91%E4%BB%AC%E7%9F%A5%E9%81%93%EF%BC%8CKafka-%E4%B8%AD-partition-%E7%9A%84%E6%95%B0%E9%87%8F%E6%9C%80%E5%A5%BD%E6%98%AF-broker-%E6%95%B0%E9%87%8F%E7%9A%84%E6%95%B4%E6%95%B0%E5%80%8D%E3%80%82%E4%BD%86%E5%85%B7%E4%BD%93%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%98%AF-%E4%B8%80%E5%80%8D%E3%80%81%E4%B8%A4%E5%80%8D%EF%BC%8C%E8%BF%98%E6%98%AF%E4%B8%89%E5%80%8D%EF%BC%8C%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%91%A2"><span class="nav-number">8.</span> <span class="nav-text">我们知道，Kafka 中 partition 的数量最好是 broker 数量的整数倍。但具体来说，是 一倍、两倍，还是三倍，如何选择呢?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#partition-Leader-%E4%B8%8E-Follower-%E9%97%B4%E6%98%AF%E4%B8%BB%E4%BB%8E%E8%BF%98%E6%98%AF%E4%B8%BB%E5%A4%87%E5%85%B3%E7%B3%BB"><span class="nav-number">9.</span> <span class="nav-text">partition Leader 与 Follower 间是主从还是主备关系?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9C%A8-Kafka-%E7%9A%84%E5%89%AF%E6%9C%AC%E4%B8%AD%E6%9C%89-AR%E3%80%81ISR-%E4%B8%8E-OSR-%E6%A6%82%E5%BF%B5%EF%BC%8C%E5%AE%83%E4%BB%AC%E9%97%B4%E6%98%AF%E4%BB%80%E4%B9%88%E5%85%B3%E7%B3%BB"><span class="nav-number">10.</span> <span class="nav-text">在 Kafka 的副本中有 AR、ISR 与 OSR 概念，它们间是什么关系?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%B7%E7%AE%80%E8%BF%B0Rebalance-%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">11.</span> <span class="nav-text">请简述Rebalance 的概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E7%9A%84-partition-leader-%E4%B8%8E-broker-controller-%E6%98%AF%E7%94%B1%E8%B0%81%E9%80%89%E4%B8%BE%E5%87%BA%E6%9D%A5%E7%9A%84"><span class="nav-number">12.</span> <span class="nav-text">Kafka 中的 partition leader 与 broker controller 是由谁选举出来的?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E7%94%9F%E4%BA%A7%E7%9A%84%E6%B6%88%E6%81%AF%E8%A2%AB%E5%86%99%E5%85%A5%E5%88%B0%E4%BA%86%E5%93%AA%E4%B8%AA-partition-%E6%B6%88%E8%B4%B9%E8%80%85%E5%B0%86-offset-%E6%8F%90%E4%BA%A4%E5%88%B0%E4%BA%86-%E5%93%AA%E9%87%8C-%E8%BF%99%E4%B8%A4%E4%B8%AA%E9%97%AE%E9%A2%98%E6%9C%89%E4%BB%80%E4%B9%88%E8%81%94%E7%B3%BB"><span class="nav-number">13.</span> <span class="nav-text">Kafka 中的生产者生产的消息被写入到了哪个 partition?消费者将 offset 提交到了 哪里?这两个问题有什么联系?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E6%B6%88%E6%81%AF%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E4%BC%9A%E5%B0%86%E6%B6%88%E6%81%AF%E5%86%99%E5%85%A5%E5%88%B0-broker-%E4%B8%AD%EF%BC%8C%E8%AF%B7%E8%AF%A6%E7%BB%86%E6%8F%8F%E8%BF%B0%E4%B8%80%E4%B8%8B%E8%BF%99%E4%B8%AA%E5%86%99%E5%85%A5%E8%BF%87%E7%A8%8B%E3%80%82"><span class="nav-number">14.</span> <span class="nav-text">Kafka 中消息的生产者会将消息写入到 broker 中，请详细描述一下这个写入过程。</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%E7%9A%84-HW-%E6%9C%BA%E5%88%B6%E5%92%8CHW-%E6%88%AA%E6%96%AD%E6%9C%BA%E5%88%B6%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">15.</span> <span class="nav-text">Kafka 中的 HW 机制和HW 截断机制是什么?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7%E7%9A%84"><span class="nav-number">16.</span> <span class="nav-text">Kafka 是如何保证消息发送的可靠性的?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E7%9A%84%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E8%80%85%E8%AE%BE%E7%BD%AE-acks-%E5%B1%9E%E6%80%A7%E5%80%BC%E4%B8%BA-1-%E6%97%B6%EF%BC%8C%E8%83%BD%E5%90%A6%E4%BD%BF%E7%94%9F%E4%BA%A7%E8%80%85%E7%A1%AE%E8%AE%A4%E5%AE%83%E5%8F%91%E9%80%81%E7%9A%84%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81-%E6%88%90%E5%8A%9F%E6%88%96%E5%A4%B1%E8%B4%A5%E5%91%A2"><span class="nav-number">17.</span> <span class="nav-text">Kafka 的消息生产者设置 acks 属性值为 1 时，能否使生产者确认它发送的消息发送 成功或失败呢?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E7%9A%84%E6%B6%88%E6%81%AF%E7%94%9F%E4%BA%A7%E8%80%85%E8%AE%BE%E7%BD%AE-acks-%E5%B1%9E%E6%80%A7%E5%80%BC%E4%B8%BA-all-%E6%97%B6%EF%BC%8C%E5%9F%BA%E6%9C%AC%E5%8F%AF%E4%BB%A5%E4%BF%9D%E8%AF%81%E6%B6%88%E6%81%AF%E7%9A%84%E4%B8%8D%E4%B8%A2%E5%A4%B1%E3%80%82%E4%BD%86%E5%8D%B4%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%BC%95%E5%8F%91%E6%B6%88%E6%81%AF%E7%9A%84%E9%87%8D%E5%A4%8D%E6%8E%A5%E6%94%B6%E3%80%82%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">18.</span> <span class="nav-text">Kafka 的消息生产者设置 acks 属性值为 all 时，基本可以保证消息的不丢失。但却可能会引发消息的重复接收。为什么?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD-partition-leader-%E8%8B%A5%E6%8C%82%E4%BA%86%EF%BC%8C%E4%B8%80%E8%88%AC%E4%BC%9A%E9%80%89%E6%8B%A9-ISR-%E4%B8%AD%E7%9A%84-follower-%E4%BD%9C%E4%B8%BA%E6%96%B0%E7%9A%84-leader-%E8%BF%99%E6%98%AF%E7%94%B1%E8%B0%81%E5%AE%8C%E6%88%90%E7%9A%84-%E8%8B%A5-ISR-%E4%B8%AD%E6%B2%A1%E6%9C%89%E5%85%B6%E5%AE%83-follower-%E8%83%BD%E5%90%A6%E9%80%89%E4%B8%BE%E5%87%BA%E6%96%B0%E7%9A%84-leader"><span class="nav-number">19.</span> <span class="nav-text">Kafka 中 partition leader 若挂了，一般会选择 ISR 中的 follower 作为新的 leader, 这是由谁完成的?若 ISR 中没有其它 follower 能否选举出新的 leader?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD-partition-leader-%E8%8B%A5%E6%8C%82%E4%BA%86%EF%BC%8C%E9%80%9A%E8%BF%87%E8%AE%BE%E7%BD%AE%E5%85%81%E8%AE%B8%E5%85%B6%E4%BB%8E%E4%BB%BB%E6%84%8F%E6%B2%A1%E6%9C%89%E5%AE%95%E6%9C%BA%E7%9A%84%E4%B8%BB%E6%9C%BA%E7%9A%84-partition-%E4%B8%AD%E9%80%89%E4%B8%BE%E6%96%B0%E7%9A%84-leader%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E8%83%BD%E5%AF%BC%E8%87%B4%E5%A4%A7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E4%B8%A2%E5%A4%B1"><span class="nav-number">20.</span> <span class="nav-text">Kafka 中 partition leader 若挂了，通过设置允许其从任意没有宕机的主机的 partition 中选举新的 leader，为什么可能导致大量数据的丢失</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-%E4%B8%AD%EF%BC%8C%E5%BD%93%E4%B8%80%E4%B8%AA-Consumer-Group-%E4%B8%AD%E4%BB%85%E5%8C%85%E5%90%AB%E4%B8%80%E4%B8%AA-Consumer-%E6%97%B6%EF%BC%8C%E8%8B%A5%E5%85%B6%E6%B6%88%E8%B4%B9%E8%83%BD%E5%8A%9B%E8%BE%83%E4%BD%8E%EF%BC%8C-%E5%88%99%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%BC%95%E5%8F%91%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%E3%80%82%E4%B8%BA%E4%BB%80%E4%B9%88-%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3"><span class="nav-number">21.</span> <span class="nav-text">Kafka 中，当一个 Consumer Group 中仅包含一个 Consumer 时，若其消费能力较低， 则可能会引发重复消费。为什么?怎么解决?</span></a></li></ol></div>
-        </section>
-        <!--/noindex-->
-
-        <section class="site-overview-wrap sidebar-panel">
-          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Fei Qi</p>
-  <div class="site-description" itemprop="description">learn more, forget more; practice more, get more.</div>
-</div>
-<div class="site-state-wrap site-overview-item animated">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">BootFei&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
         
-          <span class="site-state-item-count">209</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-          
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">categories</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">21</span>
-        <span class="site-state-item-name">tags</span></a>
-      </div>
-  </nav>
-</div>
-
-
-
-        </section>
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
       </div>
     </div>
-  </aside>
-  <div class="sidebar-dimmer"></div>
-
-
-    </header>
-
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-分布式系统/分布式-中间件/Kafka/kafka-知识点与面试题" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/02/17/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/" class="article-date">
+  <time datetime="2021-02-17T00:42:46.000Z" itemprop="datePublished">2021-02-17</time>
+</a>
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
   </div>
-
-<noscript>
-  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
-</noscript>
-
-
-    <div class="main-inner post posts-expand">
-      
-
-      
-
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      kafka-03-知识点与面试题
+    </h1>
   
 
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en,cn">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/17/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Fei Qi">
-      <meta itemprop="description" content="learn more, forget more; practice more, get more.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BootFei's Blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          kafka-03-知识点与面试题
-        </h1>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2021-02-17 08:42:46" itemprop="dateCreated datePublished" datetime="2021-02-17T08:42:46+08:00">2021-02-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-09-02 13:52:45" itemprop="dateModified" datetime="2021-09-02T13:52:45+08:00">2021-09-02</time>
-      </span>
-
-  
-</div>
-
-        </div>
       </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
+    <div class="article-entry" itemprop="articleBody">
+      
         <h1 id="请简述-Kafka-中-Broker、Topic、Partition-及-Segment-间的关系。"><a href="#请简述-Kafka-中-Broker、Topic、Partition-及-Segment-间的关系。" class="headerlink" title="请简述 Kafka 中 Broker、Topic、Partition 及 Segment 间的关系。"></a>请简述 Kafka 中 Broker、Topic、Partition 及 Segment 间的关系。</h1><p>Kafka 中的 Broker 指的就是 Kafka 集群中的一个节点，就是一台 Kafka 主机。Broker 中可以存放很多的消息，但这些消息是分类存放的，一类就是一个 Topic。每一类的消息在 一台 Broker 中都被集中存放在了一起，被放在了一个目录中，这个目录称为 Partition。但消 息本身并不是文件，其需要存放到文件中。用于存放消息的文件称为 Segment。</p>
 <p>一个 Topic 的消息可以被存放到多个 Broker 中，一个 Broker 中可以存放一个 Topic 的多个 Partition，而一个 Partition 中可以存放很多的 Segment，一个 Segment 中可以存放很多的 消息。</p>
 <h1 id="Kafka-与其它-MQ-相比，其最大的特点就是高吞吐率。Kafka-中消息存放的顺序存放-是实现高吞吐率的重要特征。请简述一下-Kafka-中消息的顺序存放特性。"><a href="#Kafka-与其它-MQ-相比，其最大的特点就是高吞吐率。Kafka-中消息存放的顺序存放-是实现高吞吐率的重要特征。请简述一下-Kafka-中消息的顺序存放特性。" class="headerlink" title="Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。Kafka 中消息存放的顺序存放 是实现高吞吐率的重要特征。请简述一下 Kafka 中消息的顺序存放特性。"></a>Kafka 与其它 MQ 相比，其最大的特点就是高吞吐率。Kafka 中消息存放的顺序存放 是实现高吞吐率的重要特征。请简述一下 Kafka 中消息的顺序存放特性。</h1><p>Kafka 中消息的顺序存放指的是一个 Segment 中消息的存放是顺序存放的。为了能够 存放大量的消息，Kafka 是将消息直接存放在了磁盘。由于磁盘是一个低速 IO 设备，为了提 高 IO 速度，就想将 Broker 中同一 Topic 的消息顺序存放在磁盘。但一个 Topic 的消息量是非 常庞大的，但到底有多大，并不确定，因为其是一直在增长的。为了便于连续磁盘空间的分 配，就将一个 Topic 的消息写入到一个文件中，这个文件的最大大小通过配置可以固定。即 在磁盘中查找到一块连接的指定大小的空间是可以完成的。这个文件称为 Segment。随着消 息量的不断增长，Segment 文件越来越多，为了便于管理，将同一 Topic 的 Segment 文件都 存放到一个或多个目录中，这些目录就是 Partition。通过以上叙述可知，Segment 中的消息 是顺序存放的，而 Partition 中的这些 Segment 文件的存储并不是顺序存放的。</p>
@@ -385,120 +177,151 @@
 <p>对于 consumer 来说，由于本次消费过程在时限内没有完成，即没有成功，所以该 consumer 会再从该 partition 中拉取消息。由于前面没有提交 offset，所以这次拉取的消息与 上次的是相同的。该 consumer 又重新消费之前的那一批消息，然后就又出现了消费超时， 所以会造成死循环，一直消费相同的消息。</p>
 <p>对于这种情况下的重复消费的解决方案是，延长 offset 自动提交时间，即<a href="">增加自动提交 超时时限 auto.commit.interval.ms 的值</a>。或<a href="">将自动提交改为手动提交</a>，真正消费完毕后再进 行提交。</p>
 
+      
     </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-item">
-                <a href="/2021/02/16/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zookeeper-02-Leader%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/" rel="prev" title="zookeeper-02-Leader的选举机制">
-                  <i class="fa fa-chevron-left"></i> zookeeper-02-Leader的选举机制
-                </a>
-            </div>
-            <div class="post-nav-item">
-                <a href="/2021/02/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-%E9%9D%A2%E8%AF%95%E9%A2%98%E4%B8%8E%E7%9F%A5%E8%AF%86%E7%82%B9/" rel="next" title="springboot-面试题与知识点">
-                  springboot-面试题与知识点 <i class="fa fa-chevron-right"></i>
-                </a>
-            </div>
-          </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/02/17/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%B8%AD%E9%97%B4%E4%BB%B6/Kafka/kafka-%E7%9F%A5%E8%AF%86%E7%82%B9%E4%B8%8E%E9%9D%A2%E8%AF%95%E9%A2%98/" data-id="cm6lrpfhy004ziddl6byqftiu" class="article-share-link">Share</a>
+      
+      
     </footer>
-  </article>
-</div>
-
-
-
-
-
-
-      
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      const commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      
-
-      
-
-<div class="copyright">
+  </div>
   
-  &copy; 
-  <span itemprop="copyrightYear">2025</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Fei Qi</span>
-</div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+    
+<nav id="article-nav">
+  
+    <a href="/2021/02/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/springboot/springboot-%E9%9D%A2%E8%AF%95%E9%A2%98%E4%B8%8E%E7%9F%A5%E8%AF%86%E7%82%B9/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          springboot-面试题与知识点
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/02/16/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F-%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86/zookeeper-02-Leader%E7%9A%84%E9%80%89%E4%B8%BE%E6%9C%BA%E5%88%B6/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">zookeeper-02-Leader的选举机制</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/">juc</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/java/juc/oom/">oom</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/oom/">oom</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/spring/">spring</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%89%8D%E7%AB%AF/">前端</a></li></ul>
+    </div>
   </div>
 
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JDK/" rel="tag">JDK</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/" rel="tag">annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cluster/" rel="tag">cluster</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interview/" rel="tag">interview</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jstack/" rel="tag">jstack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcode/" rel="tag">leetcode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lock/" rel="tag">lock</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/net/" rel="tag">net</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/next/" rel="tag">next</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/reflect/" rel="tag">reflect</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-starter/" rel="tag">spring starter</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springboot/" rel="tag">springboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/startup/" rel="tag">startup</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/transaction/" rel="tag">transaction</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtual-machine/" rel="tag">virtual machine</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vm/" rel="tag">vm</a></li></ul>
     </div>
-  </footer>
-
-  
-  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JDK/" style="font-size: 11.11px;">JDK</a> <a href="/tags/annotation/" style="font-size: 10px;">annotation</a> <a href="/tags/cluster/" style="font-size: 10px;">cluster</a> <a href="/tags/git/" style="font-size: 12.22px;">git</a> <a href="/tags/hexo/" style="font-size: 12.22px;">hexo</a> <a href="/tags/interview/" style="font-size: 10px;">interview</a> <a href="/tags/java/" style="font-size: 20px;">java</a> <a href="/tags/jstack/" style="font-size: 14.44px;">jstack</a> <a href="/tags/leetcode/" style="font-size: 10px;">leetcode</a> <a href="/tags/lock/" style="font-size: 10px;">lock</a> <a href="/tags/mysql/" style="font-size: 16.67px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/next/" style="font-size: 11.11px;">next</a> <a href="/tags/redis/" style="font-size: 15.56px;">redis</a> <a href="/tags/reflect/" style="font-size: 10px;">reflect</a> <a href="/tags/spring-starter/" style="font-size: 10px;">spring starter</a> <a href="/tags/springboot/" style="font-size: 18.89px;">springboot</a> <a href="/tags/startup/" style="font-size: 17.78px;">startup</a> <a href="/tags/transaction/" style="font-size: 11.11px;">transaction</a> <a href="/tags/virtual-machine/" style="font-size: 12.22px;">virtual machine</a> <a href="/tags/vm/" style="font-size: 13.33px;">vm</a>
+    </div>
+  </div>
 
-
-
-
-
-
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">October 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">April 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/11/">November 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">June 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">April 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a></li></ul>
+    </div>
+  </div>
 
 
   
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/10/17/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/spring/spring%E6%A1%86%E6%9E%B6-04-bean%E5%8C%85-Bean/">spring框架-04-bean包-Bean</a>
+          </li>
+        
+          <li>
+            <a href="/2022/04/19/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Java/jdk/JDK-util-HashMap/">JDK-util-HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E5%B8%B8%E8%A7%81%E4%BA%8B%E5%8A%A1%E5%9C%BA%E6%99%AF/">mysql - 常见事务问题解决方案</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/08/database/mysql/mysql-%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98/">mysql - 面试问题</a>
+          </li>
+        
+          <li>
+            <a href="/2021/11/20/%E7%AE%97%E6%B3%95/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/%E4%BA%A4%E6%8D%A2%E6%8E%92%E5%BA%8F-%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F/">交换排序-冒泡排序</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
 
   
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2025 Fei Qi<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
 
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
 </body>
 </html>
